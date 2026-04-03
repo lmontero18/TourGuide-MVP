@@ -8,31 +8,31 @@ export function Pricing() {
   const { t } = useI18n();
 
   return (
-    <section id="pricing" className="py-24 lg:py-32 bg-slate-50 relative overflow-hidden">
+    <section id="pricing" className="py-16 sm:py-24 lg:py-32 bg-slate-50 relative overflow-hidden">
       <div className="absolute inset-0 grid-pattern opacity-40" aria-hidden />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <FadeUp>
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-sm font-bold uppercase tracking-[0.15em] text-blue-500">
               {t("pricing.label")}
             </p>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-navy-950">
+            <h2 className="mt-3 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-navy-950">
               {t("pricing.title")}
             </h2>
-            <p className="mt-4 text-lg text-slate-500 leading-relaxed">
+            <p className="mt-3 sm:mt-4 text-base sm:text-lg text-slate-500 leading-relaxed">
               {t("pricing.sub")}
             </p>
           </div>
         </FadeUp>
 
         <StaggerContainer
-          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-start"
+          className="mt-10 sm:mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 items-start"
           staggerDelay={0.12}
         >
           {/* Tier 1 — Do it yourself */}
           <StaggerItem>
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-8 transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5 h-full flex flex-col">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5 h-full flex flex-col">
               <div className="mb-6">
                 <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600">
                   {t("pricing.0.badge")}
@@ -48,7 +48,7 @@ export function Pricing() {
               {/* Price */}
               <div className="mt-6 pb-6 border-b border-slate-100">
                 <div className="flex items-baseline gap-1">
-                  <span className="font-display text-5xl font-extrabold tracking-tighter text-navy-950">
+                  <span className="font-display text-4xl sm:text-5xl font-extrabold tracking-tighter text-navy-950">
                     $500
                   </span>
                   <span className="text-sm font-medium text-slate-400">
@@ -80,7 +80,7 @@ export function Pricing() {
 
           {/* Tier 2 — Do it for you (featured) */}
           <StaggerItem>
-            <div className="rounded-2xl border-2 border-navy-900 bg-white p-8 transition-all hover:shadow-xl hover:shadow-navy-900/10 hover:-translate-y-0.5 h-full flex flex-col relative">
+            <div className="rounded-2xl border-2 border-navy-900 bg-white p-6 sm:p-8 transition-all hover:shadow-xl hover:shadow-navy-900/10 hover:-translate-y-0.5 h-full flex flex-col relative">
               {/* Popular badge */}
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                 <span className="inline-flex items-center rounded-full bg-navy-900 px-4 py-1 text-xs font-bold text-white tracking-wide shadow-lg shadow-navy-900/25">
@@ -103,7 +103,7 @@ export function Pricing() {
               {/* Price */}
               <div className="mt-6 pb-6 border-b border-slate-100">
                 <div className="flex items-baseline gap-1">
-                  <span className="font-display text-5xl font-extrabold tracking-tighter text-navy-950">
+                  <span className="font-display text-4xl sm:text-5xl font-extrabold tracking-tighter text-navy-950">
                     $3,000
                   </span>
                 </div>
@@ -151,7 +151,7 @@ export function Pricing() {
 
           {/* Tier 3 — Done for you */}
           <StaggerItem>
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-8 transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5 h-full flex flex-col">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5 h-full flex flex-col">
               <div className="mb-6">
                 <span className="inline-flex items-center rounded-full bg-navy-900/5 px-3 py-1 text-xs font-bold uppercase tracking-wider text-navy-700">
                   {t("pricing.2.badge")}
@@ -167,7 +167,7 @@ export function Pricing() {
               {/* Price */}
               <div className="mt-6 pb-6 border-b border-slate-100">
                 <div className="flex items-baseline gap-1">
-                  <span className="font-display text-4xl font-extrabold tracking-tighter text-navy-950">
+                  <span className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter text-navy-950">
                     {t("pricing.2.price")}
                   </span>
                 </div>

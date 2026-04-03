@@ -9,7 +9,7 @@ export function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="py-24 lg:py-32 bg-navy-950 relative overflow-hidden"
+      className="py-16 sm:py-24 lg:py-32 bg-navy-950 relative overflow-hidden"
     >
       {/* Soft glow */}
       <div
@@ -21,23 +21,23 @@ export function HowItWorks() {
         aria-hidden
       />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <FadeUp>
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-sm font-bold uppercase tracking-[0.15em] text-blue-400">
               {t("how.label")}
             </p>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h2 className="mt-3 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white">
               {t("how.title")}
             </h2>
-            <p className="mt-4 text-lg text-slate-400 leading-relaxed">
+            <p className="mt-3 sm:mt-4 text-base sm:text-lg text-slate-400 leading-relaxed">
               {t("how.sub")}
             </p>
           </div>
         </FadeUp>
 
         <StaggerContainer
-          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-6"
+          className="mt-10 sm:mt-16 grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 lg:gap-6"
           staggerDelay={0.15}
         >
           {[0, 1, 2].map((i) => (
@@ -65,9 +65,9 @@ export function HowItWorks() {
                 )}
 
                 {/* Icon circle */}
-                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-white/[0.06] border border-white/[0.08] transition-all group-hover:bg-blue-500/10 group-hover:border-blue-500/20">
+                <div className="mx-auto flex h-18 w-18 sm:h-24 sm:w-24 items-center justify-center rounded-2xl sm:rounded-3xl bg-white/[0.06] border border-white/[0.08] transition-all group-hover:bg-blue-500/10 group-hover:border-blue-500/20">
                   <div
-                    className="h-10 w-10 text-blue-400"
+                    className="h-8 w-8 sm:h-10 sm:w-10 text-blue-400"
                     dangerouslySetInnerHTML={{ __html: icons[i] }}
                   />
                 </div>

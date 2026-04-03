@@ -9,33 +9,33 @@ export function Metrics() {
   const metricValues = ["3×", "68%", "<2s", "$4.2k"];
 
   return (
-    <section id="metrics" className="py-24 lg:py-32 bg-white">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <section id="metrics" className="py-16 sm:py-24 lg:py-32 bg-white">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <FadeUp>
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-sm font-bold uppercase tracking-[0.15em] text-blue-500">
               {t("metrics.label")}
             </p>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-navy-950">
+            <h2 className="mt-3 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-navy-950">
               {t("metrics.title")}
             </h2>
-            <p className="mt-4 text-lg text-slate-500">
+            <p className="mt-3 sm:mt-4 text-base sm:text-lg text-slate-500">
               {t("metrics.sub")}
             </p>
           </div>
         </FadeUp>
 
         <StaggerContainer
-          className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="mt-10 sm:mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
           staggerDelay={0.1}
         >
           {metricValues.map((value, i) => (
             <StaggerItem key={i}>
-              <div className="relative rounded-2xl border border-slate-200/80 bg-white p-7 text-center group transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5">
-                <span className="font-display text-5xl lg:text-6xl font-extrabold tracking-tighter text-navy-950">
+              <div className="relative rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-7 text-center group transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5">
+                <span className="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter text-navy-950">
                   {value}
                 </span>
-                <span className="block mt-1 text-lg font-display font-bold text-blue-500">
+                <span className="block mt-1 text-sm sm:text-lg font-display font-bold text-blue-500">
                   {t(`metrics.${i}.unit`)}
                 </span>
                 <p className="mt-3 text-sm text-slate-500 leading-relaxed">
@@ -52,7 +52,7 @@ export function Metrics() {
         {/* Testimonial */}
         <FadeUp delay={0.2}>
           <div className="mt-20 max-w-3xl mx-auto text-center">
-            <blockquote className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-navy-950 leading-snug">
+            <blockquote className="font-display text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-navy-950 leading-snug">
               {t("metrics.quote")}
             </blockquote>
             <div className="mt-6 flex items-center justify-center gap-3">
