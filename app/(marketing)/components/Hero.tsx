@@ -1,75 +1,75 @@
+"use client";
+
+import { useI18n } from "./i18n";
+import { FadeUp, SlideInRight } from "./Motion";
+
 export function Hero() {
+  const { t } = useI18n();
+
   return (
     <section className="relative pt-28 pb-8 lg:pt-36 lg:pb-16 hero-gradient grid-pattern noise-bg overflow-hidden">
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Badge */}
-        <div className="animate-float-up delay-100">
-          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 backdrop-blur-sm px-3.5 py-1.5 text-sm shadow-sm">
-            <span className="flex h-2 w-2 rounded-full bg-whatsapp animate-pulse" />
-            <span className="font-medium text-navy-900">
-              Backed by Y Combinator
-            </span>
-            <span className="text-slate-400">·</span>
-            <span className="text-slate-500">W25</span>
-          </div>
-        </div>
-
         {/* Headline */}
         <div className="mt-8 max-w-3xl">
-          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-navy-950 leading-[1.05] animate-float-up delay-200">
-            Your tours sell
-            <br />
-            themselves at{" "}
-            <span className="relative inline-block">
-              <span className="relative z-10">2&nbsp;AM</span>
-              <span
-                className="absolute bottom-1 left-0 right-0 h-3 bg-blue-400/20 rounded-sm -z-0"
-                aria-hidden
-              />
-            </span>
-          </h1>
+          <FadeUp delay={0.1}>
+            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-navy-950 leading-[1.05]">
+              {t("hero.headline1")}
+              <br />
+              {t("hero.headline2")}{" "}
+              <span className="relative inline-block">
+                <span className="relative z-10">{t("hero.headline3")}</span>
+                <span
+                  className="absolute bottom-1 left-0 right-0 h-3 bg-blue-400/20 rounded-sm -z-0"
+                  aria-hidden
+                />
+              </span>
+            </h1>
+          </FadeUp>
 
-          <p className="mt-6 text-lg sm:text-xl leading-relaxed text-slate-600 max-w-xl animate-float-up delay-300">
-            WhatsApp bots that answer, qualify, and book — trained on your tours,
-            your prices, your voice. No leads lost to sleep.
-          </p>
+          <FadeUp delay={0.2}>
+            <p className="mt-6 text-lg sm:text-xl leading-relaxed text-slate-600 max-w-xl">
+              {t("hero.sub")}
+            </p>
+          </FadeUp>
         </div>
 
         {/* CTA row */}
-        <div className="mt-8 flex flex-col sm:flex-row items-start gap-3 animate-float-up delay-400">
-          <a
-            href="/login"
-            className="inline-flex h-12 items-center justify-center rounded-xl bg-navy-900 px-6 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
-          >
-            Start free trial
-            <svg
-              className="ml-2 h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
+        <FadeUp delay={0.3}>
+          <div className="mt-8 flex flex-col sm:flex-row items-start gap-3">
+            <a
+              href="/login"
+              className="inline-flex h-12 items-center justify-center rounded-xl bg-navy-900 px-6 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </svg>
-          </a>
-          <a
-            href="#how-it-works"
-            className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
-          >
-            See how it works
-          </a>
-        </div>
+              {t("hero.ctaPrimary")}
+              <svg
+                className="ml-2 h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </a>
+            <a
+              href="#how-it-works"
+              className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
+            >
+              {t("hero.ctaSecondary")}
+            </a>
+          </div>
+        </FadeUp>
 
-        <p className="mt-4 text-xs text-slate-400 animate-fade-in delay-500">
-          Free 14-day trial · No credit card · Setup in 10 min
-        </p>
+        <FadeUp delay={0.35}>
+          <p className="mt-4 text-xs text-slate-400">{t("hero.trust")}</p>
+        </FadeUp>
 
         {/* Browser mockup — Screen Studio preview area */}
-        <div className="mt-14 lg:mt-20 animate-slide-in-right delay-500">
+        <SlideInRight delay={0.4} className="mt-14 lg:mt-20">
           <div className="browser-frame overflow-hidden">
             {/* Browser chrome */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/50">
@@ -90,14 +90,12 @@ export function Hero() {
 
             {/* Preview area — 16:9 aspect ratio container for Screen Studio */}
             <div className="relative aspect-video bg-gradient-to-br from-slate-50 to-slate-100">
-              {/* Placeholder content — replace with Screen Studio recording */}
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8">
-                {/* Decorative dashboard skeleton */}
                 <DashboardSkeleton />
               </div>
             </div>
           </div>
-        </div>
+        </SlideInRight>
       </div>
     </section>
   );
@@ -119,7 +117,7 @@ function DashboardSkeleton() {
             className={`h-8 rounded-lg ${i === 0 ? "bg-blue-500/10 border border-blue-500/20" : "bg-transparent"} flex items-center gap-2 px-2.5`}
           >
             <div className="h-3.5 w-3.5 rounded bg-slate-200" />
-            <div className={`h-2.5 rounded bg-slate-200`} style={{ width: w }} />
+            <div className="h-2.5 rounded bg-slate-200" style={{ width: w }} />
           </div>
         ))}
         <div className="mt-auto">
@@ -132,7 +130,6 @@ function DashboardSkeleton() {
 
       {/* Main content skeleton */}
       <div className="flex-1 flex flex-col">
-        {/* Top bar */}
         <div className="h-12 border-b border-slate-200/60 bg-white flex items-center justify-between px-5">
           <div className="h-3 w-32 rounded bg-slate-200" />
           <div className="flex gap-2">
@@ -141,7 +138,6 @@ function DashboardSkeleton() {
           </div>
         </div>
 
-        {/* Content area */}
         <div className="flex-1 flex">
           {/* Conversation list */}
           <div className="w-72 border-r border-slate-200/60 bg-white hidden md:block">
@@ -168,7 +164,6 @@ function DashboardSkeleton() {
 
           {/* Chat area */}
           <div className="flex-1 flex flex-col bg-slate-50/50">
-            {/* Chat header */}
             <div className="h-14 border-b border-slate-200/60 bg-white flex items-center justify-between px-4">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded-full bg-slate-200" />
@@ -181,11 +176,15 @@ function DashboardSkeleton() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <StatusPill label="Bot active" />
+                <div className="flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200/60 px-2.5 py-1">
+                  <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                  <span className="text-[10px] font-semibold text-green-700 tracking-wide">
+                    Bot active
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Messages */}
             <div className="flex-1 p-4 space-y-3 overflow-hidden">
               <ChatBubble side="right" lines={[80]} color="bg-blue-500/10" />
               <ChatBubble side="left" lines={[100, 70]} color="bg-white" />
@@ -194,7 +193,6 @@ function DashboardSkeleton() {
               <ChatBubble side="right" lines={[90]} color="bg-blue-500/10" />
             </div>
 
-            {/* Input */}
             <div className="p-3 bg-white border-t border-slate-200/60">
               <div className="h-10 rounded-xl bg-slate-100 flex items-center px-3 justify-between">
                 <div className="h-2.5 w-32 rounded bg-slate-200" />
@@ -230,17 +228,6 @@ function ChatBubble({
           />
         ))}
       </div>
-    </div>
-  );
-}
-
-function StatusPill({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200/60 px-2.5 py-1">
-      <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
-      <span className="text-[10px] font-semibold text-green-700 tracking-wide">
-        {label}
-      </span>
     </div>
   );
 }
