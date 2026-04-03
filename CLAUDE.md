@@ -19,7 +19,7 @@ pueden tomar el control, y metricas de ROI.
 - Supabase (Auth + DB + Realtime + RLS)
 - Tailwind CSS + shadcn/ui
 - Framer Motion
-- Twilio (WhatsApp)
+- Meta Cloud API (WhatsApp — directo, sin BSP intermediario)
 - N8N (motor del bot, hosteado en Railway)
 - Stripe (billing)
 - Vercel (deploy)
@@ -52,8 +52,13 @@ tourguide/
 │   │   └── layout.tsx                 # Layout publico (navbar + footer)
 │   ├── api/
 │   │   ├── webhooks/
-│   │   │   └── twilio/
-│   │   │       └── route.ts           # Recibe mensajes entrantes de WhatsApp
+│   │   │   └── whatsapp/
+│   │   │       └── route.ts           # Recibe mensajes de WhatsApp via Meta Cloud API
+│   │   ├── whatsapp/
+│   │   │   ├── connect/
+│   │   │   │   └── route.ts           # Embedded Signup — conectar numero del cliente
+│   │   │   └── disconnect/
+│   │   │       └── route.ts           # Desconectar numero
 │   │   └── conversations/
 │   │       └── [id]/
 │   │           └── route.ts
@@ -92,9 +97,9 @@ tourguide/
 │   │   │   ├── leads.ts              # getLeads, getLeadStats
 │   │   │   └── organizations.ts       # getOrg, updateOrgConfig
 │   │   └── types.ts                   # Tipos generados de Supabase (supabase gen types)
-│   ├── twilio/
-│   │   ├── client.ts                  # Instancia del cliente Twilio
-│   │   └── sendMessage.ts             # Enviar mensaje por WhatsApp
+│   ├── whatsapp/
+│   │   ├── client.ts                  # Funciones para Meta Cloud API v21.0
+│   │   └── sendMessage.ts             # Enviar texto, media, botones, templates
 │   ├── n8n/
 │   │   └── pauseBot.ts               # Cambia status en Supabase para pausar N8N
 │   └── utils.ts                       # cn(), formatDate(), formatPhone()
@@ -206,14 +211,17 @@ export interface Lead {
   updated_at: string
 }
 
-export interface TwilioNumber {
+export interface WhatsAppAccount {
   id: string
-  phone_number: string       // formato E.164
-  twilio_sid: string
-  org_id: string | null      // null = en pool, disponible para asignar
+  org_id: string
+  waba_id: string            // WhatsApp Business Account ID (de Meta)
+  phone_number_id: string    // ID que Meta asigna al numero — se usa para enviar mensajes
+  phone_number: string       // formato E.164, el numero del cliente
+  access_token: string       // token para Graph API — sensible, considerar encriptar
   status: OrgStatus
-  assigned_at: string | null
+  connected_at: string | null
   created_at: string
+  updated_at: string
 }
 
 export interface Subscription {
@@ -330,20 +338,50 @@ export const config = {
 }
 ```
 
-### 5. Webhook de Twilio
+### 5. Webhook de WhatsApp (Meta Cloud API)
 
 ```
-POST /api/webhooks/twilio
+GET  /api/webhooks/whatsapp   → Verificacion de webhook (Meta envia challenge)
+POST /api/webhooks/whatsapp   → Recepcion de mensajes
 ```
 
-- Validar firma de Twilio SIEMPRE (`validateRequest` del SDK)
-- Identificar la organizacion por el campo `To` (numero destino) via tabla `twilio_numbers`
+- Validar firma SIEMPRE (`X-Hub-Signature-256` con Meta App Secret)
+- Extraer `phone_number_id` del payload → lookup en `whatsapp_accounts`
+- Identificar la org por `phone_number_id`
 - Buscar o crear el contacto en `contacts` (upsert por org_id + phone)
 - Buscar o crear la conversacion en `conversations` (por contact_id)
 - Insertar el mensaje en `messages`
 - Si `conversation.bot_active === true`, dejar que N8N procese
 - Si `conversation.bot_active === false`, notificar al agente via Realtime (automatico)
-- Responder con TwiML vacio `<Response/>` inmediatamente — no bloquear el webhook
+- Responder 200 inmediatamente — no bloquear el webhook
+
+### 5b. Enviar mensajes (Meta Cloud API)
+
+```typescript
+// lib/whatsapp/sendMessage.ts
+// Endpoint: POST https://graph.facebook.com/v21.0/{phone_number_id}/messages
+
+// Dentro de ventana 24h (GRATIS): texto libre, media, botones, listas
+await sendTextMessage(phoneNumberId, accessToken, to, body)
+await sendMediaMessage(phoneNumberId, accessToken, to, 'image', url, caption)
+await sendButtonMessage(phoneNumberId, accessToken, to, body, buttons)
+
+// Fuera de ventana 24h (con costo ~$0.03 USD Mexico): solo templates aprobados
+await sendTemplateMessage(phoneNumberId, accessToken, to, templateName, params)
+```
+
+> **Ventana de 24h:** Cada mensaje del cliente reinicia la ventana.
+> Dentro de la ventana se puede enviar lo que sea (texto, media, botones) GRATIS.
+> Fuera de la ventana solo se pueden enviar templates pre-aprobados por Meta (con costo).
+
+### 5c. Onboarding WhatsApp (Meta Embedded Signup)
+
+El cliente conecta su numero de WhatsApp con un click:
+1. Click "Conectar WhatsApp" → popup de Meta (SDK JS)
+2. Login con Facebook → acepta permisos → verifica numero con SMS
+3. Meta devuelve `waba_id`, `phone_number_id`, `access_token`
+4. Backend guarda en `whatsapp_accounts` via `POST /api/whatsapp/connect`
+5. Bot empieza a responder
 
 ### 6. Control del bot (N8N)
 
@@ -411,7 +449,7 @@ export async function getLeadStats(orgId: string, from: Date, to: Date) {
 
 ### Errores
 - Las queries de Supabase siempre manejan `error`: `const { data, error } = await supabase...`
-- Los webhooks siempre responden 200 aunque fallen internamente (Twilio reintenta en 4xx/5xx)
+- Los webhooks siempre responden 200 aunque fallen internamente (Meta reintenta en 4xx/5xx)
 - Loggear errores criticos — en produccion usar Sentry o similar
 
 ### Variables de entorno requeridas
@@ -419,9 +457,9 @@ export async function getLeadStats(orgId: string, from: Date, to: Date) {
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=        # Solo en API Routes, nunca en cliente
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_WEBHOOK_SECRET=
+META_APP_ID=
+META_APP_SECRET=                      # Validar firma del webhook
+META_WEBHOOK_VERIFY_TOKEN=            # Token para verificacion inicial del webhook
 N8N_WEBHOOK_URL=
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
@@ -433,9 +471,10 @@ STRIPE_WEBHOOK_SECRET=
 
 - [ ] RLS activado en todas las tablas
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` nunca en codigo cliente ni en `NEXT_PUBLIC_`
-- [ ] Firma de Twilio validada en el webhook
+- [ ] Firma de Meta validada en el webhook (`X-Hub-Signature-256`)
 - [ ] Middleware protegiendo todas las rutas de `/dashboard`
-- [ ] Rate limiting en `/api/webhooks/twilio` (Vercel Edge Config o Upstash)
+- [ ] Rate limiting en `/api/webhooks/whatsapp` (Vercel Edge Config o Upstash)
+- [ ] `access_token` de WhatsApp encriptado en DB o en Vault
 - [ ] Inputs sanitizados antes de insertar en DB
 - [ ] Stripe webhook validado con `stripe.webhooks.constructEvent`
 
@@ -449,7 +488,8 @@ STRIPE_WEBHOOK_SECRET=
 | Indices en `org_id + created_at` | Queries paginadas rapidas sin importar el volumen total |
 | Realtime filtrado por canal `conversations:{orgId}` | Cada org solo recibe sus eventos, no hay flood global |
 | N8N lee `bot_active` desde DB en lugar de recibir senales | Sin estado en memoria, escala horizontalmente |
-| Webhook de Twilio responde inmediato + procesa async | Twilio tiene timeout de 15s, no podemos bloquear |
+| Meta Cloud API directo en lugar de Twilio/BSP | Sin markup por mensaje, mensajes de servicio gratis, Embedded Signup nativo |
+| Webhook de Meta responde 200 inmediato + procesa async | Meta reintenta en fallo, no podemos bloquear |
 | Server Components para el dashboard inicial | Carga inicial rapida, datos frescos sin waterfall de fetch |
 
 ---
@@ -458,7 +498,7 @@ STRIPE_WEBHOOK_SECRET=
 
 ```bash
 # Instalar dependencias core
-npm install @supabase/supabase-js @supabase/ssr framer-motion twilio stripe
+npm install @supabase/supabase-js @supabase/ssr framer-motion stripe
 
 # shadcn/ui
 npx shadcn@latest init
