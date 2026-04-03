@@ -130,6 +130,7 @@ export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost
 export type MessageRole = 'user' | 'assistant' | 'agent'
 export type PlanType = 'starter' | 'growth' | 'pro'
 export type OrgStatus = 'active' | 'inactive' | 'suspended'
+export type WhatsAppAccountStatus = 'active' | 'inactive' | 'suspended'
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid'
 
 export interface Organization {
@@ -218,7 +219,7 @@ export interface WhatsAppAccount {
   phone_number_id: string    // ID que Meta asigna al numero — se usa para enviar mensajes
   phone_number: string       // formato E.164, el numero del cliente
   access_token: string       // token para Graph API — sensible, considerar encriptar
-  status: OrgStatus
+  status: WhatsAppAccountStatus
   connected_at: string | null
   created_at: string
   updated_at: string
