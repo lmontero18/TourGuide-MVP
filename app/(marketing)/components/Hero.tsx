@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "./i18n";
-import { FadeUp, SlideInRight } from "./Motion";
+import { FadeUp } from "./Motion";
 
 export function Hero() {
   const { t } = useI18n();
@@ -10,7 +10,7 @@ export function Hero() {
     <section className="relative pt-24 pb-6 sm:pt-28 sm:pb-8 lg:pt-36 lg:pb-16 hero-gradient grid-pattern noise-bg overflow-hidden">
       <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         {/* Headline */}
-        <div className="mt-4 sm:mt-8 max-w-3xl">
+        <div className="mt-4 sm:mt-8 max-w-3xl mx-auto text-center">
           <FadeUp delay={0.1}>
             <h1 className="font-display text-[2.5rem] leading-[1.1] sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-navy-950 sm:leading-[1.05]">
               {t("hero.headline1")}
@@ -27,45 +27,45 @@ export function Hero() {
           </FadeUp>
 
           <FadeUp delay={0.2}>
-            <p className="mt-5 sm:mt-6 text-base sm:text-lg lg:text-xl leading-relaxed text-slate-600 max-w-xl">
+            <p className="mt-5 sm:mt-6 text-base sm:text-lg lg:text-xl leading-relaxed text-slate-600 max-w-xl mx-auto">
               {t("hero.sub")}
             </p>
           </FadeUp>
+
+          {/* CTA row */}
+          <FadeUp delay={0.3}>
+            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+              <a
+                href="/login"
+                className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl bg-navy-900 px-6 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+              >
+                {t("hero.ctaPrimary")}
+                <svg
+                  className="ml-2 h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </a>
+              <a
+                href="#how-it-works"
+                className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
+              >
+                {t("hero.ctaSecondary")}
+              </a>
+            </div>
+          </FadeUp>
+
+          <FadeUp delay={0.35}>
+            <p className="mt-3 sm:mt-4 text-xs text-slate-400">{t("hero.trust")}</p>
+          </FadeUp>
         </div>
 
-        {/* CTA row */}
-        <FadeUp delay={0.3}>
-          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-start gap-3">
-            <a
-              href="/login"
-              className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl bg-navy-900 px-6 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
-            >
-              {t("hero.ctaPrimary")}
-              <svg
-                className="ml-2 h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </a>
-            <a
-              href="#how-it-works"
-              className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
-            >
-              {t("hero.ctaSecondary")}
-            </a>
-          </div>
-        </FadeUp>
-
-        <FadeUp delay={0.35}>
-          <p className="mt-3 sm:mt-4 text-xs text-slate-400">{t("hero.trust")}</p>
-        </FadeUp>
-
         {/* Browser mockup */}
-        <SlideInRight delay={0.4} className="mt-10 sm:mt-14 lg:mt-20">
+        <FadeUp delay={0.4} className="mt-10 sm:mt-14 lg:mt-20">
           <div className="browser-frame overflow-hidden">
             {/* Browser chrome */}
             <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 border-b border-slate-100 bg-slate-50/50">
@@ -91,7 +91,7 @@ export function Hero() {
               </div>
             </div>
           </div>
-        </SlideInRight>
+        </FadeUp>
       </div>
     </section>
   );
