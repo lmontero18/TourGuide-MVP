@@ -19,7 +19,7 @@ pueden tomar el control, y metricas de ROI.
 - Supabase (Auth + DB + Realtime + RLS)
 - Tailwind CSS + shadcn/ui
 - Framer Motion
-- Twilio (WhatsApp)
+- Meta Cloud API (WhatsApp — directo, sin BSP intermediario)
 - N8N (motor del bot, hosteado en Railway)
 - Stripe (billing)
 - Vercel (deploy)
@@ -52,8 +52,13 @@ tourguide/
 │   │   └── layout.tsx                 # Layout publico (navbar + footer)
 │   ├── api/
 │   │   ├── webhooks/
-│   │   │   └── twilio/
-│   │   │       └── route.ts           # Recibe mensajes entrantes de WhatsApp
+│   │   │   └── whatsapp/
+│   │   │       └── route.ts           # Recibe mensajes de WhatsApp via Meta Cloud API
+│   │   ├── whatsapp/
+│   │   │   ├── connect/
+│   │   │   │   └── route.ts           # Embedded Signup — conectar numero del cliente
+│   │   │   └── disconnect/
+│   │   │       └── route.ts           # Desconectar numero
 │   │   └── conversations/
 │   │       └── [id]/
 │   │           └── route.ts
@@ -92,9 +97,9 @@ tourguide/
 │   │   │   ├── leads.ts              # getLeads, getLeadStats
 │   │   │   └── organizations.ts       # getOrg, updateOrgConfig
 │   │   └── types.ts                   # Tipos generados de Supabase (supabase gen types)
-│   ├── twilio/
-│   │   ├── client.ts                  # Instancia del cliente Twilio
-│   │   └── sendMessage.ts             # Enviar mensaje por WhatsApp
+│   ├── whatsapp/
+│   │   ├── client.ts                  # Funciones para Meta Cloud API v21.0
+│   │   └── sendMessage.ts             # Enviar texto, media, botones, templates
 │   ├── n8n/
 │   │   └── pauseBot.ts               # Cambia status en Supabase para pausar N8N
 │   └── utils.ts                       # cn(), formatDate(), formatPhone()
@@ -116,32 +121,122 @@ tourguide/
 
 ## Tipos globales
 
-> **Fuente de verdad:** `types/index.ts` — sincronizado con el schema real de Supabase (TourismSAAS).
-> Los tipos de abajo son una referencia rapida. Si hay discrepancia, `types/index.ts` manda.
-
 ```typescript
-// types/index.ts — resumen
+// types/index.ts
 
-// Enums (reflejan los enums de la DB)
-export type UserRole = 'admin' | 'agent'
+export type Role = 'admin' | 'agent'
 export type ConversationStatus = 'open' | 'resolved' | 'pending'
 export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
 export type MessageRole = 'user' | 'assistant' | 'agent'
 export type PlanType = 'starter' | 'growth' | 'pro'
 export type OrgStatus = 'active' | 'inactive' | 'suspended'
+export type WhatsAppAccountStatus = 'active' | 'inactive' | 'suspended'
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid'
 
-// Tablas principales: Organization, User, Contact, Conversation, Message, Lead, Subscription, TwilioNumber
-// Ver types/index.ts para las interfaces completas
-```
+export interface Organization {
+  id: string
+  name: string
+  slug: string
+  prompt: string | null
+  faqs: FAQ[]
+  bot_config: BotConfig
+  plan: PlanType
+  status: OrgStatus
+  created_at: string
+  updated_at: string
+}
 
-**Diferencias clave vs versiones anteriores del doc:**
-- `Conversation.status` es `open | resolved | pending` (no `bot | waiting | active | resolved`). El control del bot se maneja con `bot_active: boolean`.
-- `Message.role` usa `assistant` (no `bot`). `from_bot: boolean` distingue mensajes del bot vs agente humano.
-- Los contactos viven en tabla `contacts` separada. `Conversation` referencia `contact_id`, no `contact_phone`.
-- `Lead` referencia `contact_id` y usa `metadata: jsonb` para datos extraidos por el bot.
-- Twilio numbers estan en tabla `twilio_numbers` separada (pool de numeros asignables).
-- `Subscription` maneja billing via Stripe webhooks.
+export interface BotConfig {
+  buffer_seconds?: number
+  default_lang?: string
+}
+
+export interface FAQ {
+  question: string
+  answer: string
+}
+
+export interface User {
+  id: string
+  org_id: string
+  email: string
+  full_name: string | null
+  role: Role
+  created_at: string
+  updated_at: string
+}
+
+export interface Contact {
+  id: string
+  org_id: string
+  phone: string
+  name: string | null
+  channel: string            // default: 'whatsapp'
+  custom_attributes: Record<string, unknown>
+  last_seen_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Conversation {
+  id: string
+  org_id: string
+  contact_id: string
+  status: ConversationStatus
+  bot_active: boolean        // false cuando un agente tomo control. N8N verifica esto.
+  assigned_agent_id: string | null
+  last_message_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Message {
+  id: string
+  conversation_id: string
+  role: MessageRole          // 'user' = cliente, 'assistant' = bot, 'agent' = agente humano
+  content: string
+  from_bot: boolean          // filtra mensajes del bot vs agentes humanos en dashboard
+  channel: string            // default: 'whatsapp'
+  created_at: string
+}
+
+export interface Lead {
+  id: string
+  org_id: string
+  contact_id: string
+  conversation_id: string | null
+  tour_interest: string | null
+  status: LeadStatus
+  metadata: Record<string, unknown>  // {dates, group_size, special_needs, ...}
+  created_at: string
+  updated_at: string
+}
+
+export interface WhatsAppAccount {
+  id: string
+  org_id: string
+  waba_id: string            // WhatsApp Business Account ID (de Meta)
+  phone_number_id: string    // ID que Meta asigna al numero — se usa para enviar mensajes
+  phone_number: string       // formato E.164, el numero del cliente
+  access_token: string       // token para Graph API — sensible, considerar encriptar
+  status: WhatsAppAccountStatus
+  connected_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Subscription {
+  id: string
+  org_id: string
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  plan: PlanType
+  status: SubscriptionStatus
+  current_period_end: string | null
+  created_at: string
+  updated_at: string
+}
+```
 
 ---
 
@@ -184,7 +279,7 @@ export function useConversations(orgId: string) {
     supabase
       .from('conversations')
       .select('id, contact_id, status, bot_active, assigned_agent_id, last_message_at, updated_at')
-      .order('updated_at', { ascending: false })
+      .order('last_message_at', { ascending: false })
       .then(({ data }) => {
         if (data) setConversations(data)
       })
@@ -244,21 +339,50 @@ export const config = {
 }
 ```
 
-### 5. Webhook de Twilio
+### 5. Webhook de WhatsApp (Meta Cloud API)
 
 ```
-POST /api/webhooks/twilio
+GET  /api/webhooks/whatsapp   → Verificacion de webhook (Meta envia challenge)
+POST /api/webhooks/whatsapp   → Recepcion de mensajes
 ```
 
-- Validar firma de Twilio SIEMPRE (`validateRequest` del SDK)
-- Identificar la organizacion por el campo `To` (numero destino)
-- Identificar org por `To` → lookup en `twilio_numbers`
-- Upsert contacto en `contacts` por `(org_id, phone)`
-- Crear/encontrar conversacion activa para ese contacto
-- Insertar el mensaje en `messages` con role `user`
+- Validar firma SIEMPRE (`X-Hub-Signature-256` con Meta App Secret)
+- Extraer `phone_number_id` del payload → lookup en `whatsapp_accounts`
+- Identificar la org por `phone_number_id`
+- Buscar o crear el contacto en `contacts` (upsert por org_id + phone)
+- Buscar o crear la conversacion en `conversations` (por contact_id)
+- Insertar el mensaje en `messages`
 - Si `conversation.bot_active === true`, dejar que N8N procese
 - Si `conversation.bot_active === false`, notificar al agente via Realtime (automatico)
-- Responder con TwiML vacio `<Response/>` inmediatamente — no bloquear el webhook
+- Responder 200 inmediatamente — no bloquear el webhook
+
+### 5b. Enviar mensajes (Meta Cloud API)
+
+```typescript
+// lib/whatsapp/sendMessage.ts
+// Endpoint: POST https://graph.facebook.com/v21.0/{phone_number_id}/messages
+
+// Dentro de ventana 24h (GRATIS): texto libre, media, botones, listas
+await sendTextMessage(phoneNumberId, accessToken, to, body)
+await sendMediaMessage(phoneNumberId, accessToken, to, 'image', url, caption)
+await sendButtonMessage(phoneNumberId, accessToken, to, body, buttons)
+
+// Fuera de ventana 24h (con costo ~$0.03 USD Mexico): solo templates aprobados
+await sendTemplateMessage(phoneNumberId, accessToken, to, templateName, params)
+```
+
+> **Ventana de 24h:** Cada mensaje del cliente reinicia la ventana.
+> Dentro de la ventana se puede enviar lo que sea (texto, media, botones) GRATIS.
+> Fuera de la ventana solo se pueden enviar templates pre-aprobados por Meta (con costo).
+
+### 5c. Onboarding WhatsApp (Meta Embedded Signup)
+
+El cliente conecta su numero de WhatsApp con un click:
+1. Click "Conectar WhatsApp" → popup de Meta (SDK JS)
+2. Login con Facebook → acepta permisos → verifica numero con SMS
+3. Meta devuelve `waba_id`, `phone_number_id`, `access_token`
+4. Backend guarda en `whatsapp_accounts` via `POST /api/whatsapp/connect`
+5. Bot empieza a responder
 
 ### 6. Control del bot (N8N)
 
@@ -275,7 +399,7 @@ export async function takeControl(conversationId: string, agentId: string) {
   const supabase = createClient()
   await supabase
     .from('conversations')
-    .update({ bot_active: false, assigned_agent_id: agentId })
+    .update({ bot_active: false, assigned_agent_id: agentId, status: 'open' })
     .eq('id', conversationId)
 }
 
@@ -302,18 +426,11 @@ export async function getLeadStats(orgId: string, from: Date, to: Date) {
     .lte('created_at', to.toISOString())
   return data
 }
-
-export async function getConversationStats(orgId: string, from: Date, to: Date) {
-  const supabase = createServerClient()
-  const { count } = await supabase
-    .from('conversations')
-    .select('id', { count: 'exact', head: true })
-    .eq('org_id', orgId)
-    .gte('created_at', from.toISOString())
-    .lte('created_at', to.toISOString())
-  return count
-}
 ```
+
+> **Nota:** `is_after_hours` no existe como columna en la DB.
+> Las metricas de fuera de horario se calculan comparando `last_message_at`
+> contra `organizations.bot_config.business_hours` en el servidor.
 
 ---
 
@@ -333,7 +450,7 @@ export async function getConversationStats(orgId: string, from: Date, to: Date) 
 
 ### Errores
 - Las queries de Supabase siempre manejan `error`: `const { data, error } = await supabase...`
-- Los webhooks siempre responden 200 aunque fallen internamente (Twilio reintenta en 4xx/5xx)
+- Los webhooks siempre responden 200 aunque fallen internamente (Meta reintenta en 4xx/5xx)
 - Loggear errores criticos — en produccion usar Sentry o similar
 
 ### Variables de entorno requeridas
@@ -341,9 +458,9 @@ export async function getConversationStats(orgId: string, from: Date, to: Date) 
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=        # Solo en API Routes, nunca en cliente
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_WEBHOOK_SECRET=
+META_APP_ID=
+META_APP_SECRET=                      # Validar firma del webhook
+META_WEBHOOK_VERIFY_TOKEN=            # Token para verificacion inicial del webhook
 N8N_WEBHOOK_URL=
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
@@ -355,9 +472,10 @@ STRIPE_WEBHOOK_SECRET=
 
 - [ ] RLS activado en todas las tablas
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` nunca en codigo cliente ni en `NEXT_PUBLIC_`
-- [ ] Firma de Twilio validada en el webhook
+- [ ] Firma de Meta validada en el webhook (`X-Hub-Signature-256`)
 - [ ] Middleware protegiendo todas las rutas de `/dashboard`
-- [ ] Rate limiting en `/api/webhooks/twilio` (Vercel Edge Config o Upstash)
+- [ ] Rate limiting en `/api/webhooks/whatsapp` (Vercel Edge Config o Upstash)
+- [ ] `access_token` de WhatsApp encriptado en DB o en Vault
 - [ ] Inputs sanitizados antes de insertar en DB
 - [ ] Stripe webhook validado con `stripe.webhooks.constructEvent`
 
@@ -370,8 +488,9 @@ STRIPE_WEBHOOK_SECRET=
 | RLS en Supabase en lugar de filtros manuales | Aislamiento de datos garantizado a nivel DB, no codigo |
 | Indices en `org_id + created_at` | Queries paginadas rapidas sin importar el volumen total |
 | Realtime filtrado por canal `conversations:{orgId}` | Cada org solo recibe sus eventos, no hay flood global |
-| N8N lee status desde DB en lugar de recibir senales | Sin estado en memoria, escala horizontalmente |
-| Webhook de Twilio responde inmediato + procesa async | Twilio tiene timeout de 15s, no podemos bloquear |
+| N8N lee `bot_active` desde DB en lugar de recibir senales | Sin estado en memoria, escala horizontalmente |
+| Meta Cloud API directo en lugar de Twilio/BSP | Sin markup por mensaje, mensajes de servicio gratis, Embedded Signup nativo |
+| Webhook de Meta responde 200 inmediato + procesa async | Meta reintenta en fallo, no podemos bloquear |
 | Server Components para el dashboard inicial | Carga inicial rapida, datos frescos sin waterfall de fetch |
 
 ---
@@ -380,7 +499,7 @@ STRIPE_WEBHOOK_SECRET=
 
 ```bash
 # Instalar dependencias core
-npm install @supabase/supabase-js @supabase/ssr framer-motion twilio stripe
+npm install @supabase/supabase-js @supabase/ssr framer-motion stripe
 
 # shadcn/ui
 npx shadcn@latest init
