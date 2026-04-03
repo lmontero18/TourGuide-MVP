@@ -184,7 +184,7 @@ export function useConversations(orgId: string) {
     supabase
       .from('conversations')
       .select('id, contact_id, status, bot_active, assigned_agent_id, last_message_at, updated_at')
-      .order('updated_at', { ascending: false })
+      .order('last_message_at', { ascending: false })
       .then(({ data }) => {
         if (data) setConversations(data)
       })
@@ -251,8 +251,7 @@ POST /api/webhooks/twilio
 ```
 
 - Validar firma de Twilio SIEMPRE (`validateRequest` del SDK)
-- Identificar la organizacion por el campo `To` (numero destino)
-- Identificar org por `To` → lookup en `twilio_numbers`
+- Identificar org por campo `To` → lookup en `twilio_numbers`
 - Upsert contacto en `contacts` por `(org_id, phone)`
 - Crear/encontrar conversacion activa para ese contacto
 - Insertar el mensaje en `messages` con role `user`
@@ -370,7 +369,7 @@ STRIPE_WEBHOOK_SECRET=
 | RLS en Supabase en lugar de filtros manuales | Aislamiento de datos garantizado a nivel DB, no codigo |
 | Indices en `org_id + created_at` | Queries paginadas rapidas sin importar el volumen total |
 | Realtime filtrado por canal `conversations:{orgId}` | Cada org solo recibe sus eventos, no hay flood global |
-| N8N lee status desde DB en lugar de recibir senales | Sin estado en memoria, escala horizontalmente |
+| N8N lee `bot_active` desde DB en lugar de recibir senales | Sin estado en memoria, escala horizontalmente |
 | Webhook de Twilio responde inmediato + procesa async | Twilio tiene timeout de 15s, no podemos bloquear |
 | Server Components para el dashboard inicial | Carga inicial rapida, datos frescos sin waterfall de fetch |
 
