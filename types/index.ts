@@ -9,6 +9,7 @@ export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost
 export type MessageRole = 'user' | 'assistant' | 'agent'
 export type PlanType = 'starter' | 'growth' | 'pro'
 export type OrgStatus = 'active' | 'inactive' | 'suspended'
+export type TwilioNumberStatus = 'active' | 'inactive' | 'suspended'
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid'
 
 // ─── Tables ──────────────────────────────────────────────
@@ -116,7 +117,7 @@ export interface TwilioNumber {
   phone_number: string
   twilio_sid: string
   org_id: string | null
-  status: OrgStatus
+  status: TwilioNumberStatus
   assigned_at: string | null
   created_at: string
 }

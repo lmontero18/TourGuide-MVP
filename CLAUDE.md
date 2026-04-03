@@ -182,7 +182,7 @@ export function useConversations(orgId: string) {
     // Carga inicial
     supabase
       .from('conversations')
-      .select('id, contact_phone, contact_name, status, assigned_to, updated_at')
+      .select('id, contact_id, status, bot_active, assigned_agent_id, last_message_at, updated_at')
       .order('updated_at', { ascending: false })
       .then(({ data }) => {
         if (data) setConversations(data)
@@ -296,18 +296,18 @@ export async function getLeadStats(orgId: string, from: Date, to: Date) {
   const supabase = createServerClient()
   const { data } = await supabase
     .from('leads')
-    .select('status, estimated_value, created_at')
+    .select('status, metadata, created_at')
     .gte('created_at', from.toISOString())
     .lte('created_at', to.toISOString())
   return data
 }
 
-export async function getAfterHoursStats(orgId: string, from: Date, to: Date) {
+export async function getConversationStats(orgId: string, from: Date, to: Date) {
   const supabase = createServerClient()
   const { count } = await supabase
     .from('conversations')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_after_hours', true)
+    .select('id', { count: 'exact', head: true })
+    .eq('org_id', orgId)
     .gte('created_at', from.toISOString())
     .lte('created_at', to.toISOString())
   return count
