@@ -115,76 +115,32 @@ tourguide/
 
 ## Tipos globales
 
+> **Fuente de verdad:** `types/index.ts` — sincronizado con el schema real de Supabase (TourismSAAS).
+> Los tipos de abajo son una referencia rapida. Si hay discrepancia, `types/index.ts` manda.
+
 ```typescript
-// types/index.ts
+// types/index.ts — resumen
 
-export type Role = 'admin' | 'agent'
-export type ConversationStatus = 'bot' | 'waiting' | 'active' | 'resolved'
-export type LeadStatus = 'new' | 'qualified' | 'booked' | 'lost'
-export type MessageRole = 'user' | 'bot' | 'agent'
+// Enums (reflejan los enums de la DB)
+export type UserRole = 'admin' | 'agent'
+export type ConversationStatus = 'open' | 'resolved' | 'pending'
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
+export type MessageRole = 'user' | 'assistant' | 'agent'
+export type PlanType = 'starter' | 'growth' | 'pro'
+export type OrgStatus = 'active' | 'inactive' | 'suspended'
+export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid'
 
-export interface Organization {
-  id: string
-  name: string
-  slug: string
-  prompt: string | null
-  faqs: FAQ[]
-  config: OrgConfig
-  twilio_number: string | null
-  created_at: string
-}
-
-export interface OrgConfig {
-  business_hours?: { start: string; end: string; timezone: string }
-  language?: string
-}
-
-export interface FAQ {
-  question: string
-  answer: string
-}
-
-export interface User {
-  id: string
-  org_id: string
-  email: string
-  full_name: string | null
-  role: Role
-  is_active: boolean
-}
-
-export interface Conversation {
-  id: string
-  org_id: string
-  contact_phone: string
-  contact_name: string | null
-  status: ConversationStatus
-  assigned_to: string | null
-  is_after_hours: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface Message {
-  id: string
-  conversation_id: string
-  role: MessageRole
-  content: string
-  created_at: string
-}
-
-export interface Lead {
-  id: string
-  org_id: string
-  conversation_id: string
-  contact_phone: string
-  tour_interest: string | null
-  group_size: number | null
-  estimated_value: number | null
-  status: LeadStatus
-  created_at: string
-}
+// Tablas principales: Organization, User, Contact, Conversation, Message, Lead, Subscription, TwilioNumber
+// Ver types/index.ts para las interfaces completas
 ```
+
+**Diferencias clave vs versiones anteriores del doc:**
+- `Conversation.status` es `open | resolved | pending` (no `bot | waiting | active | resolved`). El control del bot se maneja con `bot_active: boolean`.
+- `Message.role` usa `assistant` (no `bot`). `from_bot: boolean` distingue mensajes del bot vs agente humano.
+- Los contactos viven en tabla `contacts` separada. `Conversation` referencia `contact_id`, no `contact_phone`.
+- `Lead` referencia `contact_id` y usa `metadata: jsonb` para datos extraidos por el bot.
+- Twilio numbers estan en tabla `twilio_numbers` separada (pool de numeros asignables).
+- `Subscription` maneja billing via Stripe webhooks.
 
 ---
 
@@ -295,18 +251,20 @@ POST /api/webhooks/twilio
 
 - Validar firma de Twilio SIEMPRE (`validateRequest` del SDK)
 - Identificar la organizacion por el campo `To` (numero destino)
-- Insertar el mensaje en `messages`
-- Si `conversation.status === 'bot'`, dejar que N8N procese
-- Si `conversation.status === 'active'`, notificar al agente via Realtime (automatico)
-- Si `conversation.status === 'waiting'`, insertar y esperar que un agente tome el control
+- Identificar org por `To` → lookup en `twilio_numbers`
+- Upsert contacto en `contacts` por `(org_id, phone)`
+- Crear/encontrar conversacion activa para ese contacto
+- Insertar el mensaje en `messages` con role `user`
+- Si `conversation.bot_active === true`, dejar que N8N procese
+- Si `conversation.bot_active === false`, notificar al agente via Realtime (automatico)
 - Responder con TwiML vacio `<Response/>` inmediatamente — no bloquear el webhook
 
 ### 6. Control del bot (N8N)
 
-N8N lee el `status` de la conversacion antes de responder:
+N8N lee `bot_active` de la conversacion antes de responder:
 
 ```
-if conversation.status !== 'bot' -> N8N no responde
+if conversation.bot_active === false -> N8N no responde
 ```
 
 Para pausar el bot desde el dashboard:
@@ -316,7 +274,7 @@ export async function takeControl(conversationId: string, agentId: string) {
   const supabase = createClient()
   await supabase
     .from('conversations')
-    .update({ status: 'active', assigned_to: agentId })
+    .update({ bot_active: false, assigned_agent_id: agentId })
     .eq('id', conversationId)
 }
 
@@ -324,7 +282,7 @@ export async function returnToBot(conversationId: string) {
   const supabase = createClient()
   await supabase
     .from('conversations')
-    .update({ status: 'bot', assigned_to: null })
+    .update({ bot_active: true, assigned_agent_id: null })
     .eq('id', conversationId)
 }
 ```
