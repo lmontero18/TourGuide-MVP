@@ -8,34 +8,25 @@ export function CTA() {
   const { t } = useI18n();
 
   return (
-    <section className="py-16 sm:py-24 lg:py-32 bg-slate-50 relative overflow-hidden">
-      <div className="absolute inset-0 grid-pattern opacity-50" aria-hidden />
-
+    <section className="py-16 sm:py-24 lg:py-32 bg-white relative overflow-hidden">
       <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <FadeUp>
-          <div className="mx-auto max-w-3xl rounded-2xl sm:rounded-3xl bg-navy-950 p-8 sm:p-14 lg:p-20 text-center relative overflow-hidden noise-bg">
-            <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-15"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(59,130,246,0.8) 0%, transparent 60%)",
-              }}
-              aria-hidden
-            />
+          <div className="mx-auto max-w-3xl rounded-2xl sm:rounded-3xl border border-slate-200 bg-slate-50 p-8 sm:p-14 lg:p-20 text-center relative overflow-hidden">
+            <div className="absolute inset-0 grid-pattern opacity-30" aria-hidden />
 
             <div className="relative z-10">
-              <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+              <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-navy-950 leading-tight">
                 {t("cta.title1")}
                 <br />
                 {t("cta.title2")}
               </h2>
-              <p className="mt-5 text-lg text-slate-400 max-w-lg mx-auto leading-relaxed">
+              <p className="mt-5 text-base sm:text-lg text-slate-500 max-w-lg mx-auto leading-relaxed">
                 {t("cta.sub")}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link
                   href="/login"
-                  className="inline-flex h-12 items-center justify-center rounded-xl bg-white px-7 text-sm font-bold text-navy-950 shadow-lg shadow-black/20 transition-all hover:bg-slate-100 hover:-translate-y-0.5 active:translate-y-0"
+                  className="inline-flex h-12 items-center justify-center rounded-xl bg-navy-900 px-7 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0"
                 >
                   {t("cta.button")}
                   <svg
@@ -52,7 +43,7 @@ export function CTA() {
                     />
                   </svg>
                 </Link>
-                <span className="text-sm text-slate-500">
+                <span className="text-sm text-slate-400">
                   {t("cta.note")}
                 </span>
               </div>
