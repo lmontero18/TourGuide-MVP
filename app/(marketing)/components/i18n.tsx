@@ -192,6 +192,69 @@ const translations: Record<string, Record<Locale, string>> = {
     es: "14 días gratis · Sin tarjeta",
   },
 
+  // Pricing
+  "pricing.label": { en: "Pricing", es: "Precios" },
+  "pricing.title": {
+    en: "Pick how hands-on you want us",
+    es: "Elige qué tan involucrados nos quieres",
+  },
+  "pricing.sub": {
+    en: "Start self-service or let us handle everything. All plans include the same powerful bot.",
+    es: "Empieza por tu cuenta o deja que nos encarguemos de todo. Todos los planes incluyen el mismo bot.",
+  },
+  "pricing.month": { en: "mo", es: "mes" },
+  "pricing.popular": { en: "Most popular", es: "Más popular" },
+
+  // Tier 0 — DIY
+  "pricing.0.badge": { en: "Self-service", es: "Autoservicio" },
+  "pricing.0.name": { en: "Do It Yourself", es: "Do It Yourself" },
+  "pricing.0.desc": {
+    en: "You set it up, we give you the tools. Perfect for tech-savvy agencies.",
+    es: "Tú lo configuras, te damos las herramientas. Ideal para agencias tech-savvy.",
+  },
+  "pricing.0.cta": { en: "Get started", es: "Empezar" },
+  "pricing.0.f0": { en: "WhatsApp bot with your catalog", es: "Bot de WhatsApp con tu catálogo" },
+  "pricing.0.f1": { en: "Live dashboard & conversations", es: "Dashboard en vivo y conversaciones" },
+  "pricing.0.f2": { en: "Agent takeover chat", es: "Chat con toma de control" },
+  "pricing.0.f3": { en: "Lead qualification", es: "Calificación de leads" },
+  "pricing.0.f4": { en: "Email support", es: "Soporte por email" },
+
+  // Tier 1 — DIFY
+  "pricing.1.badge": { en: "Recommended", es: "Recomendado" },
+  "pricing.1.name": { en: "Do It For You", es: "Do It For You" },
+  "pricing.1.desc": {
+    en: "We build and launch your bot. You just approve and go live.",
+    es: "Nosotros armamos y lanzamos tu bot. Tú solo apruebas y sales en vivo.",
+  },
+  "pricing.1.setup": { en: "One-time setup", es: "Setup único" },
+  "pricing.1.cta": { en: "Start free trial", es: "Prueba gratis" },
+  "pricing.1.f0": { en: "Everything in Do It Yourself", es: "Todo lo de Do It Yourself" },
+  "pricing.1.f1": { en: "Full bot setup & training by us", es: "Setup y entrenamiento del bot por nosotros" },
+  "pricing.1.f2": { en: "Twilio & WhatsApp configuration", es: "Configuración de Twilio y WhatsApp" },
+  "pricing.1.f3": { en: "Custom FAQ & tour catalog import", es: "Importación de FAQs y catálogo" },
+  "pricing.1.f4": { en: "ROI dashboard", es: "Dashboard de ROI" },
+  "pricing.1.f5": { en: "Priority support", es: "Soporte prioritario" },
+
+  // Tier 2 — Done for you
+  "pricing.2.badge": { en: "White glove", es: "Premium" },
+  "pricing.2.name": { en: "Done For You", es: "Done For You" },
+  "pricing.2.desc": {
+    en: "Fully managed. We run your bot, optimize it, and report results weekly.",
+    es: "100% administrado. Operamos tu bot, lo optimizamos y reportamos resultados cada semana.",
+  },
+  "pricing.2.price": { en: "Custom", es: "A medida" },
+  "pricing.2.priceNote": {
+    en: "Tailored to your agency's volume and needs",
+    es: "Adaptado al volumen y necesidades de tu agencia",
+  },
+  "pricing.2.cta": { en: "Talk to us", es: "Hablemos" },
+  "pricing.2.f0": { en: "Everything in Do It For You", es: "Todo lo de Do It For You" },
+  "pricing.2.f1": { en: "Dedicated account manager", es: "Account manager dedicado" },
+  "pricing.2.f2": { en: "Weekly optimization & reporting", es: "Optimización y reportes semanales" },
+  "pricing.2.f3": { en: "Custom integrations", es: "Integraciones a la medida" },
+  "pricing.2.f4": { en: "Multi-language bot training", es: "Entrenamiento multi-idioma" },
+  "pricing.2.f5": { en: "SLA & phone support", es: "SLA y soporte telefónico" },
+
   // Footer
   "footer.tagline1": {
     en: "WhatsApp AI for tour agencies.",
