@@ -9,8 +9,8 @@ interface OnboardingData {
   agencyName: string;
   country: string;
   language: string;
-  whatsappNumber: string;
-  verificationCode: string;
+  whatsappConnected: boolean;
+  whatsappPhone: string;
   tours: Tour[];
   faqs: FAQ[];
   tone: "formal" | "friendly" | "casual";
@@ -34,8 +34,8 @@ const INITIAL_DATA: OnboardingData = {
   agencyName: "",
   country: "",
   language: "es",
-  whatsappNumber: "",
-  verificationCode: "",
+  whatsappConnected: false,
+  whatsappPhone: "",
   tours: [{ id: "1", name: "", price: "", description: "" }],
   faqs: [{ id: "1", question: "", answer: "" }],
   tone: "friendly",
@@ -424,25 +424,34 @@ function StepWhatsApp({
   data: OnboardingData;
   update: (p: Partial<OnboardingData>) => void;
 }) {
+  const [connecting, setConnecting] = useState(false);
+
+  const handleConnect = () => {
+    setConnecting(true);
+    // In production, this opens the Meta Embedded Signup popup:
+    // FB.login((response) => { ... }, { config_id: META_CONFIG_ID, response_type: 'code', override_default_response_type: true })
+    // For now, simulate the flow
+    setTimeout(() => {
+      setConnecting(false);
+      update({ whatsappConnected: true, whatsappPhone: "+52 55 1234 5678" });
+    }, 2000);
+  };
+
   return (
     <div>
       <StepHeader
         number="02"
         title="Connect your WhatsApp"
-        description="We'll link your WhatsApp Business number so the bot can send and receive messages."
+        description="Link your WhatsApp Business number with one click. No technical setup needed."
       />
 
-      <div className="mt-8 space-y-5">
-        <Field label="WhatsApp Business number" htmlFor="whatsapp">
-          <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-slate-400">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="text-green-500"
-              >
+      {/* Main connect area */}
+      <div className="mt-8">
+        {!data.whatsappConnected ? (
+          <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 sm:p-10 text-center">
+            {/* WhatsApp icon */}
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-green-500/10 mb-5">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-green-500">
                 <path
                   d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"
                   fill="currentColor"
@@ -456,20 +465,75 @@ function StepWhatsApp({
                 />
               </svg>
             </div>
-            <input
-              id="whatsapp"
-              type="tel"
-              value={data.whatsappNumber}
-              onChange={(e) => update({ whatsappNumber: e.target.value })}
-              placeholder="+52 55 1234 5678"
-              className={`${INPUT_CLASS} pl-10`}
-            />
+
+            <h3 className="text-lg font-bold text-navy-900 mb-2">
+              Connect with Facebook
+            </h3>
+            <p className="text-sm text-slate-500 max-w-md mx-auto mb-6 leading-relaxed">
+              Sign in with your Facebook account to connect your WhatsApp Business number. The whole process takes less than 2 minutes.
+            </p>
+
+            <button
+              onClick={handleConnect}
+              disabled={connecting}
+              className="inline-flex h-12 items-center gap-2.5 rounded-xl bg-[#1877F2] px-6 text-sm font-bold text-white shadow-lg shadow-[#1877F2]/25 transition-all hover:bg-[#166FE5] hover:shadow-xl hover:shadow-[#1877F2]/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            >
+              {connecting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Connecting...
+                </>
+              ) : (
+                <>
+                  {/* Facebook icon */}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                  </svg>
+                  Continue with Facebook
+                </>
+              )}
+            </button>
           </div>
-        </Field>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="rounded-2xl border-2 border-green-200 bg-green-50/50 p-8 sm:p-10 text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 20 }}
+              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500 mb-5"
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 13l4 4L19 7" />
+              </svg>
+            </motion.div>
+
+            <h3 className="text-lg font-bold text-green-900 mb-1">
+              WhatsApp connected
+            </h3>
+            <p className="text-sm text-green-700/70 mb-4">
+              Your number <span className="font-semibold text-green-800">{data.whatsappPhone}</span> is ready to receive messages.
+            </p>
+
+            <button
+              onClick={() => update({ whatsappConnected: false, whatsappPhone: "" })}
+              className="text-xs font-medium text-green-600 hover:text-green-700 transition-colors underline underline-offset-2"
+            >
+              Disconnect and use a different number
+            </button>
+          </motion.div>
+        )}
       </div>
 
       {/* How it works card */}
-      <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
         <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 mb-4">
           How it works
         </p>
@@ -477,23 +541,26 @@ function StepWhatsApp({
           {[
             {
               icon: "link",
-              title: "We connect via Twilio",
-              desc: "Your existing WhatsApp Business number gets linked through Twilio's API — no new number needed.",
+              step: "1",
+              title: "Sign in with Facebook",
+              desc: "We use Meta's official Embedded Signup — your credentials are handled by Facebook directly, never by us.",
             },
             {
               icon: "shield",
-              title: "Fully encrypted",
-              desc: "All messages are end-to-end encrypted. We never store message content beyond what you see in your dashboard.",
+              step: "2",
+              title: "Authorize WhatsApp access",
+              desc: "Grant permission for TourGuide to send and receive messages on your behalf through Meta Cloud API.",
             },
             {
               icon: "zap",
-              title: "Takes 2 minutes",
-              desc: "We'll send a verification code to confirm ownership, then you're connected.",
+              step: "3",
+              title: "Verify your number",
+              desc: "Meta sends a code to your phone to confirm ownership. Once verified, your bot starts working instantly.",
             },
           ].map((item) => (
             <div key={item.title} className="flex gap-3">
-              <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-lg bg-white border border-slate-200 shadow-sm">
-                <StepIcon name={item.icon} />
+              <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-xs font-bold text-navy-700">
+                {item.step}
               </div>
               <div>
                 <p className="text-sm font-semibold text-navy-900">
@@ -508,13 +575,19 @@ function StepWhatsApp({
         </div>
       </div>
 
-      {/* Skip option */}
-      <p className="mt-4 text-center text-xs text-slate-400">
-        Don&apos;t have a WhatsApp Business number?{" "}
-        <button className="font-medium text-blue-500 hover:text-blue-600 transition-colors">
-          We&apos;ll help you set one up
-        </button>
-      </p>
+      {/* Trust badges */}
+      <div className="mt-4 flex items-center justify-center gap-4 text-xs text-slate-400">
+        <span className="flex items-center gap-1">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          End-to-end encrypted
+        </span>
+        <span className="h-3 w-px bg-slate-200" />
+        <span>Official Meta partner</span>
+        <span className="h-3 w-px bg-slate-200" />
+        <span>No extra fees</span>
+      </div>
     </div>
   );
 }
