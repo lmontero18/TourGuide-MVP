@@ -4,6 +4,7 @@ import { LogoBar } from "./components/LogoBar";
 import { Features } from "./components/Features";
 import { HowItWorks } from "./components/HowItWorks";
 import { Metrics } from "./components/Metrics";
+import { Pricing } from "./components/Pricing";
 import { CTA } from "./components/CTA";
 import { Footer } from "./components/Footer";
 import { I18nProvider } from "./components/i18n";
@@ -18,6 +19,7 @@ export default function LandingPage() {
         <Features />
         <HowItWorks />
         <Metrics />
+        <Pricing />
         <CTA />
         <Footer />
       </main>
