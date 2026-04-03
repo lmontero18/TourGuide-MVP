@@ -70,7 +70,7 @@ tourguide/
 │   ├── conversations/
 │   │   ├── ConversationList.tsx       # Lista con realtime
 │   │   ├── ConversationItem.tsx       # Fila individual
-│   │   └── StatusBadge.tsx            # bot | waiting | active | resolved
+│   │   └── StatusBadge.tsx            # open | pending | resolved + bot_active
 │   ├── metrics/
 │   │   ├── MetricCard.tsx             # Numero grande + label
 │   │   ├── LeadsChart.tsx             # Grafico de leads por periodo
@@ -88,6 +88,7 @@ tourguide/
 │   │   ├── queries/
 │   │   │   ├── conversations.ts       # getConversations, getConversationById
 │   │   │   ├── messages.ts            # getMessages, insertMessage
+│   │   │   ├── contacts.ts            # getContact, upsertContact
 │   │   │   ├── leads.ts              # getLeads, getLeadStats
 │   │   │   └── organizations.ts       # getOrg, updateOrgConfig
 │   │   └── types.ts                   # Tipos generados de Supabase (supabase gen types)
