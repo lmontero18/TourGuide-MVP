@@ -8,12 +8,12 @@ export function CTA() {
   const { t } = useI18n();
 
   return (
-    <section className="py-24 lg:py-32 bg-slate-50 relative overflow-hidden">
+    <section className="py-16 sm:py-24 lg:py-32 bg-slate-50 relative overflow-hidden">
       <div className="absolute inset-0 grid-pattern opacity-50" aria-hidden />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <FadeUp>
-          <div className="mx-auto max-w-3xl rounded-3xl bg-navy-950 p-10 sm:p-14 lg:p-20 text-center relative overflow-hidden noise-bg">
+          <div className="mx-auto max-w-3xl rounded-2xl sm:rounded-3xl bg-navy-950 p-8 sm:p-14 lg:p-20 text-center relative overflow-hidden noise-bg">
             <div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-15"
               style={{
@@ -24,7 +24,7 @@ export function CTA() {
             />
 
             <div className="relative z-10">
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+              <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
                 {t("cta.title1")}
                 <br />
                 {t("cta.title2")}

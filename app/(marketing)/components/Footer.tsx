@@ -9,9 +9,9 @@ export function Footer() {
 
   return (
     <FadeIn>
-      <footer className="border-t border-slate-200 bg-white py-12">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-start justify-between gap-8">
+      <footer className="border-t border-slate-200 bg-white py-10 sm:py-12">
+        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-8 lg:gap-12">
             {/* Logo & tagline */}
             <div className="max-w-xs">
               <Link href="/" className="flex items-center gap-2.5">
@@ -41,8 +41,8 @@ export function Footer() {
               </p>
             </div>
 
-            {/* Link columns */}
-            <div className="flex gap-16">
+            {/* Link columns — grid instead of flex for mobile wrapping */}
+            <div className="grid grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 mb-3">
                   {t("footer.product")}
@@ -50,10 +50,7 @@ export function Footer() {
                 <ul className="space-y-2">
                   {["Features", "Pricing", "Changelog"].map((item) => (
                     <li key={item}>
-                      <a
-                        href="#"
-                        className="text-sm text-slate-500 hover:text-navy-900 transition-colors"
-                      >
+                      <a href="#" className="text-xs sm:text-sm text-slate-500 hover:text-navy-900 transition-colors">
                         {item}
                       </a>
                     </li>
@@ -67,10 +64,7 @@ export function Footer() {
                 <ul className="space-y-2">
                   {["About", "Blog", "Careers"].map((item) => (
                     <li key={item}>
-                      <a
-                        href="#"
-                        className="text-sm text-slate-500 hover:text-navy-900 transition-colors"
-                      >
+                      <a href="#" className="text-xs sm:text-sm text-slate-500 hover:text-navy-900 transition-colors">
                         {item}
                       </a>
                     </li>
@@ -84,10 +78,7 @@ export function Footer() {
                 <ul className="space-y-2">
                   {["Privacy", "Terms"].map((item) => (
                     <li key={item}>
-                      <a
-                        href="#"
-                        className="text-sm text-slate-500 hover:text-navy-900 transition-colors"
-                      >
+                      <a href="#" className="text-xs sm:text-sm text-slate-500 hover:text-navy-900 transition-colors">
                         {item}
                       </a>
                     </li>
@@ -97,15 +88,13 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="mt-12 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="mt-10 sm:mt-12 pt-5 sm:pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-slate-400">
               © {new Date().getFullYear()} {t("footer.rights")}
             </p>
             <div className="flex items-center gap-1.5">
               <span className="flex h-2 w-2 rounded-full bg-green-400" />
-              <span className="text-xs text-slate-400">
-                {t("footer.status")}
-              </span>
+              <span className="text-xs text-slate-400">{t("footer.status")}</span>
             </div>
           </div>
         </div>
