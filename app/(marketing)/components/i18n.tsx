@@ -123,26 +123,35 @@ const translations: Record<string, Record<Locale, string>> = {
 
   // HowItWorks
   "how.label": { en: "How it works", es: "Cómo funciona" },
-  "how.title1": { en: "Live in 10 minutes.", es: "En vivo en 10 minutos." },
-  "how.title2": { en: "No code required.", es: "Sin código." },
-  "how.0.title": { en: "Connect WhatsApp", es: "Conecta WhatsApp" },
+  "how.title": {
+    en: "Three steps. No tech skills needed.",
+    es: "Tres pasos. Sin conocimientos técnicos.",
+  },
+  "how.sub": {
+    en: "We set up everything for you — you just tell us about your tours.",
+    es: "Nosotros configuramos todo — tú solo nos cuentas sobre tus tours.",
+  },
+  "how.0.step": { en: "STEP 1", es: "PASO 1" },
+  "how.0.title": { en: "Tell us about your tours", es: "Cuéntanos sobre tus tours" },
   "how.0.desc": {
-    en: "Link your Twilio-powered WhatsApp number. We handle the setup — just paste your credentials.",
-    es: "Vincula tu número de WhatsApp con Twilio. Nosotros hacemos el setup — solo pega tus credenciales.",
+    en: "Share your tour descriptions, prices, and the questions your clients ask most. That's it.",
+    es: "Comparte tus descripciones de tours, precios y las preguntas que más hacen tus clientes. Eso es todo.",
   },
-  "how.1.title": { en: "Train your bot", es: "Entrena tu bot" },
+  "how.1.step": { en: "STEP 2", es: "PASO 2" },
+  "how.1.title": { en: "We build your bot", es: "Armamos tu bot" },
   "how.1.desc": {
-    en: "Paste your tour descriptions, prices, and FAQs. The bot learns your catalog and answers accurately.",
-    es: "Pega las descripciones de tus tours, precios y FAQs. El bot aprende tu catálogo y responde con precisión.",
+    en: "We train it to answer like your best agent — in your tone, your language, with your prices.",
+    es: "Lo entrenamos para responder como tu mejor agente — con tu tono, tu idioma, tus precios.",
   },
-  "how.2.title": {
-    en: "Watch leads roll in",
-    es: "Mira cómo llegan los leads",
-  },
+  "how.2.step": { en: "STEP 3", es: "PASO 3" },
+  "how.2.title": { en: "Start getting bookings", es: "Empieza a recibir reservas" },
   "how.2.desc": {
-    en: "Open the dashboard. See every conversation, qualified lead, and booking — in real time.",
-    es: "Abre el dashboard. Ve cada conversación, lead calificado y reserva — en tiempo real.",
+    en: "Your WhatsApp answers clients 24/7. You see every conversation and jump in whenever you want.",
+    es: "Tu WhatsApp responde clientes 24/7. Ves cada conversación y te metes cuando quieras.",
   },
+  "how.check0": { en: "No coding required", es: "Sin programación" },
+  "how.check1": { en: "Ready in 48 hours", es: "Listo en 48 horas" },
+  "how.check2": { en: "Cancel anytime", es: "Cancela cuando quieras" },
 
   // Metrics
   "metrics.label": { en: "Results", es: "Resultados" },
