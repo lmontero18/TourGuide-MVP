@@ -70,7 +70,7 @@ tourguide/
 │   ├── conversations/
 │   │   ├── ConversationList.tsx       # Lista con realtime
 │   │   ├── ConversationItem.tsx       # Fila individual
-│   │   └── StatusBadge.tsx            # bot | waiting | active | resolved
+│   │   └── StatusBadge.tsx            # open | pending | resolved + bot_active
 │   ├── metrics/
 │   │   ├── MetricCard.tsx             # Numero grande + label
 │   │   ├── LeadsChart.tsx             # Grafico de leads por periodo
@@ -88,6 +88,7 @@ tourguide/
 │   │   ├── queries/
 │   │   │   ├── conversations.ts       # getConversations, getConversationById
 │   │   │   ├── messages.ts            # getMessages, insertMessage
+│   │   │   ├── contacts.ts            # getContact, upsertContact
 │   │   │   ├── leads.ts              # getLeads, getLeadStats
 │   │   │   └── organizations.ts       # getOrg, updateOrgConfig
 │   │   └── types.ts                   # Tipos generados de Supabase (supabase gen types)
@@ -119,9 +120,12 @@ tourguide/
 // types/index.ts
 
 export type Role = 'admin' | 'agent'
-export type ConversationStatus = 'bot' | 'waiting' | 'active' | 'resolved'
-export type LeadStatus = 'new' | 'qualified' | 'booked' | 'lost'
-export type MessageRole = 'user' | 'bot' | 'agent'
+export type ConversationStatus = 'open' | 'resolved' | 'pending'
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
+export type MessageRole = 'user' | 'assistant' | 'agent'
+export type PlanType = 'starter' | 'growth' | 'pro'
+export type OrgStatus = 'active' | 'inactive' | 'suspended'
+export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid'
 
 export interface Organization {
   id: string
@@ -129,14 +133,16 @@ export interface Organization {
   slug: string
   prompt: string | null
   faqs: FAQ[]
-  config: OrgConfig
-  twilio_number: string | null
+  bot_config: BotConfig
+  plan: PlanType
+  status: OrgStatus
   created_at: string
+  updated_at: string
 }
 
-export interface OrgConfig {
-  business_hours?: { start: string; end: string; timezone: string }
-  language?: string
+export interface BotConfig {
+  buffer_seconds?: number
+  default_lang?: string
 }
 
 export interface FAQ {
@@ -150,17 +156,30 @@ export interface User {
   email: string
   full_name: string | null
   role: Role
-  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface Contact {
+  id: string
+  org_id: string
+  phone: string
+  name: string | null
+  channel: string            // default: 'whatsapp'
+  custom_attributes: Record<string, unknown>
+  last_seen_at: string | null
+  created_at: string
+  updated_at: string
 }
 
 export interface Conversation {
   id: string
   org_id: string
-  contact_phone: string
-  contact_name: string | null
+  contact_id: string
   status: ConversationStatus
-  assigned_to: string | null
-  is_after_hours: boolean
+  bot_active: boolean        // false cuando un agente tomo control. N8N verifica esto.
+  assigned_agent_id: string | null
+  last_message_at: string | null
   created_at: string
   updated_at: string
 }
@@ -168,21 +187,45 @@ export interface Conversation {
 export interface Message {
   id: string
   conversation_id: string
-  role: MessageRole
+  role: MessageRole          // 'user' = cliente, 'assistant' = bot, 'agent' = agente humano
   content: string
+  from_bot: boolean          // filtra mensajes del bot vs agentes humanos en dashboard
+  channel: string            // default: 'whatsapp'
   created_at: string
 }
 
 export interface Lead {
   id: string
   org_id: string
-  conversation_id: string
-  contact_phone: string
+  contact_id: string
+  conversation_id: string | null
   tour_interest: string | null
-  group_size: number | null
-  estimated_value: number | null
   status: LeadStatus
+  metadata: Record<string, unknown>  // {dates, group_size, special_needs, ...}
   created_at: string
+  updated_at: string
+}
+
+export interface TwilioNumber {
+  id: string
+  phone_number: string       // formato E.164
+  twilio_sid: string
+  org_id: string | null      // null = en pool, disponible para asignar
+  status: OrgStatus
+  assigned_at: string | null
+  created_at: string
+}
+
+export interface Subscription {
+  id: string
+  org_id: string
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  plan: PlanType
+  status: SubscriptionStatus
+  current_period_end: string | null
+  created_at: string
+  updated_at: string
 }
 ```
 
@@ -226,8 +269,8 @@ export function useConversations(orgId: string) {
     // Carga inicial
     supabase
       .from('conversations')
-      .select('id, contact_phone, contact_name, status, assigned_to, updated_at')
-      .order('updated_at', { ascending: false })
+      .select('id, contact_id, status, bot_active, assigned_agent_id, last_message_at, updated_at')
+      .order('last_message_at', { ascending: false })
       .then(({ data }) => {
         if (data) setConversations(data)
       })
@@ -294,19 +337,20 @@ POST /api/webhooks/twilio
 ```
 
 - Validar firma de Twilio SIEMPRE (`validateRequest` del SDK)
-- Identificar la organizacion por el campo `To` (numero destino)
+- Identificar la organizacion por el campo `To` (numero destino) via tabla `twilio_numbers`
+- Buscar o crear el contacto en `contacts` (upsert por org_id + phone)
+- Buscar o crear la conversacion en `conversations` (por contact_id)
 - Insertar el mensaje en `messages`
-- Si `conversation.status === 'bot'`, dejar que N8N procese
-- Si `conversation.status === 'active'`, notificar al agente via Realtime (automatico)
-- Si `conversation.status === 'waiting'`, insertar y esperar que un agente tome el control
+- Si `conversation.bot_active === true`, dejar que N8N procese
+- Si `conversation.bot_active === false`, notificar al agente via Realtime (automatico)
 - Responder con TwiML vacio `<Response/>` inmediatamente — no bloquear el webhook
 
 ### 6. Control del bot (N8N)
 
-N8N lee el `status` de la conversacion antes de responder:
+N8N lee `bot_active` de la conversacion antes de responder:
 
 ```
-if conversation.status !== 'bot' -> N8N no responde
+if conversation.bot_active === false -> N8N no responde
 ```
 
 Para pausar el bot desde el dashboard:
@@ -316,7 +360,7 @@ export async function takeControl(conversationId: string, agentId: string) {
   const supabase = createClient()
   await supabase
     .from('conversations')
-    .update({ status: 'active', assigned_to: agentId })
+    .update({ bot_active: false, assigned_agent_id: agentId, status: 'open' })
     .eq('id', conversationId)
 }
 
@@ -324,7 +368,7 @@ export async function returnToBot(conversationId: string) {
   const supabase = createClient()
   await supabase
     .from('conversations')
-    .update({ status: 'bot', assigned_to: null })
+    .update({ bot_active: true, assigned_agent_id: null })
     .eq('id', conversationId)
 }
 ```
@@ -338,23 +382,16 @@ export async function getLeadStats(orgId: string, from: Date, to: Date) {
   const supabase = createServerClient()
   const { data } = await supabase
     .from('leads')
-    .select('status, estimated_value, created_at')
+    .select('status, metadata, created_at')
     .gte('created_at', from.toISOString())
     .lte('created_at', to.toISOString())
   return data
 }
-
-export async function getAfterHoursStats(orgId: string, from: Date, to: Date) {
-  const supabase = createServerClient()
-  const { count } = await supabase
-    .from('conversations')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_after_hours', true)
-    .gte('created_at', from.toISOString())
-    .lte('created_at', to.toISOString())
-  return count
-}
 ```
+
+> **Nota:** `is_after_hours` no existe como columna en la DB.
+> Las metricas de fuera de horario se calculan comparando `last_message_at`
+> contra `organizations.bot_config.business_hours` en el servidor.
 
 ---
 
@@ -411,7 +448,7 @@ STRIPE_WEBHOOK_SECRET=
 | RLS en Supabase en lugar de filtros manuales | Aislamiento de datos garantizado a nivel DB, no codigo |
 | Indices en `org_id + created_at` | Queries paginadas rapidas sin importar el volumen total |
 | Realtime filtrado por canal `conversations:{orgId}` | Cada org solo recibe sus eventos, no hay flood global |
-| N8N lee status desde DB en lugar de recibir senales | Sin estado en memoria, escala horizontalmente |
+| N8N lee `bot_active` desde DB en lugar de recibir senales | Sin estado en memoria, escala horizontalmente |
 | Webhook de Twilio responde inmediato + procesa async | Twilio tiene timeout de 15s, no podemos bloquear |
 | Server Components para el dashboard inicial | Carga inicial rapida, datos frescos sin waterfall de fetch |
 
