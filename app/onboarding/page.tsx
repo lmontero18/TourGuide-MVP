@@ -998,9 +998,9 @@ function StepPersonality({
    STEP 5 — Go Live / Preview
    ═══════════════════════════════════════════════════ */
 function StepGoLive({ data }: { data: OnboardingData }) {
-  const [previewMessages, setPreviewMessages] = useState([
+  const [previewMessages, setPreviewMessages] = useState<{ from: "bot" | "user"; text: string }[]>([
     {
-      from: "bot" as const,
+      from: "bot",
       text:
         data.greeting ||
         `¡Hola! 👋 Soy el asistente de ${data.agencyName || "tu agencia"}. ¿En qué te puedo ayudar?`,

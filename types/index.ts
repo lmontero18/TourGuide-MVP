@@ -4,7 +4,6 @@ export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost
 export type MessageRole = 'user' | 'assistant' | 'agent'
 export type PlanType = 'starter' | 'growth' | 'pro'
 export type OrgStatus = 'active' | 'inactive' | 'suspended'
-export type WhatsAppAccountStatus = 'active' | 'inactive' | 'suspended'
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid'
 
 export interface Organization {
@@ -93,7 +92,7 @@ export interface WhatsAppAccount {
   phone_number_id: string
   phone_number: string
   access_token: string
-  status: WhatsAppAccountStatus
+  status: OrgStatus
   connected_at: string | null
   created_at: string
   updated_at: string

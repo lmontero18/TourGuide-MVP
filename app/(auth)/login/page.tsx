@@ -1,10 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
+import { login } from "./actions";
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+  const message = searchParams.get("message");
 
   return (
     <div>
@@ -15,7 +29,22 @@ export default function LoginPage() {
         Log in to your TourGuide dashboard
       </p>
 
-      <form className="mt-8 space-y-4" onSubmit={(e) => e.preventDefault()}>
+      {error && (
+        <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+          {decodeURIComponent(error)}
+        </div>
+      )}
+
+      {message === "check_email" && (
+        <div className="mt-4 p-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm">
+          Check your email to confirm your account.
+        </div>
+      )}
+
+      <form
+        className="mt-8 space-y-4"
+        onSubmit={() => setLoading(true)}
+      >
         {/* Email */}
         <div>
           <label
@@ -26,7 +55,9 @@ export default function LoginPage() {
           </label>
           <input
             id="email"
+            name="email"
             type="email"
+            required
             autoComplete="email"
             placeholder="you@agency.com"
             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -52,7 +83,9 @@ export default function LoginPage() {
           <div className="relative">
             <input
               id="password"
+              name="password"
               type={showPassword ? "text" : "password"}
+              required
               autoComplete="current-password"
               placeholder="••••••••"
               className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -81,9 +114,11 @@ export default function LoginPage() {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full h-11 rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md mt-2"
+          formAction={login}
+          disabled={loading}
+          className="w-full h-11 rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Log in
+          {loading ? "Logging in..." : "Log in"}
         </button>
       </form>
 
