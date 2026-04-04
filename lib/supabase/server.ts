@@ -10,6 +10,16 @@ export async function createClient() {
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
+        setAll: (cookiesToSet) => {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // setAll is called from Server Components where cookies can't be set.
+            // This can be ignored if the proxy refreshes the session.
+          }
+        },
       },
     }
   )
