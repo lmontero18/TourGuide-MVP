@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -70,9 +71,12 @@ const COUNTRIES = [
 
 /* ─── Main component ─── */
 export default function OnboardingPage() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [data, setData] = useState<OnboardingData>(INITIAL_DATA);
+  const [launching, setLaunching] = useState(false);
+  const [launchError, setLaunchError] = useState<string | null>(null);
 
   const update = useCallback(
     (patch: Partial<OnboardingData>) =>
@@ -98,6 +102,58 @@ export default function OnboardingPage() {
     if (target < step) {
       setDirection(-1);
       setStep(target);
+    }
+  };
+
+  const handleLaunch = async () => {
+    if (!data.agencyName) {
+      setLaunchError("Agency name is required");
+      return;
+    }
+
+    setLaunching(true);
+    setLaunchError(null);
+
+    try {
+      // Generate slug from agency name
+      const slug = data.agencyName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+
+      // Create org + assign user as admin
+      const res = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ org_name: data.agencyName, slug }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        // If slug taken, try with random suffix
+        if (res.status === 409) {
+          const retryRes = await fetch("/api/onboarding", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              org_name: data.agencyName,
+              slug: `${slug}-${Math.random().toString(36).slice(2, 6)}`,
+            }),
+          });
+          const retryResult = await retryRes.json();
+          if (!retryRes.ok) {
+            throw new Error(retryResult.error || "Failed to create organization");
+          }
+        } else {
+          throw new Error(result.error || "Failed to create organization");
+        }
+      }
+
+      router.push("/conversations");
+    } catch (err) {
+      setLaunchError(err instanceof Error ? err.message : "Something went wrong");
+      setLaunching(false);
     }
   };
 
@@ -268,25 +324,33 @@ export default function OnboardingPage() {
                 </svg>
               </button>
             ) : (
-              <Link
-                href="/conversations"
-                className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
-              >
-                Launch my bot
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              <div className="flex items-center gap-3">
+                {launchError && (
+                  <p className="text-sm text-red-600">{launchError}</p>
+                )}
+                <button
+                  onClick={handleLaunch}
+                  disabled={launching}
+                  className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <path d="M5 12h14" />
-                  <path d="M12 5l7 7-7 7" />
-                </svg>
-              </Link>
+                  {launching ? "Launching..." : "Launch my bot"}
+                  {!launching && (
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="M12 5l7 7-7 7" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             )}
           </div>
         </div>
