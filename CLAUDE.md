@@ -33,8 +33,18 @@ tourguide/
 ├── app/
 │   ├── (auth)/
 │   │   ├── login/
-│   │   │   └── page.tsx
+│   │   │   ├── page.tsx               # Login form
+│   │   │   └── actions.ts             # Server actions: login, signup, logout
+│   │   ├── register/
+│   │   │   └── page.tsx               # Signup form (usa signup action de login/actions.ts)
 │   │   └── layout.tsx
+│   ├── auth/
+│   │   ├── callback/
+│   │   │   └── route.ts              # PKCE callback — intercambia code por sesion
+│   │   └── confirm/
+│   │       └── route.ts              # Email OTP verification
+│   ├── onboarding/
+│   │   └── page.tsx                   # 5 steps: Agency, WhatsApp, Tours, Personality, Go live
 │   ├── (dashboard)/
 │   │   ├── conversations/
 │   │   │   ├── page.tsx               # Lista de conversaciones
@@ -53,12 +63,17 @@ tourguide/
 │   ├── api/
 │   │   ├── webhooks/
 │   │   │   └── whatsapp/
-│   │   │       └── route.ts           # Recibe mensajes de WhatsApp via Meta Cloud API
+│   │   │       └── route.ts           # GET: verificacion Meta, POST: recepcion de mensajes
 │   │   ├── whatsapp/
 │   │   │   ├── connect/
 │   │   │   │   └── route.ts           # Embedded Signup — conectar numero del cliente
 │   │   │   └── disconnect/
-│   │   │       └── route.ts           # Desconectar numero
+│   │   │       └── route.ts           # Desconectar numero (admin only)
+│   │   ├── onboarding/
+│   │   │   └── route.ts              # POST: crea org + asigna admin + subscription starter
+│   │   ├── agents/
+│   │   │   └── invite/
+│   │   │       └── route.ts          # POST: invitar agentes por email
 │   │   └── conversations/
 │   │       └── [id]/
 │   │           └── route.ts
@@ -87,33 +102,33 @@ tourguide/
 │
 ├── lib/
 │   ├── supabase/
-│   │   ├── client.ts                  # createBrowserClient
-│   │   ├── server.ts                  # createServerClient (Server Components)
-│   │   ├── middleware.ts              # createMiddlewareClient
+│   │   ├── client.ts                  # createBrowserClient (Client Components)
+│   │   ├── server.ts                  # createClient + createServiceClient (Server)
+│   │   ├── middleware.ts              # createClient para middleware (cookie read/write)
 │   │   ├── queries/
-│   │   │   ├── conversations.ts       # getConversations, getConversationById
+│   │   │   ├── conversations.ts       # getConversations, getConversationById, takeControl, returnToBot
 │   │   │   ├── messages.ts            # getMessages, insertMessage
 │   │   │   ├── contacts.ts            # getContact, upsertContact
-│   │   │   ├── leads.ts              # getLeads, getLeadStats
+│   │   │   ├── leads.ts              # getLeads, getLeadStats, createLead, updateLeadStatus
 │   │   │   └── organizations.ts       # getOrg, updateOrgConfig
 │   │   └── types.ts                   # Tipos generados de Supabase (supabase gen types)
 │   ├── whatsapp/
-│   │   ├── client.ts                  # Funciones para Meta Cloud API v21.0
-│   │   └── sendMessage.ts             # Enviar texto, media, botones, templates
+│   │   ├── client.ts                  # Meta Cloud API v21.0: sendText, sendButton, sendTemplate, sendMedia, markAsRead
+│   │   └── verify.ts                 # Validacion de firma HMAC SHA-256 del webhook
 │   ├── n8n/
-│   │   └── pauseBot.ts               # Cambia status en Supabase para pausar N8N
+│   │   └── pauseBot.ts               # Cambia bot_active en Supabase para pausar N8N
 │   └── utils.ts                       # cn(), formatDate(), formatPhone()
 │
 ├── hooks/
 │   ├── useConversations.ts            # Lista con suscripcion Realtime
 │   ├── useMessages.ts                 # Mensajes con suscripcion Realtime
-│   ├── useAuth.ts                     # Session + org_id + role
+│   ├── useAuth.ts                     # Session + profile (org_id, role) + auth state listener
 │   └── useMetrics.ts                  # Stats de ROI con periodo seleccionable
 │
 ├── types/
 │   └── index.ts                       # Tipos globales del dominio
 │
-├── middleware.ts                       # Proteccion de rutas + auth
+├── middleware.ts                       # Auth guard: protege /dashboard, /conversations, /metrics, /settings
 └── CLAUDE.md                          # Este archivo
 ```
 
@@ -130,7 +145,6 @@ export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost
 export type MessageRole = 'user' | 'assistant' | 'agent'
 export type PlanType = 'starter' | 'growth' | 'pro'
 export type OrgStatus = 'active' | 'inactive' | 'suspended'
-export type WhatsAppAccountStatus = 'active' | 'inactive' | 'suspended'
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid'
 
 export interface Organization {
@@ -219,7 +233,7 @@ export interface WhatsAppAccount {
   phone_number_id: string    // ID que Meta asigna al numero — se usa para enviar mensajes
   phone_number: string       // formato E.164, el numero del cliente
   access_token: string       // token para Graph API — sensible, considerar encriptar
-  status: WhatsAppAccountStatus
+  status: OrgStatus
   connected_at: string | null
   created_at: string
   updated_at: string
@@ -312,32 +326,24 @@ export function useConversations(orgId: string) {
 
 ### 4. Auth y roles
 
-- El middleware (`middleware.ts`) protege todas las rutas de `/dashboard/*`
-- El `org_id` y `role` del usuario se leen desde la tabla `users` al hacer login y se guardan en la sesion
-- **Nunca** confiar en el `role` del lado cliente para logica critica — validar en Server Component o API Route
+**Flujo de auth completo:**
+1. **Signup** (`/register`) → server action `signup` en `app/(auth)/login/actions.ts` → Supabase Auth crea usuario
+2. **Confirmar email** → Supabase envia link → `app/auth/confirm/route.ts` verifica OTP
+3. **Login** (`/login`) → server action `login` → PKCE flow → `app/auth/callback/route.ts` intercambia code
+4. **Post-login** → middleware checa si usuario tiene `org_id` → sin org redirige a `/onboarding`
+5. **Onboarding** → crea org via `POST /api/onboarding` (service client, bypasses RLS) → asigna admin + subscription starter
+6. **Siguiente login** → ya tiene org → directo a `/conversations`
+
+**DB trigger:** `handle_new_user()` crea automaticamente un row en `public.users` cuando se registra en `auth.users`. El `org_id` es nullable para soportar usuarios nuevos sin org.
+
+**Agentes invitados:** Admin invita via `POST /api/agents/invite` → `supabase.auth.admin.inviteUserByEmail` con `org_id` y `role` en metadata → agente confirma email → ya tiene org asignada.
+
+**Reglas:**
+- El middleware protege `/dashboard/*`, `/conversations/*`, `/metrics/*`, `/settings/*`
+- Redirige usuarios logueados en `/login` hacia el dashboard
+- `org_id` y `role` se leen desde tabla `users` — **nunca** confiar en el role del cliente para logica critica
 - Los admins ven metricas y settings. Los agentes solo ven conversaciones.
-
-```typescript
-// middleware.ts — patron base
-import { createMiddlewareClient } from '@/lib/supabase/middleware'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-
-export async function middleware(req: NextRequest) {
-  const { supabase, response } = createMiddlewareClient(req)
-  const { data: { session } } = await supabase.auth.getSession()
-
-  if (!session && req.nextUrl.pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/login', req.url))
-  }
-
-  return response
-}
-
-export const config = {
-  matcher: ['/dashboard/:path*']
-}
-```
+- Auth usa server actions (no API routes) — patron oficial de Supabase para Next.js App Router
 
 ### 5. Webhook de WhatsApp (Meta Cloud API)
 
@@ -359,7 +365,7 @@ POST /api/webhooks/whatsapp   → Recepcion de mensajes
 ### 5b. Enviar mensajes (Meta Cloud API)
 
 ```typescript
-// lib/whatsapp/sendMessage.ts
+// lib/whatsapp/client.ts
 // Endpoint: POST https://graph.facebook.com/v21.0/{phone_number_id}/messages
 
 // Dentro de ventana 24h (GRATIS): texto libre, media, botones, listas
@@ -369,6 +375,9 @@ await sendButtonMessage(phoneNumberId, accessToken, to, body, buttons)
 
 // Fuera de ventana 24h (con costo ~$0.03 USD Mexico): solo templates aprobados
 await sendTemplateMessage(phoneNumberId, accessToken, to, templateName, params)
+
+// Marcar mensaje como leido
+await markAsRead(phoneNumberId, accessToken, messageId)
 ```
 
 > **Ventana de 24h:** Cada mensaje del cliente reinicia la ventana.
@@ -470,10 +479,10 @@ STRIPE_WEBHOOK_SECRET=
 
 ## Seguridad — checklist
 
-- [ ] RLS activado en todas las tablas
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` nunca en codigo cliente ni en `NEXT_PUBLIC_`
-- [ ] Firma de Meta validada en el webhook (`X-Hub-Signature-256`)
-- [ ] Middleware protegiendo todas las rutas de `/dashboard`
+- [x] RLS activado en todas las tablas (incluye admin-only en whatsapp_accounts)
+- [x] `SUPABASE_SERVICE_ROLE_KEY` nunca en codigo cliente ni en `NEXT_PUBLIC_`
+- [x] Firma de Meta validada en el webhook (`X-Hub-Signature-256` via `lib/whatsapp/verify.ts`)
+- [x] Middleware protegiendo todas las rutas de `/dashboard`, `/conversations`, `/metrics`, `/settings`
 - [ ] Rate limiting en `/api/webhooks/whatsapp` (Vercel Edge Config o Upstash)
 - [ ] `access_token` de WhatsApp encriptado en DB o en Vault
 - [ ] Inputs sanitizados antes de insertar en DB
