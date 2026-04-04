@@ -14,13 +14,25 @@ export async function login(formData: FormData) {
     redirect('/login?error=missing_fields')
   }
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const { error, data } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`)
   }
 
+  // Check if user has an org — if not, send to onboarding
+  const { data: profile } = await supabase
+    .from('users')
+    .select('org_id')
+    .eq('id', data.user.id)
+    .single()
+
   revalidatePath('/', 'layout')
+
+  if (!profile?.org_id) {
+    redirect('/onboarding')
+  }
+
   redirect('/conversations')
 }
 

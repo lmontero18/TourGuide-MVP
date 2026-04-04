@@ -7,19 +7,45 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Redirect unauthenticated users from dashboard to login
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  const protectedPaths = ['/conversations', '/metrics', '/settings', '/dashboard']
+  const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
+
+  // Redirect unauthenticated users from protected routes to login
+  if (!user && isProtected) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Redirect authenticated users from login to dashboard
-  if (user && request.nextUrl.pathname === '/login') {
-    return NextResponse.redirect(new URL('/conversations', request.url))
+  if (user) {
+    // Check if user has an org
+    const { data: profile } = await supabase
+      .from('users')
+      .select('org_id')
+      .eq('id', user.id)
+      .single()
+
+    const hasOrg = !!profile?.org_id
+
+    // User without org trying to access dashboard → onboarding
+    if (!hasOrg && isProtected) {
+      return NextResponse.redirect(new URL('/onboarding', request.url))
+    }
+
+    // User with org trying to access login → dashboard
+    if (hasOrg && request.nextUrl.pathname === '/login') {
+      return NextResponse.redirect(new URL('/conversations', request.url))
+    }
+
+    // User with org trying to access onboarding → dashboard
+    if (hasOrg && request.nextUrl.pathname === '/onboarding') {
+      return NextResponse.redirect(new URL('/conversations', request.url))
+    }
+
+    // User without org on login → let them through to login (edge case)
   }
 
   return response
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/conversations/:path*', '/metrics/:path*', '/settings/:path*'],
+  matcher: ['/dashboard/:path*', '/login', '/register', '/onboarding', '/conversations/:path*', '/metrics/:path*', '/settings/:path*'],
 }
