@@ -1,10 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
+import { signup } from "../login/actions";
 
 export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
 
   return (
     <div>
@@ -14,6 +27,12 @@ export default function RegisterPage() {
       <p className="mt-2 text-sm text-slate-500">
         Start your 14-day free trial. No credit card required.
       </p>
+
+      {error && (
+        <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+          {decodeURIComponent(error)}
+        </div>
+      )}
 
       {/* Google sign-up first — higher conversion */}
       <button
@@ -36,17 +55,21 @@ export default function RegisterPage() {
         <div className="h-px flex-1 bg-slate-200" />
       </div>
 
-      <form className="mt-5 space-y-4" onSubmit={(e) => e.preventDefault()}>
+      <form
+        className="mt-5 space-y-4"
+        onSubmit={() => setLoading(true)}
+      >
         {/* Name */}
         <div>
           <label
-            htmlFor="name"
+            htmlFor="full_name"
             className="block text-sm font-medium text-navy-900 mb-1.5"
           >
             Full name
           </label>
           <input
-            id="name"
+            id="full_name"
+            name="full_name"
             type="text"
             autoComplete="name"
             placeholder="María Rodríguez"
@@ -64,7 +87,9 @@ export default function RegisterPage() {
           </label>
           <input
             id="email"
+            name="email"
             type="email"
+            required
             autoComplete="email"
             placeholder="you@agency.com"
             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -81,6 +106,7 @@ export default function RegisterPage() {
           </label>
           <input
             id="agency"
+            name="agency"
             type="text"
             placeholder="Cusco Expeditions"
             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -98,7 +124,10 @@ export default function RegisterPage() {
           <div className="relative">
             <input
               id="password"
+              name="password"
               type={showPassword ? "text" : "password"}
+              required
+              minLength={8}
               autoComplete="new-password"
               placeholder="8+ characters"
               className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -127,9 +156,11 @@ export default function RegisterPage() {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full h-11 rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md mt-2"
+          formAction={signup}
+          disabled={loading}
+          className="w-full h-11 rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Create account
+          {loading ? "Creating account..." : "Create account"}
         </button>
       </form>
 

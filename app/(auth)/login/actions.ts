@@ -32,11 +32,11 @@ export async function signup(formData: FormData) {
   const fullName = formData.get('full_name') as string
 
   if (!email || !password) {
-    redirect('/login?error=missing_fields&tab=signup')
+    redirect('/register?error=missing_fields')
   }
 
   if (password.length < 8) {
-    redirect('/login?error=password_min_8&tab=signup')
+    redirect('/register?error=password_min_8')
   }
 
   const { error } = await supabase.auth.signUp({
@@ -50,7 +50,7 @@ export async function signup(formData: FormData) {
   })
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}&tab=signup`)
+    redirect(`/register?error=${encodeURIComponent(error.message)}`)
   }
 
   redirect('/login?message=check_email')
