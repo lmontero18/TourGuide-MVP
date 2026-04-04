@@ -2,6 +2,15 @@ import { createMiddlewareClient } from '@/lib/supabase/middleware'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+function redirectWithCookies(url: URL, response: NextResponse) {
+  const redirect = NextResponse.redirect(url)
+  // Copy refreshed auth cookies to the redirect response
+  response.cookies.getAll().forEach((cookie) => {
+    redirect.cookies.set(cookie.name, cookie.value)
+  })
+  return redirect
+}
+
 export async function middleware(request: NextRequest) {
   const { supabase, response } = createMiddlewareClient(request)
 
@@ -12,7 +21,7 @@ export async function middleware(request: NextRequest) {
 
   // Redirect unauthenticated users from protected routes to login
   if (!user && isProtected) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    return redirectWithCookies(new URL('/login', request.url), response)
   }
 
   if (user) {
@@ -27,20 +36,18 @@ export async function middleware(request: NextRequest) {
 
     // User without org trying to access dashboard → onboarding
     if (!hasOrg && isProtected) {
-      return NextResponse.redirect(new URL('/onboarding', request.url))
+      return redirectWithCookies(new URL('/onboarding', request.url), response)
     }
 
     // User with org trying to access login → dashboard
     if (hasOrg && request.nextUrl.pathname === '/login') {
-      return NextResponse.redirect(new URL('/conversations', request.url))
+      return redirectWithCookies(new URL('/conversations', request.url), response)
     }
 
     // User with org trying to access onboarding → dashboard
     if (hasOrg && request.nextUrl.pathname === '/onboarding') {
-      return NextResponse.redirect(new URL('/conversations', request.url))
+      return redirectWithCookies(new URL('/conversations', request.url), response)
     }
-
-    // User without org on login → let them through to login (edge case)
   }
 
   return response
