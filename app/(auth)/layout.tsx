@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Toaster } from "sonner";
 
 export default function AuthLayout({
   children,
@@ -10,6 +11,14 @@ export default function AuthLayout({
 }) {
   return (
     <div className="flex min-h-screen">
+      <Toaster
+        position="top-right"
+        richColors
+        closeButton
+        toastOptions={{
+          style: { fontFamily: "var(--font-body)" },
+        }}
+      />
       {/* Left panel — branding */}
       <div className="hidden lg:flex lg:w-[45%] xl:w-[48%] relative bg-navy-950 overflow-hidden">
         {/* Gradient mesh */}

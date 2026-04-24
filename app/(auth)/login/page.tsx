@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { login } from "./actions";
 
 export default function LoginPage() {
@@ -16,9 +17,21 @@ export default function LoginPage() {
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const message = searchParams.get("message");
+
+  useEffect(() => {
+    if (error) {
+      toast.error(decodeURIComponent(error));
+      router.replace("/login", { scroll: false });
+    }
+    if (message === "check_email") {
+      toast.success("Check your email to confirm your account.");
+      router.replace("/login", { scroll: false });
+    }
+  }, [error, message, router]);
 
   return (
     <div>
@@ -28,18 +41,6 @@ function LoginForm() {
       <p className="mt-2 text-sm text-slate-500">
         Log in to your TourGuide dashboard
       </p>
-
-      {error && (
-        <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
-          {decodeURIComponent(error)}
-        </div>
-      )}
-
-      {message === "check_email" && (
-        <div className="mt-4 p-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm">
-          Check your email to confirm your account.
-        </div>
-      )}
 
       <form
         className="mt-8 space-y-4"
