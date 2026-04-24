@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { signup } from "../login/actions";
 
 export default function RegisterPage() {
@@ -16,8 +17,16 @@ export default function RegisterPage() {
 function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+
+  useEffect(() => {
+    if (error) {
+      toast.error(decodeURIComponent(error));
+      router.replace("/register", { scroll: false });
+    }
+  }, [error, router]);
 
   return (
     <div>
@@ -27,12 +36,6 @@ function RegisterForm() {
       <p className="mt-2 text-sm text-slate-500">
         Start your 14-day free trial. No credit card required.
       </p>
-
-      {error && (
-        <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
-          {decodeURIComponent(error)}
-        </div>
-      )}
 
       {/* Google sign-up first — higher conversion */}
       <button

@@ -2,16 +2,23 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { Toaster } from "sonner";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const t = useTranslations("auth.panel");
   return (
     <div className="flex min-h-screen">
+      <Toaster
+        position="top-right"
+        richColors
+        closeButton
+        toastOptions={{
+          style: { fontFamily: "var(--font-body)" },
+        }}
+      />
       {/* Left panel — branding */}
       <div className="hidden lg:flex lg:w-[45%] xl:w-[48%] relative bg-navy-950 overflow-hidden">
         {/* Gradient mesh */}
@@ -67,13 +74,13 @@ export default function AuthLayout({
             <div className="flex items-center gap-2 mb-6">
               <div className="h-px flex-1 bg-white/10" />
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                {t("badge")}
+                Built for LATAM
               </span>
               <div className="h-px flex-1 bg-white/10" />
             </div>
 
             <blockquote className="font-display text-2xl xl:text-3xl font-bold text-white leading-snug tracking-tight">
-              {t("quote")}
+              &ldquo;Perdíamos el 40% de consultas después de las 6 PM. Ahora despertamos con leads calificados.&rdquo;
             </blockquote>
             <div className="mt-6 flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
@@ -81,10 +88,10 @@ export default function AuthLayout({
               </div>
               <div>
                 <p className="text-sm font-semibold text-white/90">
-                  {t("quoteName")}
+                  María Rodríguez
                 </p>
                 <p className="text-sm text-white/40">
-                  {t("quoteRole")}
+                  Cusco Expeditions · Peru
                 </p>
               </div>
             </div>
@@ -98,15 +105,15 @@ export default function AuthLayout({
             className="flex gap-8"
           >
             {[
-              { value: "3×", key: "statMoreLeads" as const },
-              { value: "<2s", key: "statReplyTime" as const },
-              { value: "24/7", key: "statAvailability" as const },
+              { value: "3×", label: "more leads" },
+              { value: "<2s", label: "reply time" },
+              { value: "24/7", label: "availability" },
             ].map((stat) => (
-              <div key={stat.key}>
+              <div key={stat.label}>
                 <p className="font-display text-2xl font-extrabold text-white tracking-tight">
                   {stat.value}
                 </p>
-                <p className="text-xs text-white/40 mt-0.5">{t(stat.key)}</p>
+                <p className="text-xs text-white/40 mt-0.5">{stat.label}</p>
               </div>
             ))}
           </motion.div>
