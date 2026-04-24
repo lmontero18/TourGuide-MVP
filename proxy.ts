@@ -25,27 +25,28 @@ export async function proxy(request: NextRequest) {
   }
 
   if (user) {
-    // Check if user has an org
+    // Check if the user's org has completed onboarding
     const { data: profile } = await supabase
       .from('users')
-      .select('org_id')
+      .select('org_id, organizations(onboarded_at)')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
-    const hasOrg = !!profile?.org_id
+    const orgData = profile?.organizations as unknown as { onboarded_at: string | null } | { onboarded_at: string | null }[] | null
+    const org = Array.isArray(orgData) ? orgData[0] : orgData
+    const isOnboarded = !!org?.onboarded_at
 
-    // User without org trying to access dashboard → onboarding
-    if (!hasOrg && isProtected) {
+    // Not onboarded → force onboarding
+    if (!isOnboarded && isProtected) {
       return redirectWithCookies(new URL('/onboarding', request.url), response)
     }
 
-    // User with org trying to access login → dashboard
-    if (hasOrg && request.nextUrl.pathname === '/login') {
+    // Onboarded → keep out of auth / onboarding pages
+    if (isOnboarded && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
       return redirectWithCookies(new URL('/conversations', request.url), response)
     }
 
-    // User with org trying to access onboarding → dashboard
-    if (hasOrg && request.nextUrl.pathname === '/onboarding') {
+    if (isOnboarded && request.nextUrl.pathname === '/onboarding') {
       return redirectWithCookies(new URL('/conversations', request.url), response)
     }
   }

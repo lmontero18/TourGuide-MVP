@@ -93,13 +93,15 @@ export async function login(formData: FormData) {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('org_id')
+    .select('org_id, organizations(onboarded_at)')
     .eq('id', data.user.id)
-    .single()
+    .maybeSingle()
 
   revalidatePath('/', 'layout')
 
-  if (!profile?.org_id) {
+  const orgData = profile?.organizations as unknown as { onboarded_at: string | null } | { onboarded_at: string | null }[] | null
+  const org = Array.isArray(orgData) ? orgData[0] : orgData
+  if (!org?.onboarded_at) {
     redirect('/onboarding')
   }
 
