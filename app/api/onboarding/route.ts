@@ -48,10 +48,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Slug already taken' }, { status: 409 })
   }
 
-  // Create organization
+  // Create organization — onboarded_at marks completion of the onboarding wizard
   const { data: org, error: orgError } = await serviceClient
     .from('organizations')
-    .insert({ name: org_name, slug })
+    .insert({ name: org_name, slug, onboarded_at: new Date().toISOString() })
     .select('id, name, slug')
     .single()
 

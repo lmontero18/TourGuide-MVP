@@ -15,6 +15,7 @@ export interface Organization {
   bot_config: BotConfig
   plan: PlanType
   status: OrgStatus
+  onboarded_at: string | null
   created_at: string
   updated_at: string
 }
