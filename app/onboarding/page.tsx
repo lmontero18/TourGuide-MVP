@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+import ConnectWhatsAppButton from "@/components/whatsapp/ConnectWhatsAppButton";
 
 /* ─── Types ─── */
 interface OnboardingData {
@@ -77,6 +79,8 @@ export default function OnboardingPage() {
   const [data, setData] = useState<OnboardingData>(INITIAL_DATA);
   const [launching, setLaunching] = useState(false);
   const [launchError, setLaunchError] = useState<string | null>(null);
+  const [orgCreated, setOrgCreated] = useState(false);
+  const [advancing, setAdvancing] = useState(false);
 
   const update = useCallback(
     (patch: Partial<OnboardingData>) =>
@@ -84,11 +88,52 @@ export default function OnboardingPage() {
     [],
   );
 
-  const next = () => {
-    if (step < STEPS.length - 1) {
-      setDirection(1);
-      setStep((s) => s + 1);
+  const ensureOrg = async (): Promise<boolean> => {
+    if (orgCreated) return true;
+    if (!data.agencyName.trim()) {
+      toast.error("Agency name is required to continue");
+      return false;
     }
+
+    const baseSlug = data.agencyName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    const attempts = [baseSlug, `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`];
+    for (const slug of attempts) {
+      const res = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ org_name: data.agencyName.trim(), slug }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        setOrgCreated(true);
+        return true;
+      }
+      if (res.status !== 409) {
+        toast.error(result.error ?? "Failed to create organization");
+        return false;
+      }
+    }
+    toast.error("Could not find an available slug. Try a different agency name.");
+    return false;
+  };
+
+  const next = async () => {
+    if (step >= STEPS.length - 1) return;
+
+    // Leaving step 0 (Agency) → create the org so downstream steps have one
+    if (step === 0 && !orgCreated) {
+      setAdvancing(true);
+      const ok = await ensureOrg();
+      setAdvancing(false);
+      if (!ok) return;
+    }
+
+    setDirection(1);
+    setStep((s) => s + 1);
   };
 
   const back = () => {
@@ -106,48 +151,25 @@ export default function OnboardingPage() {
   };
 
   const handleLaunch = async () => {
-    if (!data.agencyName) {
-      setLaunchError("Agency name is required");
-      return;
-    }
-
     setLaunching(true);
     setLaunchError(null);
 
     try {
-      // Generate slug from agency name
-      const slug = data.agencyName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
+      // Safety net — ensure the org exists (user could have landed here without traversing step 0)
+      if (!orgCreated) {
+        const ok = await ensureOrg();
+        if (!ok) {
+          setLaunching(false);
+          return;
+        }
+      }
 
-      // Create org + assign user as admin
-      const res = await fetch("/api/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ org_name: data.agencyName, slug }),
-      });
-
+      // Finalize onboarding — marks onboarded_at so middleware stops forcing /onboarding
+      const res = await fetch("/api/onboarding", { method: "PATCH" });
       const result = await res.json();
 
       if (!res.ok) {
-        // If slug taken, try with random suffix
-        if (res.status === 409) {
-          const retryRes = await fetch("/api/onboarding", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              org_name: data.agencyName,
-              slug: `${slug}-${Math.random().toString(36).slice(2, 6)}`,
-            }),
-          });
-          const retryResult = await retryRes.json();
-          if (!retryRes.ok) {
-            throw new Error(retryResult.error || "Failed to create organization");
-          }
-        } else {
-          throw new Error(result.error || "Failed to create organization");
-        }
+        throw new Error(result.error || "Failed to finalize onboarding");
       }
 
       router.push("/conversations");
@@ -306,9 +328,10 @@ export default function OnboardingPage() {
             {step < STEPS.length - 1 ? (
               <button
                 onClick={next}
-                className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+                disabled={advancing}
+                className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
-                Continue
+                {advancing ? "Saving..." : "Continue"}
                 <svg
                   width="16"
                   height="16"
@@ -488,19 +511,6 @@ function StepWhatsApp({
   data: OnboardingData;
   update: (p: Partial<OnboardingData>) => void;
 }) {
-  const [connecting, setConnecting] = useState(false);
-
-  const handleConnect = () => {
-    setConnecting(true);
-    // In production, this opens the Meta Embedded Signup popup:
-    // FB.login((response) => { ... }, { config_id: META_CONFIG_ID, response_type: 'code', override_default_response_type: true })
-    // For now, simulate the flow
-    setTimeout(() => {
-      setConnecting(false);
-      update({ whatsappConnected: true, whatsappPhone: "+52 55 1234 5678" });
-    }, 2000);
-  };
-
   return (
     <div>
       <StepHeader
@@ -537,29 +547,13 @@ function StepWhatsApp({
               Sign in with your Facebook account to connect your WhatsApp Business number. The whole process takes less than 2 minutes.
             </p>
 
-            <button
-              onClick={handleConnect}
-              disabled={connecting}
-              className="inline-flex h-12 items-center gap-2.5 rounded-xl bg-[#1877F2] px-6 text-sm font-bold text-white shadow-lg shadow-[#1877F2]/25 transition-all hover:bg-[#166FE5] hover:shadow-xl hover:shadow-[#1877F2]/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-            >
-              {connecting ? (
-                <>
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Connecting...
-                </>
-              ) : (
-                <>
-                  {/* Facebook icon */}
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                  </svg>
-                  Continue with Facebook
-                </>
-              )}
-            </button>
+            <div className="flex justify-center">
+              <ConnectWhatsAppButton
+                onConnected={(account) =>
+                  update({ whatsappConnected: true, whatsappPhone: account.phone_number })
+                }
+              />
+            </div>
           </div>
         ) : (
           <motion.div
