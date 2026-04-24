@@ -1,38 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
-import { signup } from "../login/actions";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function RegisterPage() {
-  return (
-    <Suspense>
-      <RegisterForm />
-    </Suspense>
-  );
-}
-
-function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const searchParams = useSearchParams();
-  const error = searchParams.get("error");
+  const t = useTranslations("auth.register");
 
   return (
     <div>
       <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-navy-950">
-        Create your account
+        {t("title")}
       </h1>
-      <p className="mt-2 text-sm text-slate-500">
-        Start your 14-day free trial. No credit card required.
-      </p>
-
-      {error && (
-        <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
-          {decodeURIComponent(error)}
-        </div>
-      )}
+      <p className="mt-2 text-sm text-slate-500">{t("sub")}</p>
 
       {/* Google sign-up first — higher conversion */}
       <button
@@ -45,34 +26,30 @@ function RegisterForm() {
           <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
           <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
         </svg>
-        Sign up with Google
+        {t("googleSignUp")}
       </button>
 
       {/* Divider */}
       <div className="mt-5 flex items-center gap-3">
         <div className="h-px flex-1 bg-slate-200" />
-        <span className="text-xs text-slate-400">or</span>
+        <span className="text-xs text-slate-400">{t("or")}</span>
         <div className="h-px flex-1 bg-slate-200" />
       </div>
 
-      <form
-        className="mt-5 space-y-4"
-        onSubmit={() => setLoading(true)}
-      >
+      <form className="mt-5 space-y-4" onSubmit={(e) => e.preventDefault()}>
         {/* Name */}
         <div>
           <label
-            htmlFor="full_name"
+            htmlFor="name"
             className="block text-sm font-medium text-navy-900 mb-1.5"
           >
-            Full name
+            {t("name")}
           </label>
           <input
-            id="full_name"
-            name="full_name"
+            id="name"
             type="text"
             autoComplete="name"
-            placeholder="María Rodríguez"
+            placeholder={t("namePlaceholder")}
             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
@@ -83,15 +60,13 @@ function RegisterForm() {
             htmlFor="email"
             className="block text-sm font-medium text-navy-900 mb-1.5"
           >
-            Work email
+            {t("email")}
           </label>
           <input
             id="email"
-            name="email"
             type="email"
-            required
             autoComplete="email"
-            placeholder="you@agency.com"
+            placeholder={t("emailPlaceholder")}
             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
@@ -102,13 +77,12 @@ function RegisterForm() {
             htmlFor="agency"
             className="block text-sm font-medium text-navy-900 mb-1.5"
           >
-            Agency name
+            {t("company")}
           </label>
           <input
             id="agency"
-            name="agency"
             type="text"
-            placeholder="Cusco Expeditions"
+            placeholder={t("companyPlaceholder")}
             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
@@ -119,17 +93,14 @@ function RegisterForm() {
             htmlFor="password"
             className="block text-sm font-medium text-navy-900 mb-1.5"
           >
-            Password
+            {t("password")}
           </label>
           <div className="relative">
             <input
               id="password"
-              name="password"
               type={showPassword ? "text" : "password"}
-              required
-              minLength={8}
               autoComplete="new-password"
-              placeholder="8+ characters"
+              placeholder={t("passwordPlaceholder")}
               className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
             <button
@@ -156,33 +127,31 @@ function RegisterForm() {
         {/* Submit */}
         <button
           type="submit"
-          formAction={signup}
-          disabled={loading}
-          className="w-full h-11 rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full h-11 rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md mt-2"
         >
-          {loading ? "Creating account..." : "Create account"}
+          {t("submit")}
         </button>
       </form>
 
       <p className="mt-4 text-center text-xs text-slate-400 leading-relaxed">
-        By signing up you agree to our{" "}
+        {t("terms")}{" "}
         <a href="#" className="underline hover:text-slate-600 transition-colors">
-          Terms
+          {t("termsLink")}
         </a>{" "}
-        and{" "}
+        {t("and")}{" "}
         <a href="#" className="underline hover:text-slate-600 transition-colors">
-          Privacy Policy
+          {t("privacyLink")}
         </a>
       </p>
 
       {/* Login link */}
       <p className="mt-6 text-center text-sm text-slate-500">
-        Already have an account?{" "}
+        {t("hasAccount")}{" "}
         <Link
           href="/login"
           className="font-semibold text-navy-900 hover:text-navy-700 transition-colors"
         >
-          Log in
+          {t("logIn")}
         </Link>
       </p>
     </div>

@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const t = useTranslations("auth.panel");
   return (
     <div className="flex min-h-screen">
       {/* Left panel — branding */}
@@ -65,13 +67,13 @@ export default function AuthLayout({
             <div className="flex items-center gap-2 mb-6">
               <div className="h-px flex-1 bg-white/10" />
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                Built for LATAM
+                {t("badge")}
               </span>
               <div className="h-px flex-1 bg-white/10" />
             </div>
 
             <blockquote className="font-display text-2xl xl:text-3xl font-bold text-white leading-snug tracking-tight">
-              &ldquo;Perdíamos el 40% de consultas después de las 6 PM. Ahora despertamos con leads calificados.&rdquo;
+              {t("quote")}
             </blockquote>
             <div className="mt-6 flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
@@ -79,10 +81,10 @@ export default function AuthLayout({
               </div>
               <div>
                 <p className="text-sm font-semibold text-white/90">
-                  María Rodríguez
+                  {t("quoteName")}
                 </p>
                 <p className="text-sm text-white/40">
-                  Cusco Expeditions · Peru
+                  {t("quoteRole")}
                 </p>
               </div>
             </div>
@@ -96,15 +98,15 @@ export default function AuthLayout({
             className="flex gap-8"
           >
             {[
-              { value: "3×", label: "more leads" },
-              { value: "<2s", label: "reply time" },
-              { value: "24/7", label: "availability" },
+              { value: "3×", key: "statMoreLeads" as const },
+              { value: "<2s", key: "statReplyTime" as const },
+              { value: "24/7", key: "statAvailability" as const },
             ].map((stat) => (
-              <div key={stat.label}>
+              <div key={stat.key}>
                 <p className="font-display text-2xl font-extrabold text-white tracking-tight">
                   {stat.value}
                 </p>
-                <p className="text-xs text-white/40 mt-0.5">{stat.label}</p>
+                <p className="text-xs text-white/40 mt-0.5">{t(stat.key)}</p>
               </div>
             ))}
           </motion.div>

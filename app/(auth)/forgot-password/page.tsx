@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
+  const t = useTranslations("auth.forgot");
 
   if (sent) {
     return (
@@ -26,11 +28,10 @@ export default function ForgotPasswordPage() {
           </svg>
         </div>
         <h1 className="mt-5 font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-navy-950">
-          Check your email
+          {t("sentTitle")}
         </h1>
         <p className="mt-3 text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">
-          We sent a password reset link. It may take a minute to arrive — check
-          your spam folder too.
+          {t("sentSub")}
         </p>
 
         <button
@@ -38,7 +39,7 @@ export default function ForgotPasswordPage() {
           onClick={() => setSent(false)}
           className="mt-6 text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors"
         >
-          Didn&apos;t get it? Resend
+          {t("resend")}
         </button>
 
         <p className="mt-8 text-sm text-slate-500">
@@ -50,7 +51,7 @@ export default function ForgotPasswordPage() {
               <path d="M19 12H5" />
               <path d="M12 19l-7-7 7-7" />
             </svg>
-            Back to log in
+            {t("back")}
           </Link>
         </p>
       </div>
@@ -67,15 +68,13 @@ export default function ForgotPasswordPage() {
           <path d="M19 12H5" />
           <path d="M12 19l-7-7 7-7" />
         </svg>
-        Back to log in
+        {t("back")}
       </Link>
 
       <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-navy-950">
-        Reset your password
+        {t("title")}
       </h1>
-      <p className="mt-2 text-sm text-slate-500">
-        Enter your email and we&apos;ll send you a reset link.
-      </p>
+      <p className="mt-2 text-sm text-slate-500">{t("sub")}</p>
 
       <form
         className="mt-8 space-y-4"
@@ -90,13 +89,13 @@ export default function ForgotPasswordPage() {
             htmlFor="email"
             className="block text-sm font-medium text-navy-900 mb-1.5"
           >
-            Email
+            {t("email")}
           </label>
           <input
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="you@agency.com"
+            placeholder={t("emailPlaceholder")}
             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
@@ -106,7 +105,7 @@ export default function ForgotPasswordPage() {
           type="submit"
           className="w-full h-11 rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
         >
-          Send reset link
+          {t("submit")}
         </button>
       </form>
     </div>

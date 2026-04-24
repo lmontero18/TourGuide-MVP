@@ -1,15 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import ConversationItem from "./ConversationItem";
 import type { ConversationStatus } from "@/types";
 
-const FILTERS: { label: string; value: ConversationStatus | "all" }[] = [
-  { label: "All", value: "all" },
-  { label: "Open", value: "open" },
-  { label: "Pending", value: "pending" },
-  { label: "Resolved", value: "resolved" },
-];
+const FILTER_VALUES = ["all", "open", "pending", "resolved"] as const;
+type FilterValue = typeof FILTER_VALUES[number];
 
 /* ─── Mock data ─── */
 const MOCK_CONVERSATIONS = [
@@ -90,7 +87,8 @@ interface ConversationListProps {
 }
 
 export default function ConversationList({ activeId }: ConversationListProps) {
-  const [filter, setFilter] = useState<ConversationStatus | "all">("all");
+  const t = useTranslations("dashboard.conversations");
+  const [filter, setFilter] = useState<FilterValue>("all");
   const [search, setSearch] = useState("");
 
   const filtered = MOCK_CONVERSATIONS.filter((c) => {
@@ -128,7 +126,7 @@ export default function ConversationList({ activeId }: ConversationListProps) {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search conversations..."
+            placeholder={t("searchPlaceholder")}
             className="w-full h-9 rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm text-navy-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
           />
         </div>
@@ -136,19 +134,19 @@ export default function ConversationList({ activeId }: ConversationListProps) {
 
       {/* Filters */}
       <div className="flex items-center gap-1 px-4 py-2 border-b border-slate-100">
-        {FILTERS.map((f) => (
+        {FILTER_VALUES.map((value) => (
           <button
-            key={f.value}
-            onClick={() => setFilter(f.value)}
+            key={value}
+            onClick={() => setFilter(value)}
             className={`inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors ${
-              filter === f.value
+              filter === value
                 ? "bg-navy-900 text-white"
                 : "text-slate-500 hover:bg-slate-100 hover:text-navy-900"
             }`}
           >
-            {f.label}
-            <span className={`text-[10px] ${filter === f.value ? "text-white/60" : "text-slate-400"}`}>
-              {counts[f.value]}
+            {t(`tabs.${value}`)}
+            <span className={`text-[10px] ${filter === value ? "text-white/60" : "text-slate-400"}`}>
+              {counts[value]}
             </span>
           </button>
         ))}
@@ -163,8 +161,8 @@ export default function ConversationList({ activeId }: ConversationListProps) {
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-slate-500">No conversations found</p>
-            <p className="text-xs text-slate-400 mt-0.5">Try adjusting your filters</p>
+            <p className="text-sm font-medium text-slate-500">{t("noResults.title")}</p>
+            <p className="text-xs text-slate-400 mt-0.5">{t("noResults.sub")}</p>
           </div>
         ) : (
           filtered.map((conv) => (

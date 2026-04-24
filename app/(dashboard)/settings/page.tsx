@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import TopBar from "@/components/layout/TopBar";
 
 export default function SettingsPage() {
+  const t = useTranslations("dashboard.settings");
   const [orgName, setOrgName] = useState("Cusco Expeditions");
   const [language, setLanguage] = useState("es");
   const [timezone, setTimezone] = useState("America/Lima");
@@ -17,7 +19,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <TopBar title="Settings">
+      <TopBar title={t("title")}>
         <Link
           href="/settings/agents"
           className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
@@ -27,7 +29,7 @@ export default function SettingsPage() {
             <circle cx="8.5" cy="7" r="4" />
             <path d="M20 8v6" /><path d="M23 11h-6" />
           </svg>
-          Manage agents
+          {t("manageAgents")}
         </Link>
       </TopBar>
 
@@ -35,10 +37,10 @@ export default function SettingsPage() {
         <div className="max-w-2xl space-y-6">
           {/* Organization */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="text-sm font-bold text-navy-900 mb-4">Organization</h2>
+            <h2 className="text-sm font-bold text-navy-900 mb-4">{t("org.title")}</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-navy-900 mb-1.5">Agency name</label>
+                <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("org.name")}</label>
                 <input
                   type="text"
                   value={orgName}
@@ -49,7 +51,7 @@ export default function SettingsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-navy-900 mb-1.5">Default language</label>
+                  <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("org.language")}</label>
                   <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
@@ -61,7 +63,7 @@ export default function SettingsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-navy-900 mb-1.5">Timezone</label>
+                  <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("org.timezone")}</label>
                   <select
                     value={timezone}
                     onChange={(e) => setTimezone(e.target.value)}
@@ -79,11 +81,11 @@ export default function SettingsPage() {
 
           {/* Business hours */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="text-sm font-bold text-navy-900 mb-1">Business hours</h2>
-            <p className="text-xs text-slate-400 mb-4">Messages outside these hours are marked as after-hours in your metrics.</p>
+            <h2 className="text-sm font-bold text-navy-900 mb-1">{t("hours.title")}</h2>
+            <p className="text-xs text-slate-400 mb-4">{t("hours.sub")}</p>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-navy-900 mb-1.5">Opens at</label>
+                <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("hours.opens")}</label>
                 <input
                   type="time"
                   value={hoursStart}
@@ -92,7 +94,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-navy-900 mb-1.5">Closes at</label>
+                <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("hours.closes")}</label>
                 <input
                   type="time"
                   value={hoursEnd}
@@ -105,31 +107,31 @@ export default function SettingsPage() {
 
           {/* Bot config */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="text-sm font-bold text-navy-900 mb-1">Bot personality</h2>
-            <p className="text-xs text-slate-400 mb-4">This prompt defines how your bot responds to customers.</p>
+            <h2 className="text-sm font-bold text-navy-900 mb-1">{t("bot.title")}</h2>
+            <p className="text-xs text-slate-400 mb-4">{t("bot.sub")}</p>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-navy-900 mb-1.5">Tone</label>
+                <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("bot.tone")}</label>
                 <div className="flex gap-2">
-                  {(["formal", "friendly", "casual"] as const).map((t) => (
+                  {(["formal", "friendly", "casual"] as const).map((toneKey) => (
                     <button
-                      key={t}
-                      onClick={() => setTone(t)}
+                      key={toneKey}
+                      onClick={() => setTone(toneKey)}
                       className={`flex-1 h-9 rounded-lg border text-xs font-medium capitalize transition-all ${
-                        tone === t
+                        tone === toneKey
                           ? "border-navy-900 bg-navy-900/5 text-navy-900 ring-2 ring-navy-900/10"
                           : "border-slate-200 text-slate-500 hover:border-slate-300"
                       }`}
                     >
-                      {t}
+                      {t(`bot.${toneKey}`)}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-navy-900 mb-1.5">System prompt</label>
+                <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("bot.prompt")}</label>
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
@@ -142,7 +144,7 @@ export default function SettingsPage() {
 
           {/* WhatsApp connection */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="text-sm font-bold text-navy-900 mb-4">WhatsApp connection</h2>
+            <h2 className="text-sm font-bold text-navy-900 mb-4">{t("whatsapp.title")}</h2>
             <div className="flex items-center justify-between rounded-xl bg-green-50 border border-green-200 p-4">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
@@ -152,12 +154,12 @@ export default function SettingsPage() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-green-900">Connected</p>
+                  <p className="text-sm font-semibold text-green-900">{t("whatsapp.connected")}</p>
                   <p className="text-xs text-green-700/70">+52 55 1234 5678</p>
                 </div>
               </div>
               <button className="text-xs font-medium text-green-600 hover:text-green-700 underline underline-offset-2 transition-colors">
-                Disconnect
+                {t("whatsapp.disconnect")}
               </button>
             </div>
           </section>
@@ -165,7 +167,7 @@ export default function SettingsPage() {
           {/* Save */}
           <div className="flex justify-end pb-8">
             <button className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0">
-              Save changes
+              {t("save")}
             </button>
           </div>
         </div>

@@ -1,18 +1,28 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import TopBar from "@/components/layout/TopBar";
 import MetricCard from "@/components/metrics/MetricCard";
 import LeadsChart from "@/components/metrics/LeadsChart";
 import AfterHoursCard from "@/components/metrics/AfterHoursCard";
 
+const FUNNEL_STAGES = [
+  { key: "new", count: 284, pct: 100, color: "bg-blue-500" },
+  { key: "contacted", count: 196, pct: 69, color: "bg-blue-400" },
+  { key: "qualified", count: 118, pct: 42, color: "bg-navy-900" },
+  { key: "converted", count: 47, pct: 17, color: "bg-green-500" },
+  { key: "lost", count: 23, pct: 8, color: "bg-slate-300" },
+] as const;
+
 export default function MetricsPage() {
+  const t = useTranslations("dashboard.metrics");
   return (
     <div className="flex h-full flex-col">
-      <TopBar title="Metrics">
+      <TopBar title={t("title")}>
         <select className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-navy-900 outline-none">
-          <option>Last 7 days</option>
-          <option>Last 30 days</option>
-          <option>Last 90 days</option>
+          <option>{t("period.7d")}</option>
+          <option>{t("period.30d")}</option>
+          <option>{t("period.90d")}</option>
         </select>
       </TopBar>
 
@@ -20,28 +30,28 @@ export default function MetricsPage() {
         {/* Top metric cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
-            label="Total conversations"
+            label={t("cards.totalConversations")}
             value="284"
             change="12%"
             positive
             icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>}
           />
           <MetricCard
-            label="Qualified leads"
+            label={t("cards.qualifiedLeads")}
             value="118"
             change="23%"
             positive
             icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><path d="M20 8v6" /><path d="M23 11h-6" /></svg>}
           />
           <MetricCard
-            label="Conversion rate"
+            label={t("cards.conversionRate")}
             value="41.5%"
             change="3.2%"
             positive
             icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
           />
           <MetricCard
-            label="Revenue captured"
+            label={t("cards.revenue")}
             value="$8,420"
             change="18%"
             positive
@@ -57,17 +67,11 @@ export default function MetricsPage() {
 
         {/* Leads funnel */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <h3 className="text-sm font-bold text-navy-900 mb-4">Lead funnel</h3>
+          <h3 className="text-sm font-bold text-navy-900 mb-4">{t("funnel.title")}</h3>
           <div className="space-y-3">
-            {[
-              { label: "New", count: 284, pct: 100, color: "bg-blue-500" },
-              { label: "Contacted", count: 196, pct: 69, color: "bg-blue-400" },
-              { label: "Qualified", count: 118, pct: 42, color: "bg-navy-900" },
-              { label: "Converted", count: 47, pct: 17, color: "bg-green-500" },
-              { label: "Lost", count: 23, pct: 8, color: "bg-slate-300" },
-            ].map((stage) => (
-              <div key={stage.label} className="flex items-center gap-4">
-                <span className="text-xs font-medium text-slate-500 w-20 shrink-0">{stage.label}</span>
+            {FUNNEL_STAGES.map((stage) => (
+              <div key={stage.key} className="flex items-center gap-4">
+                <span className="text-xs font-medium text-slate-500 w-20 shrink-0">{t(`funnel.${stage.key}`)}</span>
                 <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden">
                   <div className={`h-full rounded-full ${stage.color} transition-all duration-700`} style={{ width: `${stage.pct}%` }} />
                 </div>

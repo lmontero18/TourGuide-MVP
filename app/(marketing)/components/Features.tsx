@@ -1,10 +1,10 @@
 "use client";
 
-import { useI18n } from "./i18n";
+import { useTranslations } from "next-intl";
 import { FadeUp, StaggerContainer, StaggerItem } from "./Motion";
 
 export function Features() {
-  const { t } = useI18n();
+  const t = useTranslations("features");
 
   return (
     <section id="features" className="py-16 sm:py-24 lg:py-32 bg-white">
@@ -12,13 +12,13 @@ export function Features() {
         <FadeUp>
           <div className="max-w-2xl">
             <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.15em] text-blue-500">
-              {t("features.label")}
+              {t("label")}
             </p>
             <h2 className="mt-3 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-navy-950">
-              {t("features.title")}
+              {t("title")}
             </h2>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-slate-500 leading-relaxed">
-              {t("features.sub")}
+              {t("sub")}
             </p>
           </div>
         </FadeUp>
@@ -52,14 +52,14 @@ export function Features() {
                     i === 0 ? "text-lg sm:text-xl lg:text-2xl" : "text-base sm:text-lg"
                   }`}
                 >
-                  {t(`features.${i}.title`)}
+                  {t(`items.${i}.title`)}
                 </h3>
                 <p
                   className={`mt-1.5 sm:mt-2 text-slate-500 leading-relaxed ${
                     i === 0 ? "text-sm sm:text-base lg:text-lg max-w-lg" : "text-xs sm:text-sm"
                   }`}
                 >
-                  {t(`features.${i}.desc`)}
+                  {t(`items.${i}.desc`)}
                 </p>
                 {i === 0 && (
                   <div className="mt-5 sm:mt-8 rounded-xl border border-slate-100 bg-slate-50 p-3 sm:p-5">

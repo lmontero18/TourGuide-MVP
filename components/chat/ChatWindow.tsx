@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
 import TakeControlButton from "./TakeControlButton";
@@ -28,6 +29,7 @@ export default function ChatWindow({
   initialBotActive = true,
   initialMessages = [],
 }: ChatWindowProps) {
+  const t = useTranslations("dashboard.chat");
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [botActive, setBotActive] = useState(initialBotActive);
   const [typing, setTyping] = useState(false);
@@ -80,7 +82,7 @@ export default function ChatWindow({
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
           </span>
-          <span className="text-xs font-medium text-green-700">Bot is handling this conversation</span>
+          <span className="text-xs font-medium text-green-700">{t("botBanner")}</span>
         </div>
       )}
       {!botActive && (
@@ -88,7 +90,7 @@ export default function ChatWindow({
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600">
             <circle cx="12" cy="12" r="10" /><path d="M12 8v4" /><path d="M12 16h.01" />
           </svg>
-          <span className="text-xs font-medium text-amber-700">You are in control — bot is paused</span>
+          <span className="text-xs font-medium text-amber-700">{t("agentBanner")}</span>
         </div>
       )}
 
@@ -104,7 +106,7 @@ export default function ChatWindow({
       <ChatInput
         onSend={handleSend}
         disabled={botActive}
-        placeholder={botActive ? "Take control to send a message..." : "Type a message..."}
+        placeholder={botActive ? t("takeControlPlaceholder") : t("typePlaceholder")}
       />
     </div>
   );

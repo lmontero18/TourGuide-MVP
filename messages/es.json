@@ -1,0 +1,468 @@
+{
+  "nav": {
+    "features": "Funciones",
+    "howItWorks": "Cómo funciona",
+    "results": "Resultados",
+    "login": "Iniciar sesión",
+    "cta": "Empezar gratis"
+  },
+  "hero": {
+    "headline1": "Tus tours se venden",
+    "headline2": "solos a las",
+    "headline3": "2 AM",
+    "sub": "Bots de WhatsApp que responden, califican y reservan — entrenados con tus tours, tus precios, tu voz. Ningún lead perdido mientras duermes.",
+    "ctaPrimary": "Prueba gratis",
+    "ctaSecondary": "Ver cómo funciona",
+    "trust": "14 días gratis · Sin tarjeta · Configura en 10 min"
+  },
+  "logos": {
+    "title": "Agencias en toda Latinoamérica confían en nosotros"
+  },
+  "features": {
+    "label": "Funciones",
+    "title": "Todo lo que tu agencia necesita para no perder un solo lead",
+    "sub": "Un bot de WhatsApp que conoce tus tours a fondo, un dashboard en vivo para tu equipo, y las métricas que prueban el ROI.",
+    "items": {
+      "0": {
+        "title": "IA que habla como tu marca",
+        "desc": "Entrena al bot con tus tours, precios, FAQs y tono de voz. Responde como tu mejor agente — en español, portugués o inglés — las 24 horas."
+      },
+      "1": {
+        "title": "Toma de control en vivo",
+        "desc": "Un clic para entrar a cualquier conversación. El bot se pausa, tú hablas, y lo devuelves cuando termines."
+      },
+      "2": {
+        "title": "Captura fuera de horario",
+        "desc": "El 60% de las consultas por WhatsApp llegan fuera de horario. El bot las maneja todas — ningún lead se pierde."
+      },
+      "3": {
+        "title": "Calificación de leads",
+        "desc": "Extrae automáticamente interés, tamaño de grupo, fechas y presupuesto de las conversaciones. Ve tu pipeline de un vistazo."
+      },
+      "4": {
+        "title": "Dashboard de ROI",
+        "desc": "Rastrea leads capturados, reservas atribuidas e ingresos generados — prueba de que tu inversión rinde."
+      }
+    }
+  },
+  "how": {
+    "label": "Cómo funciona",
+    "title": "Tres pasos. Sin conocimientos técnicos.",
+    "sub": "Nosotros configuramos todo — tú solo nos cuentas sobre tus tours.",
+    "steps": {
+      "0": {
+        "step": "PASO 1",
+        "title": "Cuéntanos sobre tus tours",
+        "desc": "Comparte tus descripciones de tours, precios y las preguntas que más hacen tus clientes. Eso es todo."
+      },
+      "1": {
+        "step": "PASO 2",
+        "title": "Armamos tu bot",
+        "desc": "Lo entrenamos para responder como tu mejor agente — con tu tono, tu idioma, tus precios."
+      },
+      "2": {
+        "step": "PASO 3",
+        "title": "Empieza a recibir reservas",
+        "desc": "Tu WhatsApp responde clientes 24/7. Ves cada conversación y te metes cuando quieras."
+      }
+    },
+    "checks": {
+      "0": "Sin programación",
+      "1": "Listo en 48 horas",
+      "2": "Cancela cuando quieras"
+    }
+  },
+  "metrics": {
+    "label": "Resultados",
+    "title": "Números de agencias reales",
+    "sub": "Resultados promedio de nuestra primera cohorte de operadores turísticos en LATAM.",
+    "items": {
+      "0": {
+        "label": "Capturados fuera de horario vs. antes",
+        "unit": "más leads"
+      },
+      "1": {
+        "label": "De conversaciones iniciadas por el bot que convierten a leads calificados",
+        "unit": "tasa de respuesta"
+      },
+      "2": {
+        "label": "Tiempo promedio de primera respuesta, día o noche",
+        "unit": "tiempo de respuesta"
+      },
+      "3": {
+        "label": "Ingreso incremental promedio por agencia en los primeros 90 días",
+        "unit": "ingreso mensual"
+      }
+    },
+    "quote": "“Perdíamos el 40% de las consultas que llegaban después de las 6 PM. Ahora el bot las maneja y despertamos con leads calificados.”",
+    "quoteName": "María Rodríguez",
+    "quoteRole": "Cusco Expeditions · Perú"
+  },
+  "ctaSection": {
+    "title1": "Deja de perder leads",
+    "title2": "por tu buzón de voz",
+    "sub": "Tu próximo cliente te está escribiendo ahora. Asegúrate de que alguien — o algún bot — responda.",
+    "button": "Prueba gratis",
+    "note": "14 días gratis · Sin tarjeta"
+  },
+  "pricing": {
+    "label": "Precios",
+    "title": "Elige qué tan involucrados nos quieres",
+    "sub": "Empieza por tu cuenta o deja que nos encarguemos de todo. Todos los planes incluyen el mismo bot.",
+    "month": "mes",
+    "popular": "Más popular",
+    "tiers": {
+      "0": {
+        "badge": "Autoservicio",
+        "name": "Do It Yourself",
+        "desc": "Tú lo configuras, te damos las herramientas. Ideal para agencias tech-savvy.",
+        "cta": "Empezar",
+        "f0": "Bot de WhatsApp con tu catálogo",
+        "f1": "Dashboard en vivo y conversaciones",
+        "f2": "Chat con toma de control",
+        "f3": "Calificación de leads",
+        "f4": "Soporte por email"
+      },
+      "1": {
+        "badge": "Recomendado",
+        "name": "Do It For You",
+        "desc": "Nosotros armamos y lanzamos tu bot. Tú solo apruebas y sales en vivo.",
+        "setup": "Setup único",
+        "cta": "Prueba gratis",
+        "f0": "Todo lo de Do It Yourself",
+        "f1": "Setup y entrenamiento del bot por nosotros",
+        "f2": "Configuración de Twilio y WhatsApp",
+        "f3": "Importación de FAQs y catálogo",
+        "f4": "Dashboard de ROI",
+        "f5": "Soporte prioritario"
+      },
+      "2": {
+        "badge": "Premium",
+        "name": "Done For You",
+        "desc": "100% administrado. Operamos tu bot, lo optimizamos y reportamos resultados cada semana.",
+        "price": "A medida",
+        "priceNote": "Adaptado al volumen y necesidades de tu agencia",
+        "cta": "Hablemos",
+        "f0": "Todo lo de Do It For You",
+        "f1": "Account manager dedicado",
+        "f2": "Optimización y reportes semanales",
+        "f3": "Integraciones a la medida",
+        "f4": "Entrenamiento multi-idioma",
+        "f5": "SLA y soporte telefónico"
+      }
+    }
+  },
+  "footer": {
+    "tagline1": "IA de WhatsApp para agencias de turismo.",
+    "tagline2": "Hecho en LATAM, para LATAM.",
+    "product": "Producto",
+    "company": "Empresa",
+    "legal": "Legal",
+    "rights": "TourGuide Inc. Todos los derechos reservados.",
+    "status": "Todos los sistemas operativos"
+  },
+  "auth": {
+    "panel": {
+      "badge": "Hecho para LATAM",
+      "quote": "“Perdíamos el 40% de consultas después de las 6 PM. Ahora despertamos con leads calificados.”",
+      "quoteName": "María Rodríguez",
+      "quoteRole": "Cusco Expeditions · Perú",
+      "statMoreLeads": "más leads",
+      "statReplyTime": "tiempo respuesta",
+      "statAvailability": "disponibilidad"
+    },
+    "login": {
+      "title": "Bienvenido de vuelta",
+      "sub": "Ingresa a tu dashboard de TourGuide",
+      "email": "Email",
+      "emailPlaceholder": "tu@agencia.com",
+      "password": "Contraseña",
+      "passwordPlaceholder": "••••••••",
+      "forgot": "¿Olvidaste tu contraseña?",
+      "submit": "Iniciar sesión",
+      "noAccount": "¿No tienes cuenta?",
+      "signUp": "Regístrate gratis",
+      "or": "o",
+      "googleContinue": "Continuar con Google"
+    },
+    "register": {
+      "title": "Crea tu cuenta",
+      "sub": "Empieza tu prueba gratis de 14 días. Sin tarjeta de crédito.",
+      "googleSignUp": "Regístrate con Google",
+      "or": "o",
+      "name": "Nombre completo",
+      "namePlaceholder": "María Rodríguez",
+      "email": "Email de trabajo",
+      "emailPlaceholder": "tu@agencia.com",
+      "company": "Nombre de la agencia",
+      "companyPlaceholder": "Cusco Expeditions",
+      "password": "Contraseña",
+      "passwordPlaceholder": "8+ caracteres",
+      "submit": "Crear cuenta",
+      "terms": "Al registrarte aceptas nuestros",
+      "termsLink": "Términos",
+      "and": "y",
+      "privacyLink": "Política de Privacidad",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "logIn": "Iniciar sesión"
+    },
+    "forgot": {
+      "back": "Volver al inicio de sesión",
+      "title": "Recupera tu contraseña",
+      "sub": "Ingresa tu email y te enviaremos un link para restablecerla.",
+      "email": "Email",
+      "emailPlaceholder": "tu@agencia.com",
+      "submit": "Enviar link",
+      "sentTitle": "Revisa tu email",
+      "sentSub": "Te enviamos un link para restablecer tu contraseña. Puede tardar un minuto — revisa también la carpeta de spam.",
+      "resend": "¿No llega? Reenviar"
+    }
+  },
+  "onboarding": {
+    "progress": "Paso {current} de {total}",
+    "next": "Continuar",
+    "back": "Atrás",
+    "finish": "Lanzar mi bot",
+    "stepLabel": "Paso",
+    "stepNames": {
+      "0": "Agencia",
+      "1": "WhatsApp",
+      "2": "Tours",
+      "3": "Personalidad",
+      "4": "Salir en vivo"
+    },
+    "steps": {
+      "agency": {
+        "number": "01",
+        "title": "Cuéntanos sobre tu agencia",
+        "description": "Esto nos ayuda a personalizar tu bot y dashboard para tu región e idioma.",
+        "name": "Nombre de la agencia",
+        "namePlaceholder": "Cusco Expeditions",
+        "country": "País",
+        "countryPlaceholder": "Selecciona tu país",
+        "language": "Idioma del bot",
+        "tip": "Tu bot responderá en este idioma por defecto. Los clientes pueden escribir en cualquier idioma — el bot lo detectará y responderá según corresponda."
+      },
+      "whatsapp": {
+        "number": "02",
+        "title": "Conecta tu WhatsApp",
+        "description": "Vincula tu número de WhatsApp Business con un clic. No necesitas configuración técnica.",
+        "connectTitle": "Conecta con Facebook",
+        "connectDesc": "Inicia sesión con tu cuenta de Facebook para conectar tu número de WhatsApp Business. Todo el proceso toma menos de 2 minutos.",
+        "connecting": "Conectando...",
+        "connectCta": "Continuar con Facebook",
+        "connectedTitle": "WhatsApp conectado",
+        "connectedSub": "Tu número {phone} está listo para recibir mensajes.",
+        "disconnect": "Desconectar y usar otro número",
+        "howItWorks": "Cómo funciona",
+        "step1Title": "Inicia sesión con Facebook",
+        "step1Desc": "Usamos Embedded Signup oficial de Meta — tus credenciales las maneja Facebook directamente, nunca nosotros.",
+        "step2Title": "Autoriza el acceso a WhatsApp",
+        "step2Desc": "Concede permiso a TourGuide para enviar y recibir mensajes en tu nombre mediante la API de Meta Cloud.",
+        "step3Title": "Verifica tu número",
+        "step3Desc": "Meta envía un código a tu teléfono para confirmar la propiedad. Una vez verificado, tu bot empieza a funcionar al instante.",
+        "trustEncrypted": "Cifrado de extremo a extremo",
+        "trustPartner": "Partner oficial de Meta",
+        "trustNoFees": "Sin cargos extra"
+      },
+      "tours": {
+        "number": "03",
+        "title": "Agrega tus tours y FAQs",
+        "description": "Esto es lo que tu bot usará para responder preguntas. Siempre podrás editarlo después.",
+        "toursTitle": "Tours",
+        "addTour": "Agregar tour",
+        "tourLabel": "Tour",
+        "tourNamePlaceholder": "Nombre del tour (ej. Machu Picchu Full Day)",
+        "tourPricePlaceholder": "$320 USD",
+        "tourDescPlaceholder": "Descripción breve — qué incluye, duración, puntos destacados...",
+        "faqsTitle": "Preguntas frecuentes",
+        "addFaq": "Agregar FAQ",
+        "faqLabel": "FAQ",
+        "faqQuestionPlaceholder": "Pregunta que hacen los clientes (ej. ¿Ofrecen recogida del hotel?)",
+        "faqAnswerPlaceholder": "Tu respuesta...",
+        "tip": "No te preocupes por dejarlo perfecto — puedes editar tours y FAQs en cualquier momento desde tu dashboard."
+      },
+      "personality": {
+        "number": "04",
+        "title": "Define la personalidad de tu bot",
+        "description": "Elige cómo habla tu bot con los clientes. Esto define el tono de cada conversación.",
+        "formalLabel": "Profesional",
+        "formalDesc": "Pulido y cortés. Perfecto para viajes de lujo.",
+        "formalExample": "¡Buenas tardes! Gracias por su interés en nuestro tour al Valle Sagrado. El precio por persona es de $320 USD, incluye transporte, guía bilingüe y almuerzo. ¿Le consulto disponibilidad para una fecha en particular?",
+        "friendlyLabel": "Amigable",
+        "friendlyDesc": "Cálido y cercano. Ideal para la mayoría de agencias.",
+        "friendlyExample": "¡Hola! 👋 Excelente elección — ¡el tour al Valle Sagrado es uno de nuestros favoritos! Son $320 por persona e incluye todo: transporte, guía y almuerzo. ¿Para cuándo estás pensando?",
+        "casualLabel": "Casual",
+        "casualDesc": "Relajado y divertido. Ideal para tours de aventura / mochileros.",
+        "casualExample": "¡Qué tal! 🏔️ El Valle Sagrado es increíble, ¡te va a encantar! $320 por persona, todo incluido. ¡Dime tus fechas y cuántos son, y te lo aparto!",
+        "botLabel": "Bot de TourGuide",
+        "greetingLabel": "Saludo personalizado (opcional)",
+        "greetingHint": "Primer mensaje cuando alguien te contacta por WhatsApp",
+        "greetingPlaceholder": "¡Hola! 👋 Soy el asistente de {agency}. ¿En qué te puedo ayudar?",
+        "greetingFallback": "tu agencia"
+      },
+      "preview": {
+        "number": "05",
+        "title": "Previsualiza y sal en vivo",
+        "description": "Prueba tu bot abajo y lánzalo cuando estés listo.",
+        "summaryAgency": "Agencia",
+        "summaryLanguage": "Idioma",
+        "summaryTours": "Tours",
+        "summaryTone": "Tono",
+        "previewYourAgency": "Tu Agencia",
+        "botActive": "Bot activo",
+        "botLabel": "Bot de TourGuide",
+        "inputPlaceholder": "Escribe un mensaje para probar tu bot...",
+        "greetingFallback": "¡Hola! 👋 Soy el asistente de {agency}. ¿En qué te puedo ayudar?",
+        "agencyFallback": "tu agencia",
+        "sampleTourName": "Machu Picchu Full Day",
+        "sampleTourPrice": "$320 USD",
+        "responseFormal": "¡Gracias por tu interés! Nuestro tour {name} cuesta {price} por persona. ¿Te consulto disponibilidad para una fecha en particular?",
+        "responseCasual": "¡Genial! 🏔️ El {name} son {price} por persona — ¡es increíble! ¿Qué fechas te sirven?",
+        "responseFriendly": "¡Buena pregunta! 😊 El {name} son {price} por persona e incluye todo. ¿Te reviso fechas?",
+        "readyTitle": "Tu bot está listo para salir en vivo",
+        "readyDesc": "Haz clic en \"Lanzar mi bot\" para activarlo en tu número de WhatsApp. Puedes pausarlo cuando quieras desde el dashboard."
+      }
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "conversations": "Conversaciones",
+      "metrics": "Métricas",
+      "settings": "Configuración"
+    },
+    "topbar": {
+      "search": "Buscar..."
+    },
+    "conversations": {
+      "title": "Conversaciones",
+      "searchPlaceholder": "Buscar conversaciones...",
+      "tabs": {
+        "all": "Todas",
+        "open": "Abiertas",
+        "pending": "Pendientes",
+        "resolved": "Resueltas"
+      },
+      "noResults": {
+        "title": "No hay conversaciones",
+        "sub": "Prueba ajustar los filtros"
+      },
+      "empty": {
+        "title": "Elige una conversación",
+        "sub": "Selecciona una conversación de la lista para ver los mensajes y tomar el control del bot."
+      },
+      "status": {
+        "open": "Abierta",
+        "pending": "Pendiente",
+        "resolved": "Resuelta",
+        "bot": "BOT"
+      }
+    },
+    "chat": {
+      "typePlaceholder": "Escribe un mensaje...",
+      "takeControlPlaceholder": "Toma el control para enviar un mensaje...",
+      "send": "Enviar",
+      "takeControl": "Tomar control",
+      "returnToBot": "Devolver al bot",
+      "botBanner": "El bot está manejando esta conversación",
+      "agentBanner": "Tú tienes el control — bot en pausa",
+      "roleClient": "Cliente",
+      "roleBot": "Bot de TourGuide",
+      "roleYou": "Tú"
+    },
+    "metrics": {
+      "title": "Métricas",
+      "period": {
+        "7d": "Últimos 7 días",
+        "30d": "Últimos 30 días",
+        "90d": "Últimos 90 días"
+      },
+      "change": "vs período anterior",
+      "cards": {
+        "totalConversations": "Total de conversaciones",
+        "qualifiedLeads": "Leads calificados",
+        "conversionRate": "Tasa de conversión",
+        "revenue": "Ingresos capturados"
+      },
+      "afterHours": {
+        "title": "Fuera de horario",
+        "sub": "Conversaciones manejadas por el bot fuera del horario comercial",
+        "conversations": "conversaciones esta semana",
+        "revenueCaptured": "{amount} en ingresos potenciales capturados",
+        "revenueSub": "Leads que se habrían perdido sin el bot respondiendo 24/7",
+        "slotEvening": "6pm — 10pm",
+        "slotNight": "10pm — 6am",
+        "slotWeekend": "Fines de semana"
+      },
+      "funnel": {
+        "title": "Embudo de leads",
+        "new": "Nuevos",
+        "contacted": "Contactados",
+        "qualified": "Calificados",
+        "converted": "Convertidos",
+        "lost": "Perdidos"
+      },
+      "chart": {
+        "title": "Leads esta semana",
+        "sub": "Conversaciones que se convirtieron en leads calificados",
+        "period": "Últimos 7 días",
+        "days": {
+          "mon": "Lun",
+          "tue": "Mar",
+          "wed": "Mié",
+          "thu": "Jue",
+          "fri": "Vie",
+          "sat": "Sáb",
+          "sun": "Dom"
+        }
+      }
+    },
+    "settings": {
+      "title": "Configuración",
+      "manageAgents": "Gestionar agentes",
+      "org": {
+        "title": "Organización",
+        "name": "Nombre de la agencia",
+        "language": "Idioma por defecto",
+        "timezone": "Zona horaria"
+      },
+      "hours": {
+        "title": "Horario de atención",
+        "sub": "Los mensajes fuera de estas horas se marcan como after-hours en tus métricas.",
+        "opens": "Abre a las",
+        "closes": "Cierra a las"
+      },
+      "bot": {
+        "title": "Personalidad del bot",
+        "sub": "Este prompt define cómo responde tu bot a los clientes.",
+        "tone": "Tono",
+        "formal": "Formal",
+        "friendly": "Amigable",
+        "casual": "Casual",
+        "prompt": "Prompt del sistema"
+      },
+      "whatsapp": {
+        "title": "Conexión de WhatsApp",
+        "connected": "Conectado",
+        "disconnect": "Desconectar"
+      },
+      "save": "Guardar cambios"
+    },
+    "agents": {
+      "title": "Agentes",
+      "invite": "Invitar agente",
+      "inviteTitle": "Invitar a un nuevo agente",
+      "email": "Email",
+      "emailPlaceholder": "agente@tuempresa.com",
+      "role": "Rol",
+      "admin": "admin",
+      "agent": "agente",
+      "roleHelp": "Los agentes pueden ver y responder conversaciones. Los admins también pueden acceder a métricas, configuración y gestionar otros agentes.",
+      "cancel": "Cancelar",
+      "send": "Enviar invitación",
+      "teamTitle": "Miembros del equipo",
+      "teamCount": "{count} agentes en tu organización",
+      "inactive": "INACTIVO"
+    }
+  }
+}

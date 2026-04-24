@@ -1,10 +1,10 @@
 "use client";
 
-import { useI18n } from "./i18n";
+import { useTranslations } from "next-intl";
 import { FadeUp } from "./Motion";
 
 export function Hero() {
-  const { t } = useI18n();
+  const t = useTranslations("hero");
 
   return (
     <section className="relative pt-24 pb-6 sm:pt-28 sm:pb-8 lg:pt-36 lg:pb-16 hero-gradient grid-pattern noise-bg overflow-hidden">
@@ -13,11 +13,11 @@ export function Hero() {
         <div className="mt-4 sm:mt-8 max-w-3xl mx-auto text-center">
           <FadeUp delay={0.1}>
             <h1 className="font-display text-[2.5rem] leading-[1.1] sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-navy-950 sm:leading-[1.05]">
-              {t("hero.headline1")}
+              {t("headline1")}
               <br />
-              {t("hero.headline2")}{" "}
+              {t("headline2")}{" "}
               <span className="relative inline-block">
-                <span className="relative z-10">{t("hero.headline3")}</span>
+                <span className="relative z-10">{t("headline3")}</span>
                 <span
                   className="absolute bottom-0.5 sm:bottom-1 left-0 right-0 h-2.5 sm:h-3 bg-blue-400/20 rounded-sm -z-0"
                   aria-hidden
@@ -28,7 +28,7 @@ export function Hero() {
 
           <FadeUp delay={0.2}>
             <p className="mt-5 sm:mt-6 text-base sm:text-lg lg:text-xl leading-relaxed text-slate-600 max-w-xl mx-auto">
-              {t("hero.sub")}
+              {t("sub")}
             </p>
           </FadeUp>
 
@@ -39,7 +39,7 @@ export function Hero() {
                 href="/login"
                 className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl bg-navy-900 px-6 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
               >
-                {t("hero.ctaPrimary")}
+                {t("ctaPrimary")}
                 <svg
                   className="ml-2 h-4 w-4"
                   fill="none"
@@ -54,13 +54,13 @@ export function Hero() {
                 href="#how-it-works"
                 className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
               >
-                {t("hero.ctaSecondary")}
+                {t("ctaSecondary")}
               </a>
             </div>
           </FadeUp>
 
           <FadeUp delay={0.35}>
-            <p className="mt-3 sm:mt-4 text-xs text-slate-400">{t("hero.trust")}</p>
+            <p className="mt-3 sm:mt-4 text-xs text-slate-400">{t("trust")}</p>
           </FadeUp>
         </div>
 

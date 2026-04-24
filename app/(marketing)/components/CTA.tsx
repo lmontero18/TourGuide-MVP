@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useI18n } from "./i18n";
+import { useTranslations } from "next-intl";
 import { FadeUp } from "./Motion";
 
 export function CTA() {
-  const { t } = useI18n();
+  const t = useTranslations("ctaSection");
 
   return (
     <section className="py-16 sm:py-24 lg:py-32 bg-white relative overflow-hidden">
@@ -16,19 +16,19 @@ export function CTA() {
 
             <div className="relative z-10">
               <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-navy-950 leading-tight">
-                {t("cta.title1")}
+                {t("title1")}
                 <br />
-                {t("cta.title2")}
+                {t("title2")}
               </h2>
               <p className="mt-5 text-base sm:text-lg text-slate-500 max-w-lg mx-auto leading-relaxed">
-                {t("cta.sub")}
+                {t("sub")}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link
                   href="/login"
                   className="inline-flex h-12 items-center justify-center rounded-xl bg-navy-900 px-7 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0"
                 >
-                  {t("cta.button")}
+                  {t("button")}
                   <svg
                     className="ml-2 h-4 w-4"
                     fill="none"
@@ -44,7 +44,7 @@ export function CTA() {
                   </svg>
                 </Link>
                 <span className="text-sm text-slate-400">
-                  {t("cta.note")}
+                  {t("note")}
                 </span>
               </div>
             </div>

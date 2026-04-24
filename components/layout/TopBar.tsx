@@ -1,5 +1,7 @@
 "use client";
 
+import LocaleToggle from "@/components/LocaleToggle";
+
 interface TopBarProps {
   title: string;
   children?: React.ReactNode;
@@ -13,6 +15,7 @@ export default function TopBar({ title, children }: TopBarProps) {
       </h1>
       <div className="flex items-center gap-3">
         {children}
+        <LocaleToggle />
         {/* User avatar */}
         <div className="flex items-center gap-2.5">
           <div className="h-8 w-8 rounded-full bg-navy-900/10 flex items-center justify-center">

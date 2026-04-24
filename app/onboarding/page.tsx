@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 /* ─── Types ─── */
 interface OnboardingData {
@@ -43,13 +43,7 @@ const INITIAL_DATA: OnboardingData = {
   greeting: "",
 };
 
-const STEPS = [
-  { label: "Agency", icon: "building" },
-  { label: "WhatsApp", icon: "phone" },
-  { label: "Tours", icon: "map" },
-  { label: "Personality", icon: "sparkle" },
-  { label: "Go live", icon: "rocket" },
-];
+const STEP_COUNT = 5;
 
 const COUNTRIES = [
   "Mexico",
@@ -71,12 +65,10 @@ const COUNTRIES = [
 
 /* ─── Main component ─── */
 export default function OnboardingPage() {
-  const router = useRouter();
+  const t = useTranslations("onboarding");
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [data, setData] = useState<OnboardingData>(INITIAL_DATA);
-  const [launching, setLaunching] = useState(false);
-  const [launchError, setLaunchError] = useState<string | null>(null);
 
   const update = useCallback(
     (patch: Partial<OnboardingData>) =>
@@ -85,7 +77,7 @@ export default function OnboardingPage() {
   );
 
   const next = () => {
-    if (step < STEPS.length - 1) {
+    if (step < STEP_COUNT - 1) {
       setDirection(1);
       setStep((s) => s + 1);
     }
@@ -102,58 +94,6 @@ export default function OnboardingPage() {
     if (target < step) {
       setDirection(-1);
       setStep(target);
-    }
-  };
-
-  const handleLaunch = async () => {
-    if (!data.agencyName) {
-      setLaunchError("Agency name is required");
-      return;
-    }
-
-    setLaunching(true);
-    setLaunchError(null);
-
-    try {
-      // Generate slug from agency name
-      const slug = data.agencyName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
-
-      // Create org + assign user as admin
-      const res = await fetch("/api/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ org_name: data.agencyName, slug }),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        // If slug taken, try with random suffix
-        if (res.status === 409) {
-          const retryRes = await fetch("/api/onboarding", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              org_name: data.agencyName,
-              slug: `${slug}-${Math.random().toString(36).slice(2, 6)}`,
-            }),
-          });
-          const retryResult = await retryRes.json();
-          if (!retryRes.ok) {
-            throw new Error(retryResult.error || "Failed to create organization");
-          }
-        } else {
-          throw new Error(result.error || "Failed to create organization");
-        }
-      }
-
-      router.push("/conversations");
-    } catch (err) {
-      setLaunchError(err instanceof Error ? err.message : "Something went wrong");
-      setLaunching(false);
     }
   };
 
@@ -184,7 +124,7 @@ export default function OnboardingPage() {
           </Link>
 
           <span className="text-xs text-slate-400">
-            Step {step + 1} of {STEPS.length}
+            {t("progress", { current: step + 1, total: STEP_COUNT })}
           </span>
         </div>
       </header>
@@ -193,9 +133,9 @@ export default function OnboardingPage() {
       <div className="border-b border-slate-100">
         <div className="mx-auto max-w-3xl px-5 sm:px-6 py-4">
           <div className="flex items-center gap-1 sm:gap-2">
-            {STEPS.map((s, i) => (
+            {Array.from({ length: STEP_COUNT }).map((_, i) => (
               <button
-                key={s.label}
+                key={i}
                 onClick={() => goToStep(i)}
                 disabled={i >= step}
                 className={`flex items-center gap-1.5 sm:gap-2 group transition-all ${
@@ -234,11 +174,11 @@ export default function OnboardingPage() {
                     i <= step ? "text-navy-900" : "text-slate-400"
                   }`}
                 >
-                  {s.label}
+                  {t(`stepNames.${i}`)}
                 </span>
 
                 {/* Connector line */}
-                {i < STEPS.length - 1 && (
+                {i < STEP_COUNT - 1 && (
                   <div className="w-4 sm:w-8 lg:w-12 h-0.5 rounded-full overflow-hidden bg-slate-100 mx-0.5 sm:mx-1">
                     <motion.div
                       className="h-full bg-navy-900 rounded-full origin-left"
@@ -300,15 +240,15 @@ export default function OnboardingPage() {
                 <path d="M19 12H5" />
                 <path d="M12 19l-7-7 7-7" />
               </svg>
-              Back
+              {t("back")}
             </button>
 
-            {step < STEPS.length - 1 ? (
+            {step < STEP_COUNT - 1 ? (
               <button
                 onClick={next}
                 className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
               >
-                Continue
+                {t("next")}
                 <svg
                   width="16"
                   height="16"
@@ -324,33 +264,25 @@ export default function OnboardingPage() {
                 </svg>
               </button>
             ) : (
-              <div className="flex items-center gap-3">
-                {launchError && (
-                  <p className="text-sm text-red-600">{launchError}</p>
-                )}
-                <button
-                  onClick={handleLaunch}
-                  disabled={launching}
-                  className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              <Link
+                href="/conversations"
+                className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+              >
+                {t("finish")}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  {launching ? "Launching..." : "Launch my bot"}
-                  {!launching && (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M5 12h14" />
-                      <path d="M12 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </button>
-              </div>
+                  <path d="M5 12h14" />
+                  <path d="M12 5l7 7-7 7" />
+                </svg>
+              </Link>
             )}
           </div>
         </div>
@@ -369,27 +301,28 @@ function StepAgency({
   data: OnboardingData;
   update: (p: Partial<OnboardingData>) => void;
 }) {
+  const t = useTranslations("onboarding.steps.agency");
   return (
     <div>
       <StepHeader
-        number="01"
-        title="Tell us about your agency"
-        description="This helps us customize your bot and dashboard for your region and language."
+        number={t("number")}
+        title={t("title")}
+        description={t("description")}
       />
 
       <div className="mt-8 space-y-5">
-        <Field label="Agency name" htmlFor="agencyName">
+        <Field label={t("name")} htmlFor="agencyName">
           <input
             id="agencyName"
             type="text"
             value={data.agencyName}
             onChange={(e) => update({ agencyName: e.target.value })}
-            placeholder="Cusco Expeditions"
+            placeholder={t("namePlaceholder")}
             className={INPUT_CLASS}
           />
         </Field>
 
-        <Field label="Country" htmlFor="country">
+        <Field label={t("country")} htmlFor="country">
           <div className="relative">
             <select
               id="country"
@@ -400,7 +333,7 @@ function StepAgency({
               }`}
             >
               <option value="" disabled>
-                Select your country
+                {t("countryPlaceholder")}
               </option>
               {COUNTRIES.map((c) => (
                 <option key={c} value={c}>
@@ -425,7 +358,7 @@ function StepAgency({
           </div>
         </Field>
 
-        <Field label="Bot language" htmlFor="language">
+        <Field label={t("language")} htmlFor="language">
           <div className="flex gap-2">
             {[
               { value: "es", label: "Español", flag: "🇪🇸" },
@@ -470,8 +403,7 @@ function StepAgency({
           </svg>
         </div>
         <p className="text-sm text-slate-600 leading-relaxed">
-          Your bot will answer in this language by default. Clients can still
-          write in any language — the bot will detect and respond accordingly.
+          {t("tip")}
         </p>
       </div>
     </div>
@@ -488,13 +420,11 @@ function StepWhatsApp({
   data: OnboardingData;
   update: (p: Partial<OnboardingData>) => void;
 }) {
+  const t = useTranslations("onboarding.steps.whatsapp");
   const [connecting, setConnecting] = useState(false);
 
   const handleConnect = () => {
     setConnecting(true);
-    // In production, this opens the Meta Embedded Signup popup:
-    // FB.login((response) => { ... }, { config_id: META_CONFIG_ID, response_type: 'code', override_default_response_type: true })
-    // For now, simulate the flow
     setTimeout(() => {
       setConnecting(false);
       update({ whatsappConnected: true, whatsappPhone: "+52 55 1234 5678" });
@@ -504,9 +434,9 @@ function StepWhatsApp({
   return (
     <div>
       <StepHeader
-        number="02"
-        title="Connect your WhatsApp"
-        description="Link your WhatsApp Business number with one click. No technical setup needed."
+        number={t("number")}
+        title={t("title")}
+        description={t("description")}
       />
 
       {/* Main connect area */}
@@ -531,10 +461,10 @@ function StepWhatsApp({
             </div>
 
             <h3 className="text-lg font-bold text-navy-900 mb-2">
-              Connect with Facebook
+              {t("connectTitle")}
             </h3>
             <p className="text-sm text-slate-500 max-w-md mx-auto mb-6 leading-relaxed">
-              Sign in with your Facebook account to connect your WhatsApp Business number. The whole process takes less than 2 minutes.
+              {t("connectDesc")}
             </p>
 
             <button
@@ -548,7 +478,7 @@ function StepWhatsApp({
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                  Connecting...
+                  {t("connecting")}
                 </>
               ) : (
                 <>
@@ -556,7 +486,7 @@ function StepWhatsApp({
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
-                  Continue with Facebook
+                  {t("connectCta")}
                 </>
               )}
             </button>
@@ -580,17 +510,21 @@ function StepWhatsApp({
             </motion.div>
 
             <h3 className="text-lg font-bold text-green-900 mb-1">
-              WhatsApp connected
+              {t("connectedTitle")}
             </h3>
             <p className="text-sm text-green-700/70 mb-4">
-              Your number <span className="font-semibold text-green-800">{data.whatsappPhone}</span> is ready to receive messages.
+              {t.rich("connectedSub", {
+                phone: () => (
+                  <span className="font-semibold text-green-800">{data.whatsappPhone}</span>
+                ),
+              })}
             </p>
 
             <button
               onClick={() => update({ whatsappConnected: false, whatsappPhone: "" })}
               className="text-xs font-medium text-green-600 hover:text-green-700 transition-colors underline underline-offset-2"
             >
-              Disconnect and use a different number
+              {t("disconnect")}
             </button>
           </motion.div>
         )}
@@ -599,39 +533,24 @@ function StepWhatsApp({
       {/* How it works card */}
       <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
         <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 mb-4">
-          How it works
+          {t("howItWorks")}
         </p>
         <div className="space-y-4">
           {[
-            {
-              icon: "link",
-              step: "1",
-              title: "Sign in with Facebook",
-              desc: "We use Meta's official Embedded Signup — your credentials are handled by Facebook directly, never by us.",
-            },
-            {
-              icon: "shield",
-              step: "2",
-              title: "Authorize WhatsApp access",
-              desc: "Grant permission for TourGuide to send and receive messages on your behalf through Meta Cloud API.",
-            },
-            {
-              icon: "zap",
-              step: "3",
-              title: "Verify your number",
-              desc: "Meta sends a code to your phone to confirm ownership. Once verified, your bot starts working instantly.",
-            },
+            { step: "1", titleKey: "step1Title", descKey: "step1Desc" },
+            { step: "2", titleKey: "step2Title", descKey: "step2Desc" },
+            { step: "3", titleKey: "step3Title", descKey: "step3Desc" },
           ].map((item) => (
-            <div key={item.title} className="flex gap-3">
+            <div key={item.step} className="flex gap-3">
               <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-xs font-bold text-navy-700">
                 {item.step}
               </div>
               <div>
                 <p className="text-sm font-semibold text-navy-900">
-                  {item.title}
+                  {t(item.titleKey)}
                 </p>
                 <p className="text-sm text-slate-500 leading-relaxed mt-0.5">
-                  {item.desc}
+                  {t(item.descKey)}
                 </p>
               </div>
             </div>
@@ -645,12 +564,12 @@ function StepWhatsApp({
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           </svg>
-          End-to-end encrypted
+          {t("trustEncrypted")}
         </span>
         <span className="h-3 w-px bg-slate-200" />
-        <span>Official Meta partner</span>
+        <span>{t("trustPartner")}</span>
         <span className="h-3 w-px bg-slate-200" />
-        <span>No extra fees</span>
+        <span>{t("trustNoFees")}</span>
       </div>
     </div>
   );
@@ -666,6 +585,8 @@ function StepTours({
   data: OnboardingData;
   update: (p: Partial<OnboardingData>) => void;
 }) {
+  const t = useTranslations("onboarding.steps.tours");
+
   const addTour = () => {
     update({
       tours: [
@@ -709,15 +630,15 @@ function StepTours({
   return (
     <div>
       <StepHeader
-        number="03"
-        title="Add your tours & FAQs"
-        description="This is what your bot will use to answer questions. You can always edit this later."
+        number={t("number")}
+        title={t("title")}
+        description={t("description")}
       />
 
       {/* Tours */}
       <div className="mt-8">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-navy-900">Tours</h3>
+          <h3 className="text-sm font-bold text-navy-900">{t("toursTitle")}</h3>
           <button
             onClick={addTour}
             className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all active:scale-[0.98]"
@@ -734,7 +655,7 @@ function StepTours({
               <path d="M12 5v14" />
               <path d="M5 12h14" />
             </svg>
-            Add tour
+            {t("addTour")}
           </button>
         </div>
 
@@ -751,7 +672,7 @@ function StepTours({
                 <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Tour {i + 1}
+                      {t("tourLabel")} {i + 1}
                     </span>
                     {data.tours.length > 1 && (
                       <button
@@ -780,7 +701,7 @@ function StepTours({
                       onChange={(e) =>
                         updateTour(tour.id, { name: e.target.value })
                       }
-                      placeholder="Tour name (e.g. Machu Picchu Full Day)"
+                      placeholder={t("tourNamePlaceholder")}
                       className={INPUT_CLASS_SM}
                     />
                     <input
@@ -789,7 +710,7 @@ function StepTours({
                       onChange={(e) =>
                         updateTour(tour.id, { price: e.target.value })
                       }
-                      placeholder="$320 USD"
+                      placeholder={t("tourPricePlaceholder")}
                       className={INPUT_CLASS_SM}
                     />
                   </div>
@@ -798,7 +719,7 @@ function StepTours({
                     onChange={(e) =>
                       updateTour(tour.id, { description: e.target.value })
                     }
-                    placeholder="Brief description — what's included, duration, highlights..."
+                    placeholder={t("tourDescPlaceholder")}
                     rows={2}
                     className={`${INPUT_CLASS_SM} resize-none`}
                   />
@@ -816,7 +737,7 @@ function StepTours({
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold text-navy-900">
-            Frequently asked questions
+            {t("faqsTitle")}
           </h3>
           <button
             onClick={addFaq}
@@ -834,7 +755,7 @@ function StepTours({
               <path d="M12 5v14" />
               <path d="M5 12h14" />
             </svg>
-            Add FAQ
+            {t("addFaq")}
           </button>
         </div>
 
@@ -851,7 +772,7 @@ function StepTours({
                 <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      FAQ {i + 1}
+                      {t("faqLabel")} {i + 1}
                     </span>
                     {data.faqs.length > 1 && (
                       <button
@@ -879,7 +800,7 @@ function StepTours({
                     onChange={(e) =>
                       updateFaq(faq.id, { question: e.target.value })
                     }
-                    placeholder="Question clients ask (e.g. Do you offer hotel pickup?)"
+                    placeholder={t("faqQuestionPlaceholder")}
                     className={INPUT_CLASS_SM}
                   />
                   <textarea
@@ -887,7 +808,7 @@ function StepTours({
                     onChange={(e) =>
                       updateFaq(faq.id, { answer: e.target.value })
                     }
-                    placeholder="Your answer..."
+                    placeholder={t("faqAnswerPlaceholder")}
                     rows={2}
                     className={`${INPUT_CLASS_SM} resize-none`}
                   />
@@ -918,8 +839,7 @@ function StepTours({
           </svg>
         </div>
         <p className="text-sm text-slate-600 leading-relaxed">
-          Don&apos;t worry about getting it perfect — you can edit tours and FAQs
-          anytime from your dashboard.
+          {t("tip")}
         </p>
       </div>
     </div>
@@ -936,36 +856,21 @@ function StepPersonality({
   data: OnboardingData;
   update: (p: Partial<OnboardingData>) => void;
 }) {
+  const t = useTranslations("onboarding.steps.personality");
   const tones = [
-    {
-      value: "formal" as const,
-      label: "Professional",
-      desc: "Polished and courteous. Perfect for luxury travel.",
-      example:
-        "Good afternoon! Thank you for your interest in our Sacred Valley tour. The price per person is $320 USD, which includes transport, a bilingual guide, and lunch. Shall I check availability for your preferred date?",
-    },
-    {
-      value: "friendly" as const,
-      label: "Friendly",
-      desc: "Warm and approachable. Great for most agencies.",
-      example:
-        "Hey! 👋 Great choice — the Sacred Valley tour is one of our favorites! It's $320 per person and includes everything: transport, guide, and lunch. When were you thinking of going?",
-    },
-    {
-      value: "casual" as const,
-      label: "Casual",
-      desc: "Relaxed and fun. Ideal for adventure / backpacker tours.",
-      example:
-        "Yo! 🏔️ Sacred Valley is amazing, you're gonna love it! $320 per person, all-inclusive. Just tell me your dates and group size and I'll lock it in for you!",
-    },
+    { value: "formal" as const, labelKey: "formalLabel", descKey: "formalDesc", exampleKey: "formalExample" },
+    { value: "friendly" as const, labelKey: "friendlyLabel", descKey: "friendlyDesc", exampleKey: "friendlyExample" },
+    { value: "casual" as const, labelKey: "casualLabel", descKey: "casualDesc", exampleKey: "casualExample" },
   ];
+
+  const agency = data.agencyName || t("greetingFallback");
 
   return (
     <div>
       <StepHeader
-        number="04"
-        title="Set your bot's personality"
-        description="Choose how your bot talks to customers. This sets the tone for every conversation."
+        number={t("number")}
+        title={t("title")}
+        description={t("description")}
       />
 
       <div className="mt-8 space-y-3">
@@ -998,10 +903,10 @@ function StepPersonality({
               </div>
               <div>
                 <span className="text-sm font-bold text-navy-900">
-                  {tone.label}
+                  {t(tone.labelKey)}
                 </span>
                 <span className="text-sm text-slate-500 ml-2">
-                  {tone.desc}
+                  {t(tone.descKey)}
                 </span>
               </div>
             </div>
@@ -1026,11 +931,11 @@ function StepPersonality({
                   </svg>
                 </div>
                 <span className="text-[10px] font-bold text-navy-700">
-                  TourGuide Bot
+                  {t("botLabel")}
                 </span>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
-                {tone.example}
+                {t(tone.exampleKey)}
               </p>
             </div>
           </button>
@@ -1040,15 +945,15 @@ function StepPersonality({
       {/* Custom greeting */}
       <div className="mt-8">
         <Field
-          label="Custom greeting (optional)"
+          label={t("greetingLabel")}
           htmlFor="greeting"
-          hint="First message when someone contacts you on WhatsApp"
+          hint={t("greetingHint")}
         >
           <textarea
             id="greeting"
             value={data.greeting}
             onChange={(e) => update({ greeting: e.target.value })}
-            placeholder={`¡Hola! 👋 Soy el asistente de ${data.agencyName || "tu agencia"}. ¿En qué te puedo ayudar?`}
+            placeholder={t("greetingPlaceholder", { agency })}
             rows={3}
             className={`${INPUT_CLASS} resize-none`}
           />
@@ -1062,12 +967,13 @@ function StepPersonality({
    STEP 5 — Go Live / Preview
    ═══════════════════════════════════════════════════ */
 function StepGoLive({ data }: { data: OnboardingData }) {
-  const [previewMessages, setPreviewMessages] = useState<{ from: "bot" | "user"; text: string }[]>([
+  const t = useTranslations("onboarding.steps.preview");
+  const agency = data.agencyName || t("agencyFallback");
+  type PreviewMessage = { from: "bot" | "user"; text: string };
+  const [previewMessages, setPreviewMessages] = useState<PreviewMessage[]>([
     {
       from: "bot",
-      text:
-        data.greeting ||
-        `¡Hola! 👋 Soy el asistente de ${data.agencyName || "tu agencia"}. ¿En qué te puedo ayudar?`,
+      text: data.greeting || t("greetingFallback", { agency }),
     },
   ]);
   const [input, setInput] = useState("");
@@ -1078,39 +984,39 @@ function StepGoLive({ data }: { data: OnboardingData }) {
     setInput("");
     setPreviewMessages((prev) => [...prev, { from: "user" as const, text: userMsg }]);
 
-    // Simulate bot response
     setTimeout(() => {
-      const tourName = data.tours[0]?.name || "Machu Picchu Full Day";
-      const tourPrice = data.tours[0]?.price || "$320 USD";
-      let response = "";
-
-      if (data.tone === "formal") {
-        response = `Thank you for your interest! Our ${tourName} tour is priced at ${tourPrice} per person. Would you like me to check availability for a specific date?`;
-      } else if (data.tone === "casual") {
-        response = `Nice! 🏔️ The ${tourName} is ${tourPrice} per person — it's awesome! What dates work for you?`;
-      } else {
-        response = `Great question! 😊 The ${tourName} is ${tourPrice} per person and includes everything. Want me to check dates for you?`;
-      }
-
+      const tourName = data.tours[0]?.name || t("sampleTourName");
+      const tourPrice = data.tours[0]?.price || t("sampleTourPrice");
+      const responseKey =
+        data.tone === "formal" ? "responseFormal"
+        : data.tone === "casual" ? "responseCasual"
+        : "responseFriendly";
+      const response = t(responseKey, { name: tourName, price: tourPrice });
       setPreviewMessages((prev) => [...prev, { from: "bot" as const, text: response }]);
     }, 1200);
   };
 
+  const languageLabel =
+    data.language === "es" ? "Español" : data.language === "pt" ? "Português" : "English";
+  const toneLabelKey =
+    data.tone === "formal" ? "formalLabel" : data.tone === "casual" ? "casualLabel" : "friendlyLabel";
+  const tPersonality = useTranslations("onboarding.steps.personality");
+
   return (
     <div>
       <StepHeader
-        number="05"
-        title="Preview & go live"
-        description="Test your bot below, then launch it when you're ready."
+        number={t("number")}
+        title={t("title")}
+        description={t("description")}
       />
 
       {/* Summary cards */}
       <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Agency", value: data.agencyName || "—" },
-          { label: "Language", value: data.language === "es" ? "Español" : data.language === "pt" ? "Português" : "English" },
-          { label: "Tours", value: `${data.tours.filter((t) => t.name).length}` },
-          { label: "Tone", value: data.tone === "formal" ? "Professional" : data.tone === "casual" ? "Casual" : "Friendly" },
+          { label: t("summaryAgency"), value: data.agencyName || "—" },
+          { label: t("summaryLanguage"), value: languageLabel },
+          { label: t("summaryTours"), value: `${data.tours.filter((tour) => tour.name).length}` },
+          { label: t("summaryTone"), value: tPersonality(toneLabelKey) },
         ].map((item) => (
           <div
             key={item.label}
@@ -1147,11 +1053,11 @@ function StepGoLive({ data }: { data: OnboardingData }) {
           </div>
           <div>
             <p className="text-sm font-semibold text-white">
-              {data.agencyName || "Your Agency"}
+              {data.agencyName || t("previewYourAgency")}
             </p>
             <div className="flex items-center gap-1.5">
               <div className="h-1.5 w-1.5 rounded-full bg-green-400" />
-              <span className="text-[10px] text-white/60">Bot active</span>
+              <span className="text-[10px] text-white/60">{t("botActive")}</span>
             </div>
           </div>
         </div>
@@ -1176,7 +1082,7 @@ function StepGoLive({ data }: { data: OnboardingData }) {
                 >
                   {msg.from === "bot" && (
                     <span className="block text-[10px] font-semibold text-blue-500 mb-0.5">
-                      TourGuide Bot
+                      {t("botLabel")}
                     </span>
                   )}
                   {msg.text}
@@ -1193,7 +1099,7 @@ function StepGoLive({ data }: { data: OnboardingData }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendPreview()}
-            placeholder="Type a message to test your bot..."
+            placeholder={t("inputPlaceholder")}
             className="flex-1 h-9 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-navy-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
           />
           <button
@@ -1241,11 +1147,10 @@ function StepGoLive({ data }: { data: OnboardingData }) {
         </div>
         <div>
           <p className="text-sm font-semibold text-green-900">
-            Your bot is ready to go live
+            {t("readyTitle")}
           </p>
           <p className="text-sm text-green-700/70 mt-0.5">
-            Click &ldquo;Launch my bot&rdquo; to activate it on your WhatsApp
-            number. You can pause it anytime from the dashboard.
+            {t("readyDesc")}
           </p>
         </div>
       </motion.div>
@@ -1272,10 +1177,11 @@ function StepHeader({
   title: string;
   description: string;
 }) {
+  const t = useTranslations("onboarding");
   return (
     <div>
       <span className="inline-flex h-6 items-center rounded-full bg-navy-900/5 px-2.5 text-[10px] font-bold text-navy-700 tracking-widest uppercase">
-        Step {number}
+        {t("stepLabel")} {number}
       </span>
       <h2 className="mt-3 font-display text-xl sm:text-2xl font-extrabold tracking-tight text-navy-950">
         {title}
@@ -1311,21 +1217,5 @@ function Field({
       )}
       {children}
     </div>
-  );
-}
-
-function StepIcon({ name }: { name: string }) {
-  const icons: Record<string, string> = {
-    link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
-    shield:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-    zap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-  };
-
-  return (
-    <div
-      className="h-4 w-4 text-navy-700"
-      dangerouslySetInnerHTML={{ __html: icons[name] || "" }}
-    />
   );
 }

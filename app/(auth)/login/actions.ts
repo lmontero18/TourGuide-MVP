@@ -51,7 +51,7 @@ export async function signup(formData: FormData) {
     redirect('/register?error=password_min_8')
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { error, data } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -65,7 +65,24 @@ export async function signup(formData: FormData) {
     redirect(`/register?error=${encodeURIComponent(error.message)}`)
   }
 
-  redirect('/login?message=check_email')
+  // With email confirmation disabled, user is already authenticated
+  // Check if they have an org — new users go to onboarding
+  if (data.user) {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('org_id')
+      .eq('id', data.user.id)
+      .single()
+
+    revalidatePath('/', 'layout')
+
+    if (profile?.org_id) {
+      redirect('/conversations')
+    }
+  }
+
+  revalidatePath('/', 'layout')
+  redirect('/onboarding')
 }
 
 export async function logout() {

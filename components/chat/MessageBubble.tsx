@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { MessageRole } from "@/types";
 
 interface MessageBubbleProps {
@@ -6,25 +9,26 @@ interface MessageBubbleProps {
   createdAt: string;
 }
 
-const ROLE_STYLES: Record<MessageRole, { wrapper: string; bubble: string; label: string }> = {
+const ROLE_STYLES: Record<MessageRole, { wrapper: string; bubble: string; labelKey: string }> = {
   user: {
     wrapper: "justify-start",
     bubble: "bg-white border border-slate-200 text-navy-900 rounded-tl-md shadow-sm",
-    label: "Client",
+    labelKey: "roleClient",
   },
   assistant: {
     wrapper: "justify-start",
     bubble: "bg-blue-50 border border-blue-100 text-navy-900 rounded-tl-md",
-    label: "TourGuide Bot",
+    labelKey: "roleBot",
   },
   agent: {
     wrapper: "justify-end",
     bubble: "bg-navy-900 text-white rounded-tr-md shadow-md",
-    label: "You",
+    labelKey: "roleYou",
   },
 };
 
 export default function MessageBubble({ content, role, createdAt }: MessageBubbleProps) {
+  const t = useTranslations("dashboard.chat");
   const style = ROLE_STYLES[role];
 
   return (
@@ -34,7 +38,7 @@ export default function MessageBubble({ content, role, createdAt }: MessageBubbl
           <span className={`block text-[10px] font-bold mb-0.5 ${
             role === "assistant" ? "text-blue-500" : "text-slate-400"
           }`}>
-            {style.label}
+            {t(style.labelKey)}
           </span>
         )}
         <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>

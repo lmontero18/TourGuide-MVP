@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import ConversationList from "@/components/conversations/ConversationList";
 import ChatWindow from "@/components/chat/ChatWindow";
 import TopBar from "@/components/layout/TopBar";
@@ -54,10 +55,11 @@ export default function ConversationDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const conv = MOCK_MESSAGES[id] || DEFAULT_CONV;
+  const t = useTranslations("dashboard.conversations");
 
   return (
     <div className="flex h-full flex-col">
-      <TopBar title="Conversations" />
+      <TopBar title={t("title")} />
       <div className="flex flex-1 overflow-hidden">
         {/* Conversation list */}
         <div className="hidden lg:block w-full max-w-md border-r border-slate-200 bg-white overflow-hidden">

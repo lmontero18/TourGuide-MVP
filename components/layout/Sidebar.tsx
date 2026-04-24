@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 const NAV_ITEMS = [
   {
-    label: "Conversations",
+    key: "conversations",
     href: "/conversations",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -15,7 +16,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    label: "Metrics",
+    key: "metrics",
     href: "/metrics",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -24,7 +25,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    label: "Settings",
+    key: "settings",
     href: "/settings",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -42,6 +43,7 @@ interface SidebarProps {
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const t = useTranslations("dashboard.sidebar");
 
   return (
     <motion.aside
@@ -86,7 +88,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               }`}
             >
               <span className="shrink-0">{item.icon}</span>
-              {!collapsed && <span className="whitespace-nowrap">{item.label}</span>}
+              {!collapsed && <span className="whitespace-nowrap">{t(item.key)}</span>}
               {active && !collapsed && (
                 <div className="ml-auto h-1.5 w-1.5 rounded-full bg-navy-900" />
               )}

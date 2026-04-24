@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useI18n } from "./i18n";
+import { useTranslations } from "next-intl";
+import LocaleToggle from "@/components/LocaleToggle";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { t, locale, toggle } = useI18n();
+  const t = useTranslations("nav");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -40,7 +41,16 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="flex h-14 sm:h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link
+            href="/"
+            onClick={(e) => {
+              if (window.location.pathname === "/") {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
+            className="flex items-center gap-2 group"
+          >
             <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-navy-900 transition-transform group-hover:scale-105">
               <svg
                 width="14"
@@ -64,37 +74,32 @@ export function Navbar() {
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm font-medium text-slate-500 hover:text-navy-900 transition-colors">
-              {t("nav.features")}
+              {t("features")}
             </a>
             <a href="#how-it-works" className="text-sm font-medium text-slate-500 hover:text-navy-900 transition-colors">
-              {t("nav.howItWorks")}
+              {t("howItWorks")}
             </a>
             <a href="#metrics" className="text-sm font-medium text-slate-500 hover:text-navy-900 transition-colors">
-              {t("nav.results")}
+              {t("results")}
             </a>
           </div>
 
           {/* Right side */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Language toggle — always visible */}
-            <button
-              onClick={toggle}
-              className="inline-flex h-7 sm:h-8 items-center justify-center rounded-md border border-slate-200 px-2 sm:px-2.5 text-[11px] sm:text-xs font-bold text-slate-500 hover:text-navy-900 hover:border-slate-300 transition-colors tracking-wide"
-            >
-              {locale === "en" ? "ES" : "EN"}
-            </button>
+            <LocaleToggle />
 
             <Link
               href="/login"
               className="text-sm font-medium text-slate-500 hover:text-navy-900 transition-colors hidden md:block"
             >
-              {t("nav.login")}
+              {t("login")}
             </Link>
             <Link
               href="/login"
               className="hidden sm:inline-flex h-8 sm:h-9 items-center rounded-lg bg-navy-900 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-white transition-all hover:bg-navy-800 hover:shadow-lg hover:shadow-navy-900/20 active:scale-[0.98]"
             >
-              {t("nav.cta")}
+              {t("cta")}
             </Link>
 
             {/* Mobile hamburger */}
@@ -133,9 +138,9 @@ export function Navbar() {
           >
             <div className="px-5 py-4 space-y-1">
               {[
-                { href: "#features", label: t("nav.features") },
-                { href: "#how-it-works", label: t("nav.howItWorks") },
-                { href: "#metrics", label: t("nav.results") },
+                { href: "#features", label: t("features") },
+                { href: "#how-it-works", label: t("howItWorks") },
+                { href: "#metrics", label: t("results") },
               ].map((link) => (
                 <a
                   key={link.href}
@@ -152,14 +157,14 @@ export function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className="flex h-10 items-center justify-center rounded-lg bg-navy-900 text-sm font-semibold text-white"
                 >
-                  {t("nav.cta")}
+                  {t("cta")}
                 </Link>
                 <Link
                   href="/login"
                   onClick={() => setMobileOpen(false)}
                   className="flex h-10 items-center justify-center rounded-lg border border-slate-200 text-sm font-medium text-slate-600"
                 >
-                  {t("nav.login")}
+                  {t("login")}
                 </Link>
               </div>
             </div>

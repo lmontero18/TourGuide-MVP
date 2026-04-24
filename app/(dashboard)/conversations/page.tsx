@@ -1,12 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import ConversationList from "@/components/conversations/ConversationList";
 import TopBar from "@/components/layout/TopBar";
 
 export default function ConversationsPage() {
+  const t = useTranslations("dashboard.conversations");
   return (
     <div className="flex h-full flex-col">
-      <TopBar title="Conversations" />
+      <TopBar title={t("title")} />
       <div className="flex flex-1 overflow-hidden">
         {/* Conversation list */}
         <div className="w-full max-w-md border-r border-slate-200 bg-white overflow-hidden">
@@ -21,9 +23,9 @@ export default function ConversationsPage() {
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <h2 className="font-display text-lg font-bold text-navy-900">Select a conversation</h2>
+            <h2 className="font-display text-lg font-bold text-navy-900">{t("empty.title")}</h2>
             <p className="text-sm text-slate-500 mt-1 max-w-xs">
-              Choose a conversation from the list to view messages and take control from the bot.
+              {t("empty.sub")}
             </p>
           </div>
         </div>

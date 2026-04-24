@@ -1,10 +1,10 @@
 "use client";
 
-import { useI18n } from "./i18n";
+import { useTranslations } from "next-intl";
 import { FadeUp, StaggerContainer, StaggerItem } from "./Motion";
 
 export function Metrics() {
-  const { t } = useI18n();
+  const t = useTranslations("metrics");
 
   const metricValues = ["3×", "68%", "<2s", "$4.2k"];
 
@@ -14,13 +14,13 @@ export function Metrics() {
         <FadeUp>
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-sm font-bold uppercase tracking-[0.15em] text-blue-500">
-              {t("metrics.label")}
+              {t("label")}
             </p>
             <h2 className="mt-3 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-navy-950">
-              {t("metrics.title")}
+              {t("title")}
             </h2>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-slate-500">
-              {t("metrics.sub")}
+              {t("sub")}
             </p>
           </div>
         </FadeUp>
@@ -36,10 +36,10 @@ export function Metrics() {
                   {value}
                 </span>
                 <span className="block mt-1 text-sm sm:text-lg font-display font-bold text-blue-500">
-                  {t(`metrics.${i}.unit`)}
+                  {t(`items.${i}.unit`)}
                 </span>
                 <p className="mt-3 text-sm text-slate-500 leading-relaxed">
-                  {t(`metrics.${i}.label`)}
+                  {t(`items.${i}.label`)}
                 </p>
                 <div className="absolute top-0 right-0 h-12 w-12 overflow-hidden rounded-tr-2xl">
                   <div className="absolute -top-6 -right-6 h-12 w-12 rotate-45 bg-blue-500/5" />
@@ -53,7 +53,7 @@ export function Metrics() {
         <FadeUp delay={0.2}>
           <div className="mt-20 max-w-3xl mx-auto text-center">
             <blockquote className="font-display text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-navy-950 leading-snug">
-              {t("metrics.quote")}
+              {t("quote")}
             </blockquote>
             <div className="mt-6 flex items-center justify-center gap-3">
               <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center">
@@ -61,10 +61,10 @@ export function Metrics() {
               </div>
               <div className="text-left">
                 <p className="text-sm font-semibold text-navy-900">
-                  María Rodríguez
+                  {t("quoteName")}
                 </p>
                 <p className="text-sm text-slate-500">
-                  Cusco Expeditions · Peru
+                  {t("quoteRole")}
                 </p>
               </div>
             </div>

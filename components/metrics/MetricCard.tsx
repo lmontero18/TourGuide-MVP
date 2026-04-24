@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 interface MetricCardProps {
   label: string;
   value: number | string;
@@ -7,6 +11,7 @@ interface MetricCardProps {
 }
 
 export default function MetricCard({ label, value, change, positive, icon }: MetricCardProps) {
+  const t = useTranslations("dashboard.metrics");
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5">
       <div className="flex items-center justify-between mb-3">
@@ -16,7 +21,7 @@ export default function MetricCard({ label, value, change, positive, icon }: Met
       <p className="font-display text-2xl font-extrabold tracking-tight text-navy-900">{value}</p>
       {change && (
         <p className={`text-xs font-medium mt-1 ${positive ? "text-green-600" : "text-red-500"}`}>
-          {positive ? "+" : ""}{change} vs last period
+          {positive ? "+" : ""}{change} {t("change")}
         </p>
       )}
     </div>

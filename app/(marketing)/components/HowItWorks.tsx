@@ -1,10 +1,10 @@
 "use client";
 
-import { useI18n } from "./i18n";
+import { useTranslations } from "next-intl";
 import { FadeUp, StaggerContainer, StaggerItem } from "./Motion";
 
 export function HowItWorks() {
-  const { t } = useI18n();
+  const t = useTranslations("how");
 
   return (
     <section
@@ -17,13 +17,13 @@ export function HowItWorks() {
         <FadeUp>
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-sm font-bold uppercase tracking-[0.15em] text-blue-500">
-              {t("how.label")}
+              {t("label")}
             </p>
             <h2 className="mt-3 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-navy-950">
-              {t("how.title")}
+              {t("title")}
             </h2>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-slate-500 leading-relaxed">
-              {t("how.sub")}
+              {t("sub")}
             </p>
           </div>
         </FadeUp>
@@ -67,15 +67,15 @@ export function HowItWorks() {
                 {/* Step number */}
                 <div className="mt-5 inline-flex h-6 items-center rounded-full bg-slate-200/60 px-3">
                   <span className="text-xs font-bold text-slate-400 tracking-wider">
-                    {t(`how.${i}.step`)}
+                    {t(`steps.${i}.step`)}
                   </span>
                 </div>
 
                 <h3 className="mt-4 font-display text-xl font-bold text-navy-950 tracking-tight">
-                  {t(`how.${i}.title`)}
+                  {t(`steps.${i}.title`)}
                 </h3>
                 <p className="mt-2 text-base leading-relaxed text-slate-500 max-w-xs mx-auto">
-                  {t(`how.${i}.desc`)}
+                  {t(`steps.${i}.desc`)}
                 </p>
               </div>
             </StaggerItem>
@@ -101,7 +101,7 @@ export function HowItWorks() {
                   />
                 </svg>
                 <span className="text-sm text-slate-500">
-                  {t(`how.check${i}`)}
+                  {t(`checks.${i}`)}
                 </span>
               </div>
             ))}

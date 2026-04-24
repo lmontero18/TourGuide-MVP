@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useI18n } from "./i18n";
+import { useTranslations } from "next-intl";
 import { FadeUp, StaggerContainer, StaggerItem } from "./Motion";
 
 export function Pricing() {
-  const { t } = useI18n();
+  const t = useTranslations("pricing");
 
   return (
     <section id="pricing" className="py-16 sm:py-24 lg:py-32 bg-slate-50 relative overflow-hidden">
@@ -15,13 +15,13 @@ export function Pricing() {
         <FadeUp>
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-sm font-bold uppercase tracking-[0.15em] text-blue-500">
-              {t("pricing.label")}
+              {t("label")}
             </p>
             <h2 className="mt-3 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-navy-950">
-              {t("pricing.title")}
+              {t("title")}
             </h2>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-slate-500 leading-relaxed">
-              {t("pricing.sub")}
+              {t("sub")}
             </p>
           </div>
         </FadeUp>
@@ -35,14 +35,14 @@ export function Pricing() {
             <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5 h-full flex flex-col">
               <div className="mb-6">
                 <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600">
-                  {t("pricing.0.badge")}
+                  {t("tiers.0.badge")}
                 </span>
               </div>
               <h3 className="font-display text-xl font-bold text-navy-950 tracking-tight">
-                {t("pricing.0.name")}
+                {t("tiers.0.name")}
               </h3>
               <p className="mt-2 text-sm text-slate-500 leading-relaxed min-h-[40px]">
-                {t("pricing.0.desc")}
+                {t("tiers.0.desc")}
               </p>
 
               {/* Price */}
@@ -52,7 +52,7 @@ export function Pricing() {
                     $500
                   </span>
                   <span className="text-sm font-medium text-slate-400">
-                    /{t("pricing.month")}
+                    /{t("month")}
                   </span>
                 </div>
               </div>
@@ -63,7 +63,7 @@ export function Pricing() {
                   <li key={i} className="flex items-start gap-2.5">
                     <CheckIcon className="text-slate-400" />
                     <span className="text-sm text-slate-600">
-                      {t(`pricing.0.f${i}`)}
+                      {t(`tiers.0.f${i}`)}
                     </span>
                   </li>
                 ))}
@@ -73,7 +73,7 @@ export function Pricing() {
                 href="/login"
                 className="mt-8 flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
               >
-                {t("pricing.0.cta")}
+                {t("tiers.0.cta")}
               </Link>
             </div>
           </StaggerItem>
@@ -84,20 +84,20 @@ export function Pricing() {
               {/* Popular badge */}
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                 <span className="inline-flex items-center rounded-full bg-navy-900 px-4 py-1 text-xs font-bold text-white tracking-wide shadow-lg shadow-navy-900/25">
-                  {t("pricing.popular")}
+                  {t("popular")}
                 </span>
               </div>
 
               <div className="mb-6 mt-1">
                 <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-600">
-                  {t("pricing.1.badge")}
+                  {t("tiers.1.badge")}
                 </span>
               </div>
               <h3 className="font-display text-xl font-bold text-navy-950 tracking-tight">
-                {t("pricing.1.name")}
+                {t("tiers.1.name")}
               </h3>
               <p className="mt-2 text-sm text-slate-500 leading-relaxed min-h-[40px]">
-                {t("pricing.1.desc")}
+                {t("tiers.1.desc")}
               </p>
 
               {/* Price */}
@@ -108,9 +108,9 @@ export function Pricing() {
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-slate-500">
-                  {t("pricing.1.setup")}
+                  {t("tiers.1.setup")}
                   <span className="font-semibold text-navy-900">
-                    {" "}+ $500/{t("pricing.month")}
+                    {" "}+ $500/{t("month")}
                   </span>
                 </p>
               </div>
@@ -121,7 +121,7 @@ export function Pricing() {
                   <li key={i} className="flex items-start gap-2.5">
                     <CheckIcon className="text-blue-500" />
                     <span className="text-sm text-slate-600">
-                      {t(`pricing.1.f${i}`)}
+                      {t(`tiers.1.f${i}`)}
                     </span>
                   </li>
                 ))}
@@ -131,7 +131,7 @@ export function Pricing() {
                 href="/login"
                 className="mt-8 flex h-11 items-center justify-center rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0"
               >
-                {t("pricing.1.cta")}
+                {t("tiers.1.cta")}
                 <svg
                   className="ml-2 h-4 w-4"
                   fill="none"
@@ -154,25 +154,25 @@ export function Pricing() {
             <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5 h-full flex flex-col">
               <div className="mb-6">
                 <span className="inline-flex items-center rounded-full bg-navy-900/5 px-3 py-1 text-xs font-bold uppercase tracking-wider text-navy-700">
-                  {t("pricing.2.badge")}
+                  {t("tiers.2.badge")}
                 </span>
               </div>
               <h3 className="font-display text-xl font-bold text-navy-950 tracking-tight">
-                {t("pricing.2.name")}
+                {t("tiers.2.name")}
               </h3>
               <p className="mt-2 text-sm text-slate-500 leading-relaxed min-h-[40px]">
-                {t("pricing.2.desc")}
+                {t("tiers.2.desc")}
               </p>
 
               {/* Price */}
               <div className="mt-6 pb-6 border-b border-slate-100">
                 <div className="flex items-baseline gap-1">
                   <span className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter text-navy-950">
-                    {t("pricing.2.price")}
+                    {t("tiers.2.price")}
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-slate-500">
-                  {t("pricing.2.priceNote")}
+                  {t("tiers.2.priceNote")}
                 </p>
               </div>
 
@@ -182,7 +182,7 @@ export function Pricing() {
                   <li key={i} className="flex items-start gap-2.5">
                     <CheckIcon className="text-navy-500" />
                     <span className="text-sm text-slate-600">
-                      {t(`pricing.2.f${i}`)}
+                      {t(`tiers.2.f${i}`)}
                     </span>
                   </li>
                 ))}
@@ -192,7 +192,7 @@ export function Pricing() {
                 href="/login"
                 className="mt-8 flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
               >
-                {t("pricing.2.cta")}
+                {t("tiers.2.cta")}
               </Link>
             </div>
           </StaggerItem>

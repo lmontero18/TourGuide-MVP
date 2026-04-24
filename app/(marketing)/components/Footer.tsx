@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useI18n } from "./i18n";
+import { useTranslations } from "next-intl";
 import { FadeIn } from "./Motion";
 
 export function Footer() {
-  const { t } = useI18n();
+  const t = useTranslations("footer");
 
   return (
     <FadeIn>
@@ -35,9 +35,9 @@ export function Footer() {
                 </span>
               </Link>
               <p className="mt-3 text-sm text-slate-500 leading-relaxed">
-                {t("footer.tagline1")}
+                {t("tagline1")}
                 <br />
-                {t("footer.tagline2")}
+                {t("tagline2")}
               </p>
             </div>
 
@@ -45,7 +45,7 @@ export function Footer() {
             <div className="grid grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 mb-3">
-                  {t("footer.product")}
+                  {t("product")}
                 </p>
                 <ul className="space-y-2">
                   {["Features", "Pricing", "Changelog"].map((item) => (
@@ -59,7 +59,7 @@ export function Footer() {
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 mb-3">
-                  {t("footer.company")}
+                  {t("company")}
                 </p>
                 <ul className="space-y-2">
                   {["About", "Blog", "Careers"].map((item) => (
@@ -73,7 +73,7 @@ export function Footer() {
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 mb-3">
-                  {t("footer.legal")}
+                  {t("legal")}
                 </p>
                 <ul className="space-y-2">
                   {["Privacy", "Terms"].map((item) => (
@@ -90,11 +90,11 @@ export function Footer() {
 
           <div className="mt-10 sm:mt-12 pt-5 sm:pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-slate-400">
-              © {new Date().getFullYear()} {t("footer.rights")}
+              © {new Date().getFullYear()} {t("rights")}
             </p>
             <div className="flex items-center gap-1.5">
               <span className="flex h-2 w-2 rounded-full bg-green-400" />
-              <span className="text-xs text-slate-400">{t("footer.status")}</span>
+              <span className="text-xs text-slate-400">{t("status")}</span>
             </div>
           </div>
         </div>
