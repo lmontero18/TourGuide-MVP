@@ -323,7 +323,9 @@
         "readyTitle": "Your bot is ready to go live",
         "readyDesc": "Click \"Launch my bot\" to activate it on your WhatsApp number. You can pause it anytime from the dashboard."
       }
-    }
+    },
+    "saving": "Saving...",
+    "launching": "Launching..."
   },
   "dashboard": {
     "sidebar": {

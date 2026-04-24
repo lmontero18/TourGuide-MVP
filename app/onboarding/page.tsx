@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import ConnectWhatsAppButton from "@/components/whatsapp/ConnectWhatsAppButton";
 
 /* ─── Types ─── */
 interface OnboardingData {
@@ -66,9 +69,14 @@ const COUNTRIES = [
 /* ─── Main component ─── */
 export default function OnboardingPage() {
   const t = useTranslations("onboarding");
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [data, setData] = useState<OnboardingData>(INITIAL_DATA);
+  const [orgCreated, setOrgCreated] = useState(false);
+  const [advancing, setAdvancing] = useState(false);
+  const [launching, setLaunching] = useState(false);
+  const [launchError, setLaunchError] = useState<string | null>(null);
 
   const update = useCallback(
     (patch: Partial<OnboardingData>) =>
@@ -76,11 +84,52 @@ export default function OnboardingPage() {
     [],
   );
 
-  const next = () => {
-    if (step < STEP_COUNT - 1) {
-      setDirection(1);
-      setStep((s) => s + 1);
+  const ensureOrg = async (): Promise<boolean> => {
+    if (orgCreated) return true;
+    if (!data.agencyName.trim()) {
+      toast.error("Agency name is required to continue");
+      return false;
     }
+
+    const baseSlug = data.agencyName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    const attempts = [baseSlug, `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`];
+    for (const slug of attempts) {
+      const res = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ org_name: data.agencyName.trim(), slug }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        setOrgCreated(true);
+        return true;
+      }
+      if (res.status !== 409) {
+        toast.error(result.error ?? "Failed to create organization");
+        return false;
+      }
+    }
+    toast.error("Could not find an available slug. Try a different agency name.");
+    return false;
+  };
+
+  const next = async () => {
+    if (step >= STEP_COUNT - 1) return;
+
+    // Leaving step 0 (Agency) → create the org so downstream steps have one
+    if (step === 0 && !orgCreated) {
+      setAdvancing(true);
+      const ok = await ensureOrg();
+      setAdvancing(false);
+      if (!ok) return;
+    }
+
+    setDirection(1);
+    setStep((s) => s + 1);
   };
 
   const back = () => {
@@ -94,6 +143,33 @@ export default function OnboardingPage() {
     if (target < step) {
       setDirection(-1);
       setStep(target);
+    }
+  };
+
+  const handleLaunch = async () => {
+    setLaunching(true);
+    setLaunchError(null);
+
+    try {
+      if (!orgCreated) {
+        const ok = await ensureOrg();
+        if (!ok) {
+          setLaunching(false);
+          return;
+        }
+      }
+
+      const res = await fetch("/api/onboarding", { method: "PATCH" });
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.error || "Failed to finalize onboarding");
+      }
+
+      router.push("/conversations");
+    } catch (err) {
+      setLaunchError(err instanceof Error ? err.message : "Something went wrong");
+      setLaunching(false);
     }
   };
 
@@ -246,9 +322,10 @@ export default function OnboardingPage() {
             {step < STEP_COUNT - 1 ? (
               <button
                 onClick={next}
-                className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+                disabled={advancing}
+                className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
-                {t("next")}
+                {advancing ? t("saving") : t("next")}
                 <svg
                   width="16"
                   height="16"
@@ -264,25 +341,33 @@ export default function OnboardingPage() {
                 </svg>
               </button>
             ) : (
-              <Link
-                href="/conversations"
-                className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
-              >
-                {t("finish")}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              <div className="flex items-center gap-3">
+                {launchError && (
+                  <p className="text-sm text-red-600">{launchError}</p>
+                )}
+                <button
+                  onClick={handleLaunch}
+                  disabled={launching}
+                  className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
-                  <path d="M5 12h14" />
-                  <path d="M12 5l7 7-7 7" />
-                </svg>
-              </Link>
+                  {launching ? t("launching") : t("finish")}
+                  {!launching && (
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="M12 5l7 7-7 7" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -421,15 +506,6 @@ function StepWhatsApp({
   update: (p: Partial<OnboardingData>) => void;
 }) {
   const t = useTranslations("onboarding.steps.whatsapp");
-  const [connecting, setConnecting] = useState(false);
-
-  const handleConnect = () => {
-    setConnecting(true);
-    setTimeout(() => {
-      setConnecting(false);
-      update({ whatsappConnected: true, whatsappPhone: "+52 55 1234 5678" });
-    }, 2000);
-  };
 
   return (
     <div>
@@ -467,29 +543,13 @@ function StepWhatsApp({
               {t("connectDesc")}
             </p>
 
-            <button
-              onClick={handleConnect}
-              disabled={connecting}
-              className="inline-flex h-12 items-center gap-2.5 rounded-xl bg-[#1877F2] px-6 text-sm font-bold text-white shadow-lg shadow-[#1877F2]/25 transition-all hover:bg-[#166FE5] hover:shadow-xl hover:shadow-[#1877F2]/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-            >
-              {connecting ? (
-                <>
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  {t("connecting")}
-                </>
-              ) : (
-                <>
-                  {/* Facebook icon */}
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                  </svg>
-                  {t("connectCta")}
-                </>
-              )}
-            </button>
+            <div className="flex justify-center">
+              <ConnectWhatsAppButton
+                onConnected={(account) =>
+                  update({ whatsappConnected: true, whatsappPhone: account.phone_number })
+                }
+              />
+            </div>
           </div>
         ) : (
           <motion.div

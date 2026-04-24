@@ -1,43 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
+const createSchema = z.object({
+  org_name: z.string().trim().min(1).max(100),
+  slug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(60)
+    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens only'),
+})
+
+// POST — create the org for the current user (idempotent: returns existing org if already assigned)
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
 
-  // Verify authenticated user
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Check user doesn't already have an org
   const { data: profile } = await supabase
     .from('users')
     .select('org_id')
     .eq('id', user.id)
     .single()
 
+  // Idempotent — already has an org, return it
   if (profile?.org_id) {
-    return NextResponse.json({ error: 'User already belongs to an organization' }, { status: 400 })
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('id, name, slug, onboarded_at')
+      .eq('id', profile.org_id)
+      .single()
+    return NextResponse.json({ success: true, organization: org })
   }
 
-  const body = await request.json()
-  const { org_name, slug } = body as { org_name: string; slug: string }
-
-  if (!org_name || !slug) {
-    return NextResponse.json({ error: 'Missing org_name or slug' }, { status: 400 })
+  const parsed = createSchema.safeParse(await request.json())
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 })
   }
 
-  // Validate slug format (lowercase alphanumeric + hyphens)
-  if (!/^[a-z0-9-]+$/.test(slug)) {
-    return NextResponse.json({ error: 'Slug must be lowercase alphanumeric with hyphens only' }, { status: 400 })
-  }
-
-  // Use service role to create org (bypasses RLS)
-  const { createServiceClient } = await import('@/lib/supabase/server')
+  const { org_name, slug } = parsed.data
   const serviceClient = await createServiceClient()
 
-  // Check slug uniqueness
   const { data: existingOrg } = await serviceClient
     .from('organizations')
     .select('id')
@@ -48,11 +55,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Slug already taken' }, { status: 409 })
   }
 
-  // Create organization — onboarded_at marks completion of the onboarding wizard
+  // Org is created without onboarded_at — the final Launch step sets it via PATCH
   const { data: org, error: orgError } = await serviceClient
     .from('organizations')
-    .insert({ name: org_name, slug, onboarded_at: new Date().toISOString() })
-    .select('id, name, slug')
+    .insert({ name: org_name, slug })
+    .select('id, name, slug, onboarded_at')
     .single()
 
   if (orgError || !org) {
@@ -60,7 +67,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create organization' }, { status: 500 })
   }
 
-  // Assign user to org as admin
   const { error: userError } = await serviceClient
     .from('users')
     .update({ org_id: org.id, role: 'admin' })
@@ -71,18 +77,50 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to assign user' }, { status: 500 })
   }
 
-  // Create starter subscription
   const { error: subError } = await serviceClient
     .from('subscriptions')
-    .insert({
-      org_id: org.id,
-      plan: 'starter',
-      status: 'trialing',
-    })
+    .insert({ org_id: org.id, plan: 'starter', status: 'trialing' })
 
   if (subError) {
     console.error('Failed to create subscription:', subError)
-    // Non-critical, don't fail onboarding
+  }
+
+  return NextResponse.json({ success: true, organization: org })
+}
+
+// PATCH — finalize onboarding by setting onboarded_at on the user's org
+export async function PATCH() {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('org_id, role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.org_id) {
+    return NextResponse.json({ error: 'User has no organization' }, { status: 400 })
+  }
+  if (profile.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
+  }
+
+  const serviceClient = await createServiceClient()
+  const { data: org, error } = await serviceClient
+    .from('organizations')
+    .update({ onboarded_at: new Date().toISOString() })
+    .eq('id', profile.org_id)
+    .select('id, name, slug, onboarded_at')
+    .single()
+
+  if (error || !org) {
+    console.error('Failed to finalize onboarding:', error)
+    return NextResponse.json({ error: 'Failed to finalize onboarding' }, { status: 500 })
   }
 
   return NextResponse.json({ success: true, organization: org })
