@@ -129,7 +129,7 @@ function RegisterForm() {
               required
               minLength={8}
               autoComplete="new-password"
-              placeholder="8+ characters"
+              placeholder="8+ chars, upper, lower, number"
               className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
             <button
