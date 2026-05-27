@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { login } from "./actions";
 
@@ -17,42 +18,33 @@ export default function LoginPage() {
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const t = useTranslations("auth.login");
   const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
-  const message = searchParams.get("message");
 
   useEffect(() => {
     if (error) {
       toast.error(decodeURIComponent(error));
       router.replace("/login", { scroll: false });
     }
-    if (message === "check_email") {
-      toast.success("Check your email to confirm your account.");
-      router.replace("/login", { scroll: false });
-    }
-  }, [error, message, router]);
+  }, [error, router]);
 
   return (
     <div>
       <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-navy-950">
-        Welcome back
+        {t("title")}
       </h1>
-      <p className="mt-2 text-sm text-slate-500">
-        Log in to your TourGuide dashboard
-      </p>
+      <p className="mt-2 text-sm text-slate-500">{t("sub")}</p>
 
-      <form
-        className="mt-8 space-y-4"
-        onSubmit={() => setLoading(true)}
-      >
+      <form className="mt-8 space-y-4" onSubmit={() => setLoading(true)}>
         {/* Email */}
         <div>
           <label
             htmlFor="email"
             className="block text-sm font-medium text-navy-900 mb-1.5"
           >
-            Email
+            {t("email")}
           </label>
           <input
             id="email"
@@ -60,7 +52,7 @@ function LoginForm() {
             type="email"
             required
             autoComplete="email"
-            placeholder="you@agency.com"
+            placeholder={t("emailPlaceholder")}
             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
@@ -72,13 +64,13 @@ function LoginForm() {
               htmlFor="password"
               className="block text-sm font-medium text-navy-900"
             >
-              Password
+              {t("password")}
             </label>
             <Link
               href="/forgot-password"
               className="text-xs font-medium text-blue-500 hover:text-blue-600 transition-colors"
             >
-              Forgot password?
+              {t("forgot")}
             </Link>
           </div>
           <div className="relative">
@@ -88,7 +80,7 @@ function LoginForm() {
               type={showPassword ? "text" : "password"}
               required
               autoComplete="current-password"
-              placeholder="••••••••"
+              placeholder={t("passwordPlaceholder")}
               className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
             <button
@@ -119,14 +111,14 @@ function LoginForm() {
           disabled={loading}
           className="w-full h-11 rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Logging in..." : "Log in"}
+          {loading ? `${t("submit")}...` : t("submit")}
         </button>
       </form>
 
       {/* Divider */}
       <div className="mt-6 flex items-center gap-3">
         <div className="h-px flex-1 bg-slate-200" />
-        <span className="text-xs text-slate-400">or</span>
+        <span className="text-xs text-slate-400">{t("or")}</span>
         <div className="h-px flex-1 bg-slate-200" />
       </div>
 
@@ -141,17 +133,17 @@ function LoginForm() {
           <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
           <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
         </svg>
-        Continue with Google
+        {t("googleContinue")}
       </button>
 
       {/* Register link */}
       <p className="mt-8 text-center text-sm text-slate-500">
-        Don&apos;t have an account?{" "}
+        {t("noAccount")}{" "}
         <Link
           href="/register"
           className="font-semibold text-navy-900 hover:text-navy-700 transition-colors"
         >
-          Sign up free
+          {t("signUp")}
         </Link>
       </p>
     </div>

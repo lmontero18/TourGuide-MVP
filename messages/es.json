@@ -4,7 +4,11 @@
     "howItWorks": "Cómo funciona",
     "results": "Resultados",
     "login": "Iniciar sesión",
-    "cta": "Empezar gratis"
+    "cta": "Empezar gratis",
+    "account": "Cuenta",
+    "dashboard": "Ir al dashboard",
+    "finishOnboarding": "Terminar onboarding",
+    "signOut": "Cerrar sesión"
   },
   "hero": {
     "headline1": "Tus tours se venden",
@@ -43,6 +47,12 @@
         "title": "Dashboard de ROI",
         "desc": "Rastrea leads capturados, reservas atribuidas e ingresos generados — prueba de que tu inversión rinde."
       }
+    },
+    "demo": {
+      "botName": "TourGuide Bot",
+      "msg0": "Hola! Cuánto cuesta el tour a Machu Picchu para 4 personas?",
+      "msg1": "¡Hola! 🏔️ El tour a Machu Picchu para 4 personas es $320 USD por persona. Incluye transporte, guía bilingüe y almuerzo. ¿Te gustaría reservar una fecha?",
+      "msg2": "Si, el próximo sábado tienen disponible?"
     }
   },
   "how": {
@@ -135,20 +145,6 @@
         "f3": "Importación de FAQs y catálogo",
         "f4": "Dashboard de ROI",
         "f5": "Soporte prioritario"
-      },
-      "2": {
-        "badge": "Premium",
-        "name": "Done For You",
-        "desc": "100% administrado. Operamos tu bot, lo optimizamos y reportamos resultados cada semana.",
-        "price": "A medida",
-        "priceNote": "Adaptado al volumen y necesidades de tu agencia",
-        "cta": "Hablemos",
-        "f0": "Todo lo de Do It For You",
-        "f1": "Account manager dedicado",
-        "f2": "Optimización y reportes semanales",
-        "f3": "Integraciones a la medida",
-        "f4": "Entrenamiento multi-idioma",
-        "f5": "SLA y soporte telefónico"
       }
     }
   },
@@ -272,15 +268,49 @@
         "toursTitle": "Tours",
         "addTour": "Agregar tour",
         "tourLabel": "Tour",
+        "tourNameLabel": "Nombre del tour",
         "tourNamePlaceholder": "Nombre del tour (ej. Machu Picchu Full Day)",
-        "tourPricePlaceholder": "$320 USD",
-        "tourDescPlaceholder": "Descripción breve — qué incluye, duración, puntos destacados...",
+        "pricesLabel": "Precios",
+        "addPrice": "Agregar precio",
+        "priceLabelPlaceholder": "Etiqueta (ej. Local)",
+        "notesLabel": "Notas",
+        "tourInfoPlaceholder": "Qué incluye, duración, punto de salida, condiciones…",
+        "businessTitleLabel": "Título de la sección",
+        "businessContentLabel": "Contenido",
+        "faqQuestionLabel": "Pregunta",
+        "faqAnswerLabel": "Respuesta",
+        "reviewFlag": "Revisar",
         "faqsTitle": "Preguntas frecuentes",
         "addFaq": "Agregar FAQ",
         "faqLabel": "FAQ",
         "faqQuestionPlaceholder": "Pregunta que hacen los clientes (ej. ¿Ofrecen recogida del hotel?)",
         "faqAnswerPlaceholder": "Tu respuesta...",
-        "tip": "No te preocupes por dejarlo perfecto — puedes editar tours y FAQs en cualquier momento desde tu dashboard."
+        "tip": "No te preocupes por dejarlo perfecto — puedes editar tours y FAQs en cualquier momento desde tu dashboard.",
+        "sourceWebTitle": "Importar desde mi sitio web",
+        "sourceWebDesc": "Pegá la URL de tu web y la leemos para sacar tus tours, precios y preguntas frecuentes. Vos solo revisás.",
+        "urlPlaceholder": "https://tuagencia.com",
+        "importCta": "Importar",
+        "importing": "Leyendo tu sitio…",
+        "sourcePdfTitle": "Subir mi tarifario (PDF o foto)",
+        "sourcePdfDesc": "Subí el archivo que ya usás y extraemos los precios tal cual.",
+        "soon": "Pronto",
+        "sourceManual": "Agregar manualmente",
+        "sourceManualDesc": "Cargá tus tours y FAQs a mano, uno por uno.",
+        "changeSource": "Cambiar fuente",
+        "businessTitle": "Información del negocio",
+        "addBusiness": "Agregar sección",
+        "businessTitlePlaceholder": "Título (ej. Políticas de cancelación)",
+        "businessContentPlaceholder": "Contenido — ej. Reembolso total hasta 48h antes · pagos por Yape/Visa · recojo en el centro…",
+        "importDone": "Encontramos {tours} tours, {sections} secciones del negocio y {faqs} preguntas. Revisalos.",
+        "importEmpty": "No encontramos tours en ese sitio. Probá con otra página o agregalos a mano.",
+        "importThin": "Esa página casi no tiene texto que podamos leer. Probá con otra URL o subí tu tarifario.",
+        "importError": "No pudimos importar desde esa URL. Revisá la dirección e intentá de nuevo.",
+        "importHint": "Leemos varias páginas de tu sitio para armar tu catálogo — puede tardar hasta ~30s. No recargues la página al importar.",
+        "importingHint": "Leyendo tu sitio y armando tu catálogo… esto tarda un momento, no recargues la página.",
+        "editLaterHint": "Todo lo que importes se puede editar y agregar después — esto es solo para arrancar rápido.",
+        "toursEmpty": "Todavía no hay tours. Agregá uno o importá desde tu web.",
+        "businessEmpty": "Todavía no hay info del negocio. Agregá una sección (sobre nosotros, pagos, contacto…).",
+        "faqsEmpty": "Todavía no hay preguntas frecuentes. Agregá una."
       },
       "personality": {
         "number": "04",
@@ -330,8 +360,33 @@
   "dashboard": {
     "sidebar": {
       "conversations": "Conversaciones",
+      "tours": "Tours y FAQs",
       "metrics": "Métricas",
       "settings": "Configuración"
+    },
+    "tours": {
+      "title": "Tours y FAQs",
+      "subtitle": "Esto es lo que tu bot usa para responder. Editá tus tours, precios y preguntas frecuentes cuando quieras.",
+      "tabTours": "Tours",
+      "tabBusiness": "Negocio",
+      "tabFaqs": "FAQs",
+      "summary": "{tours} tours · {sections} secciones · {faqs} preguntas",
+      "importTitle": "Importar desde tu web",
+      "importSubtitle": "Pegá la URL de tu sitio y agregamos los tours y FAQs que encontremos.",
+      "urlPlaceholder": "https://tuagencia.com",
+      "importCta": "Importar",
+      "importing": "Leyendo tu sitio…",
+      "importDone": "Agregamos {tours} tours, {sections} secciones y {faqs} preguntas. Revisalos y guardá.",
+      "importEmpty": "No encontramos tours en ese sitio. Probá con otra página.",
+      "importThin": "Esa página casi no tiene texto que podamos leer. Probá con otra URL.",
+      "importError": "No pudimos importar desde esa URL. Revisá la dirección e intentá de nuevo.",
+      "importHint": "Leemos varias páginas de tu sitio — puede tardar hasta ~30s. No recargues la página al importar.",
+      "importingHint": "Leyendo tu sitio y armando tu catálogo… esto tarda un momento, no recargues la página.",
+      "save": "Guardar cambios",
+      "saving": "Guardando...",
+      "saved": "Cambios guardados",
+      "loadError": "No pudimos cargar tus tours",
+      "saveError": "No pudimos guardar los cambios"
     },
     "topbar": {
       "search": "Buscar..."

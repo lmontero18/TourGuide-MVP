@@ -1,6 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { compilePrompt } from '@/lib/bot/compilePrompt'
+import { dedupeBusiness, dedupeFaqs, dedupeTours } from '@/lib/knowledge/dedupe'
+import type { BotConfig, BotTone, BusinessSection, FAQ, Tour } from '@/types'
+
+// Payload del paso final del wizard. Tolera body vacio (clientes viejos).
+const finishSchema = z.object({
+  tone: z.enum(['formal', 'friendly', 'casual']).optional(),
+  greeting: z.string().trim().max(500).optional(),
+  language: z.enum(['es', 'en', 'pt']).optional(),
+  faqs: z
+    .array(z.object({
+      question: z.string().trim().min(1).max(500),
+      answer: z.string().trim().min(1).max(2000),
+    }))
+    .max(200)
+    .optional(),
+  tours: z
+    .array(z.object({
+      id: z.string().min(1).max(64),
+      name: z.string().trim().min(1).max(200),
+      category: z.string().trim().max(100).optional(),
+      prices: z
+        .array(z.object({
+          label: z.string().trim().max(60).optional(),
+          amount: z.number(),
+          currency: z.string().trim().min(1).max(8),
+        }))
+        .max(20)
+        .optional(),
+      info: z.string().trim().max(4000),
+      source: z.enum(['manual', 'url', 'pdf', 'photo', 'learned']).optional(),
+      confidence: z.number().min(0).max(1).optional(),
+    }))
+    .max(100)
+    .optional(),
+  business_info: z
+    .array(z.object({
+      id: z.string().min(1).max(64),
+      title: z.string().trim().min(1).max(200),
+      content: z.string().trim().max(4000),
+      source: z.enum(['manual', 'url', 'pdf', 'photo', 'learned']).optional(),
+      confidence: z.number().min(0).max(1).optional(),
+    }))
+    .max(100)
+    .optional(),
+})
 
 const createSchema = z.object({
   org_name: z.string().trim().min(1).max(100),
@@ -88,8 +134,9 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ success: true, organization: org })
 }
 
-// PATCH — finalize onboarding by setting onboarded_at on the user's org
-export async function PATCH() {
+// PATCH — finalize onboarding: persist the wizard knowledge (tours, faqs, tone,
+// greeting, language), compile the bot prompt, and set onboarded_at.
+export async function PATCH(request: NextRequest) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -110,10 +157,51 @@ export async function PATCH() {
     return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
   }
 
+  const parsed = finishSchema.safeParse(await request.json().catch(() => ({})))
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 })
+  }
+
   const serviceClient = await createServiceClient()
+
+  // Estado actual para mergear bot_config y obtener el nombre de la agencia.
+  const { data: current } = await serviceClient
+    .from('organizations')
+    .select('name, faqs, tours, business_info, bot_config')
+    .eq('id', profile.org_id)
+    .single()
+
+  const currentBotConfig = (current?.bot_config ?? {}) as BotConfig
+  const nextBotConfig: BotConfig = { ...currentBotConfig }
+  if (parsed.data.tone !== undefined) nextBotConfig.tone = parsed.data.tone
+  if (parsed.data.greeting !== undefined) nextBotConfig.greeting = parsed.data.greeting
+  if (parsed.data.language !== undefined) nextBotConfig.default_lang = parsed.data.language
+
+  const tours = dedupeTours((parsed.data.tours ?? (current?.tours as Tour[] | null) ?? []) as Tour[])
+  const faqs = dedupeFaqs((parsed.data.faqs ?? (current?.faqs as FAQ[] | null) ?? []) as FAQ[])
+  const businessInfo = dedupeBusiness(
+    (parsed.data.business_info ?? (current?.business_info as BusinessSection[] | null) ?? []) as BusinessSection[],
+  )
+
+  const prompt = compilePrompt({
+    agencyName: current?.name ?? '',
+    tone: (nextBotConfig.tone ?? 'friendly') as BotTone,
+    greeting: nextBotConfig.greeting ?? null,
+    tours,
+    faqs,
+    businessInfo,
+  })
+
   const { data: org, error } = await serviceClient
     .from('organizations')
-    .update({ onboarded_at: new Date().toISOString() })
+    .update({
+      tours,
+      faqs,
+      business_info: businessInfo,
+      bot_config: nextBotConfig,
+      prompt,
+      onboarded_at: new Date().toISOString(),
+    })
     .eq('id', profile.org_id)
     .select('id, name, slug, onboarded_at')
     .single()

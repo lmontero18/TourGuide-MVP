@@ -16,6 +16,15 @@ const NAV_ITEMS = [
     ),
   },
   {
+    key: "tours",
+    href: "/tours",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 11H3v10h6V11z" /><path d="M21 3h-6v18h6V3z" /><path d="M15 7H9v14h6V7z" />
+      </svg>
+    ),
+  },
+  {
     key: "metrics",
     href: "/metrics",
     icon: (

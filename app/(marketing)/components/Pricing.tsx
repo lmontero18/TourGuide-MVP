@@ -27,7 +27,7 @@ export function Pricing() {
         </FadeUp>
 
         <StaggerContainer
-          className="mt-10 sm:mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 items-start"
+          className="mt-10 sm:mt-16 grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 items-stretch max-w-4xl mx-auto"
           staggerDelay={0.12}
         >
           {/* Tier 1 — Do it yourself */}
@@ -145,54 +145,6 @@ export function Pricing() {
                     d="M13 7l5 5m0 0l-5 5m5-5H6"
                   />
                 </svg>
-              </Link>
-            </div>
-          </StaggerItem>
-
-          {/* Tier 3 — Done for you */}
-          <StaggerItem>
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5 h-full flex flex-col">
-              <div className="mb-6">
-                <span className="inline-flex items-center rounded-full bg-navy-900/5 px-3 py-1 text-xs font-bold uppercase tracking-wider text-navy-700">
-                  {t("tiers.2.badge")}
-                </span>
-              </div>
-              <h3 className="font-display text-xl font-bold text-navy-950 tracking-tight">
-                {t("tiers.2.name")}
-              </h3>
-              <p className="mt-2 text-sm text-slate-500 leading-relaxed min-h-[40px]">
-                {t("tiers.2.desc")}
-              </p>
-
-              {/* Price */}
-              <div className="mt-6 pb-6 border-b border-slate-100">
-                <div className="flex items-baseline gap-1">
-                  <span className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter text-navy-950">
-                    {t("tiers.2.price")}
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-slate-500">
-                  {t("tiers.2.priceNote")}
-                </p>
-              </div>
-
-              {/* Features */}
-              <ul className="mt-6 space-y-3 flex-1">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <CheckIcon className="text-navy-500" />
-                    <span className="text-sm text-slate-600">
-                      {t(`tiers.2.f${i}`)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/login"
-                className="mt-8 flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
-              >
-                {t("tiers.2.cta")}
               </Link>
             </div>
           </StaggerItem>

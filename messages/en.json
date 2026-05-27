@@ -4,7 +4,11 @@
     "howItWorks": "How it works",
     "results": "Results",
     "login": "Log in",
-    "cta": "Start free"
+    "cta": "Start free",
+    "account": "Account",
+    "dashboard": "Go to dashboard",
+    "finishOnboarding": "Finish onboarding",
+    "signOut": "Sign out"
   },
   "hero": {
     "headline1": "Your tours sell",
@@ -43,6 +47,12 @@
         "title": "ROI dashboard",
         "desc": "Track leads captured, bookings attributed, and revenue generated — proof your investment is paying off."
       }
+    },
+    "demo": {
+      "botName": "TourGuide Bot",
+      "msg0": "Hi! How much is the Machu Picchu tour for 4 people?",
+      "msg1": "Hi there! 🏔️ The Machu Picchu tour for 4 people is $320 USD per person. It includes transport, a bilingual guide, and lunch. Would you like to book a date?",
+      "msg2": "Yes, do you have availability next Saturday?"
     }
   },
   "how": {
@@ -135,20 +145,6 @@
         "f3": "Custom FAQ & tour catalog import",
         "f4": "ROI dashboard",
         "f5": "Priority support"
-      },
-      "2": {
-        "badge": "White glove",
-        "name": "Done For You",
-        "desc": "Fully managed. We run your bot, optimize it, and report results weekly.",
-        "price": "Custom",
-        "priceNote": "Tailored to your agency's volume and needs",
-        "cta": "Talk to us",
-        "f0": "Everything in Do It For You",
-        "f1": "Dedicated account manager",
-        "f2": "Weekly optimization & reporting",
-        "f3": "Custom integrations",
-        "f4": "Multi-language bot training",
-        "f5": "SLA & phone support"
       }
     }
   },
@@ -272,15 +268,49 @@
         "toursTitle": "Tours",
         "addTour": "Add tour",
         "tourLabel": "Tour",
+        "tourNameLabel": "Tour name",
         "tourNamePlaceholder": "Tour name (e.g. Machu Picchu Full Day)",
-        "tourPricePlaceholder": "$320 USD",
-        "tourDescPlaceholder": "Brief description — what's included, duration, highlights...",
+        "pricesLabel": "Prices",
+        "addPrice": "Add price",
+        "priceLabelPlaceholder": "Label (e.g. Local)",
+        "notesLabel": "Notes",
+        "tourInfoPlaceholder": "What's included, duration, meeting point, conditions…",
+        "businessTitleLabel": "Section title",
+        "businessContentLabel": "Content",
+        "faqQuestionLabel": "Question",
+        "faqAnswerLabel": "Answer",
+        "reviewFlag": "Review",
         "faqsTitle": "Frequently asked questions",
         "addFaq": "Add FAQ",
         "faqLabel": "FAQ",
         "faqQuestionPlaceholder": "Question clients ask (e.g. Do you offer hotel pickup?)",
         "faqAnswerPlaceholder": "Your answer...",
-        "tip": "Don't worry about getting it perfect — you can edit tours and FAQs anytime from your dashboard."
+        "tip": "Don't worry about getting it perfect — you can edit tours and FAQs anytime from your dashboard.",
+        "sourceWebTitle": "Import from my website",
+        "sourceWebDesc": "Paste your website URL and we'll read it to pull your tours, prices and FAQs. You just review.",
+        "urlPlaceholder": "https://youragency.com",
+        "importCta": "Import",
+        "importing": "Reading your site…",
+        "sourcePdfTitle": "Upload my price list (PDF or photo)",
+        "sourcePdfDesc": "Upload the file you already use and we'll extract the prices as-is.",
+        "soon": "Soon",
+        "sourceManual": "Add manually",
+        "sourceManualDesc": "Enter your tours and FAQs by hand, one by one.",
+        "changeSource": "Change source",
+        "businessTitle": "Business info",
+        "addBusiness": "Add section",
+        "businessTitlePlaceholder": "Title (e.g. Cancellation policy)",
+        "businessContentPlaceholder": "Content — e.g. Full refund up to 48h before · pay by card/transfer · pickup downtown…",
+        "importDone": "Found {tours} tours, {sections} business sections and {faqs} FAQs. Review them.",
+        "importEmpty": "We couldn't find tours on that site. Try another page or add them manually.",
+        "importThin": "That page has almost no readable text. Try another URL or upload your price list.",
+        "importError": "We couldn't import from that URL. Check the address and try again.",
+        "importHint": "We read several pages of your site to build your catalog — it can take up to ~30s. Don't reload the page while importing.",
+        "importingHint": "Reading your site and building your catalog… this takes a moment, don't reload the page.",
+        "editLaterHint": "Everything you import can be edited and added to later — this is just to get started fast.",
+        "toursEmpty": "No tours yet. Add one or import from your website.",
+        "businessEmpty": "No business info yet. Add a section (about us, payments, contact…).",
+        "faqsEmpty": "No FAQs yet. Add one."
       },
       "personality": {
         "number": "04",
@@ -330,8 +360,33 @@
   "dashboard": {
     "sidebar": {
       "conversations": "Conversations",
+      "tours": "Tours & FAQs",
       "metrics": "Metrics",
       "settings": "Settings"
+    },
+    "tours": {
+      "title": "Tours & FAQs",
+      "subtitle": "This is what your bot uses to answer. Edit your tours, prices and FAQs anytime.",
+      "tabTours": "Tours",
+      "tabBusiness": "Business",
+      "tabFaqs": "FAQs",
+      "summary": "{tours} tours · {sections} sections · {faqs} FAQs",
+      "importTitle": "Import from your website",
+      "importSubtitle": "Paste your site URL and we'll add the tours and FAQs we find.",
+      "urlPlaceholder": "https://youragency.com",
+      "importCta": "Import",
+      "importing": "Reading your site…",
+      "importDone": "Added {tours} tours, {sections} sections and {faqs} FAQs. Review and save.",
+      "importEmpty": "We couldn't find tours on that site. Try another page.",
+      "importThin": "That page has almost no readable text. Try another URL.",
+      "importError": "We couldn't import from that URL. Check the address and try again.",
+      "importHint": "We read several pages of your site — it can take up to ~30s. Don't reload the page while importing.",
+      "importingHint": "Reading your site and building your catalog… this takes a moment, don't reload the page.",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "saved": "Changes saved",
+      "loadError": "We couldn't load your tours",
+      "saveError": "We couldn't save your changes"
     },
     "topbar": {
       "search": "Search..."

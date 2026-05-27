@@ -76,10 +76,11 @@ export function Features() {
 }
 
 function WhatsAppPreview() {
+  const t = useTranslations("features.demo");
   const messages = [
-    { from: "user", text: "Hola! Cuánto cuesta el tour a Machu Picchu para 4 personas?" },
-    { from: "bot", text: "¡Hola! 🏔️ El tour a Machu Picchu para 4 personas es $320 USD por persona. Incluye transporte, guía bilingüe y almuerzo. ¿Te gustaría reservar una fecha?" },
-    { from: "user", text: "Si, el próximo sábado tienen disponible?" },
+    { from: "user", text: t("msg0") },
+    { from: "bot", text: t("msg1") },
+    { from: "user", text: t("msg2") },
   ];
 
   return (
@@ -95,7 +96,7 @@ function WhatsAppPreview() {
           >
             {m.from === "bot" && (
               <span className="block text-[9px] sm:text-[10px] font-semibold text-blue-500 mb-0.5">
-                TourGuide Bot
+                {t("botName")}
               </span>
             )}
             {m.text}

@@ -61,6 +61,7 @@ async function processWebhook(body: Record<string, unknown>) {
 
       const metadata = value.metadata as { phone_number_id?: string } | undefined
       const messages = value.messages as Array<Record<string, unknown>> | undefined
+      const contactsPayload = value.contacts as Array<{ wa_id?: string; profile?: { name?: string } }> | undefined
 
       if (!metadata?.phone_number_id || !messages) continue
 
@@ -76,10 +77,17 @@ async function processWebhook(body: Record<string, unknown>) {
         continue
       }
 
+      // Map wa_id -> profile name from the webhook contacts array
+      const nameByWaId = new Map<string, string>()
+      for (const c of contactsPayload ?? []) {
+        if (c.wa_id && c.profile?.name) nameByWaId.set(c.wa_id, c.profile.name)
+      }
+
       for (const message of messages) {
         const from = message.from as string
         const type = message.type as string
         const messageId = message.id as string
+        const profileName = nameByWaId.get(from) ?? null
 
         // Extract text content
         let content = ''
@@ -93,14 +101,25 @@ async function processWebhook(body: Record<string, unknown>) {
           content = `[${type}]`
         }
 
-        // Upsert contact
+        // Look up existing contact to decide whether to set name
+        const { data: existing } = await supabase
+          .from('contacts')
+          .select('id, name')
+          .eq('org_id', waAccount.org_id)
+          .eq('phone', from)
+          .maybeSingle()
+
+        const nowIso = new Date().toISOString()
+        const shouldSetName = profileName && (!existing || !existing.name)
+
         const { data: contact } = await supabase
           .from('contacts')
           .upsert(
             {
               org_id: waAccount.org_id,
               phone: from,
-              last_seen_at: new Date().toISOString(),
+              last_seen_at: nowIso,
+              ...(shouldSetName ? { name: profileName } : {}),
             },
             { onConflict: 'org_id,phone' }
           )

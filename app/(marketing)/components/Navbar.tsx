@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import LocaleToggle from "@/components/LocaleToggle";
+import { UserMenu, MobileAuthLinks } from "./UserMenu";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -89,18 +90,7 @@ export function Navbar() {
             {/* Language toggle — always visible */}
             <LocaleToggle />
 
-            <Link
-              href="/login"
-              className="text-sm font-medium text-slate-500 hover:text-navy-900 transition-colors hidden md:block"
-            >
-              {t("login")}
-            </Link>
-            <Link
-              href="/login"
-              className="hidden sm:inline-flex h-8 sm:h-9 items-center rounded-lg bg-navy-900 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-white transition-all hover:bg-navy-800 hover:shadow-lg hover:shadow-navy-900/20 active:scale-[0.98]"
-            >
-              {t("cta")}
-            </Link>
+            <UserMenu />
 
             {/* Mobile hamburger */}
             <button
@@ -151,21 +141,8 @@ export function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
-                <Link
-                  href="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex h-10 items-center justify-center rounded-lg bg-navy-900 text-sm font-semibold text-white"
-                >
-                  {t("cta")}
-                </Link>
-                <Link
-                  href="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex h-10 items-center justify-center rounded-lg border border-slate-200 text-sm font-medium text-slate-600"
-                >
-                  {t("login")}
-                </Link>
+              <div className="pt-3 border-t border-slate-100">
+                <MobileAuthLinks onSelect={() => setMobileOpen(false)} />
               </div>
             </div>
           </motion.div>

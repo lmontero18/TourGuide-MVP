@@ -7,6 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import ConnectWhatsAppButton from "@/components/whatsapp/ConnectWhatsAppButton";
+import TourCards, { type FaqDraft } from "@/components/tours/TourCards";
+import { importFromUrl, type ImportResult } from "@/lib/import/client";
+import type { BusinessSection, Tour } from "@/types";
 
 /* ─── Types ─── */
 interface OnboardingData {
@@ -16,22 +19,10 @@ interface OnboardingData {
   whatsappConnected: boolean;
   whatsappPhone: string;
   tours: Tour[];
-  faqs: FAQ[];
+  faqs: FaqDraft[];
+  business: BusinessSection[];
   tone: "formal" | "friendly" | "casual";
   greeting: string;
-}
-
-interface Tour {
-  id: string;
-  name: string;
-  price: string;
-  description: string;
-}
-
-interface FAQ {
-  id: string;
-  question: string;
-  answer: string;
 }
 
 const INITIAL_DATA: OnboardingData = {
@@ -40,8 +31,9 @@ const INITIAL_DATA: OnboardingData = {
   language: "es",
   whatsappConnected: false,
   whatsappPhone: "",
-  tours: [{ id: "1", name: "", price: "", description: "" }],
+  tours: [{ id: "1", name: "", info: "", source: "manual" }],
   faqs: [{ id: "1", question: "", answer: "" }],
+  business: [],
   tone: "friendly",
   greeting: "",
 };
@@ -159,7 +151,35 @@ export default function OnboardingPage() {
         }
       }
 
-      const res = await fetch("/api/onboarding", { method: "PATCH" });
+      const res = await fetch("/api/onboarding", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tone: data.tone,
+          greeting: data.greeting.trim() || undefined,
+          language: data.language,
+          tours: data.tours
+            .filter((tour) => tour.name.trim())
+            .map((tour) => ({
+              ...tour,
+              name: tour.name.trim(),
+              info: tour.info.trim(),
+            })),
+          faqs: data.faqs
+            .filter((faq) => faq.question.trim() && faq.answer.trim())
+            .map((faq) => ({
+              question: faq.question.trim(),
+              answer: faq.answer.trim(),
+            })),
+          business_info: data.business
+            .filter((section) => section.title.trim() && section.content.trim())
+            .map((section) => ({
+              ...section,
+              title: section.title.trim(),
+              content: section.content.trim(),
+            })),
+        }),
+      });
       const result = await res.json();
 
       if (!res.ok) {
@@ -646,237 +666,145 @@ function StepTours({
   update: (p: Partial<OnboardingData>) => void;
 }) {
   const t = useTranslations("onboarding.steps.tours");
+  const hasContent =
+    data.tours.some((tour) => tour.name.trim()) ||
+    data.faqs.some((faq) => faq.question.trim()) ||
+    data.business.some((section) => section.title.trim());
+  const [mode, setMode] = useState<"picker" | "edit">(hasContent ? "edit" : "picker");
+  const [url, setUrl] = useState("");
+  const [importing, setImporting] = useState(false);
 
-  const addTour = () => {
+  const applyDraft = (result: ImportResult) => {
     update({
-      tours: [
-        ...data.tours,
-        { id: crypto.randomUUID(), name: "", price: "", description: "" },
-      ],
-    });
-  };
-
-  const removeTour = (id: string) => {
-    if (data.tours.length <= 1) return;
-    update({ tours: data.tours.filter((t) => t.id !== id) });
-  };
-
-  const updateTour = (id: string, patch: Partial<Tour>) => {
-    update({
-      tours: data.tours.map((t) => (t.id === id ? { ...t, ...patch } : t)),
-    });
-  };
-
-  const addFaq = () => {
-    update({
+      tours: [...data.tours.filter((tour) => tour.name.trim()), ...result.tours],
       faqs: [
-        ...data.faqs,
-        { id: crypto.randomUUID(), question: "", answer: "" },
+        ...data.faqs.filter((faq) => faq.question.trim()),
+        ...result.faqs.map((faq) => ({ id: crypto.randomUUID(), ...faq })),
       ],
+      business: [...data.business.filter((section) => section.title.trim()), ...result.business],
     });
+    setMode("edit");
   };
 
-  const removeFaq = (id: string) => {
-    if (data.faqs.length <= 1) return;
-    update({ faqs: data.faqs.filter((f) => f.id !== id) });
+  const runImport = async () => {
+    if (!url.trim()) return;
+    setImporting(true);
+    try {
+      const result = await importFromUrl(url);
+      const total = result.tours.length + result.faqs.length + result.business.length;
+      if (total === 0) {
+        toast.message(result.thin ? t("importThin") : t("importEmpty"));
+      } else {
+        toast.success(
+          t("importDone", {
+            tours: result.tours.length,
+            sections: result.business.length,
+            faqs: result.faqs.length,
+          }),
+        );
+        applyDraft(result);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("importError"));
+    } finally {
+      setImporting(false);
+    }
   };
 
-  const updateFaq = (id: string, patch: Partial<FAQ>) => {
-    update({
-      faqs: data.faqs.map((f) => (f.id === id ? { ...f, ...patch } : f)),
-    });
+  const startManual = () => {
+    if (data.tours.length === 0) {
+      update({ tours: [{ id: crypto.randomUUID(), name: "", info: "", source: "manual" }] });
+    }
+    setMode("edit");
   };
+
+  if (mode === "picker") {
+    return (
+      <div>
+        <StepHeader number={t("number")} title={t("title")} description={t("description")} />
+
+        <div className="mt-8 space-y-3">
+          {/* Importar desde la web */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <h3 className="text-sm font-bold text-navy-900">{t("sourceWebTitle")}</h3>
+            <p className="mt-1 text-sm text-slate-500">{t("sourceWebDesc")}</p>
+            <div className="mt-3 flex flex-col sm:flex-row gap-2">
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !importing && runImport()}
+                placeholder={t("urlPlaceholder")}
+                className={INPUT_CLASS}
+              />
+              <button
+                onClick={runImport}
+                disabled={importing || !url.trim()}
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {importing && (
+                  <svg className="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                )}
+                {importing ? t("importing") : t("importCta")}
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-slate-400">
+              {importing ? t("importingHint") : t("importHint")}
+            </p>
+          </div>
+
+          {/* Subir tarifario — próximamente (Fase 3) */}
+          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 p-4 opacity-70">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-500">{t("sourcePdfTitle")}</h3>
+              <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                {t("soon")}
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-slate-400">{t("sourcePdfDesc")}</p>
+          </div>
+
+          {/* Agregar manualmente */}
+          <button
+            onClick={startManual}
+            className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left transition-all hover:border-slate-300 hover:bg-slate-50"
+          >
+            <h3 className="text-sm font-bold text-navy-900">{t("sourceManual")}</h3>
+            <p className="mt-1 text-sm text-slate-500">{t("sourceManualDesc")}</p>
+          </button>
+
+          <p className="pt-1 text-center text-xs text-slate-400">{t("editLaterHint")}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <StepHeader
-        number={t("number")}
-        title={t("title")}
-        description={t("description")}
-      />
+      <StepHeader number={t("number")} title={t("title")} description={t("description")} />
 
-      {/* Tours */}
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-navy-900">{t("toursTitle")}</h3>
-          <button
-            onClick={addTour}
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all active:scale-[0.98]"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            >
-              <path d="M12 5v14" />
-              <path d="M5 12h14" />
-            </svg>
-            {t("addTour")}
-          </button>
-        </div>
+      <button
+        onClick={() => setMode("picker")}
+        className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-navy-900 transition-colors"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5" />
+          <path d="M12 19l-7-7 7-7" />
+        </svg>
+        {t("changeSource")}
+      </button>
 
-        <div className="space-y-3">
-          <AnimatePresence initial={false}>
-            {data.tours.map((tour, i) => (
-              <motion.div
-                key={tour.id}
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      {t("tourLabel")} {i + 1}
-                    </span>
-                    {data.tours.length > 1 && (
-                      <button
-                        onClick={() => removeTour(tour.id)}
-                        className="text-slate-400 hover:text-red-500 transition-colors"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        >
-                          <path d="M18 6L6 18" />
-                          <path d="M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px] gap-3">
-                    <input
-                      type="text"
-                      value={tour.name}
-                      onChange={(e) =>
-                        updateTour(tour.id, { name: e.target.value })
-                      }
-                      placeholder={t("tourNamePlaceholder")}
-                      className={INPUT_CLASS_SM}
-                    />
-                    <input
-                      type="text"
-                      value={tour.price}
-                      onChange={(e) =>
-                        updateTour(tour.id, { price: e.target.value })
-                      }
-                      placeholder={t("tourPricePlaceholder")}
-                      className={INPUT_CLASS_SM}
-                    />
-                  </div>
-                  <textarea
-                    value={tour.description}
-                    onChange={(e) =>
-                      updateTour(tour.id, { description: e.target.value })
-                    }
-                    placeholder={t("tourDescPlaceholder")}
-                    rows={2}
-                    className={`${INPUT_CLASS_SM} resize-none`}
-                  />
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* Divider */}
-      <div className="my-8 h-px bg-slate-200" />
-
-      {/* FAQs */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-navy-900">
-            {t("faqsTitle")}
-          </h3>
-          <button
-            onClick={addFaq}
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all active:scale-[0.98]"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            >
-              <path d="M12 5v14" />
-              <path d="M5 12h14" />
-            </svg>
-            {t("addFaq")}
-          </button>
-        </div>
-
-        <div className="space-y-3">
-          <AnimatePresence initial={false}>
-            {data.faqs.map((faq, i) => (
-              <motion.div
-                key={faq.id}
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      {t("faqLabel")} {i + 1}
-                    </span>
-                    {data.faqs.length > 1 && (
-                      <button
-                        onClick={() => removeFaq(faq.id)}
-                        className="text-slate-400 hover:text-red-500 transition-colors"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        >
-                          <path d="M18 6L6 18" />
-                          <path d="M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    value={faq.question}
-                    onChange={(e) =>
-                      updateFaq(faq.id, { question: e.target.value })
-                    }
-                    placeholder={t("faqQuestionPlaceholder")}
-                    className={INPUT_CLASS_SM}
-                  />
-                  <textarea
-                    value={faq.answer}
-                    onChange={(e) =>
-                      updateFaq(faq.id, { answer: e.target.value })
-                    }
-                    placeholder={t("faqAnswerPlaceholder")}
-                    rows={2}
-                    className={`${INPUT_CLASS_SM} resize-none`}
-                  />
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+      <div className="mt-4">
+        <TourCards
+          tours={data.tours}
+          faqs={data.faqs}
+          business={data.business}
+          onToursChange={(tours) => update({ tours })}
+          onFaqsChange={(faqs) => update({ faqs })}
+          onBusinessChange={(business) => update({ business })}
+        />
       </div>
 
       {/* Tip */}
@@ -898,9 +826,7 @@ function StepTours({
             <path d="M12 8h.01" />
           </svg>
         </div>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          {t("tip")}
-        </p>
+        <p className="text-sm text-slate-600 leading-relaxed">{t("tip")}</p>
       </div>
     </div>
   );
@@ -1046,12 +972,12 @@ function StepGoLive({ data }: { data: OnboardingData }) {
 
     setTimeout(() => {
       const tourName = data.tours[0]?.name || t("sampleTourName");
-      const tourPrice = data.tours[0]?.price || t("sampleTourPrice");
+      const tourInfo = data.tours[0]?.info || t("sampleTourPrice");
       const responseKey =
         data.tone === "formal" ? "responseFormal"
         : data.tone === "casual" ? "responseCasual"
         : "responseFriendly";
-      const response = t(responseKey, { name: tourName, price: tourPrice });
+      const response = t(responseKey, { name: tourName, price: tourInfo });
       setPreviewMessages((prev) => [...prev, { from: "bot" as const, text: response }]);
     }, 1200);
   };
@@ -1224,9 +1150,6 @@ function StepGoLive({ data }: { data: OnboardingData }) {
 
 const INPUT_CLASS =
   "w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
-
-const INPUT_CLASS_SM =
-  "w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
 
 function StepHeader({
   number,

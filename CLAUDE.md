@@ -20,7 +20,7 @@ pueden tomar el control, y metricas de ROI.
 - Tailwind CSS + shadcn/ui
 - Framer Motion
 - Meta Cloud API (WhatsApp — directo, sin BSP intermediario)
-- N8N (motor del bot, hosteado en Railway)
+- N8N (motor del bot, hosteado en Hostinger)
 - Stripe (billing)
 - Vercel (deploy)
 
