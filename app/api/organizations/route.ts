@@ -42,7 +42,6 @@ const businessHoursSchema = z.object({
 })
 
 const botConfigSchema = z.object({
-  default_lang: z.enum(['es', 'en', 'pt']).optional(),
   timezone: z.string().min(1).max(64).optional(),
   business_hours: businessHoursSchema.optional(),
   tone: z.enum(['formal', 'friendly', 'casual']).optional(),

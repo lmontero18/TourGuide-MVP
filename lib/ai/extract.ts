@@ -139,17 +139,20 @@ const normCurrency = (raw: string): string => {
   return CURRENCY_SYMBOLS[c.toUpperCase()] ?? CURRENCY_SYMBOLS[c] ?? c.toUpperCase().slice(0, 8);
 };
 
+type UserContent = string | OpenAI.Chat.Completions.ChatCompletionContentPart[];
+
 /**
- * Extrae el contexto completo del negocio (tours + secciones de negocio + FAQs)
- * desde texto (markdown del sitio o de un documento). Usa Structured Outputs
- * (json_schema strict) para garantizar la forma del JSON.
+ * Núcleo compartido: manda los `messages` al LLM con Structured Outputs
+ * (json_schema strict) y normaliza la respuesta a `ExtractionDraft`.
+ * El `userContent` puede ser texto (sitio web) o content parts multimodales
+ * (imágenes / PDF de un tarifario) — el resto del pipeline es idéntico.
  */
-export async function extractFromText(content: string, source: TourSource): Promise<ExtractionDraft> {
+async function runExtraction(userContent: UserContent, source: TourSource): Promise<ExtractionDraft> {
   const completion = await getClient().chat.completions.create({
     model: MODEL,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content },
+      { role: "user", content: userContent },
     ],
     response_format: {
       type: "json_schema",
@@ -200,4 +203,53 @@ export async function extractFromText(content: string, source: TourSource): Prom
     .map((faq) => ({ question: faq.question.trim(), answer: faq.answer.trim() }));
 
   return { tours, faqs, business };
+}
+
+/**
+ * Extrae el contexto completo del negocio desde texto (markdown del sitio o
+ * de un documento).
+ */
+export async function extractFromText(content: string, source: TourSource): Promise<ExtractionDraft> {
+  return runExtraction(content, source);
+}
+
+/** Un archivo de tarifario ya leído y codificado como data URL base64. */
+export interface ExtractionFile {
+  filename: string;
+  /** MIME real: "application/pdf" | "image/jpeg" | "image/png" | "image/webp". */
+  mime: string;
+  /** data URL completa: "data:<mime>;base64,<...>". */
+  dataUrl: string;
+}
+
+/**
+ * Extrae el contexto del negocio desde uno o varios archivos de tarifario
+ * (PDF nativo/escaneado o fotos). Envía las páginas en un solo mensaje multimodal
+ * para que el modelo combine y deduplique tarifas entre ellas.
+ */
+export async function extractFromFiles(files: ExtractionFile[], source: TourSource): Promise<ExtractionDraft> {
+  if (files.length === 0) return { tours: [], faqs: [], business: [] };
+
+  const parts: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
+    {
+      type: "text",
+      text: "Este es el tarifario de la agencia. Puede venir en varias páginas o imágenes; combiná la información en un solo catálogo, sin duplicar tours ni secciones.",
+    },
+  ];
+
+  for (const file of files) {
+    if (file.mime === "application/pdf") {
+      parts.push({
+        type: "file",
+        file: { filename: file.filename, file_data: file.dataUrl },
+      } as unknown as OpenAI.Chat.Completions.ChatCompletionContentPart);
+    } else {
+      parts.push({
+        type: "image_url",
+        image_url: { url: file.dataUrl, detail: "high" },
+      });
+    }
+  }
+
+  return runExtraction(parts, source);
 }

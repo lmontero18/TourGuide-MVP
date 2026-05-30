@@ -13,7 +13,6 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
 
   const [orgName, setOrgName] = useState("");
-  const [language, setLanguage] = useState<"es" | "en" | "pt">("es");
   const [timezone, setTimezone] = useState("America/Lima");
   const [hoursStart, setHoursStart] = useState(DEFAULT_HOURS.start);
   const [hoursEnd, setHoursEnd] = useState(DEFAULT_HOURS.end);
@@ -28,7 +27,6 @@ export default function SettingsPage() {
         if (!res.ok) throw new Error(result.error ?? "Failed to load");
         const org = result.organization as Organization;
         setOrgName(org.name);
-        setLanguage((org.bot_config?.default_lang as "es" | "en" | "pt") ?? "es");
         setTimezone(org.bot_config?.timezone ?? "America/Lima");
         setHoursStart(org.bot_config?.business_hours?.start ?? DEFAULT_HOURS.start);
         setHoursEnd(org.bot_config?.business_hours?.end ?? DEFAULT_HOURS.end);
@@ -57,7 +55,6 @@ export default function SettingsPage() {
           name: orgName.trim(),
           prompt: prompt.trim() || null,
           bot_config: {
-            default_lang: language,
             timezone,
             business_hours: { start: hoursStart, end: hoursEnd },
             tone,
@@ -118,19 +115,7 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-navy-900 mb-1.5">Default language</label>
-                    <select
-                      value={language}
-                      onChange={(e) => setLanguage(e.target.value as "es" | "en" | "pt")}
-                      className="w-full h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none"
-                    >
-                      <option value="es">Espanol</option>
-                      <option value="en">English</option>
-                      <option value="pt">Portugues</option>
-                    </select>
-                  </div>
+                <div>
                   <div>
                     <label className="block text-xs font-medium text-navy-900 mb-1.5">Timezone</label>
                     <select

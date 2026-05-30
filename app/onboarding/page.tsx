@@ -2,20 +2,19 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import ConnectWhatsAppButton from "@/components/whatsapp/ConnectWhatsAppButton";
 import TourCards, { type FaqDraft } from "@/components/tours/TourCards";
-import { importFromUrl, type ImportResult } from "@/lib/import/client";
+import { importFromUrl, importFromFiles, type ImportResult } from "@/lib/import/client";
 import type { BusinessSection, Tour } from "@/types";
 
 /* ─── Types ─── */
 interface OnboardingData {
   agencyName: string;
   country: string;
-  language: string;
   whatsappConnected: boolean;
   whatsappPhone: string;
   tours: Tour[];
@@ -28,7 +27,6 @@ interface OnboardingData {
 const INITIAL_DATA: OnboardingData = {
   agencyName: "",
   country: "",
-  language: "es",
   whatsappConnected: false,
   whatsappPhone: "",
   tours: [{ id: "1", name: "", info: "", source: "manual" }],
@@ -157,7 +155,6 @@ export default function OnboardingPage() {
         body: JSON.stringify({
           tone: data.tone,
           greeting: data.greeting.trim() || undefined,
-          language: data.language,
           tours: data.tours
             .filter((tour) => tour.name.trim())
             .map((tour) => ({
@@ -463,53 +460,6 @@ function StepAgency({
           </div>
         </Field>
 
-        <Field label={t("language")} htmlFor="language">
-          <div className="flex gap-2">
-            {[
-              { value: "es", label: "Español", flag: "🇪🇸" },
-              { value: "en", label: "English", flag: "🇺🇸" },
-              { value: "pt", label: "Português", flag: "🇧🇷" },
-            ].map((lang) => (
-              <button
-                key={lang.value}
-                type="button"
-                onClick={() => update({ language: lang.value })}
-                className={`flex-1 h-11 rounded-xl border text-sm font-medium transition-all ${
-                  data.language === lang.value
-                    ? "border-navy-900 bg-navy-900/5 text-navy-900 ring-2 ring-navy-900/10"
-                    : "border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                }`}
-              >
-                <span className="mr-1.5">{lang.flag}</span>
-                {lang.label}
-              </button>
-            ))}
-          </div>
-        </Field>
-      </div>
-
-      {/* Tip card */}
-      <div className="mt-8 rounded-xl border border-blue-100 bg-blue-50/50 p-4 flex gap-3">
-        <div className="shrink-0 mt-0.5">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-blue-500"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 16v-4" />
-            <path d="M12 8h.01" />
-          </svg>
-        </div>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          {t("tip")}
-        </p>
       </div>
     </div>
   );
@@ -673,6 +623,12 @@ function StepTours({
   const [mode, setMode] = useState<"picker" | "edit">(hasContent ? "edit" : "picker");
   const [url, setUrl] = useState("");
   const [importing, setImporting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+  const MAX_UPLOAD_FILES = 8;
+  const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
   const applyDraft = (result: ImportResult) => {
     update({
@@ -708,6 +664,45 @@ function StepTours({
       toast.error(err instanceof Error ? err.message : t("importError"));
     } finally {
       setImporting(false);
+    }
+  };
+
+  const runFileImport = async (files: File[]) => {
+    if (files.length === 0) return;
+
+    // Validación ligera en el cliente (espejo del server) para feedback inmediato.
+    if (files.length > MAX_UPLOAD_FILES) {
+      toast.error(t("uploadTooLarge"));
+      return;
+    }
+    for (const file of files) {
+      if (!ACCEPTED_TYPES.includes(file.type) || file.size > MAX_UPLOAD_BYTES) {
+        toast.error(t("uploadTooLarge"));
+        return;
+      }
+    }
+
+    setUploading(true);
+    try {
+      const result = await importFromFiles(files);
+      const total = result.tours.length + result.faqs.length + result.business.length;
+      if (total === 0) {
+        toast.message(t("uploadEmpty"));
+      } else {
+        toast.success(
+          t("importDone", {
+            tours: result.tours.length,
+            sections: result.business.length,
+            faqs: result.faqs.length,
+          }),
+        );
+        applyDraft(result);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("uploadError"));
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -755,15 +750,36 @@ function StepTours({
             </p>
           </div>
 
-          {/* Subir tarifario — próximamente (Fase 3) */}
-          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 p-4 opacity-70">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-500">{t("sourcePdfTitle")}</h3>
-              <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-                {t("soon")}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-slate-400">{t("sourcePdfDesc")}</p>
+          {/* Subir tarifario — PDF o fotos */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <h3 className="text-sm font-bold text-navy-900">{t("sourcePdfTitle")}</h3>
+            <p className="mt-1 text-sm text-slate-500">{t("sourcePdfDesc")}</p>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="application/pdf,image/jpeg,image/png,image/webp"
+              hidden
+              onChange={(e) => runFileImport(Array.from(e.target.files ?? []))}
+            />
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="mt-3 inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-navy-900 bg-white px-5 text-sm font-bold text-navy-900 transition-all hover:bg-navy-50 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {uploading && (
+                <svg className="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+              )}
+              {uploading ? t("uploading") : t("uploadCta")}
+            </button>
+            <p className="mt-2 text-xs text-slate-400">
+              {uploading ? t("uploadingHint") : t("uploadHint")}
+            </p>
           </div>
 
           {/* Agregar manualmente */}
@@ -982,8 +998,6 @@ function StepGoLive({ data }: { data: OnboardingData }) {
     }, 1200);
   };
 
-  const languageLabel =
-    data.language === "es" ? "Español" : data.language === "pt" ? "Português" : "English";
   const toneLabelKey =
     data.tone === "formal" ? "formalLabel" : data.tone === "casual" ? "casualLabel" : "friendlyLabel";
   const tPersonality = useTranslations("onboarding.steps.personality");
@@ -997,10 +1011,9 @@ function StepGoLive({ data }: { data: OnboardingData }) {
       />
 
       {/* Summary cards */}
-      <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
           { label: t("summaryAgency"), value: data.agencyName || "—" },
-          { label: t("summaryLanguage"), value: languageLabel },
           { label: t("summaryTours"), value: `${data.tours.filter((tour) => tour.name).length}` },
           { label: t("summaryTone"), value: tPersonality(toneLabelKey) },
         ].map((item) => (

@@ -235,9 +235,7 @@
         "name": "Nombre de la agencia",
         "namePlaceholder": "Cusco Expeditions",
         "country": "País",
-        "countryPlaceholder": "Selecciona tu país",
-        "language": "Idioma del bot",
-        "tip": "Tu bot responderá en este idioma por defecto. Los clientes pueden escribir en cualquier idioma — el bot lo detectará y responderá según corresponda."
+        "countryPlaceholder": "Selecciona tu país"
       },
       "whatsapp": {
         "number": "02",
@@ -293,7 +291,13 @@
         "importing": "Leyendo tu sitio…",
         "sourcePdfTitle": "Subir mi tarifario (PDF o foto)",
         "sourcePdfDesc": "Subí el archivo que ya usás y extraemos los precios tal cual.",
-        "soon": "Pronto",
+        "uploadCta": "Subir archivo",
+        "uploading": "Leyendo tu tarifario…",
+        "uploadHint": "Aceptamos PDF y fotos (JPG, PNG, WEBP). Podés subir varias páginas a la vez.",
+        "uploadingHint": "Leyendo tu tarifario y armando tu catálogo… esto tarda un momento, no recargues la página.",
+        "uploadEmpty": "No pudimos leer tours en ese archivo. Probá con una foto más nítida o subí el PDF.",
+        "uploadError": "No pudimos procesar ese archivo. Intentá de nuevo.",
+        "uploadTooLarge": "Archivo no soportado o muy grande (máx. 8 archivos, 10MB c/u; PDF/JPG/PNG/WEBP).",
         "sourceManual": "Agregar manualmente",
         "sourceManualDesc": "Cargá tus tours y FAQs a mano, uno por uno.",
         "changeSource": "Cambiar fuente",
@@ -336,7 +340,6 @@
         "title": "Previsualiza y sal en vivo",
         "description": "Prueba tu bot abajo y lánzalo cuando estés listo.",
         "summaryAgency": "Agencia",
-        "summaryLanguage": "Idioma",
         "summaryTours": "Tours",
         "summaryTone": "Tono",
         "previewYourAgency": "Tu Agencia",
@@ -480,7 +483,6 @@
       "org": {
         "title": "Organización",
         "name": "Nombre de la agencia",
-        "language": "Idioma por defecto",
         "timezone": "Zona horaria"
       },
       "hours": {

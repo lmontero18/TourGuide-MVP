@@ -9,7 +9,6 @@ import type { BotConfig, BotTone, BusinessSection, FAQ, Tour } from '@/types'
 const finishSchema = z.object({
   tone: z.enum(['formal', 'friendly', 'casual']).optional(),
   greeting: z.string().trim().max(500).optional(),
-  language: z.enum(['es', 'en', 'pt']).optional(),
   faqs: z
     .array(z.object({
       question: z.string().trim().min(1).max(500),
@@ -135,7 +134,7 @@ export async function POST(request: NextRequest) {
 }
 
 // PATCH — finalize onboarding: persist the wizard knowledge (tours, faqs, tone,
-// greeting, language), compile the bot prompt, and set onboarded_at.
+// greeting), compile the bot prompt, and set onboarded_at.
 export async function PATCH(request: NextRequest) {
   const supabase = await createClient()
 
@@ -175,7 +174,6 @@ export async function PATCH(request: NextRequest) {
   const nextBotConfig: BotConfig = { ...currentBotConfig }
   if (parsed.data.tone !== undefined) nextBotConfig.tone = parsed.data.tone
   if (parsed.data.greeting !== undefined) nextBotConfig.greeting = parsed.data.greeting
-  if (parsed.data.language !== undefined) nextBotConfig.default_lang = parsed.data.language
 
   const tours = dedupeTours((parsed.data.tours ?? (current?.tours as Tour[] | null) ?? []) as Tour[])
   const faqs = dedupeFaqs((parsed.data.faqs ?? (current?.faqs as FAQ[] | null) ?? []) as FAQ[])

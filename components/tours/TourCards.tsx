@@ -14,8 +14,11 @@ export interface FaqDraft {
 // Monedas comunes en LATAM (+ USD/EUR). La detectada por la IA se agrega si no está.
 const CURRENCIES = ["USD", "CRC", "PEN", "MXN", "COP", "ARS", "CLP", "BRL", "GTQ", "BOB", "UYU", "DOP", "PAB", "EUR"];
 
-const INPUT =
-  "w-full h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
+// Base sin ancho: quien lo use define su width (w-full, flex-1, w-28…) sin que
+// `w-full` gane por orden de CSS y aplaste el layout (caso de las filas de precio).
+const INPUT_BASE =
+  "h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
+const INPUT = `w-full ${INPUT_BASE}`;
 const TEXTAREA = `${INPUT} h-auto py-3 leading-relaxed resize-none`;
 const FIELD_LABEL = "block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5";
 
@@ -171,14 +174,14 @@ export function ToursEditor({
                               value={p.label ?? ""}
                               onChange={(e) => updatePrice(tour, pi, { label: e.target.value || undefined })}
                               placeholder={t("priceLabelPlaceholder")}
-                              className={`${INPUT} h-10 flex-1 min-w-0`}
+                              className={`${INPUT_BASE} h-10 flex-1 min-w-0`}
                             />
                             <input
                               type="number"
                               value={Number.isFinite(p.amount) ? p.amount : ""}
                               onChange={(e) => updatePrice(tour, pi, { amount: e.target.value === "" ? 0 : Number(e.target.value) })}
                               placeholder="0"
-                              className={`${INPUT} h-10 w-28 text-right`}
+                              className={`${INPUT_BASE} h-10 w-28 text-right`}
                             />
                             <select
                               value={p.currency}

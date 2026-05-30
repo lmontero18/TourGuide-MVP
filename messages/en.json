@@ -235,9 +235,7 @@
         "name": "Agency name",
         "namePlaceholder": "Cusco Expeditions",
         "country": "Country",
-        "countryPlaceholder": "Select your country",
-        "language": "Bot language",
-        "tip": "Your bot will answer in this language by default. Clients can still write in any language — the bot will detect and respond accordingly."
+        "countryPlaceholder": "Select your country"
       },
       "whatsapp": {
         "number": "02",
@@ -293,7 +291,13 @@
         "importing": "Reading your site…",
         "sourcePdfTitle": "Upload my price list (PDF or photo)",
         "sourcePdfDesc": "Upload the file you already use and we'll extract the prices as-is.",
-        "soon": "Soon",
+        "uploadCta": "Upload file",
+        "uploading": "Reading your price list…",
+        "uploadHint": "We accept PDF and photos (JPG, PNG, WEBP). You can upload several pages at once.",
+        "uploadingHint": "Reading your price list and building your catalog… this takes a moment, don't reload the page.",
+        "uploadEmpty": "We couldn't read tours from that file. Try a clearer photo or upload the PDF.",
+        "uploadError": "We couldn't process that file. Please try again.",
+        "uploadTooLarge": "Unsupported or too-large file (max 8 files, 10MB each; PDF/JPG/PNG/WEBP).",
         "sourceManual": "Add manually",
         "sourceManualDesc": "Enter your tours and FAQs by hand, one by one.",
         "changeSource": "Change source",
@@ -336,7 +340,6 @@
         "title": "Preview & go live",
         "description": "Test your bot below, then launch it when you're ready.",
         "summaryAgency": "Agency",
-        "summaryLanguage": "Language",
         "summaryTours": "Tours",
         "summaryTone": "Tone",
         "previewYourAgency": "Your Agency",
@@ -480,7 +483,6 @@
       "org": {
         "title": "Organization",
         "name": "Agency name",
-        "language": "Default language",
         "timezone": "Timezone"
       },
       "hours": {
