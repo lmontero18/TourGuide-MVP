@@ -27,6 +27,16 @@ export default function MetricsPage() {
       </TopBar>
 
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
+        {/* Demo data notice — these metrics are sample data, not real activity */}
+        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-medium text-amber-800">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+          </svg>
+          <span><strong>Demo data</strong> — sample metrics for preview, not real activity.</span>
+        </div>
+
         {/* Top metric cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard

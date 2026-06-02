@@ -19,12 +19,16 @@
 
 El código no cambia. Lo que falta es **deploy** + **configuración en Meta** + **2 videos** + **App Review**.
 
+### Progreso
+- ✅ **Deploy a producción:** `https://tour-guide-psi.vercel.app`.
+- ✅ **Webhook configurado** (Callback + verify token + campo `messages` suscripto).
+- ✅ **Recepción probada en prod:** mensaje entrante → aparece en `/conversations`.
+
 ### Qué falta (resumen rápido)
-1. **Deploy a producción** (Vercel) → para tener URLs públicas (`/privacy`, `/data-deletion`).
-2. En Meta (Settings → Basic): **ícono PNG 1024×1024**, nombre, categoría, y cargar las 2 URLs.
-3. Probar el pipeline (conexión manual + ngrok) y **grabar Video 1**.
-4. **Grabar Video 2** (crear plantilla en WhatsApp Manager).
-5. Enviar **App Review** ("Incorporación sin socio").
+1. Probar **ENVÍO** (responder desde el dashboard) → valida `META_SYSTEM_USER_TOKEN` y da el **Video 1**.
+2. **Grabar Video 1** (enviar mensaje) y **Video 2** (crear plantilla en WhatsApp Manager).
+3. En Meta (Settings → Basic): **ícono PNG 1024×1024**, nombre, categoría, cargar las 2 URLs.
+4. Enviar **App Review** ("Incorporación sin socio").
 
 > Razón social cargada en `/privacy`: **3-102-943883 Sociedad de Responsabilidad Limitada**
 > (nombre comercial: TourGuide). Conviene un repaso legal humano antes de producción.
