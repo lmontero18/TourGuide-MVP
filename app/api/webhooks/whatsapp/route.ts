@@ -174,9 +174,13 @@ async function processWebhook(body: Record<string, unknown>) {
         // Mark as read in WhatsApp
         if (messageId) {
           const { markAsRead } = await import('@/lib/whatsapp/client')
-          await markAsRead(metadata.phone_number_id, waAccount.access_token, messageId).catch(() => {
-            // Non-critical, don't fail the webhook
-          })
+          const { getMessagingToken } = await import('@/lib/whatsapp/token')
+          const token = getMessagingToken(waAccount)
+          if (token) {
+            await markAsRead(metadata.phone_number_id, token, messageId).catch(() => {
+              // Non-critical, don't fail the webhook
+            })
+          }
         }
       }
     }

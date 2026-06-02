@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { sendTextMessage } from '@/lib/whatsapp/client'
+import { getMessagingToken } from '@/lib/whatsapp/token'
 
 const sendSchema = z.object({
   content: z.string().trim().min(1).max(4096),
@@ -71,8 +72,13 @@ export async function POST(
     return NextResponse.json({ error: 'WhatsApp not connected for this organization' }, { status: 400 })
   }
 
+  const token = getMessagingToken(wa)
+  if (!token) {
+    return NextResponse.json({ error: 'WhatsApp messaging token not configured' }, { status: 500 })
+  }
+
   try {
-    await sendTextMessage(wa.phone_number_id, wa.access_token, conv.contact.phone, parsed.data.content)
+    await sendTextMessage(wa.phone_number_id, token, conv.contact.phone, parsed.data.content)
   } catch (err) {
     console.error('WhatsApp send failed:', err)
     return NextResponse.json(

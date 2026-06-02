@@ -41,50 +41,23 @@ export function Footer() {
               </p>
             </div>
 
-            {/* Link columns — grid instead of flex for mobile wrapping */}
-            <div className="grid grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 mb-3">
-                  {t("product")}
-                </p>
-                <ul className="space-y-2">
-                  {["Features", "Pricing", "Changelog"].map((item) => (
-                    <li key={item}>
-                      <a href="#" className="text-xs sm:text-sm text-slate-500 hover:text-navy-900 transition-colors">
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 mb-3">
-                  {t("company")}
-                </p>
-                <ul className="space-y-2">
-                  {["About", "Blog", "Careers"].map((item) => (
-                    <li key={item}>
-                      <a href="#" className="text-xs sm:text-sm text-slate-500 hover:text-navy-900 transition-colors">
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 mb-3">
-                  {t("legal")}
-                </p>
-                <ul className="space-y-2">
-                  {["Privacy", "Terms"].map((item) => (
-                    <li key={item}>
-                      <a href="#" className="text-xs sm:text-sm text-slate-500 hover:text-navy-900 transition-colors">
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {/* Legal links */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 mb-3">
+                {t("legal")}
+              </p>
+              <ul className="space-y-2">
+                {[
+                  { label: "Privacy", href: "/privacy" },
+                  { label: "Data deletion", href: "/data-deletion" },
+                ].map((item) => (
+                  <li key={item.label}>
+                    <Link href={item.href} className="text-xs sm:text-sm text-slate-500 hover:text-navy-900 transition-colors">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 

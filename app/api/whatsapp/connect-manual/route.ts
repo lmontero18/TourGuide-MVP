@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { registerPhoneNumber } from '@/lib/whatsapp/client'
 
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
 
@@ -66,6 +67,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Register the phone number (idempotente, best-effort) si hay PIN configurado.
+    const pin = process.env.META_DEFAULT_WABA_PIN
+    if (pin) {
+      try {
+        await registerPhoneNumber(phone_number_id, access_token, pin)
+      } catch (err) {
+        console.error('WhatsApp register skipped (manual):', err)
+      }
+    }
+
+    // En el path manual conservamos el token provisto: es el fallback cuando no hay
+    // System User token central (ver lib/whatsapp/token.ts).
     const { data: waAccount, error } = await supabase
       .from('whatsapp_accounts')
       .upsert(

@@ -137,7 +137,7 @@ export interface WhatsAppAccount {
   waba_id: string
   phone_number_id: string
   phone_number: string
-  access_token: string
+  access_token: string | null  // legacy; el runtime usa el System User token central (lib/whatsapp/token.ts)
   status: OrgStatus
   connected_at: string | null
   created_at: string

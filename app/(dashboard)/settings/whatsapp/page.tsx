@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
 import { createClient } from "@/lib/supabase/client";
+import ConnectWhatsAppButton from "@/components/whatsapp/ConnectWhatsAppButton";
 
 interface ConnectedAccount {
   id: string;
@@ -17,43 +18,45 @@ export default function WhatsAppSettingsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [account, setAccount] = useState<ConnectedAccount | null>(null);
+  const [showManual, setShowManual] = useState(false);
 
   const [wabaId, setWabaId] = useState("");
   const [phoneNumberId, setPhoneNumberId] = useState("");
   const [accessToken, setAccessToken] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
-  useEffect(() => {
-    const load = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("users")
-        .select("org_id")
-        .eq("id", user.id)
-        .single();
-
-      if (!profile?.org_id) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: wa } = await supabase
-        .from("whatsapp_accounts")
-        .select("id, phone_number, status, connected_at")
-        .eq("org_id", profile.org_id)
-        .maybeSingle();
-
-      if (wa) setAccount(wa as ConnectedAccount);
+  const loadAccount = useCallback(async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       setLoading(false);
-    };
-    load();
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("users")
+      .select("org_id")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.org_id) {
+      setLoading(false);
+      return;
+    }
+
+    const { data: wa } = await supabase
+      .from("whatsapp_accounts")
+      .select("id, phone_number, status, connected_at")
+      .eq("org_id", profile.org_id)
+      .maybeSingle();
+
+    setAccount(wa ? (wa as ConnectedAccount) : null);
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    loadAccount();
+  }, [loadAccount]);
 
   const handleConnect = async () => {
     if (!wabaId.trim() || !phoneNumberId.trim() || !accessToken.trim()) {
@@ -138,8 +141,35 @@ export default function WhatsAppSettingsPage() {
               </div>
             </section>
           ) : (
+            <>
+            {/* Acción primaria: conectar con un clic vía Embedded Signup */}
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h2 className="text-sm font-bold text-navy-900 mb-1">Connect manually</h2>
+              <h2 className="text-sm font-bold text-navy-900 mb-1">Connect WhatsApp</h2>
+              <p className="text-xs text-slate-400 mb-4">
+                Connect your number in one click — log in with Facebook and pick your WhatsApp Business number.
+              </p>
+              <ConnectWhatsAppButton onConnected={() => { void loadAccount(); }} />
+            </section>
+
+            {/* Fallback avanzado: conexión manual con credenciales de Meta */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-5">
+              <button
+                type="button"
+                onClick={() => setShowManual((s) => !s)}
+                className="flex w-full items-center justify-between text-left"
+              >
+                <span className="text-sm font-bold text-navy-900">Connect manually (advanced)</span>
+                <svg
+                  width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  className={`text-slate-400 transition-transform ${showManual ? "rotate-180" : ""}`}
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+
+              {showManual && (
+              <div className="mt-4">
               <p className="text-xs text-slate-400 mb-4">
                 Get these values from Meta Developer Console → WhatsApp → Configuración de la API.
               </p>
@@ -204,7 +234,10 @@ export default function WhatsAppSettingsPage() {
                   {submitting ? "Connecting..." : "Connect WhatsApp"}
                 </button>
               </div>
+              </div>
+              )}
             </section>
+            </>
           )}
         </div>
       </div>

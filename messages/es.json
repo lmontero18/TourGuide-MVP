@@ -14,7 +14,7 @@
     "headline1": "Tus tours se venden",
     "headline2": "solos a las",
     "headline3": "2 AM",
-    "sub": "Bots de WhatsApp que responden, califican y reservan — entrenados con tus tours, tus precios, tu voz. Ningún lead perdido mientras duermes.",
+    "sub": "Bots de WhatsApp que responden, califican y reservan, entrenados con tus tours, tus precios y tu voz. Ningún lead perdido mientras duermes.",
     "ctaPrimary": "Prueba gratis",
     "ctaSecondary": "Ver cómo funciona",
     "trust": "14 días gratis · Sin tarjeta · Configura en 10 min"
@@ -29,7 +29,7 @@
     "items": {
       "0": {
         "title": "IA que habla como tu marca",
-        "desc": "Entrena al bot con tus tours, precios, FAQs y tono de voz. Responde como tu mejor agente — en español, portugués o inglés — las 24 horas."
+        "desc": "Entrena al bot con tus tours, precios, FAQs y tono de voz. Responde como tu mejor agente, en español, portugués o inglés, las 24 horas."
       },
       "1": {
         "title": "Toma de control en vivo",
@@ -37,7 +37,7 @@
       },
       "2": {
         "title": "Captura fuera de horario",
-        "desc": "El 60% de las consultas por WhatsApp llegan fuera de horario. El bot las maneja todas — ningún lead se pierde."
+        "desc": "El 60% de las consultas por WhatsApp llegan fuera de horario. El bot las maneja todas y ningún lead se pierde."
       },
       "3": {
         "title": "Calificación de leads",
@@ -45,7 +45,7 @@
       },
       "4": {
         "title": "Dashboard de ROI",
-        "desc": "Rastrea leads capturados, reservas atribuidas e ingresos generados — prueba de que tu inversión rinde."
+        "desc": "Rastrea leads capturados, reservas atribuidas e ingresos generados, la prueba de que tu inversión rinde."
       }
     },
     "demo": {
@@ -58,7 +58,7 @@
   "how": {
     "label": "Cómo funciona",
     "title": "Tres pasos. Sin conocimientos técnicos.",
-    "sub": "Nosotros configuramos todo — tú solo nos cuentas sobre tus tours.",
+    "sub": "Nosotros configuramos todo. Tú solo nos cuentas sobre tus tours.",
     "steps": {
       "0": {
         "step": "PASO 1",
@@ -68,7 +68,7 @@
       "1": {
         "step": "PASO 2",
         "title": "Armamos tu bot",
-        "desc": "Lo entrenamos para responder como tu mejor agente — con tu tono, tu idioma, tus precios."
+        "desc": "Lo entrenamos para responder como tu mejor agente, con tu tono, tu idioma y tus precios."
       },
       "2": {
         "step": "PASO 3",
@@ -111,7 +111,7 @@
   "ctaSection": {
     "title1": "Deja de perder leads",
     "title2": "por tu buzón de voz",
-    "sub": "Tu próximo cliente te está escribiendo ahora. Asegúrate de que alguien — o algún bot — responda.",
+    "sub": "Tu próximo cliente te está escribiendo ahora. Asegúrate de que alguien, o algún bot, responda.",
     "button": "Prueba gratis",
     "note": "14 días gratis · Sin tarjeta"
   },

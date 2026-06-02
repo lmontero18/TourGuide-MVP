@@ -117,6 +117,38 @@ export async function sendMediaMessage(
   })
 }
 
+// Registra el numero en la Cloud API (requerido para numeros nuevos onboarded por
+// Embedded Signup antes de poder enviar/recibir). Establece el PIN de two-step.
+// Idempotente: si el numero ya esta registrado, Meta devuelve un error que ignoramos.
+export async function registerPhoneNumber(
+  phoneNumberId: string,
+  accessToken: string,
+  pin: string
+) {
+  const res = await fetch(`${GRAPH_API_BASE}/${phoneNumberId}/register`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ messaging_product: 'whatsapp', pin }),
+  })
+
+  if (res.ok) return
+
+  const error = (await res.json().catch(() => ({}))) as {
+    error?: { code?: number; error_subcode?: number; message?: string }
+  }
+
+  // "already registered" → no-op. Meta usa code 100 / subcode 2388004 (o mensajes con
+  // "already registered"). Cualquier otro error si se propaga.
+  const subcode = error.error?.error_subcode
+  const message = error.error?.message ?? ''
+  if (subcode === 2388004 || /already\s+registered/i.test(message)) return
+
+  throw new Error(`WhatsApp register error: ${JSON.stringify(error)}`)
+}
+
 export async function markAsRead(
   phoneNumberId: string,
   accessToken: string,

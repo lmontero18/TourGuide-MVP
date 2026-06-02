@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { registerPhoneNumber } from '@/lib/whatsapp/client'
 
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
 
@@ -63,7 +64,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to subscribe app to WABA', details }, { status: 400 })
     }
 
-    // 3. Fetch phone number display info (to store the E.164 number)
+    // 3. Register the phone number on Cloud API (sets the two-step PIN). Idempotente.
+    const pin = process.env.META_DEFAULT_WABA_PIN
+    if (pin) {
+      try {
+        await registerPhoneNumber(phone_number_id, access_token, pin)
+      } catch (err) {
+        // El numero puede tener two-step con otro PIN, o estar ya activo en otra app.
+        // No bloqueamos la conexion; el numero se conecta igual y se puede registrar a mano.
+        console.error('WhatsApp register skipped:', err)
+      }
+    }
+
+    // 4. Fetch phone number display info (to store the E.164 number)
     const phoneRes = await fetch(
       `${GRAPH_API_BASE}/${phone_number_id}?fields=display_phone_number,verified_name,quality_rating`,
       { headers: { Authorization: `Bearer ${access_token}` } }
@@ -72,7 +85,8 @@ export async function POST(request: NextRequest) {
     const phoneData = (await phoneRes.json()) as { display_phone_number?: string }
     const phoneNumber = phoneData.display_phone_number ?? parsed.data.phone_number ?? ''
 
-    // 4. Save credentials to our DB
+    // 5. Save routing identifiers. NO guardamos el access_token: el runtime usa el
+    // System User token central (ver lib/whatsapp/token.ts).
     const { data: waAccount, error } = await supabase
       .from('whatsapp_accounts')
       .upsert(
@@ -81,7 +95,7 @@ export async function POST(request: NextRequest) {
           waba_id,
           phone_number_id,
           phone_number: phoneNumber,
-          access_token,
+          access_token: null,
           status: 'active',
           connected_at: new Date().toISOString(),
         },

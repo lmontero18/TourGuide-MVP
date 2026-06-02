@@ -25,10 +25,13 @@ interface Props {
   onConnected?: (account: { phone_number: string; status: string }) => void;
 }
 
+type SignupEvent = "FINISH" | "CANCEL" | "ERROR";
+
 export default function ConnectWhatsAppButton({ onConnected }: Props) {
   const [sdkReady, setSdkReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const sessionInfoRef = useRef<SessionInfo | null>(null);
+  const lastEventRef = useRef<SignupEvent | null>(null);
 
   const APP_ID = process.env.NEXT_PUBLIC_META_APP_ID;
   const CONFIG_ID = process.env.NEXT_PUBLIC_META_CONFIG_ID;
@@ -68,12 +71,17 @@ export default function ConnectWhatsAppButton({ onConnected }: Props) {
       if (!event.origin.endsWith("facebook.com")) return;
       try {
         const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-        if (data?.type === "WA_EMBEDDED_SIGNUP" && data?.event === "FINISH") {
+        if (data?.type !== "WA_EMBEDDED_SIGNUP") return;
+
+        lastEventRef.current = data.event as SignupEvent;
+        if (data.event === "FINISH") {
           sessionInfoRef.current = {
             phone_number_id: data.data.phone_number_id,
             waba_id: data.data.waba_id,
           };
         }
+        // CANCEL / ERROR: el usuario cerró el popup o Meta reportó un error.
+        // Lo manejamos en el callback de FB.login con feedback diferenciado.
       } catch {
         // Not JSON or irrelevant message — ignore
       }
@@ -90,40 +98,62 @@ export default function ConnectWhatsAppButton({ onConnected }: Props) {
     }
 
     setLoading(true);
+    lastEventRef.current = null;
+
+    // FB.login NO acepta un callback async ("Expression is of type asyncfunction,
+    // not function"), así que el trabajo async va en una función aparte y el callback
+    // solo la dispara.
+    const finishLogin = async (response: { authResponse?: { code?: string }; status?: string }) => {
+      try {
+        const code = response.authResponse?.code;
+        const session = sessionInfoRef.current;
+
+        // El usuario cerró el popup a mitad de camino.
+        if (lastEventRef.current === "CANCEL") {
+          toast.info("Conexión cancelada.");
+          return;
+        }
+
+        // Meta reportó un error, o la sesión quedó incompleta.
+        if (lastEventRef.current === "ERROR" || !code || !session) {
+          toast.error(
+            "No se pudo completar la conexión con Meta. Probá de nuevo o usá la conexión manual.",
+          );
+          return;
+        }
+
+        const res = await fetch("/api/whatsapp/connect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code,
+            waba_id: session.waba_id,
+            phone_number_id: session.phone_number_id,
+          }),
+        });
+
+        const result = await res.json();
+        if (!res.ok) {
+          toast.error(
+            result.error
+              ? `${result.error}. Si sigue fallando, probá la conexión manual.`
+              : "No se pudo conectar WhatsApp. Probá la conexión manual.",
+          );
+          return;
+        }
+
+        toast.success(`WhatsApp conectado: ${result.account.phone_number}`);
+        onConnected?.(result.account);
+      } finally {
+        setLoading(false);
+        sessionInfoRef.current = null;
+        lastEventRef.current = null;
+      }
+    };
 
     window.FB.login(
-      async (response) => {
-        try {
-          const code = response.authResponse?.code;
-          const session = sessionInfoRef.current;
-
-          if (!code || !session) {
-            toast.error("Signup was cancelled or incomplete.");
-            return;
-          }
-
-          const res = await fetch("/api/whatsapp/connect", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              code,
-              waba_id: session.waba_id,
-              phone_number_id: session.phone_number_id,
-            }),
-          });
-
-          const result = await res.json();
-          if (!res.ok) {
-            toast.error(result.error ?? "Failed to connect WhatsApp");
-            return;
-          }
-
-          toast.success(`WhatsApp connected: ${result.account.phone_number}`);
-          onConnected?.(result.account);
-        } finally {
-          setLoading(false);
-          sessionInfoRef.current = null;
-        }
+      (response) => {
+        void finishLogin(response);
       },
       {
         config_id: CONFIG_ID,

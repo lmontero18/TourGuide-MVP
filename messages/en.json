@@ -14,7 +14,7 @@
     "headline1": "Your tours sell",
     "headline2": "themselves at",
     "headline3": "2 AM",
-    "sub": "WhatsApp bots that answer, qualify, and book — trained on your tours, your prices, your voice. No leads lost to sleep.",
+    "sub": "WhatsApp bots that answer, qualify, and book. Trained on your tours, your prices, and your voice. No leads lost to sleep.",
     "ctaPrimary": "Start free trial",
     "ctaSecondary": "See how it works",
     "trust": "Free 14-day trial · No credit card · Setup in 10 min"
@@ -29,7 +29,7 @@
     "items": {
       "0": {
         "title": "AI that speaks your brand",
-        "desc": "Train the bot on your specific tours, prices, FAQs, and tone of voice. It answers like your best agent — in Spanish, Portuguese, or English — 24 hours a day."
+        "desc": "Train the bot on your specific tours, prices, FAQs, and tone of voice. It answers like your best agent, in Spanish, Portuguese, or English, 24 hours a day."
       },
       "1": {
         "title": "Live agent takeover",
@@ -37,7 +37,7 @@
       },
       "2": {
         "title": "After-hours capture",
-        "desc": "60% of WhatsApp inquiries come outside business hours. The bot handles them all — no lead left behind."
+        "desc": "60% of WhatsApp inquiries come outside business hours. The bot handles them all, so no lead is left behind."
       },
       "3": {
         "title": "Lead qualification",
@@ -45,7 +45,7 @@
       },
       "4": {
         "title": "ROI dashboard",
-        "desc": "Track leads captured, bookings attributed, and revenue generated — proof your investment is paying off."
+        "desc": "Track leads captured, bookings attributed, and revenue generated, proof your investment is paying off."
       }
     },
     "demo": {
@@ -58,7 +58,7 @@
   "how": {
     "label": "How it works",
     "title": "Three steps. No tech skills needed.",
-    "sub": "We set up everything for you — you just tell us about your tours.",
+    "sub": "We set up everything for you. You just tell us about your tours.",
     "steps": {
       "0": {
         "step": "STEP 1",
@@ -68,7 +68,7 @@
       "1": {
         "step": "STEP 2",
         "title": "We build your bot",
-        "desc": "We train it to answer like your best agent — in your tone, your language, with your prices."
+        "desc": "We train it to answer like your best agent, in your tone, your language, and with your prices."
       },
       "2": {
         "step": "STEP 3",
@@ -111,7 +111,7 @@
   "ctaSection": {
     "title1": "Stop losing leads",
     "title2": "to your voicemail",
-    "sub": "Your next customer is messaging you right now. Make sure someone — or some bot — answers.",
+    "sub": "Your next customer is messaging you right now. Make sure someone, or some bot, answers.",
     "button": "Start free trial",
     "note": "14 days free · No credit card"
   },
