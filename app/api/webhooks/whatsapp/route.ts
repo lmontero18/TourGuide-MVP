@@ -46,6 +46,31 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ status: 'ok' }, { status: 200 })
 }
 
+async function callN8nBot(params: {
+  org_id: string
+  conversation_id: string
+  contact_phone: string
+  phone_number_id: string
+  access_token: string
+  message: string
+  system_prompt: string
+  n8n_secret: string
+  callback_base_url: string
+}) {
+  const url = process.env.N8N_WEBHOOK_URL
+  if (!url) return
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    })
+  } catch {
+    // Non-critical — log but don't throw
+    console.error('callN8nBot failed')
+  }
+}
+
 async function processWebhook(body: Record<string, unknown>) {
   const supabase = getServiceClient()
   const entries = body.entry as Array<Record<string, unknown>> | undefined
@@ -97,6 +122,34 @@ async function processWebhook(body: Record<string, unknown>) {
         } else if (type === 'interactive') {
           const interactive = message.interactive as { button_reply?: { title?: string }; list_reply?: { title?: string } }
           content = interactive?.button_reply?.title ?? interactive?.list_reply?.title ?? `[${type}]`
+        } else if (type === 'audio') {
+          try {
+            const { getMessagingToken } = await import('@/lib/whatsapp/token')
+            const tok = getMessagingToken(waAccount)
+            const audioId = (message.audio as { id?: string })?.id
+            if (audioId && tok) {
+              const mediaRes = await fetch(
+                `https://graph.facebook.com/v21.0/${audioId}`,
+                { headers: { Authorization: `Bearer ${tok}` } }
+              )
+              const mediaData = await mediaRes.json() as { url?: string }
+              if (mediaData.url) {
+                const audioRes = await fetch(mediaData.url, {
+                  headers: { Authorization: `Bearer ${tok}` }
+                })
+                const audioBuffer = await audioRes.arrayBuffer()
+                const { OpenAI } = await import('openai')
+                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+                const transcript = await openai.audio.transcriptions.create({
+                  file: new File([audioBuffer], 'audio.ogg', { type: 'audio/ogg' }),
+                  model: 'whisper-1',
+                })
+                content = transcript.text
+              }
+            }
+          } catch {
+            content = '[audio]'
+          }
         } else {
           content = `[${type}]`
         }
@@ -170,6 +223,30 @@ async function processWebhook(body: Record<string, unknown>) {
           content,
           from_bot: false,
         })
+
+        // Call N8N bot if active and we have processable content
+        if (conversation.bot_active && content && content !== '[audio]') {
+          const { data: org } = await supabase
+            .from('organizations')
+            .select('prompt')
+            .eq('id', waAccount.org_id)
+            .single()
+
+          const { getMessagingToken } = await import('@/lib/whatsapp/token')
+          const tok = getMessagingToken(waAccount)
+
+          await callN8nBot({
+            org_id: waAccount.org_id,
+            conversation_id: conversation.id,
+            contact_phone: from,
+            phone_number_id: metadata.phone_number_id,
+            access_token: tok ?? waAccount.access_token,
+            message: content,
+            system_prompt: org?.prompt ?? '',
+            n8n_secret: process.env.N8N_INTERNAL_SECRET ?? '',
+            callback_base_url: process.env.TOURGUIDE_API_URL ?? '',
+          })
+        }
 
         // Mark as read in WhatsApp
         if (messageId) {
