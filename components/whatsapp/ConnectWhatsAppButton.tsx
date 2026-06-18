@@ -170,16 +170,30 @@ export default function ConnectWhatsAppButton({ onConnected }: Props) {
   const disabled = !sdkReady || loading || !APP_ID || !CONFIG_ID;
 
   return (
-    <button
-      type="button"
-      onClick={handleConnect}
-      disabled={disabled}
-      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1877F2] px-5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#166FE0] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M24 12c0-6.627-5.373-12-12-12S0 5.373 0 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.356c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874V12h3.328l-.532 3.469h-2.796v8.385C19.612 22.954 24 17.99 24 12z" />
-      </svg>
-      {loading ? "Connecting..." : "Connect with Facebook"}
-    </button>
+    <div className="space-y-2">
+      <button
+        type="button"
+        onClick={handleConnect}
+        disabled={disabled}
+        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1877F2] px-5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#166FE0] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M24 12c0-6.627-5.373-12-12-12S0 5.373 0 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.356c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874V12h3.328l-.532 3.469h-2.796v8.385C19.612 22.954 24 17.99 24 12z" />
+        </svg>
+        {loading ? "Conectando..." : "Connect with Facebook"}
+      </button>
+
+      {/* Aviso de popup: FB.login abre una ventana flotante; si el navegador la
+          bloquea, cae a pestaña o no abre nada. Guiamos al usuario. */}
+      {loading ? (
+        <p className="text-[11px] text-amber-600">
+          Se abrió una ventana de Facebook. Si no la ves, permití los popups para este sitio y volvé a intentar.
+        </p>
+      ) : (
+        <p className="text-[11px] text-slate-400">
+          Se abrirá una ventana de Facebook. Si tu navegador bloquea los popups, permitilos para este sitio.
+        </p>
+      )}
+    </div>
   );
 }
