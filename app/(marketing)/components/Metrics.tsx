@@ -49,26 +49,11 @@ export function Metrics() {
           ))}
         </StaggerContainer>
 
-        {/* Testimonial */}
+        {/* Caveat honesto — los numeros son proyecciones, no resultados verificados */}
         <FadeUp delay={0.2}>
-          <div className="mt-20 max-w-3xl mx-auto text-center">
-            <blockquote className="font-display text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-navy-950 leading-snug">
-              {t("quote")}
-            </blockquote>
-            <div className="mt-6 flex items-center justify-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center">
-                <span className="text-xs font-bold text-slate-500">MR</span>
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-navy-900">
-                  {t("quoteName")}
-                </p>
-                <p className="text-sm text-slate-500">
-                  {t("quoteRole")}
-                </p>
-              </div>
-            </div>
-          </div>
+          <p className="mt-10 text-center text-xs text-slate-500">
+            {t("note")}
+          </p>
         </FadeUp>
       </div>
     </section>

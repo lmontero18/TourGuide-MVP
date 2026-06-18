@@ -37,7 +37,7 @@ export function HowItWorks() {
               <div className="relative text-center group">
                 {/* Connector arrow */}
                 {i < 2 && (
-                  <div className="hidden md:flex absolute top-12 -right-3 lg:-right-1 z-10 items-center justify-center">
+                  <div className="hidden md:flex absolute top-12 -right-3 lg:-right-1 z-10 items-center justify-center" aria-hidden>
                     <svg
                       width="24"
                       height="24"
@@ -60,6 +60,7 @@ export function HowItWorks() {
                 <div className="mx-auto flex h-18 w-18 sm:h-24 sm:w-24 items-center justify-center rounded-2xl sm:rounded-3xl bg-white border border-slate-200/80 shadow-sm transition-all group-hover:border-slate-300 group-hover:shadow-md">
                   <div
                     className="h-8 w-8 sm:h-10 sm:w-10 text-navy-700"
+                    aria-hidden
                     dangerouslySetInnerHTML={{ __html: icons[i] }}
                   />
                 </div>
@@ -93,6 +94,7 @@ export function HowItWorks() {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth={2.5}
+                  aria-hidden
                 >
                   <path
                     strokeLinecap="round"

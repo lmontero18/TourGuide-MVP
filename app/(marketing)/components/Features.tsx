@@ -44,6 +44,7 @@ export function Features() {
                 >
                   <div
                     className={`h-4 w-4 sm:h-5 sm:w-5 ${featureIcons[i].color}`}
+                    aria-hidden
                     dangerouslySetInnerHTML={{ __html: featureIcons[i].svg }}
                   />
                 </div>

@@ -6,6 +6,7 @@ import { FadeIn } from "./Motion";
 
 export function Footer() {
   const t = useTranslations("footer");
+  const nav = useTranslations("nav");
 
   return (
     <FadeIn>
@@ -41,9 +42,29 @@ export function Footer() {
               </p>
             </div>
 
+            {/* Product links */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500 mb-3">
+                {t("product")}
+              </p>
+              <ul className="space-y-2">
+                {[
+                  { label: nav("features"), href: "/#features" },
+                  { label: nav("howItWorks"), href: "/#how-it-works" },
+                  { label: nav("pricing"), href: "/#pricing" },
+                ].map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href} className="text-xs sm:text-sm text-slate-500 hover:text-navy-900 transition-colors">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             {/* Legal links */}
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 mb-3">
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500 mb-3">
                 {t("legal")}
               </p>
               <ul className="space-y-2">
@@ -62,12 +83,12 @@ export function Footer() {
           </div>
 
           <div className="mt-10 sm:mt-12 pt-5 sm:pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               © {new Date().getFullYear()} {t("rights")}
             </p>
             <div className="flex items-center gap-1.5">
-              <span className="flex h-2 w-2 rounded-full bg-green-400" />
-              <span className="text-xs text-slate-400">{t("status")}</span>
+              <span className="flex h-2 w-2 rounded-full bg-green-400" aria-hidden />
+              <span className="text-xs text-slate-500">{t("status")}</span>
             </div>
           </div>
         </div>

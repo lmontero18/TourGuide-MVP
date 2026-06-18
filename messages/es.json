@@ -8,7 +8,8 @@
     "account": "Cuenta",
     "dashboard": "Ir al dashboard",
     "finishOnboarding": "Terminar onboarding",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "pricing": "Precios"
   },
   "hero": {
     "headline1": "Tus tours se venden",
@@ -20,7 +21,11 @@
     "trust": "14 días gratis · Sin tarjeta · Configura en 10 min"
   },
   "logos": {
-    "title": "Agencias en toda Latinoamérica confían en nosotros"
+    "title": "Construido sobre tecnología en la que puedes confiar",
+    "b0": "API oficial de WhatsApp Business",
+    "b1": "Proveedor de tecnología de Meta",
+    "b2": "Datos cifrados",
+    "b3": "Soporte en español"
   },
   "features": {
     "label": "Funciones",
@@ -84,8 +89,8 @@
   },
   "metrics": {
     "label": "Resultados",
-    "title": "Números de agencias reales",
-    "sub": "Resultados promedio de nuestra primera cohorte de operadores turísticos en LATAM.",
+    "title": "El impacto que puede tener en tu agencia",
+    "sub": "Proyecciones basadas en benchmarks del sector y datos de WhatsApp Business.",
     "items": {
       "0": {
         "label": "Capturados fuera de horario vs. antes",
@@ -104,9 +109,7 @@
         "unit": "ingreso mensual"
       }
     },
-    "quote": "“Perdíamos el 40% de las consultas que llegaban después de las 6 PM. Ahora el bot las maneja y despertamos con leads calificados.”",
-    "quoteName": "María Rodríguez",
-    "quoteRole": "Cusco Expeditions · Perú"
+    "note": "* Estimaciones ilustrativas, no resultados garantizados."
   },
   "ctaSection": {
     "title1": "Deja de perder leads",

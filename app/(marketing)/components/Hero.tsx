@@ -36,8 +36,8 @@ export function Hero() {
           <FadeUp delay={0.3}>
             <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
               <a
-                href="/login"
-                className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl bg-navy-900 px-6 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+                href="/register"
+                className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl bg-navy-900 px-6 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2"
               >
                 {t("ctaPrimary")}
                 <svg
@@ -46,13 +46,14 @@ export function Hero() {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth={2.5}
+                  aria-hidden
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </a>
               <a
                 href="#how-it-works"
-                className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
+                className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2"
               >
                 {t("ctaSecondary")}
               </a>
@@ -60,7 +61,7 @@ export function Hero() {
           </FadeUp>
 
           <FadeUp delay={0.35}>
-            <p className="mt-3 sm:mt-4 text-xs text-slate-400">{t("trust")}</p>
+            <p className="mt-3 sm:mt-4 text-xs text-slate-500">{t("trust")}</p>
           </FadeUp>
         </div>
 
@@ -179,6 +180,18 @@ function DashboardSkeleton() {
               <ChatBubble side="right" widths={["45%"]} color="bg-blue-500/10" />
               <ChatBubble side="left" widths={["80%", "65%", "35%"]} color="bg-white" />
               <ChatBubble side="right" widths={["55%"]} color="bg-blue-500/10" />
+              {/* Indicador de "escribiendo" — el bot esta respondiendo en vivo */}
+              <div className="flex justify-start">
+                <div className="bg-white border border-slate-200/40 rounded-xl rounded-tl-sm px-2.5 py-2 shadow-sm flex items-center gap-1">
+                  {[0, 1, 2].map((d) => (
+                    <span
+                      key={d}
+                      className="block h-1.5 w-1.5 rounded-full bg-slate-300"
+                      style={{ animation: `pulse-dot 1.4s ${d * 0.2}s infinite` }}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Input */}

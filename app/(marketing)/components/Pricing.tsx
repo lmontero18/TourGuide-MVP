@@ -51,7 +51,7 @@ export function Pricing() {
                   <span className="font-display text-4xl sm:text-5xl font-extrabold tracking-tighter text-navy-950">
                     $500
                   </span>
-                  <span className="text-sm font-medium text-slate-400">
+                  <span className="text-sm font-medium text-slate-500">
                     /{t("month")}
                   </span>
                 </div>
@@ -70,8 +70,8 @@ export function Pricing() {
               </ul>
 
               <Link
-                href="/login"
-                className="mt-8 flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
+                href="/register"
+                className="mt-8 flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2"
               >
                 {t("tiers.0.cta")}
               </Link>
@@ -128,8 +128,8 @@ export function Pricing() {
               </ul>
 
               <Link
-                href="/login"
-                className="mt-8 flex h-11 items-center justify-center rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0"
+                href="/register"
+                className="mt-8 flex h-11 items-center justify-center rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2"
               >
                 {t("tiers.1.cta")}
                 <svg
@@ -138,6 +138,7 @@ export function Pricing() {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth={2.5}
+                  aria-hidden
                 >
                   <path
                     strokeLinecap="round"

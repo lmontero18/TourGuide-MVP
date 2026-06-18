@@ -72,6 +72,16 @@ html {
   html {
     scroll-behavior: auto;
   }
+  /* Neutraliza animaciones CSS y de Framer Motion para usuarios con
+     sensibilidad vestibular. Framer Motion no respeta esto por si solo. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 body {
