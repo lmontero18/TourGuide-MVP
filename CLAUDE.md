@@ -506,16 +506,22 @@ STRIPE_WEBHOOK_SECRET=
 
 ## Comandos utiles
 
+> **Gestor de paquetes: pnpm** (vía corepack). No usar `npm`/`yarn` — el lockfile
+> es `pnpm-lock.yaml`. `corepack enable` una vez fija la versión desde `packageManager`.
+
 ```bash
-# Instalar dependencias core
-npm install @supabase/supabase-js @supabase/ssr framer-motion stripe
+# Instalar dependencias
+pnpm install
+
+# Agregar una dependencia
+pnpm add @supabase/supabase-js @supabase/ssr framer-motion stripe
 
 # shadcn/ui
-npx shadcn@latest init
+pnpm dlx shadcn@latest init
 
 # Generar tipos de Supabase (correr cada vez que cambie el schema)
-npx supabase gen types typescript --project-id TU_PROJECT_ID > lib/supabase/types.ts
+pnpm dlx supabase gen types typescript --project-id TU_PROJECT_ID > lib/supabase/types.ts
 
 # Dev
-npm run dev
+pnpm dev
 ```

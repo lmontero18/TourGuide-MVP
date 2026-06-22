@@ -1,0 +1,8 @@
+# Config de pnpm (pnpm 11 ya no lee el field "pnpm" de package.json).
+# allowBuilds = dependencias autorizadas a correr scripts de build/postinstall.
+# Next.js necesita sharp (imágenes) y @swc/core (compilación).
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  sharp: true
+  unrs-resolver: true
