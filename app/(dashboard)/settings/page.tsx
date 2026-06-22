@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
+import SettingsSkeleton from "@/components/settings/SettingsSkeleton";
 import type { BotTone, Organization } from "@/types";
 
 const DEFAULT_HOURS = { start: "09:00", end: "18:00" };
@@ -98,7 +99,7 @@ export default function SettingsPage() {
 
       <div className="flex-1 overflow-y-auto p-5">
         {loading ? (
-          <div className="max-w-2xl text-sm text-slate-400">Loading settings...</div>
+          <SettingsSkeleton />
         ) : (
           <div className="max-w-2xl space-y-6">
             {/* Organization */}

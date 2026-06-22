@@ -2,19 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
-import {
-  ToursEditor,
-  BusinessEditor,
-  FaqsEditor,
-  type FaqDraft,
-} from "@/components/tours/TourCards";
+import type { FaqDraft } from "@/components/tours/TourCards";
+import { ToursSplit, BusinessSplit, FaqsSplit } from "@/components/tours/SplitEditors";
+import ToursSkeleton from "@/components/tours/ToursSkeleton";
 import { importFromUrl } from "@/lib/import/client";
 import type { BusinessSection, Organization, Tour } from "@/types";
-
-const INPUT_CLASS =
-  "w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
 
 type Tab = "tours" | "business" | "faqs";
 
@@ -25,16 +20,35 @@ const TabIcon = ({ tab }: { tab: Tab }) => {
   return <svg {...common}><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><path d="M12 17h.01" /></svg>;
 };
 
+const SparkIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3l1.9 5.2L19 10l-5.1 1.8L12 17l-1.9-5.2L5 10l5.1-1.8L12 3z" />
+  </svg>
+);
+
+const GlobeIcon = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" /><path d="M2 12h20" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  </svg>
+);
+
 export default function ToursSettingsPage() {
   const t = useTranslations("dashboard.tours");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [tours, setTours] = useState<Tour[]>([]);
   const [faqs, setFaqs] = useState<FaqDraft[]>([]);
   const [business, setBusiness] = useState<BusinessSection[]>([]);
   const [url, setUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [tab, setTab] = useState<Tab>("tours");
+
+  // Setters que marcan cambios sin guardar (la carga inicial usa los setters crudos).
+  const editTours = (v: Tour[]) => { setTours(v); setDirty(true); };
+  const editBusiness = (v: BusinessSection[]) => { setBusiness(v); setDirty(true); };
+  const editFaqs = (v: FaqDraft[]) => { setFaqs(v); setDirty(true); };
 
   useEffect(() => {
     const load = async () => {
@@ -74,6 +88,7 @@ export default function ToursSettingsPage() {
         setBusiness((prev) => [...prev, ...result.business]);
         setFaqs((prev) => [...prev, ...result.faqs.map((faq) => ({ id: crypto.randomUUID(), ...faq }))]);
         setUrl("");
+        setDirty(true);
         toast.success(
           t("importDone", {
             tours: result.tours.length,
@@ -109,6 +124,7 @@ export default function ToursSettingsPage() {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error ?? "Failed to save");
+      setDirty(false);
       toast.success(t("saved"));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("saveError"));
@@ -129,83 +145,136 @@ export default function ToursSettingsPage() {
 
       <div className="flex-1 overflow-y-auto p-5">
         {loading ? (
-          <div className="max-w-2xl text-sm text-slate-400">…</div>
+          <ToursSkeleton />
         ) : (
           <div className="max-w-3xl space-y-5">
-            <p className="text-sm text-slate-500 leading-relaxed">{t("subtitle")}</p>
-
             {/* Importar desde la web */}
-            <section className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h2 className="text-sm font-bold text-navy-900">{t("importTitle")}</h2>
-              <p className="mt-1 text-xs text-slate-400">{t("importSubtitle")}</p>
-              <div className="mt-3 flex flex-col sm:flex-row gap-2">
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && !importing && runImport()}
-                  placeholder={t("urlPlaceholder")}
-                  className={INPUT_CLASS}
-                />
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+                  <SparkIcon />
+                </span>
+                <div className="min-w-0">
+                  <h2 className="font-display text-sm font-bold tracking-tight text-navy-900">{t("importTitle")}</h2>
+                  <p className="mt-0.5 text-xs text-slate-400">{t("importSubtitle")}</p>
+                </div>
+              </div>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <div className="relative flex-1">
+                  <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <GlobeIcon />
+                  </span>
+                  <input
+                    type="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && !importing && runImport()}
+                    placeholder={t("urlPlaceholder")}
+                    className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  />
+                </div>
                 <button
                   onClick={runImport}
                   disabled={importing || !url.trim()}
-                  className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-5 text-sm font-semibold text-navy-900 transition-all hover:bg-slate-50 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-sm shadow-navy-900/20 transition-all hover:bg-navy-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {importing && (
-                    <svg className="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  {importing ? (
+                    <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                       <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                     </svg>
+                  ) : (
+                    <SparkIcon />
                   )}
                   {importing ? t("importing") : t("importCta")}
                 </button>
               </div>
-              <p className="mt-2 text-xs text-slate-400">
+              <p className="mt-2 text-xs leading-relaxed text-slate-400">
                 {importing ? t("importingHint") : t("importHint")}
               </p>
             </section>
 
-            {/* Pestañas */}
-            <div className="flex gap-1 rounded-xl border border-slate-200 bg-white p-1">
+            {/* Pestañas con indicador deslizante */}
+            <div className="flex gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
               {TABS.map((item) => {
                 const active = tab === item.key;
                 return (
                   <button
                     key={item.key}
                     onClick={() => setTab(item.key)}
-                    className={`flex flex-1 h-9 items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition-all ${
-                      active ? "bg-navy-900 text-white shadow-sm" : "text-slate-500 hover:bg-slate-50 hover:text-navy-900"
+                    className={`relative flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
+                      active ? "text-white" : "text-slate-500 hover:text-navy-900"
                     }`}
                   >
-                    <TabIcon tab={item.key} />
-                    {item.label}
-                    <span className={active ? "text-white/70" : "text-slate-400"}>{item.count}</span>
+                    {active && (
+                      <motion.div
+                        layoutId="toursTabPill"
+                        className="absolute inset-0 rounded-xl bg-navy-900 shadow-sm"
+                        transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-1.5">
+                      <TabIcon tab={item.key} />
+                      {item.label}
+                      <span
+                        className={`rounded-full px-1.5 text-[11px] font-bold tabular-nums ${
+                          active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-400"
+                        }`}
+                      >
+                        {item.count}
+                      </span>
+                    </span>
                   </button>
                 );
               })}
             </div>
 
             {/* Contenido de la pestaña activa */}
-            <div>
-              {tab === "tours" && <ToursEditor tours={tours} onChange={setTours} />}
-              {tab === "business" && <BusinessEditor business={business} onChange={setBusiness} />}
-              {tab === "faqs" && <FaqsEditor faqs={faqs} onChange={setFaqs} />}
-            </div>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={tab}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {tab === "tours" && <ToursSplit tours={tours} onChange={editTours} />}
+                {tab === "business" && <BusinessSplit business={business} onChange={editBusiness} />}
+                {tab === "faqs" && <FaqsSplit faqs={faqs} onChange={editFaqs} />}
+              </motion.div>
+            </AnimatePresence>
           </div>
         )}
       </div>
 
-      {/* Barra de guardar fija */}
+      {/* Barra de guardar fija — glass */}
       {!loading && (
-        <div className="border-t border-slate-200 bg-white px-5 py-3">
-          <div className="max-w-3xl flex items-center justify-between gap-3">
-            <span className="text-xs text-slate-400">
-              {t("summary", { tours: tours.length, sections: business.length, faqs: faqs.length })}
-            </span>
+        <div className="border-t border-slate-200/70 bg-white/80 px-5 py-3 backdrop-blur-md">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              {/* Chips de conteo (ocultos en móvil) */}
+              <div className="hidden items-center gap-1.5 sm:flex">
+                {TABS.map((item) => (
+                  <span
+                    key={item.key}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500"
+                  >
+                    <b className="font-display tabular-nums text-navy-900">{item.count}</b>
+                    {item.label}
+                  </span>
+                ))}
+              </div>
+              {/* Indicador de cambios */}
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium">
+                <span className={`h-1.5 w-1.5 rounded-full ${dirty ? "animate-pulse bg-amber-500" : "bg-green-500"}`} />
+                <span className={dirty ? "text-amber-600" : "text-slate-400"}>
+                  {dirty ? t("unsaved") : t("allSaved")}
+                </span>
+              </span>
+            </div>
             <button
               onClick={handleSave}
-              disabled={saving}
-              className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              disabled={saving || !dirty}
+              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
             >
               {saving ? t("saving") : t("save")}
             </button>

@@ -373,6 +373,9 @@
     "tours": {
       "title": "Tours & FAQs",
       "subtitle": "This is what your bot uses to answer. Edit your tours, prices and FAQs anytime.",
+      "brainTag": "Bot knowledge base",
+      "unsaved": "Unsaved changes",
+      "allSaved": "All saved",
       "tabTours": "Tours",
       "tabBusiness": "Business",
       "tabFaqs": "FAQs",

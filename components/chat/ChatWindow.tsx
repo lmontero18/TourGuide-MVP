@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
 import TakeControlButton from "./TakeControlButton";
+import { ChatMessagesSkeleton } from "./ChatSkeleton";
 import { useMessages } from "@/hooks/useMessages";
 import type { MessageRole } from "@/types";
 
@@ -236,7 +237,7 @@ export default function ChatWindow({
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-2.5">
         {loading ? (
-          <div className="flex h-full items-center justify-center text-xs text-slate-400">Loading messages...</div>
+          <ChatMessagesSkeleton />
         ) : combined.length === 0 ? (
           <div className="flex h-full items-center justify-center text-xs text-slate-400">No messages yet</div>
         ) : (

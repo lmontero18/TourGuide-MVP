@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import ConversationList from "@/components/conversations/ConversationList";
 import ChatWindow from "@/components/chat/ChatWindow";
+import ChatSkeleton from "@/components/chat/ChatSkeleton";
 import TopBar from "@/components/layout/TopBar";
 import { createClient } from "@/lib/supabase/client";
 
@@ -50,9 +51,7 @@ export default function ConversationDetailPage() {
 
         <div className="flex-1 overflow-hidden">
           {loading ? (
-            <div className="flex h-full items-center justify-center text-sm text-slate-400">
-              Loading conversation...
-            </div>
+            <ChatSkeleton />
           ) : conv ? (
             <ChatWindow
               conversationId={conv.id}

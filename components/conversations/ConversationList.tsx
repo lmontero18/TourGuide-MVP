@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import ConversationItem from "./ConversationItem";
+import ConversationListSkeleton from "./ConversationListSkeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversations } from "@/hooks/useConversations";
 import type { ConversationStatus } from "@/types";
@@ -94,9 +95,7 @@ export default function ConversationList({ activeId }: ConversationListProps) {
       {/* List */}
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-sm text-slate-400">Loading conversations...</p>
-          </div>
+          <ConversationListSkeleton />
         ) : conversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
             <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center mb-3">
