@@ -1,0 +1,137 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Configuración de CodeRabbit para TourGuide.
+# Validador: https://docs.coderabbit.ai/configuration/yaml-validator
+# Comenta "@coderabbitai configuration" en un PR para ver la config completa con defaults.
+
+# Idioma de los reviews. Cambiar a "en-US" si el equipo prefiere inglés.
+language: "en-US"
+
+tone_instructions: "Sé directo y conciso. Prioriza problemas de seguridad, fugas de datos entre tenants y violaciones de las reglas de arquitectura por encima de nitpicks de estilo."
+
+early_access: false
+
+reviews:
+  # "chill" = menos ruido. "assertive" = más comentarios y nitpicks.
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  poem: false
+
+  # Forzar Conventional Commits en el título del PR (squash merge → el título queda en main).
+  auto_title_instructions: "El título debe seguir Conventional Commits: tipo(scope opcional): descripción en minúscula. Tipos válidos: feat, fix, chore, refactor, docs, test."
+
+  # Etiquetas automáticas por área tocada.
+  labeling_instructions:
+    - label: "area:whatsapp"
+      instructions: "Aplica si el PR toca lib/whatsapp/, app/api/webhooks/whatsapp/ o app/api/whatsapp/."
+    - label: "area:bot"
+      instructions: "Aplica si el PR toca lib/ai/, lib/bot/ o lib/n8n/."
+    - label: "area:db"
+      instructions: "Aplica si el PR toca lib/supabase/ o supabase/migrations/."
+    - label: "area:auth"
+      instructions: "Aplica si el PR toca app/(auth)/, app/auth/ o lib/supabase/middleware.ts."
+    - label: "security"
+      instructions: "Aplica si el PR toca webhooks, validación de firmas, tokens, RLS o variables de entorno sensibles."
+
+  auto_review:
+    enabled: true
+    drafts: false # CodeRabbit ignora PRs en draft (también es el default del free tier)
+
+  # Excluir ruido: lockfiles, build, tipos generados, deps, assets, secretos.
+  path_filters:
+    - "!**/*.lock"
+    - "!**/package-lock.json"
+    - "!.next/**"
+    - "!node_modules/**"
+    - "!lib/supabase/types.ts"   # tipos autogenerados por `supabase gen types`
+    - "!**/*.generated.ts"
+    - "!messages/**"             # archivos i18n (en.json, es.json) — traducciones, no lógica
+    - "!public/**"               # assets estáticos
+    - "!certificates/**"         # certificados SSL de dev
+    - "!**/*.pem"
+
+  # Instrucciones por ruta = reglas de arquitectura de TourGuide.
+  path_instructions:
+    - path: "app/api/**"
+      instructions: |
+        API routes y webhooks. Reglas críticas:
+        - Los webhooks SIEMPRE deben responder 200, incluso ante fallos internos (Meta y Stripe reintentan en 4xx/5xx).
+        - Validar firma antes de procesar: Meta usa HMAC SHA-256 (header X-Hub-Signature-256); Stripe usa stripe.webhooks.constructEvent con STRIPE_WEBHOOK_SECRET.
+        - Nunca exponer SUPABASE_SERVICE_ROLE_KEY ni META_APP_SECRET; jamás enviarlos al cliente.
+        - Sanitizar todo input antes de insertarlo en la DB.
+        - Marcar si falta rate limiting en endpoints públicos (sobre todo el webhook de WhatsApp).
+        - No renderizar UI desde aquí.
+    - path: "**/actions.ts"
+      instructions: |
+        Server Actions de Next.js. Reglas:
+        - Validar y sanitizar TODO input del usuario (usar zod u otra validación de esquema); nunca confiar en datos del cliente.
+        - Re-verificar autenticación y autorización dentro de la acción: leer org_id y role desde la tabla users, nunca de la sesión del cliente.
+        - No exponer service role ni secretos; usar el cliente de servidor con el menor privilegio necesario.
+        - Devolver errores tipados, no lanzar datos sensibles al cliente.
+    - path: "lib/supabase/queries/**"
+      instructions: |
+        Capa de queries tipadas. Reglas:
+        - Prohibido .select('*'): seleccionar solo las columnas que se usan.
+        - Usar siempre los tipos generados (supabase gen types); marcar tipos a mano o 'any'.
+        - Cada query maneja { data, error }.
+        - Sin lógica de UI aquí.
+    - path: "lib/supabase/**"
+      instructions: |
+        Server Components deben usar lib/supabase/server.ts; Client Components y hooks deben usar lib/supabase/client.ts. Marcar si se mezclan.
+        El service client (createServiceClient) solo se usa en API routes/server cuando es estrictamente necesario; marcar cualquier uso fuera de ese contexto.
+    - path: "lib/whatsapp/**"
+      instructions: |
+        Integración con Meta Cloud API. Reglas:
+        - verify.ts debe validar la firma HMAC SHA-256 del webhook con META_APP_SECRET antes de confiar en el payload.
+        - El access_token es sensible: nunca loggearlo ni exponerlo al cliente; marcar si aparece en logs o respuestas.
+        - Respetar la ventana de 24h: fuera de ella solo templates aprobados; dentro, mensajes libres.
+        - El phone_number_id identifica la org (lookup en whatsapp_accounts); validar que existe antes de procesar.
+    - path: "lib/ai/**"
+      instructions: |
+        Lógica del modelo / generación. Reglas:
+        - Mitigar prompt injection: el contenido del usuario nunca debe poder sobrescribir instrucciones del sistema.
+        - Garantizar aislamiento multi-tenant: el contexto (tours, precios, prompt) debe filtrarse por org_id; marcar si se puede filtrar data de otra org.
+        - Vigilar costo/uso de tokens y timeouts; marcar llamadas sin límite ni manejo de error.
+    - path: "lib/bot/**"
+      instructions: |
+        Orquestación del bot. El bot solo responde si conversation.bot_active === true.
+        - Marcar lógica que ignore bot_active (rompería el control humano del agente).
+        - Aislamiento por org_id en todo acceso a datos.
+    - path: "lib/n8n/**"
+      instructions: |
+        Control del bot vía bot_active en Supabase. takeControl pone bot_active=false; returnToBot lo restaura.
+        Marcar updates que no filtren por conversación o que dejen estado inconsistente (assigned_agent_id, status).
+    - path: "components/**"
+      instructions: |
+        Componentes de UI. Reglas:
+        - Nunca importar el cliente de Supabase directamente; los datos vienen de lib/supabase/queries/ o de hooks.
+        - components/ui/ debe ser render puro: sin Supabase, sin lógica de negocio.
+        - Usar 'use client' solo si hay interactividad o Realtime; preferir Server Components.
+        - Props con interface, no con type.
+    - path: "hooks/**"
+      instructions: |
+        Hooks: fetch, Realtime y estado. No deben renderizar JSX.
+        - Las suscripciones de Realtime se filtran por canal de la org (conversations:{orgId}); marcar si falta el filtro por tenant.
+        - Verificar limpieza de suscripciones (unsubscribe) en el cleanup.
+    - path: "**/*.tsx"
+      instructions: |
+        Next.js 16 App Router: params y searchParams son asíncronos (hay que await-earlos). Server Component por defecto; 'use client' solo si hace falta.
+    - path: "supabase/migrations/**"
+      instructions: |
+        Migraciones de DB. Los cambios de schema solo se hacen aquí, nunca en el dashboard.
+        - Toda tabla nueva debe tener RLS habilitado y denegar por defecto.
+        - El aislamiento multi-tenant es por org_id vía RLS; marcar cualquier política que pueda filtrar datos entre organizaciones.
+    - path: "**/*billing*/**"
+      instructions: |
+        Lógica de pagos/Stripe. Verificar idempotencia en el manejo de eventos del webhook y que los límites por plan se apliquen del lado del servidor.
+
+# Da contexto de los issues de Linear al review (el trabajo interno vive en Linear).
+knowledge_base:
+  linear:
+    usage: auto
+    team_keys:
+      - CODE
+
+chat:
+  auto_reply: true
