@@ -41,6 +41,7 @@ reviews:
   # Excluir ruido: lockfiles, build, tipos generados, deps, assets, secretos.
   path_filters:
     - "!**/*.lock"
+    - "!**/pnpm-lock.yaml"
     - "!**/package-lock.json"
     - "!.next/**"
     - "!node_modules/**"

@@ -2,6 +2,16 @@
 
 Cómo trabajamos en el repo. Documento vivo — si el proceso cambia, se actualiza acá y en el doc de metodología en Linear.
 
+## Setup local
+
+Usamos **pnpm** (vía corepack). No uses `npm` ni `yarn` — el único lockfile es `pnpm-lock.yaml` y debe commitearse.
+
+```bash
+corepack enable     # una vez; fija la versión de pnpm desde el field packageManager
+pnpm install
+pnpm dev            # http://localhost:3000
+```
+
 ## Flujo de trabajo (trunk-based)
 
 `main` = **producción**. Siempre debe estar desplegable.
