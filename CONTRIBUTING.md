@@ -25,6 +25,24 @@ pnpm dev            # http://localhost:3000
 
 Si algo rompe producción: **se revierte el PR**, no se parchea en caliente.
 
+## Cambios de schema (migraciones)
+
+**Regla dura: el schema solo cambia por migraciones versionadas en git.** Nunca por el dashboard de Supabase. Todo cambio de schema nace como migración en un PR.
+
+Flujo:
+
+1. Levanta el entorno local (ver `docs/supabase-local-setup.md`).
+2. Crea la migración:
+   - `pnpm dlx supabase migration new <nombre>` y escribe el SQL a mano, **o**
+   - haz el cambio en local y genera el diff: `pnpm dlx supabase db diff -f <nombre>`.
+3. Aplica y prueba en local: `pnpm dlx supabase db reset` (corre todas las migraciones + el seed).
+4. Regenera los tipos y commitéalos: `pnpm db:types` → commit de `lib/supabase/types.ts`. (Si te olvidas, la CI `db-validate` falla.)
+5. Abre un PR contra `main`. La CI `db-validate` verifica que las migraciones aplican y que los tipos están en sync.
+6. **Probar en staging antes de mergear:** mergea tu rama a `staging` (`git merge` + `git push origin staging`) → `db-deploy` aplica las migraciones a Supabase **staging**.
+7. Al mergear el PR a `main` → `db-deploy` aplica a **producción**.
+
+Nunca edites el schema en el dashboard. Si algo se cambió ahí por error, genera la migración que lo refleja (`supabase db diff`) y commitéala para reconciliar.
+
 ## Convención de commits y títulos de PR
 
 Usamos [Conventional Commits](https://www.conventionalcommits.org/). El prefijo va en el **título del PR** (y en los commits), no en el nombre de la rama:
