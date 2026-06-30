@@ -1,0 +1,46 @@
+name: DB · Deploy migrations
+
+# Aplica las migraciones al proyecto Supabase correspondiente según la rama:
+#   - push a `staging` -> Supabase staging (gxhqvgfasbtctvxhaqoy)
+#   - push a `main`    -> Supabase prod    (bppgwfzzrurlqzfzcpzf)
+# Solo corre cuando cambian archivos de migraciones.
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'supabase/migrations/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Push migrations a STAGING
+        if: github.ref_name == 'staging'
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
+        run: |
+          pnpm exec supabase link --project-ref gxhqvgfasbtctvxhaqoy
+          pnpm exec supabase db push
+
+      - name: Push migrations a PROD
+        if: github.ref_name == 'main'
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PROD }}
+        run: |
+          pnpm exec supabase link --project-ref bppgwfzzrurlqzfzcpzf
+          pnpm exec supabase db push

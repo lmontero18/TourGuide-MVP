@@ -1,0 +1,44 @@
+name: DB · Validate (PR)
+
+# Valida, en cada PR que toque el schema, que:
+#   1. Las migraciones aplican limpio en una DB local efímera.
+#   2. Los tipos generados (lib/supabase/types.ts) están en sync con el schema.
+# NO toca ningún proyecto remoto, por eso no necesita secrets.
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+      - 'lib/supabase/types.ts'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # Levanta el stack local y aplica TODAS las migraciones. Si una migración
+      # está rota, este paso falla. (Se puede acelerar con `-x` excluyendo
+      # servicios; se dejó plano por fiabilidad.)
+      - name: Start Supabase (aplica migraciones)
+        run: pnpm exec supabase start
+
+      - name: Verificar tipos en sync con el schema
+        run: |
+          pnpm exec supabase gen types typescript --local > lib/supabase/types.ts
+          if ! git diff --quiet -- lib/supabase/types.ts; then
+            echo "::error::lib/supabase/types.ts está desincronizado con el schema. Corré 'pnpm db:types' y commiteá el resultado."
+            git diff -- lib/supabase/types.ts
+            exit 1
+          fi

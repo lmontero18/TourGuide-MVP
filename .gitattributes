@@ -1,0 +1,3 @@
+# Tipos generados por Supabase: forzar LF para evitar falso drift CRLF<->LF
+# entre Windows (dev) y el runner Linux de la CI (el drift check compara byte a byte).
+lib/supabase/types.ts text eol=lf
