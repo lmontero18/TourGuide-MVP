@@ -48,7 +48,7 @@ Hay una tensión entre el `CONTRIBUTING.md` actual y el flujo dev→staging→pr
 Dos formas de armar la CI:
 
 ### Opción 1 — Modelo de ramas por entorno (recomendada, hace real dev→staging→prod)
-```
+```text
 feature ──PR──▶ staging ──(CI aplica a Supabase staging + Vercel staging)
                    │
                    └─merge──▶ main ──(CI aplica a Supabase prod + Vercel prod)
@@ -59,7 +59,7 @@ feature ──PR──▶ staging ──(CI aplica a Supabase staging + Vercel s
   Eso lo hacemos en el paso 03.
 
 ### Opción 2 — Mantener trunk-based actual (más simple, staging no es puerta real)
-```
+```text
 feature ──PR──▶ main ──(CI aplica a prod)
 staging  ← se actualiza manualmente cuando se quiera probar
 ```
