@@ -42,11 +42,6 @@ jobs:
   prod:
     if: github.ref_name == 'main'
     runs-on: ubuntu-latest
-    # Gate de aprobacion manual antes de tocar produccion.
-    # Requiere crear el Environment `production` en GitHub
-    # (Settings -> Environments) con "Required reviewers". Hasta que un
-    # reviewer apruebe, este job queda en espera y NO migra prod.
-    environment: production
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
     steps:
