@@ -519,8 +519,8 @@ pnpm add @supabase/supabase-js @supabase/ssr framer-motion stripe
 # shadcn/ui
 pnpm dlx shadcn@latest init
 
-# Generar tipos de Supabase (correr cada vez que cambie el schema)
-pnpm dlx supabase gen types typescript --project-id TU_PROJECT_ID > lib/supabase/types.ts
+# Generar tipos de Supabase desde el schema local (correr al cambiar el schema)
+pnpm db:types   # = supabase gen types typescript --local > lib/supabase/types.ts
 
 # Dev
 pnpm dev
