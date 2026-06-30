@@ -1,0 +1,67 @@
+name: DB · Deploy migrations
+
+# Aplica las migraciones al proyecto Supabase correspondiente segun la rama:
+#   - push a `staging` -> Supabase staging (gxhqvgfasbtctvxhaqoy)  [automatico]
+#   - push a `main`    -> Supabase prod    (bppgwfzzrurlqzfzcpzf)  [requiere aprobacion manual]
+# Solo corre cuando cambian archivos de migraciones.
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'supabase/migrations/**'
+
+jobs:
+  staging:
+    if: github.ref_name == 'staging'
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Push migrations a STAGING
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
+        run: |
+          pnpm exec supabase link --project-ref gxhqvgfasbtctvxhaqoy
+          pnpm exec supabase db push
+
+  prod:
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Push migrations a PROD
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PROD }}
+        run: |
+          pnpm exec supabase link --project-ref bppgwfzzrurlqzfzcpzf
+          pnpm exec supabase db push
