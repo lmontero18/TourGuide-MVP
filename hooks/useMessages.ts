@@ -13,7 +13,7 @@ export function useMessages(conversationId: string) {
     // Initial load
     supabase
       .from('messages')
-      .select('id, conversation_id, role, content, from_bot, channel, created_at')
+      .select('id, conversation_id, role, content, from_bot, channel, media_url, media_type, created_at')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })
       .then(({ data, error }) => {

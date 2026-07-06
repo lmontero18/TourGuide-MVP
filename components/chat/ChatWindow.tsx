@@ -85,6 +85,7 @@ export default function ChatWindow({
       role: m.role,
       createdAt: formatTime(m.created_at),
       sortAt: new Date(m.created_at).getTime(),
+      mediaPath: m.media_url,
       pending: false,
       failed: false,
     }));
@@ -94,6 +95,7 @@ export default function ChatWindow({
       role: o.role,
       createdAt: formatTime(new Date(o.sentAt).toISOString()),
       sortAt: o.sentAt,
+      mediaPath: null as string | null,
       pending: o.status === "pending",
       failed: o.status === "failed",
     }));
@@ -247,6 +249,7 @@ export default function ChatWindow({
               content={msg.content}
               role={msg.role}
               createdAt={msg.createdAt}
+              mediaPath={msg.mediaPath}
               pending={msg.pending}
               failed={msg.failed}
             />

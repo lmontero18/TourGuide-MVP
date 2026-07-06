@@ -116,6 +116,8 @@ async function processWebhook(body: Record<string, unknown>) {
 
         // Extract text content
         let content = ''
+        let mediaPath: string | null = null
+        let mediaType: string | null = null
         if (type === 'text') {
           const text = message.text as { body?: string }
           content = text?.body ?? ''
@@ -149,6 +151,30 @@ async function processWebhook(body: Record<string, unknown>) {
             }
           } catch {
             content = '[audio]'
+          }
+        } else if (type === 'image') {
+          mediaType = 'image'
+          content = '[image]'
+          try {
+            const { getMessagingToken } = await import('@/lib/whatsapp/token')
+            const tok = getMessagingToken(waAccount)
+            const image = message.image as { id?: string; caption?: string } | undefined
+            const parts: string[] = []
+            if (image?.caption) parts.push(image.caption)
+            if (image?.id && tok) {
+              const { downloadMedia, compressImage, describeImage, storeChatImage } =
+                await import('@/lib/whatsapp/media')
+              const original = await downloadMedia(image.id, tok)
+              if (original) {
+                const webp = await compressImage(original)
+                mediaPath = await storeChatImage(supabase, waAccount.org_id, webp)
+                const description = await describeImage(webp)
+                if (description) parts.push(`[Imagen: ${description}]`)
+              }
+            }
+            if (parts.length) content = parts.join(' ')
+          } catch (error) {
+            console.error('Inbound image processing failed:', error)
           }
         } else {
           content = `[${type}]`
@@ -222,10 +248,15 @@ async function processWebhook(body: Record<string, unknown>) {
           role: 'user',
           content,
           from_bot: false,
+          media_url: mediaPath,
+          media_type: mediaType,
         })
 
-        // Call N8N bot if active and we have processable content
-        if (conversation.bot_active && content && content !== '[audio]') {
+        // Call N8N bot if active and we have processable content.
+        // Placeholders tipo [image]/[video]/[sticker] no van al bot — solo
+        // texto real (incluye transcripciones de audio y descripciones de imagen).
+        const isPlaceholder = /^\[[a-z_]+\]$/.test(content)
+        if (conversation.bot_active && content && !isPlaceholder) {
           const { data: org } = await supabase
             .from('organizations')
             .select('prompt')

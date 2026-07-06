@@ -116,6 +116,8 @@ export interface Message {
   content: string
   from_bot: boolean
   channel: string
+  media_url: string | null   // path en bucket chat-media, null si no hay media o expiró
+  media_type: string | null  // image | video | document | sticker
   created_at: string
 }
 

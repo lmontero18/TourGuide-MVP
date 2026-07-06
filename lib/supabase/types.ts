@@ -244,6 +244,8 @@ export type Database = {
           created_at: string
           from_bot: boolean
           id: string
+          media_type: string | null
+          media_url: string | null
           role: string
         }
         Insert: {
@@ -253,6 +255,8 @@ export type Database = {
           created_at?: string
           from_bot?: boolean
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           role: string
         }
         Update: {
@@ -262,6 +266,8 @@ export type Database = {
           created_at?: string
           from_bot?: boolean
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           role?: string
         }
         Relationships: [

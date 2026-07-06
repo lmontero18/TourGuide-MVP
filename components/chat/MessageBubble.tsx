@@ -1,9 +1,13 @@
+"use client";
+
 import type { MessageRole } from "@/types";
+import { useChatMediaUrl } from "@/hooks/useChatMediaUrl";
 
 interface MessageBubbleProps {
   content: string;
   role: MessageRole;
   createdAt: string;
+  mediaPath?: string | null;
   pending?: boolean;
   failed?: boolean;
 }
@@ -26,8 +30,10 @@ const ROLE_STYLES: Record<MessageRole, { wrapper: string; bubble: string; label:
   },
 };
 
-export default function MessageBubble({ content, role, createdAt, pending, failed }: MessageBubbleProps) {
+export default function MessageBubble({ content, role, createdAt, mediaPath, pending, failed }: MessageBubbleProps) {
   const style = ROLE_STYLES[role];
+  const mediaUrl = useChatMediaUrl(mediaPath);
+  const isMediaPlaceholder = /^\[[a-z_]+\]$/.test(content);
 
   return (
     <div className={`flex ${style.wrapper}`}>
@@ -39,7 +45,20 @@ export default function MessageBubble({ content, role, createdAt, pending, faile
             {style.label}
           </span>
         )}
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+        {mediaUrl && (
+          <a href={mediaUrl} target="_blank" rel="noopener noreferrer" className="block mb-1.5">
+            {/* eslint-disable-next-line @next/next/no-img-element -- signed URL efímera, no optimizable por next/image */}
+            <img
+              src={mediaUrl}
+              alt="Imagen enviada por el cliente"
+              className="max-h-64 rounded-lg object-cover"
+              loading="lazy"
+            />
+          </a>
+        )}
+        {!(mediaUrl && isMediaPlaceholder) && (
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+        )}
         <span className={`flex items-center gap-1 text-[10px] mt-1 ${
           role === "agent" ? "text-white/50" : "text-slate-400"
         }`}>
