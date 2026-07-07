@@ -20,7 +20,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "TourGuide — WhatsApp AI for Tour Agencies",
+  title: "Tourfy — WhatsApp AI for Tour Agencies",
   description:
     "Your tours sell themselves at 2 AM. WhatsApp bots that answer, qualify, and book — trained on your tours, your prices, your voice.",
 };

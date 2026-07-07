@@ -32,7 +32,7 @@ export function Footer() {
                   </svg>
                 </div>
                 <span className="font-display text-base font-bold tracking-tight text-navy-900">
-                  TourGuide
+                  Tourfy
                 </span>
               </Link>
               <p className="mt-3 text-sm text-slate-500 leading-relaxed">

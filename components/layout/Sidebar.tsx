@@ -76,7 +76,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               animate={{ opacity: 1 }}
               className="font-display text-base font-bold tracking-tight text-navy-900 whitespace-nowrap"
             >
-              TourGuide
+              Tourfy
             </motion.span>
           )}
         </Link>

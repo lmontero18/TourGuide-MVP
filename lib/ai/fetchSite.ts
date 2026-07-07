@@ -109,7 +109,7 @@ export async function fetchSiteContent(url: string): Promise<FetchSiteResult> {
   if (!home) {
     try {
       const res = await fetch(base, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; TourGuideBot/1.0)" },
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; TourfyBot/1.0)" },
         signal: AbortSignal.timeout(15_000),
       });
       if (res.ok) home = stripHtml(await res.text());
