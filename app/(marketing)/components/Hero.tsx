@@ -98,7 +98,7 @@ export function Hero() {
               </div>
               <div className="flex-1 mx-2 sm:mx-3">
                 <div className="mx-auto max-w-md h-5 sm:h-6 rounded-md bg-slate-100 flex items-center justify-center px-3">
-                  <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium tracking-wide truncate">
+                  <span className="text-[10px] sm:text-[11px] text-slate-600 font-medium tracking-wide truncate">
                     {`app.tourfy.com/${view}`}
                   </span>
                 </div>
@@ -168,7 +168,7 @@ function DashboardSkeleton({
               className={`flex items-center gap-2 h-8 rounded-lg px-2 mb-0.5 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 ${
                 view === item.key
                   ? "bg-blue-500/10 border border-blue-500/20 text-navy-950"
-                  : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
               }`}
             >
               <span className="h-3.5 w-3.5 shrink-0" dangerouslySetInnerHTML={{ __html: item.icon }} />
@@ -177,7 +177,7 @@ function DashboardSkeleton({
           ) : (
             <div
               key={item.label}
-              className="flex items-center gap-2 h-8 rounded-lg px-2 mb-0.5 text-slate-300"
+              className="flex items-center gap-2 h-8 rounded-lg px-2 mb-0.5 text-slate-500"
             >
               <span className="h-3.5 w-3.5 shrink-0" dangerouslySetInnerHTML={{ __html: item.icon }} />
               <span className="text-[11px] font-semibold truncate">{item.label}</span>
@@ -191,7 +191,7 @@ function DashboardSkeleton({
           </div>
           <div className="min-w-0">
             <p className="text-[10px] font-bold text-navy-950 truncate">Cusco Expeditions</p>
-            <p className="text-[9px] text-slate-400 truncate">admin@cuscoexp.com</p>
+            <p className="text-[9px] text-slate-500 truncate">admin@cuscoexp.com</p>
           </div>
         </div>
       </div>
@@ -209,7 +209,7 @@ function DashboardSkeleton({
                   key={item.label}
                   onClick={() => setView(item.key as MockView)}
                   className={`rounded-full px-2 py-0.5 text-[9px] font-bold cursor-pointer ${
-                    view === item.key ? "bg-navy-900 text-white" : "bg-slate-100 text-slate-400"
+                    view === item.key ? "bg-navy-900 text-white" : "bg-slate-100 text-slate-600"
                   }`}
                 >
                   {item.label}
@@ -217,10 +217,10 @@ function DashboardSkeleton({
               ))}
             </div>
             <div className="hidden sm:flex h-6 items-center gap-1.5 rounded-lg bg-slate-100 px-2.5">
-              <svg className="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-3 w-3 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
               </svg>
-              <span className="text-[10px] text-slate-400">{tConv("searchPlaceholder")}</span>
+              <span className="text-[10px] text-slate-600">{tConv("searchPlaceholder")}</span>
             </div>
             <div className="h-6 w-6 rounded-full bg-navy-900/10 flex items-center justify-center">
               <span className="text-[9px] font-bold text-navy-900">LM</span>
@@ -303,7 +303,7 @@ function ConversationsView() {
       snippet: tMock("c3"),
       time: "3h",
       badge: tConv("status.resolved"),
-      badgeStyle: "bg-slate-100 text-slate-500 border-slate-200/60",
+      badgeStyle: "bg-slate-100 text-slate-600 border-slate-200/60",
       active: false,
       unread: false,
     },
@@ -323,7 +323,7 @@ function ConversationsView() {
             <span
               key={tab.label}
               className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                tab.active ? "bg-navy-900 text-white" : "bg-slate-100 text-slate-400"
+                tab.active ? "bg-navy-900 text-white" : "bg-slate-100 text-slate-600"
               }`}
             >
               {tab.label}
@@ -339,7 +339,7 @@ function ConversationsView() {
           >
             <div className="relative shrink-0">
               <div className="h-7 w-7 rounded-full bg-slate-200 flex items-center justify-center">
-                <span className="text-[9px] font-bold text-slate-500">{conv.initials}</span>
+                <span className="text-[9px] font-bold text-slate-600">{conv.initials}</span>
               </div>
               {conv.unread && (
                 <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-blue-500 border border-white" />
@@ -348,9 +348,9 @@ function ConversationsView() {
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center gap-1">
                 <span className="text-[10px] font-bold text-navy-950 truncate">{conv.name}</span>
-                <span className="text-[9px] text-slate-400 shrink-0">{conv.time}</span>
+                <span className="text-[9px] text-slate-500 shrink-0">{conv.time}</span>
               </div>
-              <p className="text-[9px] text-slate-400 truncate leading-relaxed">{conv.snippet}</p>
+              <p className="text-[9px] text-slate-500 truncate leading-relaxed">{conv.snippet}</p>
               <span className={`mt-0.5 inline-flex rounded-full border px-1.5 py-px text-[8px] font-bold ${conv.badgeStyle}`}>
                 {conv.badge}
               </span>
@@ -365,13 +365,13 @@ function ConversationsView() {
         <div className="h-10 sm:h-12 border-b border-slate-200/60 bg-white flex items-center justify-between px-3 sm:px-4 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-              <span className="text-[9px] font-bold text-slate-500">MG</span>
+              <span className="text-[9px] font-bold text-slate-600">MG</span>
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-bold text-navy-950 truncate">María González</p>
               <div className="flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
-                <span className="text-[9px] text-slate-400">WhatsApp · +51 984 ···</span>
+                <span className="text-[9px] text-slate-500">WhatsApp · +51 984 ···</span>
               </div>
             </div>
           </div>
@@ -423,7 +423,7 @@ function ConversationsView() {
         {/* Input (decorativo) */}
         <div className="p-2 sm:p-3 bg-white border-t border-slate-200/60 shrink-0">
           <div className="h-8 sm:h-9 rounded-xl bg-slate-100 flex items-center px-3 justify-between">
-            <span className="text-[10px] text-slate-400 truncate">{tChat("typePlaceholder")}</span>
+            <span className="text-[10px] text-slate-600 truncate">{tChat("typePlaceholder")}</span>
             <div className="h-5 w-5 rounded-md bg-navy-900 flex items-center justify-center shrink-0">
               <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" />
@@ -455,7 +455,7 @@ function ToursView() {
           <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200/60 px-2 py-0.5 text-[9px] font-bold text-blue-600">
             {t("brainTag")}
           </span>
-          <span className="text-[10px] text-slate-400">
+          <span className="text-[10px] text-slate-500">
             {t("summary", { tours: 3, sections: 2, faqs: 5 })}
           </span>
         </div>
@@ -479,7 +479,7 @@ function ToursView() {
           <span
             key={tab.label}
             className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold ${
-              tab.active ? "bg-navy-900 text-white" : "bg-white border border-slate-200 text-slate-400"
+              tab.active ? "bg-navy-900 text-white" : "bg-white border border-slate-200 text-slate-500"
             }`}
           >
             {tab.label}
@@ -502,7 +502,7 @@ function ToursView() {
             </div>
             <p className="mt-1.5 text-sm font-extrabold text-navy-950">{tour.price}</p>
             <div className="mt-2 flex items-center justify-between">
-              <span className="inline-flex rounded-full bg-slate-100 px-1.5 py-px text-[8px] font-bold text-slate-500">
+              <span className="inline-flex rounded-full bg-slate-100 px-1.5 py-px text-[8px] font-bold text-slate-600">
                 {tour.faqs} FAQs
               </span>
               <svg className="h-3 w-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -517,7 +517,7 @@ function ToursView() {
       <Reveal at={0.75} className="mt-3 rounded-xl border border-dashed border-slate-300 bg-white/60 p-3 flex items-center justify-between">
         <div className="min-w-0">
           <p className="text-[10px] font-bold text-navy-950">{t("importTitle")}</p>
-          <p className="text-[9px] text-slate-400 truncate">{t("importSubtitle")}</p>
+          <p className="text-[9px] text-slate-500 truncate">{t("importSubtitle")}</p>
         </div>
         <div className="h-6 rounded-lg bg-navy-900 px-2.5 flex items-center shrink-0 ml-2">
           <span className="text-[9px] font-bold text-white">{t("importCta")}</span>
@@ -553,14 +553,14 @@ function MetricsView() {
             pop
             className="rounded-xl bg-white border border-slate-200/80 p-2.5 sm:p-3"
           >
-            <p className="text-[9px] text-slate-400 truncate">{card.label}</p>
+            <p className="text-[9px] text-slate-500 truncate">{card.label}</p>
             <div className="mt-1 flex items-baseline gap-1.5">
               <span className="text-base sm:text-lg font-extrabold text-navy-950 tracking-tight">
                 {card.value}
               </span>
               <span className="text-[9px] font-bold text-green-600">{card.delta}</span>
             </div>
-            <p className="text-[8px] text-slate-300 truncate">{t("change")}</p>
+            <p className="text-[8px] text-slate-500 truncate">{t("change")}</p>
           </Reveal>
         ))}
       </div>
@@ -570,9 +570,9 @@ function MetricsView() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[10px] font-bold text-navy-950">{t("chart.title")}</p>
-            <p className="text-[9px] text-slate-400">{t("chart.sub")}</p>
+            <p className="text-[9px] text-slate-500">{t("chart.sub")}</p>
           </div>
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[8px] font-bold text-slate-400">
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[8px] font-bold text-slate-600">
             {t("period.7d")}
           </span>
         </div>
@@ -585,7 +585,7 @@ function MetricsView() {
                 animate={{ height: `${h}%` }}
                 transition={{ delay: 0.7 + i * 0.08, duration: 0.4, ease: "easeOut" }}
               />
-              <span className="text-[8px] text-slate-400">{t(`chart.days.${days[i]}`)}</span>
+              <span className="text-[8px] text-slate-500">{t(`chart.days.${days[i]}`)}</span>
             </div>
           ))}
         </div>
