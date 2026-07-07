@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { registerPhoneNumber } from '@/lib/whatsapp/client'
 
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
@@ -84,6 +84,35 @@ export async function POST(request: NextRequest) {
 
     const phoneData = (await phoneRes.json()) as { display_phone_number?: string }
     const phoneNumber = phoneData.display_phone_number ?? parsed.data.phone_number ?? ''
+
+    // 4b. El numero puede haber quedado conectado a otra org (cuenta de prueba
+    // borrada, re-onboarding). RLS no deja ver filas ajenas, asi que el chequeo
+    // va con service client — solo despues de verificar que el caller es admin.
+    // Si esa org quedo sin usuarios, liberamos el numero; si tiene usuarios
+    // activos, es un conflicto real y respondemos claro.
+    const serviceClient = await createServiceClient()
+    const { data: existing } = await serviceClient
+      .from('whatsapp_accounts')
+      .select('id, org_id')
+      .eq('phone_number_id', phone_number_id)
+      .neq('org_id', userData.org_id)
+      .maybeSingle()
+
+    if (existing) {
+      const { count } = await serviceClient
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', existing.org_id)
+
+      if (count === 0) {
+        await serviceClient.from('whatsapp_accounts').delete().eq('id', existing.id)
+      } else {
+        return NextResponse.json(
+          { error: 'Este número de WhatsApp ya está conectado a otra cuenta. Desconectalo primero o contactá soporte.' },
+          { status: 409 }
+        )
+      }
+    }
 
     // 5. Save routing identifiers. NO guardamos el access_token: el runtime usa el
     // System User token central (ver lib/whatsapp/token.ts).
