@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { fetchSiteContent } from "@/lib/ai/fetchSite";
 import { extractFromText, extractFromFiles, type ExtractionFile } from "@/lib/ai/extract";
+import { ImportUserError } from "@/lib/ai/errors";
 
 // La extracción puede tardar: visión sobre varias páginas de un tarifario es lenta.
 export const maxDuration = 120;
@@ -64,7 +65,9 @@ async function handleUrlImport(request: NextRequest) {
     return NextResponse.json({ success: true, draft });
   } catch (err) {
     console.error("Import failed:", err);
-    const message = err instanceof Error ? err.message : "No pudimos importar desde esa URL";
+    // Solo ImportUserError es seguro de mostrar; errores del SDK (OpenAI, red)
+    // filtran detalles internos en su message.
+    const message = err instanceof ImportUserError ? err.message : "No pudimos importar desde esa URL";
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }
@@ -118,7 +121,7 @@ async function handleFileImport(request: NextRequest) {
     return NextResponse.json({ success: true, draft, thin: isEmpty });
   } catch (err) {
     console.error("File import failed:", err);
-    const message = err instanceof Error ? err.message : "No pudimos procesar el archivo";
+    const message = err instanceof ImportUserError ? err.message : "No pudimos procesar el archivo";
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }
