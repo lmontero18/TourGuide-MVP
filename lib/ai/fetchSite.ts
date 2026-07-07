@@ -3,6 +3,8 @@
 // nosotros, faq, contacto…) para capturar TODO el contexto del negocio, no una sola página.
 // Usa r.jina.ai (markdown limpio) con fallback a fetch + strip de HTML para la página inicial.
 
+import { ImportUserError } from "./errors";
+
 const MAX_TOTAL = 220_000;
 const MAX_PER_PAGE = 45_000;
 const MAX_EXTRA_PAGES = 6;
@@ -116,7 +118,7 @@ export async function fetchSiteContent(url: string): Promise<FetchSiteResult> {
     }
   }
   if (!home) {
-    throw new Error("No pudimos acceder al sitio. Revisá la URL.");
+    throw new ImportUserError("No pudimos acceder al sitio. Revisá la URL.");
   }
 
   const pages: string[] = [`# Página principal: ${base}\n${home.slice(0, MAX_PER_PAGE)}`];
