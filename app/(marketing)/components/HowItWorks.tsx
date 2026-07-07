@@ -55,7 +55,7 @@ export function HowItWorks() {
                   className={`relative flex-1 min-w-[140px] px-3 sm:px-4 pb-3 pt-1 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded-t-lg ${
                     active === i
                       ? "text-navy-950"
-                      : "text-slate-400 hover:text-slate-600"
+                      : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
                   <span className="block text-[10px] font-bold tracking-wider uppercase mb-1">
@@ -116,7 +116,7 @@ export function HowItWorks() {
                 </div>
                 <div className="flex-1 mx-2 sm:mx-3">
                   <div className="mx-auto max-w-md h-5 sm:h-6 rounded-md bg-slate-100 flex items-center justify-center px-3">
-                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium tracking-wide truncate">
+                    <span className="text-[10px] sm:text-[11px] text-slate-600 font-medium tracking-wide truncate">
                       {["app.tourfy.com/onboarding", "app.tourfy.com/onboarding", "app.tourfy.com/conversations"][active]}
                     </span>
                   </div>
@@ -199,7 +199,7 @@ function ImportPreview() {
         </div>
         <Reveal at={1.9} className="mt-3 flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-          <span className="text-[11px] text-slate-400">{t("importing")}</span>
+          <span className="text-[11px] text-slate-500">{t("importing")}</span>
         </Reveal>
       </Reveal>
 
@@ -308,13 +308,13 @@ function LeadsPreview() {
         <div className="h-11 border-b border-slate-200/60 flex items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-full bg-slate-200 flex items-center justify-center">
-              <span className="text-[10px] font-bold text-slate-500">MG</span>
+              <span className="text-[10px] font-bold text-slate-600">MG</span>
             </div>
             <div>
               <p className="text-xs font-bold text-navy-950">María González</p>
               <div className="flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
-                <span className="text-[10px] text-slate-400">WhatsApp</span>
+                <span className="text-[10px] text-slate-500">WhatsApp</span>
               </div>
             </div>
           </div>
@@ -357,7 +357,7 @@ function LeadsPreview() {
       {/* Panel de lead calificado — se llena campo por campo */}
       <div className="md:col-span-2 p-4 sm:p-5">
         <Reveal at={3.3} className="flex items-center justify-between">
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
             {tHow("leadTitle")}
           </p>
           <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
