@@ -17,7 +17,7 @@ const ROLE_STYLES: Record<MessageRole, { wrapper: string; bubble: string; label:
   assistant: {
     wrapper: "justify-start",
     bubble: "bg-blue-50 border border-blue-100 text-navy-900 rounded-tl-md",
-    label: "TourGuide Bot",
+    label: "Tourfy Bot",
   },
   agent: {
     wrapper: "justify-end",

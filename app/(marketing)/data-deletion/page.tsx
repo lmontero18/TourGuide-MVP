@@ -9,8 +9,8 @@ const UPDATED_EN = "June 2, 2026";
 const UPDATED_ES = "2 de junio de 2026";
 
 export const metadata: Metadata = {
-  title: "Data Deletion — TourGuide",
-  description: "How to request deletion of your data from TourGuide.",
+  title: "Data Deletion — Tourfy",
+  description: "How to request deletion of your data from Tourfy.",
 };
 
 const H1 = "font-display text-3xl sm:text-4xl font-bold tracking-tight text-navy-900";
@@ -42,7 +42,7 @@ function DeletionEn() {
       <p className="mt-2 text-sm text-slate-400">Last updated: {UPDATED_EN}</p>
 
       <p className={`${P} mt-6`}>
-        This page explains how to delete the data TourGuide holds about you or your organization,
+        This page explains how to delete the data Tourfy holds about you or your organization,
         including data processed through the WhatsApp Business / Cloud API.
       </p>
 
@@ -97,7 +97,7 @@ function DeletionEs() {
       <p className="mt-2 text-sm text-slate-400">Última actualización: {UPDATED_ES}</p>
 
       <p className={`${P} mt-6`}>
-        Esta página explica cómo eliminar los datos que TourGuide tiene sobre vos o tu organización,
+        Esta página explica cómo eliminar los datos que Tourfy tiene sobre vos o tu organización,
         incluidos los datos procesados a través de la API de WhatsApp Business / Cloud.
       </p>
 

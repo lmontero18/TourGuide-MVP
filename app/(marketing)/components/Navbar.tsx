@@ -68,7 +68,7 @@ export function Navbar() {
               </svg>
             </div>
             <span className="font-display text-base sm:text-lg font-bold tracking-tight text-navy-900">
-              TourGuide
+              Tourfy
             </span>
           </Link>
 

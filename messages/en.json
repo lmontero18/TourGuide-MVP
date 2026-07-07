@@ -4,7 +4,7 @@
     "howItWorks": "How it works",
     "results": "Results",
     "login": "Log in",
-    "cta": "Start free",
+    "cta": "Get started",
     "account": "Account",
     "dashboard": "Go to dashboard",
     "finishOnboarding": "Finish onboarding",
@@ -14,140 +14,154 @@
   "hero": {
     "headline1": "Your tours sell",
     "headline2": "themselves at",
-    "headline3": "2 AM",
-    "sub": "WhatsApp bots that answer, qualify, and book. Trained on your tours, your prices, and your voice. No leads lost to sleep.",
-    "ctaPrimary": "Start free trial",
+    "headline3": "2 AM",
+    "sub": "A WhatsApp bot trained on your tours, your prices, and your tone. It replies in seconds at any hour, qualifies the traveler, and hands you a sale ready to close.",
+    "ctaPrimary": "Create my bot",
     "ctaSecondary": "See how it works",
-    "trust": "Free 14-day trial · No credit card · Setup in 10 min"
+    "trust": "No setup fees · Cancel anytime · Live in 10 minutes",
+    "mock": {
+      "c1": "Do you do private tours for companies?",
+      "c2": "Thanks! See you Saturday 🙌",
+      "c3": "Does it include hotel pickup?"
+    }
   },
   "logos": {
-    "title": "Built on technology you can trust",
+    "title": "Built on Meta's official platform",
     "b0": "Official WhatsApp Business API",
-    "b1": "Meta Tech Provider",
+    "b1": "Meta Technology Provider",
     "b2": "Encrypted data",
     "b3": "Support in Spanish"
   },
   "features": {
     "label": "Features",
-    "title": "Everything your agency needs to never miss a lead",
-    "sub": "A WhatsApp bot that knows your tours inside out, a live dashboard for your team, and the metrics that prove ROI.",
+    "title": "Everything your agency needs to stop losing leads",
+    "sub": "A bot that knows your tours inside out, a live dashboard for your team, and the metrics that prove the investment pays.",
     "items": {
       "0": {
-        "title": "AI that speaks your brand",
-        "desc": "Train the bot on your specific tours, prices, FAQs, and tone of voice. It answers like your best agent, in Spanish, Portuguese, or English, 24 hours a day."
+        "title": "Talks like your best salesperson",
+        "desc": "Train it on your tours, prices, FAQs, and tone of voice. It replies in Spanish, English, or Portuguese, around the clock — and never makes up a price."
       },
       "1": {
-        "title": "Live agent takeover",
-        "desc": "One click to jump into any conversation. The bot pauses, you talk, then hand it back when you're done."
+        "title": "Take over in one click",
+        "desc": "Jump into any conversation whenever you want. The bot pauses instantly, you talk, and you hand it back when you're done."
       },
       "2": {
         "title": "After-hours capture",
-        "desc": "60% of WhatsApp inquiries come outside business hours. The bot handles them all, so no lead is left behind."
+        "desc": "60% of WhatsApp inquiries arrive when the office is closed. The bot answers every one — at 2 in the afternoon or 2 in the morning."
       },
       "3": {
-        "title": "Lead qualification",
-        "desc": "Automatically extract tour interest, group size, dates, and budget from conversations. See your pipeline at a glance."
+        "title": "Qualified leads, not just chats",
+        "desc": "It pulls dates, group size, budget, and interest out of every conversation. Open the dashboard and know who to close first."
       },
       "4": {
-        "title": "ROI dashboard",
-        "desc": "Track leads captured, bookings attributed, and revenue generated, proof your investment is paying off."
+        "title": "Metrics that prove ROI",
+        "desc": "Leads captured, bookings attributed, revenue generated. The numbers to decide with data, not gut feeling."
       }
     },
     "demo": {
-      "botName": "TourGuide Bot",
+      "botName": "Tourfy Bot",
       "msg0": "Hi! How much is the Machu Picchu tour for 4 people?",
-      "msg1": "Hi there! 🏔️ The Machu Picchu tour for 4 people is $320 USD per person. It includes transport, a bilingual guide, and lunch. Would you like to book a date?",
+      "msg1": "Hi! 🏔️ The Machu Picchu tour for 4 people is $320 USD per person. It includes transport, a bilingual guide, and lunch. Would you like to book a date?",
       "msg2": "Yes, do you have availability next Saturday?"
     }
   },
   "how": {
     "label": "How it works",
-    "title": "Three steps. No tech skills needed.",
-    "sub": "We set up everything for you. You just tell us about your tours.",
+    "title": "From zero to a selling bot in 10 minutes",
+    "sub": "No code and no weeks-long projects. If you can use WhatsApp, you can use Tourfy.",
     "steps": {
       "0": {
         "step": "STEP 1",
-        "title": "Tell us about your tours",
-        "desc": "Share your tour descriptions, prices, and the questions your clients ask most. That's it."
+        "title": "Import your tours",
+        "desc": "Paste your website URL or upload your price sheet as a PDF. We read your tours, prices, and FAQs — you just review and approve."
       },
       "1": {
         "step": "STEP 2",
-        "title": "We build your bot",
-        "desc": "We train it to answer like your best agent, in your tone, your language, and with your prices."
+        "title": "Connect your WhatsApp",
+        "desc": "One click with Meta's official signup and your number is linked. The whole process takes under 2 minutes."
       },
       "2": {
         "step": "STEP 3",
-        "title": "Start getting bookings",
-        "desc": "Your WhatsApp answers clients 24/7. You see every conversation and jump in whenever you want."
+        "title": "Get qualified leads",
+        "desc": "The bot replies to every traveler instantly. You watch every conversation live and step in whenever you want."
       }
     },
     "checks": {
-      "0": "No coding required",
-      "1": "Ready in 48 hours",
+      "0": "No code",
+      "1": "Live in 10 minutes",
       "2": "Cancel anytime"
+    },
+    "preview": {
+      "leadTitle": "Qualified lead",
+      "leadStatus": "New",
+      "leadInterest": "Interest",
+      "leadDates": "Dates",
+      "leadDatesV": "March 15–18",
+      "leadGroup": "Group",
+      "leadGroupV": "4 people",
+      "leadBudget": "Est. budget"
     }
   },
   "metrics": {
     "label": "Results",
-    "title": "The impact it can have on your agency",
+    "title": "The impact on your agency's numbers",
     "sub": "Projections based on industry benchmarks and WhatsApp Business data.",
     "items": {
       "0": {
-        "label": "Captured outside business hours vs. before",
+        "label": "After-hours leads captured that are lost today",
         "unit": "more leads"
       },
       "1": {
-        "label": "Of bot-started conversations that convert to qualified leads",
-        "unit": "response rate"
+        "label": "Inquiries the bot turns into a qualified lead",
+        "unit": "conversion rate"
       },
       "2": {
-        "label": "Average first-response time, day or night",
-        "unit": "reply time"
+        "label": "First reply, daytime or middle of the night",
+        "unit": "response time"
       },
       "3": {
-        "label": "Average incremental revenue per agency in first 90 days",
+        "label": "Estimated extra revenue per month in the first 90 days",
         "unit": "monthly revenue"
       }
     },
-    "note": "* Illustrative estimates, not guaranteed results."
+    "note": "* Illustrative projections, not guaranteed results."
   },
   "ctaSection": {
-    "title1": "Stop losing leads",
-    "title2": "to your voicemail",
-    "sub": "Your next customer is messaging you right now. Make sure someone, or some bot, answers.",
-    "button": "Start free trial",
-    "note": "14 days free · No credit card"
+    "title1": "Your next customer",
+    "title2": "is texting you right now",
+    "sub": "Every unanswered inquiry is a booking that goes to another agency. Put your bot to work today.",
+    "button": "Create my bot",
+    "note": "Setup in 10 minutes · Cancel anytime"
   },
   "pricing": {
     "label": "Pricing",
-    "title": "Pick how hands-on you want us",
-    "sub": "Start self-service or let us handle everything. All plans include the same powerful bot.",
+    "title": "One simple price, no surprises",
+    "sub": "Everything you need to never lose a lead again. Unlimited replies, no hidden costs.",
     "month": "mo",
-    "popular": "Most popular",
+    "popular": "All included",
     "tiers": {
       "0": {
-        "badge": "Self-service",
-        "name": "Do It Yourself",
-        "desc": "You set it up, we give you the tools. Perfect for tech-savvy agencies.",
-        "cta": "Get started",
-        "f0": "WhatsApp bot with your catalog",
-        "f1": "Live dashboard & conversations",
-        "f2": "Agent takeover chat",
-        "f3": "Lead qualification",
-        "f4": "Email support"
+        "badge": "Available now",
+        "name": "Tourfy",
+        "desc": "Your 24/7 salesperson on WhatsApp. Replies, qualifies leads, never sleeps.",
+        "cta": "Create my bot",
+        "f0": "24/7 bot with unlimited replies",
+        "f1": "Tour catalog with automatic import (web or PDF)",
+        "f2": "Live chat with agent takeover — up to 3 agents",
+        "f3": "Lead qualification & ROI metrics",
+        "f4": "Your WhatsApp number, connected in one click"
       },
       "1": {
-        "badge": "Recommended",
-        "name": "Do It For You",
-        "desc": "We build and launch your bot. You just approve and go live.",
-        "setup": "One-time setup",
-        "cta": "Start free trial",
-        "f0": "Everything in Do It Yourself",
-        "f1": "Full bot setup & training by us",
-        "f2": "Twilio & WhatsApp configuration",
-        "f3": "Custom FAQ & tour catalog import",
-        "f4": "ROI dashboard",
-        "f5": "Priority support"
+        "badge": "Coming soon",
+        "name": "Tourfy Plus",
+        "desc": "For operators who want the bot to close sales for them too.",
+        "cta": "Coming soon",
+        "f0": "Everything in Tourfy",
+        "f1": "Automatic lead follow-ups",
+        "f2": "Payments & deposits via payment link in chat",
+        "f3": "Unlimited agents and up to 3 numbers",
+        "f4": "Advanced reports & export",
+        "f5": "Onboarding done by us + priority support"
       }
     }
   },
@@ -157,22 +171,22 @@
     "product": "Product",
     "company": "Company",
     "legal": "Legal",
-    "rights": "TourGuide Inc. All rights reserved.",
+    "rights": "Tourfy Inc. All rights reserved.",
     "status": "All systems operational"
   },
   "auth": {
     "panel": {
       "badge": "Built for LATAM",
-      "quote": "“We used to lose 40% of inquiries after 6 PM. Now we wake up to qualified leads.”",
-      "quoteName": "María Rodríguez",
-      "quoteRole": "Cusco Expeditions · Peru",
+      "quote": "“60% of traveler inquiries arrive after hours. Your bot answers every one — you just close the sale.”",
+      "quoteName": "Tourfy",
+      "quoteRole": "Your 24/7 salesperson on WhatsApp",
       "statMoreLeads": "more leads",
       "statReplyTime": "reply time",
       "statAvailability": "availability"
     },
     "login": {
       "title": "Welcome back",
-      "sub": "Log in to your TourGuide dashboard",
+      "sub": "Log in to your Tourfy dashboard",
       "email": "Email",
       "emailPlaceholder": "you@agency.com",
       "password": "Password",
@@ -180,13 +194,13 @@
       "forgot": "Forgot password?",
       "submit": "Log in",
       "noAccount": "Don’t have an account?",
-      "signUp": "Sign up free",
+      "signUp": "Sign up",
       "or": "or",
       "googleContinue": "Continue with Google"
     },
     "register": {
       "title": "Create your account",
-      "sub": "Start your 14-day free trial. No credit card required.",
+      "sub": "Create your account — your bot can be answering today.",
       "googleSignUp": "Sign up with Google",
       "or": "or",
       "name": "Full name",
@@ -255,7 +269,7 @@
         "step1Title": "Sign in with Facebook",
         "step1Desc": "We use Meta's official Embedded Signup — your credentials are handled by Facebook directly, never by us.",
         "step2Title": "Authorize WhatsApp access",
-        "step2Desc": "Grant permission for TourGuide to send and receive messages on your behalf through Meta Cloud API.",
+        "step2Desc": "Grant permission for Tourfy to send and receive messages on your behalf through Meta Cloud API.",
         "step3Title": "Verify your number",
         "step3Desc": "Meta sends a code to your phone to confirm ownership. Once verified, your bot starts working instantly.",
         "trustEncrypted": "End-to-end encrypted",
@@ -332,7 +346,7 @@
         "casualLabel": "Casual",
         "casualDesc": "Relaxed and fun. Ideal for adventure / backpacker tours.",
         "casualExample": "Yo! 🏔️ Sacred Valley is amazing, you're gonna love it! $320 per person, all-inclusive. Just tell me your dates and group size and I'll lock it in for you!",
-        "botLabel": "TourGuide Bot",
+        "botLabel": "Tourfy Bot",
         "greetingLabel": "Custom greeting (optional)",
         "greetingHint": "First message when someone contacts you on WhatsApp",
         "greetingPlaceholder": "Hi! 👋 I'm the assistant for {agency}. How can I help you?",
@@ -347,7 +361,7 @@
         "summaryTone": "Tone",
         "previewYourAgency": "Your Agency",
         "botActive": "Bot active",
-        "botLabel": "TourGuide Bot",
+        "botLabel": "Tourfy Bot",
         "inputPlaceholder": "Type a message to test your bot...",
         "greetingFallback": "Hi! 👋 I'm the assistant for {agency}. How can I help you?",
         "agencyFallback": "your agency",
@@ -433,7 +447,7 @@
       "botBanner": "Bot is handling this conversation",
       "agentBanner": "You are in control — bot is paused",
       "roleClient": "Client",
-      "roleBot": "TourGuide Bot",
+      "roleBot": "Tourfy Bot",
       "roleYou": "You"
     },
     "metrics": {

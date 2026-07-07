@@ -212,7 +212,7 @@ export default function OnboardingPage() {
               </svg>
             </div>
             <span className="font-display text-base font-bold tracking-tight text-navy-900">
-              TourGuide
+              Tourfy
             </span>
           </Link>
 

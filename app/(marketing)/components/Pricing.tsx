@@ -30,11 +30,18 @@ export function Pricing() {
           className="mt-10 sm:mt-16 grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 items-stretch max-w-4xl mx-auto"
           staggerDelay={0.12}
         >
-          {/* Tier 1 — Do it yourself */}
+          {/* Tier 0 — Tourfy (plan vivo, destacado) */}
           <StaggerItem>
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5 h-full flex flex-col">
-              <div className="mb-6">
-                <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600">
+            <div className="rounded-2xl border-2 border-navy-900 bg-white p-6 sm:p-8 transition-all hover:shadow-xl hover:shadow-navy-900/10 hover:-translate-y-0.5 h-full flex flex-col relative">
+              {/* Popular badge */}
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <span className="inline-flex items-center rounded-full bg-navy-900 px-4 py-1 text-xs font-bold text-white tracking-wide shadow-lg shadow-navy-900/25">
+                  {t("popular")}
+                </span>
+              </div>
+
+              <div className="mb-6 mt-1">
+                <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-600">
                   {t("tiers.0.badge")}
                 </span>
               </div>
@@ -61,7 +68,7 @@ export function Pricing() {
               <ul className="mt-6 space-y-3 flex-1">
                 {[0, 1, 2, 3, 4].map((i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <CheckIcon className="text-slate-400" />
+                    <CheckIcon className="text-blue-500" />
                     <span className="text-sm text-slate-600">
                       {t(`tiers.0.f${i}`)}
                     </span>
@@ -71,67 +78,9 @@ export function Pricing() {
 
               <Link
                 href="/register"
-                className="mt-8 flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-navy-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2"
-              >
-                {t("tiers.0.cta")}
-              </Link>
-            </div>
-          </StaggerItem>
-
-          {/* Tier 2 — Do it for you (featured) */}
-          <StaggerItem>
-            <div className="rounded-2xl border-2 border-navy-900 bg-white p-6 sm:p-8 transition-all hover:shadow-xl hover:shadow-navy-900/10 hover:-translate-y-0.5 h-full flex flex-col relative">
-              {/* Popular badge */}
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                <span className="inline-flex items-center rounded-full bg-navy-900 px-4 py-1 text-xs font-bold text-white tracking-wide shadow-lg shadow-navy-900/25">
-                  {t("popular")}
-                </span>
-              </div>
-
-              <div className="mb-6 mt-1">
-                <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-600">
-                  {t("tiers.1.badge")}
-                </span>
-              </div>
-              <h3 className="font-display text-xl font-bold text-navy-950 tracking-tight">
-                {t("tiers.1.name")}
-              </h3>
-              <p className="mt-2 text-sm text-slate-500 leading-relaxed min-h-[40px]">
-                {t("tiers.1.desc")}
-              </p>
-
-              {/* Price */}
-              <div className="mt-6 pb-6 border-b border-slate-100">
-                <div className="flex items-baseline gap-1">
-                  <span className="font-display text-4xl sm:text-5xl font-extrabold tracking-tighter text-navy-950">
-                    $3,000
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-slate-500">
-                  {t("tiers.1.setup")}
-                  <span className="font-semibold text-navy-900">
-                    {" "}+ $500/{t("month")}
-                  </span>
-                </p>
-              </div>
-
-              {/* Features */}
-              <ul className="mt-6 space-y-3 flex-1">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <CheckIcon className="text-blue-500" />
-                    <span className="text-sm text-slate-600">
-                      {t(`tiers.1.f${i}`)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/register"
                 className="mt-8 flex h-11 items-center justify-center rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2"
               >
-                {t("tiers.1.cta")}
+                {t("tiers.0.cta")}
                 <svg
                   className="ml-2 h-4 w-4"
                   fill="none"
@@ -147,6 +96,54 @@ export function Pricing() {
                   />
                 </svg>
               </Link>
+            </div>
+          </StaggerItem>
+
+          {/* Tier 1 — Tourfy Plus (coming soon) */}
+          <StaggerItem>
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-6 sm:p-8 h-full flex flex-col">
+              <div className="mb-6">
+                <span className="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-600">
+                  {t("tiers.1.badge")}
+                </span>
+              </div>
+              <h3 className="font-display text-xl font-bold text-navy-950 tracking-tight">
+                {t("tiers.1.name")}
+              </h3>
+              <p className="mt-2 text-sm text-slate-500 leading-relaxed min-h-[40px]">
+                {t("tiers.1.desc")}
+              </p>
+
+              {/* Price */}
+              <div className="mt-6 pb-6 border-b border-slate-100">
+                <div className="flex items-baseline gap-1">
+                  <span className="font-display text-4xl sm:text-5xl font-extrabold tracking-tighter text-navy-950/70">
+                    $1,000
+                  </span>
+                  <span className="text-sm font-medium text-slate-500">
+                    /{t("month")}
+                  </span>
+                </div>
+              </div>
+
+              {/* Features */}
+              <ul className="mt-6 space-y-3 flex-1">
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <CheckIcon className="text-slate-400" />
+                    <span className="text-sm text-slate-600">
+                      {t(`tiers.1.f${i}`)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <span
+                aria-disabled
+                className="mt-8 flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-400 cursor-default select-none"
+              >
+                {t("tiers.1.cta")}
+              </span>
             </div>
           </StaggerItem>
         </StaggerContainer>

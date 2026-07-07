@@ -10,8 +10,8 @@ const UPDATED_EN = "June 2, 2026";
 const UPDATED_ES = "2 de junio de 2026";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — TourGuide",
-  description: "How TourGuide collects, uses and protects data.",
+  title: "Privacy Policy — Tourfy",
+  description: "How Tourfy collects, uses and protects data.",
 };
 
 const H1 = "font-display text-3xl sm:text-4xl font-bold tracking-tight text-navy-900";
@@ -42,7 +42,7 @@ function PrivacyEn() {
       <p className="mt-2 text-sm text-slate-400">Last updated: {UPDATED_EN}</p>
 
       <p className={`${P} mt-6`}>
-        {LEGAL_NAME} (&ldquo;TourGuide&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) provides a
+        {LEGAL_NAME} (&ldquo;Tourfy&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) provides a
         multi-tenant platform that lets tourism agencies operate WhatsApp bots, manage conversations
         and measure results. This policy explains what data we collect, how we use it, and the rights
         you have. It applies to our website, dashboard and APIs.
@@ -52,7 +52,7 @@ function PrivacyEn() {
       <p className={P}>
         For account and billing data, {LEGAL_NAME} is the data controller. For end-customer
         conversations that flow through an agency&rsquo;s WhatsApp number, the agency is the
-        controller and TourGuide acts as a processor on its behalf.
+        controller and Tourfy acts as a processor on its behalf.
       </p>
 
       <h2 className={H2}>2. Data we collect</h2>
@@ -132,7 +132,7 @@ function PrivacyEs() {
       <p className="mt-2 text-sm text-slate-400">Última actualización: {UPDATED_ES}</p>
 
       <p className={`${P} mt-6`}>
-        {LEGAL_NAME} (&ldquo;TourGuide&rdquo;, &ldquo;nosotros&rdquo;) ofrece una plataforma
+        {LEGAL_NAME} (&ldquo;Tourfy&rdquo;, &ldquo;nosotros&rdquo;) ofrece una plataforma
         multiempresa que permite a agencias de turismo operar bots de WhatsApp, gestionar
         conversaciones y medir resultados. Esta política explica qué datos recopilamos, cómo los
         usamos y qué derechos tenés. Aplica a nuestro sitio web, panel y APIs.
@@ -142,7 +142,7 @@ function PrivacyEs() {
       <p className={P}>
         Para los datos de cuenta y facturación, {LEGAL_NAME} es el responsable del tratamiento. Para
         las conversaciones de clientes finales que pasan por el número de WhatsApp de una agencia, la
-        agencia es la responsable y TourGuide actúa como encargado del tratamiento en su nombre.
+        agencia es la responsable y Tourfy actúa como encargado del tratamiento en su nombre.
       </p>
 
       <h2 className={H2}>2. Datos que recopilamos</h2>

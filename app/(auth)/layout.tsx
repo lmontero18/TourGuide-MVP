@@ -51,7 +51,7 @@ export default function AuthLayout({
               </svg>
             </div>
             <span className="font-display text-lg font-bold tracking-tight text-white">
-              TourGuide
+              Tourfy
             </span>
           </Link>
 
@@ -132,7 +132,7 @@ export default function AuthLayout({
               </svg>
             </div>
             <span className="font-display text-base font-bold tracking-tight text-navy-900">
-              TourGuide
+              Tourfy
             </span>
           </Link>
         </div>
