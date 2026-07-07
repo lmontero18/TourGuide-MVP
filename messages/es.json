@@ -9,7 +9,8 @@
     "dashboard": "Ir al dashboard",
     "finishOnboarding": "Terminar onboarding",
     "signOut": "Cerrar sesión",
-    "pricing": "Precios"
+    "pricing": "Precios",
+    "blog": "Blog"
   },
   "hero": {
     "headline1": "Tus tours se venden",
@@ -543,5 +544,14 @@
       "teamCount": "{count} agentes en tu organización",
       "inactive": "INACTIVO"
     }
+  },
+  "blog": {
+    "metaTitle": "Blog — Tourfy",
+    "metaDescription": "Guías prácticas para agencias de turismo en LATAM: automatización de WhatsApp, CRM para tour operators y gestión de reservas.",
+    "label": "Blog",
+    "title": "Guías para agencias de turismo",
+    "sub": "Automatización de WhatsApp, CRM y gestión de reservas — sin humo, para operadores de LATAM.",
+    "readMore": "Leer más",
+    "back": "Blog"
   }
 }

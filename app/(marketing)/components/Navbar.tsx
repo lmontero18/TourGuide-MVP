@@ -86,6 +86,9 @@ export function Navbar() {
             <a href="#pricing" className="text-sm font-medium text-slate-500 hover:text-navy-900 transition-colors">
               {t("pricing")}
             </a>
+            <Link href="/blog" className="text-sm font-medium text-slate-500 hover:text-navy-900 transition-colors">
+              {t("blog")}
+            </Link>
           </div>
 
           {/* Right side */}
@@ -138,6 +141,7 @@ export function Navbar() {
                 { href: "#how-it-works", label: t("howItWorks") },
                 { href: "#metrics", label: t("results") },
                 { href: "#pricing", label: t("pricing") },
+                { href: "/blog", label: t("blog") },
               ].map((link) => (
                 <a
                   key={link.href}
