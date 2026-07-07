@@ -406,7 +406,7 @@ export type Database = {
       }
       whatsapp_accounts: {
         Row: {
-          access_token: string
+          access_token: string | null
           connected_at: string | null
           created_at: string | null
           id: string
@@ -418,7 +418,7 @@ export type Database = {
           waba_id: string
         }
         Insert: {
-          access_token: string
+          access_token?: string | null
           connected_at?: string | null
           created_at?: string | null
           id?: string
@@ -430,7 +430,7 @@ export type Database = {
           waba_id: string
         }
         Update: {
-          access_token?: string
+          access_token?: string | null
           connected_at?: string | null
           created_at?: string | null
           id?: string
