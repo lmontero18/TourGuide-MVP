@@ -52,6 +52,7 @@ export function Footer() {
                   { label: nav("features"), href: "/#features" },
                   { label: nav("howItWorks"), href: "/#how-it-works" },
                   { label: nav("pricing"), href: "/#pricing" },
+                  { label: nav("blog"), href: "/blog" },
                 ].map((item) => (
                   <li key={item.href}>
                     <Link href={item.href} className="text-xs sm:text-sm text-slate-500 hover:text-navy-900 transition-colors">
