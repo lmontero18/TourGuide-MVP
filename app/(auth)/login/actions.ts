@@ -33,7 +33,10 @@ async function getClientIp(): Promise<string> {
   return h.get('x-real-ip') ?? 'unknown'
 }
 
-async function checkRateLimit(identifier: string): Promise<{ ok: boolean; retryAfter?: number }> {
+async function checkRateLimit(
+  identifier: string,
+  { countAll = false }: { countAll?: boolean } = {}
+): Promise<{ ok: boolean; retryAfter?: number }> {
   const service = await createServiceClient()
   const since = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString()
 
@@ -46,9 +49,11 @@ async function checkRateLimit(identifier: string): Promise<{ ok: boolean; retryA
 
   if (error) return { ok: true }
 
-  const failures = (data ?? []).filter((r) => !r.success)
-  if (failures.length >= MAX_ATTEMPTS) {
-    const oldest = new Date(failures[failures.length - 1].attempted_at).getTime()
+  // Login counts only failures (successful logins are fine); signup counts
+  // every attempt to stop mass account creation from one IP.
+  const counted = countAll ? (data ?? []) : (data ?? []).filter((r) => !r.success)
+  if (counted.length >= MAX_ATTEMPTS) {
+    const oldest = new Date(counted[counted.length - 1].attempted_at).getTime()
     const retryAfter = Math.ceil((oldest + WINDOW_MINUTES * 60 * 1000 - Date.now()) / 60000)
     return { ok: false, retryAfter: Math.max(retryAfter, 1) }
   }
@@ -122,6 +127,14 @@ export async function signup(formData: FormData) {
 
   const { email, password, fullName } = parsed.data
 
+  const ip = await getClientIp()
+  const identifier = `signup:${ip}`
+
+  const limit = await checkRateLimit(identifier, { countAll: true })
+  if (!limit.ok) {
+    redirect(`/register?error=${encodeURIComponent(`Too many attempts. Try again in ${limit.retryAfter} min.`)}`)
+  }
+
   const supabase = await createClient()
   const { error } = await supabase.auth.signUp({
     email,
@@ -130,6 +143,8 @@ export async function signup(formData: FormData) {
       data: { full_name: fullName || null },
     },
   })
+
+  await recordAttempt(identifier, !error)
 
   if (error) {
     redirect(`/register?error=${encodeURIComponent(error.message)}`)

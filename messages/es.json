@@ -195,15 +195,11 @@
       "forgot": "¿Olvidaste tu contraseña?",
       "submit": "Iniciar sesión",
       "noAccount": "¿No tienes cuenta?",
-      "signUp": "Regístrate",
-      "or": "o",
-      "googleContinue": "Continuar con Google"
+      "signUp": "Regístrate"
     },
     "register": {
       "title": "Crea tu cuenta",
       "sub": "Crea tu cuenta — tu bot puede estar respondiendo hoy mismo.",
-      "googleSignUp": "Regístrate con Google",
-      "or": "o",
       "name": "Nombre completo",
       "namePlaceholder": "María Rodríguez",
       "email": "Email de trabajo",
@@ -212,6 +208,7 @@
       "companyPlaceholder": "Cusco Expeditions",
       "password": "Contraseña",
       "passwordPlaceholder": "8+ caracteres",
+      "passwordHint": "Mínimo 8 caracteres, con mayúscula, minúscula y número",
       "submit": "Crear cuenta",
       "terms": "Al registrarte aceptas nuestros",
       "termsLink": "Términos",
