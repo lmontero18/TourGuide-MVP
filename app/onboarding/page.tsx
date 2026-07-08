@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -73,6 +73,21 @@ export default function OnboardingPage() {
       setData((prev) => ({ ...prev, ...patch })),
     [],
   );
+
+  // Requisitos minimos por paso — sin esto el boton Continuar queda deshabilitado.
+  // Personalidad (3) siempre es valida: tone tiene default y el saludo es opcional.
+  const stepValid = useMemo(() => {
+    switch (step) {
+      case 0:
+        return data.agencyName.trim().length > 0 && data.country !== "";
+      case 1:
+        return data.whatsappConnected;
+      case 2:
+        return data.tours.some((tour) => tour.name.trim().length > 0);
+      default:
+        return true;
+    }
+  }, [step, data]);
 
   const ensureOrg = async (): Promise<boolean> => {
     if (orgCreated) return true;
@@ -337,9 +352,15 @@ export default function OnboardingPage() {
             </button>
 
             {step < STEP_COUNT - 1 ? (
+              <div className="flex items-center gap-3">
+                {!stepValid && (
+                  <p className="text-xs text-slate-500 max-w-[220px] text-right">
+                    {t(`validation.${step}`)}
+                  </p>
+                )}
               <button
                 onClick={next}
-                disabled={advancing}
+                disabled={advancing || !stepValid}
                 className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
                 {advancing ? t("saving") : t("next")}
@@ -357,6 +378,7 @@ export default function OnboardingPage() {
                   <path d="M12 5l7 7-7 7" />
                 </svg>
               </button>
+              </div>
             ) : (
               <div className="flex items-center gap-3">
                 {launchError && (

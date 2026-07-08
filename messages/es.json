@@ -373,7 +373,12 @@
       }
     },
     "saving": "Guardando...",
-    "launching": "Lanzando..."
+    "launching": "Lanzando...",
+    "validation": {
+      "0": "Completa el nombre de tu agencia y el país para continuar",
+      "1": "Conecta tu número de WhatsApp para continuar",
+      "2": "Agrega al menos un tour con nombre para continuar"
+    }
   },
   "dashboard": {
     "sidebar": {
