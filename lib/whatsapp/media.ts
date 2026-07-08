@@ -12,21 +12,33 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 const GRAPH_API_BASE = process.env.META_GRAPH_API_BASE ?? 'https://graph.facebook.com/v21.0'
 const MAX_DIMENSION = 1280
 const WEBP_QUALITY = 75
+// Si Graph API se cuelga no podemos bloquear el procesamiento del webhook.
+const LOOKUP_TIMEOUT_MS = 10_000
+const DOWNLOAD_TIMEOUT_MS = 20_000
 
 export async function downloadMedia(mediaId: string, accessToken: string): Promise<Buffer | null> {
-  const metaRes = await fetch(`${GRAPH_API_BASE}/${mediaId}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  })
-  if (!metaRes.ok) return null
+  try {
+    const metaRes = await fetch(`${GRAPH_API_BASE}/${mediaId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS),
+    })
+    if (!metaRes.ok) return null
 
-  const { url } = (await metaRes.json()) as { url?: string }
-  if (!url) return null
+    const { url } = (await metaRes.json()) as { url?: string }
+    if (!url) return null
 
-  // La URL de descarga de Meta expira en ~5 minutos — descargar de inmediato.
-  const fileRes = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } })
-  if (!fileRes.ok) return null
+    // La URL de descarga de Meta expira en ~5 minutos — descargar de inmediato.
+    const fileRes = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
+    })
+    if (!fileRes.ok) return null
 
-  return Buffer.from(await fileRes.arrayBuffer())
+    return Buffer.from(await fileRes.arrayBuffer())
+  } catch (error) {
+    console.error('downloadMedia failed:', error)
+    return null
+  }
 }
 
 export async function compressImage(input: Buffer): Promise<Buffer> {

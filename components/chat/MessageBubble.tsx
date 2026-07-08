@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { MessageRole } from "@/types";
 import { useChatMediaUrl } from "@/hooks/useChatMediaUrl";
 
@@ -33,6 +34,7 @@ const ROLE_STYLES: Record<MessageRole, { wrapper: string; bubble: string; label:
 export default function MessageBubble({ content, role, createdAt, mediaPath, pending, failed }: MessageBubbleProps) {
   const style = ROLE_STYLES[role];
   const mediaUrl = useChatMediaUrl(mediaPath);
+  const [imgFailed, setImgFailed] = useState(false);
   const isMediaPlaceholder = /^\[[a-z_]+\]$/.test(content);
 
   return (
@@ -53,10 +55,12 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
               alt="Imagen enviada por el cliente"
               className="max-h-64 rounded-lg object-cover"
               loading="lazy"
+              onLoad={() => setImgFailed(false)}
+              onError={() => setImgFailed(true)}
             />
           </a>
         )}
-        {!(mediaUrl && isMediaPlaceholder) && (
+        {!(mediaUrl && !imgFailed && isMediaPlaceholder) && (
           <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
         )}
         <span className={`flex items-center gap-1 text-[10px] mt-1 ${

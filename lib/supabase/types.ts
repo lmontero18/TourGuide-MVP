@@ -247,6 +247,7 @@ export type Database = {
           media_type: string | null
           media_url: string | null
           role: string
+          wa_message_id: string | null
         }
         Insert: {
           channel?: string
@@ -258,6 +259,7 @@ export type Database = {
           media_type?: string | null
           media_url?: string | null
           role: string
+          wa_message_id?: string | null
         }
         Update: {
           channel?: string
@@ -269,6 +271,7 @@ export type Database = {
           media_type?: string | null
           media_url?: string | null
           role?: string
+          wa_message_id?: string | null
         }
         Relationships: [
           {
