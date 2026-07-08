@@ -47,11 +47,14 @@ ahora, a criterio del que edita.
    - **Supabase Vector Store** (tabla `embeddings`) — RAG sobre tours/precios/itinerarios.
    - **Tool `transfer_to_human`** — `POST {callback_base_url}/api/internal/bot-control`
      con `Authorization: Bearer {n8n_secret}` → desactiva el bot (`bot_active = false`)
-     cuando el cliente pide hablar con un humano.
+     cuando el cliente pide hablar con un humano. Body: `{ conversation_id }` (requerido;
+     404 si la conversación no existe, 401 si el secret no matchea).
 4. **Send MSG** — `POST` directo a Meta Graph API
    (`graph.facebook.com/v21.0/{phone_number_id}/messages`) con el `access_token` de la org.
 5. **Save bot reply** — `POST {callback_base_url}/api/internal/save-bot-reply`
    con `Authorization: Bearer {n8n_secret}` → persiste la respuesta del bot en `public.messages`.
+   Body: `{ conversation_id, content }` (ambos requeridos; 400 si falta alguno,
+   404 si la conversación no existe).
 
 ## Contrato con la app (TourGuide)
 
