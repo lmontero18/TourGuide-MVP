@@ -5,7 +5,8 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "c7dcfac3-fea1-4ed4-b33e-1b32abcdeed6",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
       },
       "id": "657b928f-efd3-4ec6-96c7-7ccc71dde80c",
       "name": "Webhook",
@@ -15,7 +16,13 @@
         -608,
         400
       ],
-      "webhookId": "c7dcfac3-fea1-4ed4-b33e-1b32abcdeed6"
+      "webhookId": "c7dcfac3-fea1-4ed4-b33e-1b32abcdeed6",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "KoAfLs9ntHKyDS8X",
+          "name": "TourGuide Webhook Auth"
+        }
+      }
     },
     {
       "parameters": {
