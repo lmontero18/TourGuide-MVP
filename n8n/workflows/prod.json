@@ -20,8 +20,8 @@
     {
       "parameters": {
         "operation": "push",
-        "list": "={{ $json.body.org_id + ':' + $json.body.contact_phone }}",
-        "messageData": "={{ JSON.stringify({ sessionId: $json.body.conversation_id, updated_at: new Date().toISOString(), content: $json.body.message, _meta: { redis_key: $json.body.org_id + ':' + $json.body.contact_phone, phone_number_id: $json.body.phone_number_id, contact_phone: $json.body.contact_phone, access_token: $json.body.access_token, callback_base_url: $json.body.callback_base_url, n8n_secret: $json.body.n8n_secret, org_id: $json.body.org_id, conversation_id: $json.body.conversation_id, system_prompt: $json.body.system_prompt } }) }}"
+        "list": "={{ 'prod:' + $json.body.org_id + ':' + $json.body.contact_phone }}",
+        "messageData": "={{ JSON.stringify({ sessionId: $json.body.conversation_id, updated_at: new Date().toISOString(), content: $json.body.message, _meta: { redis_key: 'prod:' + $json.body.org_id + ':' + $json.body.contact_phone, phone_number_id: $json.body.phone_number_id, contact_phone: $json.body.contact_phone, access_token: $json.body.access_token, callback_base_url: $json.body.callback_base_url, n8n_secret: $json.body.n8n_secret, org_id: $json.body.org_id, conversation_id: $json.body.conversation_id, system_prompt: $json.body.system_prompt } }) }}"
       },
       "id": "tg-redis-push-001",
       "name": "Push message into redis db",
@@ -42,7 +42,7 @@
       "parameters": {
         "operation": "get",
         "propertyName": "Message",
-        "key": "={{ $json.Message ? JSON.parse($json.Message[0])._meta.redis_key : $json.body.org_id + ':' + $json.body.contact_phone }}",
+        "key": "={{ $json.Message ? JSON.parse($json.Message[0])._meta.redis_key : 'prod:' + $json.body.org_id + ':' + $json.body.contact_phone }}",
         "options": {}
       },
       "id": "tg-redis-get-001",
