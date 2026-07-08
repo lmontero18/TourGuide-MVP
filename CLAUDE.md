@@ -473,6 +473,8 @@ META_WEBHOOK_VERIFY_TOKEN=            # Token para verificacion inicial del webh
 N8N_WEBHOOK_URL=
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
+CRON_SECRET=                          # Auth del cron de Vercel (limpieza de media)
+OPENAI_API_KEY=                       # Whisper (audio) + vision (descripcion de imagenes)
 ```
 
 ---

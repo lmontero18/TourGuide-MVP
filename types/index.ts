@@ -2,6 +2,7 @@ export type Role = 'admin' | 'agent'
 export type ConversationStatus = 'open' | 'resolved' | 'pending'
 export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
 export type MessageRole = 'user' | 'assistant' | 'agent'
+export type MediaType = 'image' | 'video' | 'document' | 'sticker'
 export type PlanType = 'starter' | 'growth' | 'pro'
 export type OrgStatus = 'active' | 'inactive' | 'suspended'
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid'
@@ -116,6 +117,9 @@ export interface Message {
   content: string
   from_bot: boolean
   channel: string
+  media_url: string | null   // path en bucket chat-media, null si no hay media o expiró
+  media_type: MediaType | null
+  wa_message_id: string | null  // id de Meta (wamid) — dedupe de reintentos del webhook
   created_at: string
 }
 

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { verifyWebhookSignature } from '@/lib/whatsapp/verify'
 
@@ -33,15 +33,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
-  // Always respond 200 immediately — process async
   const body = JSON.parse(rawBody)
 
-  try {
-    await processWebhook(body)
-  } catch (error) {
-    console.error('Webhook processing error:', error)
-    // Still return 200 to prevent Meta retries
-  }
+  // Responder 200 de inmediato y procesar despues de enviar la respuesta —
+  // descargas/vision pueden tardar y Meta reintenta si el webhook demora.
+  after(async () => {
+    try {
+      await processWebhook(body)
+    } catch (error) {
+      console.error('Webhook processing error:', error)
+    }
+  })
 
   return NextResponse.json({ status: 'ok' }, { status: 200 })
 }
@@ -114,8 +116,21 @@ async function processWebhook(body: Record<string, unknown>) {
         const messageId = message.id as string
         const profileName = nameByWaId.get(from) ?? null
 
+        // Idempotencia: Meta reintenta la entrega si no recibe 200 a tiempo.
+        // Si ya procesamos este wamid, no reinsertar ni volver a subir media.
+        if (messageId) {
+          const { data: dupe } = await supabase
+            .from('messages')
+            .select('id')
+            .eq('wa_message_id', messageId)
+            .maybeSingle()
+          if (dupe) continue
+        }
+
         // Extract text content
         let content = ''
+        let mediaPath: string | null = null
+        let mediaType: string | null = null
         if (type === 'text') {
           const text = message.text as { body?: string }
           content = text?.body ?? ''
@@ -130,12 +145,13 @@ async function processWebhook(body: Record<string, unknown>) {
             if (audioId && tok) {
               const mediaRes = await fetch(
                 `https://graph.facebook.com/v21.0/${audioId}`,
-                { headers: { Authorization: `Bearer ${tok}` } }
+                { headers: { Authorization: `Bearer ${tok}` }, signal: AbortSignal.timeout(10_000) }
               )
               const mediaData = await mediaRes.json() as { url?: string }
               if (mediaData.url) {
                 const audioRes = await fetch(mediaData.url, {
-                  headers: { Authorization: `Bearer ${tok}` }
+                  headers: { Authorization: `Bearer ${tok}` },
+                  signal: AbortSignal.timeout(20_000),
                 })
                 const audioBuffer = await audioRes.arrayBuffer()
                 const { OpenAI } = await import('openai')
@@ -149,6 +165,30 @@ async function processWebhook(body: Record<string, unknown>) {
             }
           } catch {
             content = '[audio]'
+          }
+        } else if (type === 'image') {
+          mediaType = 'image'
+          content = '[image]'
+          try {
+            const { getMessagingToken } = await import('@/lib/whatsapp/token')
+            const tok = getMessagingToken(waAccount)
+            const image = message.image as { id?: string; caption?: string } | undefined
+            const parts: string[] = []
+            if (image?.caption) parts.push(image.caption)
+            if (image?.id && tok) {
+              const { downloadMedia, compressImage, describeImage, storeChatImage } =
+                await import('@/lib/whatsapp/media')
+              const original = await downloadMedia(image.id, tok)
+              if (original) {
+                const webp = await compressImage(original)
+                mediaPath = await storeChatImage(supabase, waAccount.org_id, webp)
+                const description = await describeImage(webp)
+                if (description) parts.push(`[Imagen: ${description}]`)
+              }
+            }
+            if (parts.length) content = parts.join(' ')
+          } catch (error) {
+            console.error('Inbound image processing failed:', error)
           }
         } else {
           content = `[${type}]`
@@ -217,15 +257,30 @@ async function processWebhook(body: Record<string, unknown>) {
         if (!conversation) continue
 
         // Insert message
-        await supabase.from('messages').insert({
+        const { error: insertError } = await supabase.from('messages').insert({
           conversation_id: conversation.id,
           role: 'user',
           content,
           from_bot: false,
+          media_url: mediaPath,
+          media_type: mediaType,
+          wa_message_id: messageId ?? null,
         })
 
-        // Call N8N bot if active and we have processable content
-        if (conversation.bot_active && content && content !== '[audio]') {
+        if (insertError) {
+          // 23505 = unique violation en wa_message_id: un reintento concurrente
+          // ya inserto este mensaje — no llamar al bot de nuevo.
+          if (insertError.code !== '23505') {
+            console.error('Message insert failed:', insertError.message)
+          }
+          continue
+        }
+
+        // Call N8N bot if active and we have processable content.
+        // Placeholders tipo [image]/[video]/[sticker] no van al bot — solo
+        // texto real (incluye transcripciones de audio y descripciones de imagen).
+        const isPlaceholder = /^\[[a-z_]+\]$/.test(content)
+        if (conversation.bot_active && content && !isPlaceholder) {
           const { data: org } = await supabase
             .from('organizations')
             .select('prompt')

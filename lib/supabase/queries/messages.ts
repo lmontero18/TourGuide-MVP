@@ -6,7 +6,7 @@ export async function getMessages(conversationId: string) {
 
   const { data, error } = await supabase
     .from('messages')
-    .select('id, conversation_id, role, content, from_bot, channel, created_at')
+    .select('id, conversation_id, role, content, from_bot, channel, media_url, media_type, created_at')
     .eq('conversation_id', conversationId)
     .order('created_at', { ascending: true })
 
@@ -30,7 +30,7 @@ export async function insertMessage(
       content,
       from_bot: fromBot,
     })
-    .select('id, conversation_id, role, content, from_bot, channel, created_at')
+    .select('id, conversation_id, role, content, from_bot, channel, media_url, media_type, created_at')
     .single()
 
   if (error) throw error
