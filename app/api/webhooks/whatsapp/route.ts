@@ -87,17 +87,31 @@ export async function POST(request: NextRequest) {
     ),
   ]
   if (phoneNumberIds.length > 0) {
-    const allowed = await Promise.all(
-      phoneNumberIds.map((id) => checkRateLimit('webhook', id))
+    const results = await Promise.all(
+      phoneNumberIds.map(async (id) => ({ id, allowed: await checkRateLimit('webhook', id) }))
     )
-    if (!allowed.some(Boolean)) {
-      baseLog.warn('webhook rate limited', { phone_number_ids: phoneNumberIds })
+    const blocked = new Set(results.filter((r) => !r.allowed).map((r) => r.id))
+    if (blocked.size > 0) {
+      baseLog.warn('webhook rate limited', { phone_number_ids: [...blocked] })
       Sentry.captureMessage('webhook rate limited', {
         level: 'warning',
         tags: { route: 'webhooks/whatsapp' },
-        extra: { phone_number_ids: phoneNumberIds },
+        extra: { phone_number_ids: [...blocked] },
       })
-      return NextResponse.json({ status: 'rate_limited' }, { status: 200 })
+      if (blocked.size === phoneNumberIds.length) {
+        return NextResponse.json({ status: 'rate_limited' }, { status: 200 })
+      }
+      // Batch mixto (raro — Meta suele mandar un solo número por webhook):
+      // se descartan solo los changes del número bloqueado, el resto sigue.
+      body = {
+        ...body,
+        entry: (body.entry ?? []).map((entry) => ({
+          ...entry,
+          changes: (entry.changes ?? []).filter(
+            (change) => !blocked.has(change.value?.metadata?.phone_number_id ?? '')
+          ),
+        })),
+      }
     }
   }
 

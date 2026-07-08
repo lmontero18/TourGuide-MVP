@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
   if (inviteError) {
     log.error('failed to invite agent', { error: inviteError, org_id: adminProfile.org_id })
-    return NextResponse.json({ error: inviteError.message }, { status: 400 })
+    return NextResponse.json({ error: 'Failed to send invitation' }, { status: 400 })
   }
 
   return NextResponse.json({

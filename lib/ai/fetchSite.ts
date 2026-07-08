@@ -158,13 +158,28 @@ export async function fetchSiteContent(url: string): Promise<FetchSiteResult> {
   let home = await readViaJina(base, 20_000);
   if (!home) {
     try {
-      const res = await fetch(base, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; TourfyBot/1.0)" },
-        signal: AbortSignal.timeout(15_000),
-      });
-      if (res.ok) home = stripHtml(await res.text());
+      // Redirects a mano: fetch los sigue por defecto y un host público podría
+      // redirigir a una IP privada, salteándose assertPublicUrl.
+      let target = base;
+      for (let hop = 0; hop < 4; hop++) {
+        assertPublicUrl(target);
+        const res = await fetch(target, {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; TourfyBot/1.0)" },
+          signal: AbortSignal.timeout(15_000),
+          redirect: "manual",
+        });
+        if (res.status >= 300 && res.status < 400) {
+          const location = res.headers.get("location");
+          if (!location) break;
+          target = new URL(location, target).toString();
+          continue;
+        }
+        if (res.ok) home = stripHtml(await res.text());
+        break;
+      }
     } catch {
-      // se maneja abajo
+      // se maneja abajo (ImportUserError de assertPublicUrl incluida: si el
+      // sitio redirige a red privada lo tratamos como inaccesible)
     }
   }
   if (!home) {
