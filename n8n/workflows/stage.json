@@ -1,0 +1,530 @@
+{
+  "name": "TourGuide - Parametrizado - Stage",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6fd79242-bdeb-4f66-8209-046323f6058b",
+        "options": {}
+      },
+      "id": "8d0aa792-721a-46d4-b4c7-2d878411cfc5",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        400
+      ],
+      "webhookId": "6fd79242-bdeb-4f66-8209-046323f6058b"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ 'staging:' + $json.body.org_id + ':' + $json.body.contact_phone }}",
+        "messageData": "={{ JSON.stringify({ sessionId: $json.body.conversation_id, updated_at: new Date().toISOString(), content: $json.body.message, _meta: { redis_key: 'staging:' + $json.body.org_id + ':' + $json.body.contact_phone, phone_number_id: $json.body.phone_number_id, contact_phone: $json.body.contact_phone, access_token: $json.body.access_token, callback_base_url: $json.body.callback_base_url, n8n_secret: $json.body.n8n_secret, org_id: $json.body.org_id, conversation_id: $json.body.conversation_id, system_prompt: $json.body.system_prompt } }) }}"
+      },
+      "id": "213f3eda-82bf-497b-9d0f-08625e45969e",
+      "name": "Push message into redis db",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        400
+      ],
+      "credentials": {
+        "redis": {
+          "id": "ZbEpWi6bewDSvLRE",
+          "name": "Upstash TourGuide"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "Message",
+        "key": "={{ $json.Message ? JSON.parse($json.Message[0])._meta.redis_key : 'staging:' + $json.body.org_id + ':' + $json.body.contact_phone }}",
+        "options": {}
+      },
+      "id": "36fbc68d-c52c-473d-9fbb-08fac1090fcb",
+      "name": "Get messages from redis db",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        400
+      ],
+      "credentials": {
+        "redis": {
+          "id": "ZbEpWi6bewDSvLRE",
+          "name": "Upstash TourGuide"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "buffer-continue-cond",
+                    "leftValue": "={{ DateTime.fromISO(JSON.parse($json.Message[0]).updated_at) }}",
+                    "rightValue": "={{ $now.minus(15, 'seconds') }}",
+                    "operator": {
+                      "type": "dateTime",
+                      "operation": "before"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Continue"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Esperar Mensaje"
+        }
+      },
+      "id": "36596548-f031-43cc-bc0a-3176e64e981e",
+      "name": "Buffer message ( seconds )",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        0,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "id": "f8076cc9-2fa0-4396-a184-7a5505b9a675",
+      "name": "15 seconds wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        624
+      ],
+      "webhookId": "b639d6d5-db4e-426c-8f65-e4e8221eeadd"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ JSON.parse($json.Message[0])._meta.redis_key }}"
+      },
+      "id": "b0cddbb0-f79d-4511-a031-45e451b20863",
+      "name": "Delete message from redis db",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        208,
+        400
+      ],
+      "credentials": {
+        "redis": {
+          "id": "ZbEpWi6bewDSvLRE",
+          "name": "Upstash TourGuide"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const messages = $input.first().json.Message.map(m => JSON.parse(m));\n\nmessages.sort((a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime());\n\nconst allMessages = messages.map(m => m.content).filter(Boolean).join('\\n');\nconst meta = messages[messages.length - 1]._meta || {};\n\nreturn {\n  json: {\n    allMessages,\n    sessionId: messages[0].sessionId,\n    lastestTimestamp: messages[messages.length - 1].updated_at,\n    phone_number_id: meta.phone_number_id,\n    contact_phone: meta.contact_phone,\n    access_token: meta.access_token,\n    callback_base_url: meta.callback_base_url,\n    n8n_secret: meta.n8n_secret,\n    org_id: meta.org_id,\n    conversation_id: meta.conversation_id,\n    system_prompt: meta.system_prompt\n  }\n}"
+      },
+      "id": "6c6e55e8-e59e-434d-9910-6a5a2fa5d1e3",
+      "name": "Code in JavaScript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.allMessages }}",
+        "options": {
+          "systemMessage": "={{ $json.system_prompt }}"
+        }
+      },
+      "id": "a86d29bb-c790-43fd-ae30-2812e2a31b61",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        672,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "d031488e-747a-4478-8480-8d28cbb8d2ed",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        640
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "E9O31oCyTziddNsr",
+          "name": "Tourguide OpenAI Staging"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Code in JavaScript').first().json.conversation_id }}"
+      },
+      "id": "18439814-2029-48f7-a348-40e7cbcd154d",
+      "name": "Postgres Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        704,
+        624
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "kjjPiTNPksiDR9XE",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Busca información sobre tours, destinos, precios, itinerarios y servicios de la agencia de viajes.",
+        "tableName": {
+          "__rl": true,
+          "value": "embeddings",
+          "mode": "list"
+        },
+        "topK": 10,
+        "options": {}
+      },
+      "id": "88f8342a-348a-41b2-acb4-fad4497849da",
+      "name": "Supabase Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        640
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "NytmONDz69bGngm7",
+          "name": "Vector Store"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "caae025f-f63d-410e-9aa3-9fa04853dde0",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        800
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "E9O31oCyTziddNsr",
+          "name": "Tourguide OpenAI Staging"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Usa esta herramienta cuando el cliente quiera hablar con un agente humano, reservar un tour, o la consulta requiera atención personalizada. Ejecútala silenciosamente.",
+        "method": "POST",
+        "url": "={{ $('Code in JavaScript').first().json.callback_base_url + '/api/internal/bot-control' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Code in JavaScript').first().json.n8n_secret }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ conversation_id: $('Code in JavaScript').first().json.conversation_id }) }}",
+        "options": {}
+      },
+      "id": "f12f65ad-e57a-4977-8f9f-9928e521a0e0",
+      "name": "transfer_to_human",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        816,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v21.0/{{ $('Code in JavaScript').first().json.phone_number_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Code in JavaScript').first().json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: $('Code in JavaScript').first().json.contact_phone, type: 'text', text: { body: $json.output } }) }}",
+        "options": {}
+      },
+      "id": "29fa687c-623c-4696-b51d-1ad98fb99b52",
+      "name": "Send MSG",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1024,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Code in JavaScript').first().json.callback_base_url + '/api/internal/save-bot-reply' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Code in JavaScript').first().json.n8n_secret }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ conversation_id: $('Code in JavaScript').first().json.conversation_id, content: $('AI Agent').first().json.output }) }}",
+        "options": {}
+      },
+      "id": "28831ca5-93f1-4780-abb6-630bb5c73744",
+      "name": "Save bot reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1168,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Push message into redis db",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push message into redis db": {
+      "main": [
+        [
+          {
+            "node": "Get messages from redis db",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get messages from redis db": {
+      "main": [
+        [
+          {
+            "node": "Buffer message ( seconds )",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buffer message ( seconds )": {
+      "main": [
+        [
+          {
+            "node": "Delete message from redis db",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "15 seconds wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "15 seconds wait": {
+      "main": [
+        [
+          {
+            "node": "Get messages from redis db",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete message from redis db": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send MSG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send MSG": {
+      "main": [
+        [
+          {
+            "node": "Save bot reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "transfer_to_human": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "522d690c-b198-480b-b815-ce7102b33aed",
+  "meta": {
+    "instanceId": "a93887efce39398eac3791d0d9b65f0b7ab9ffa27d222ee165feed420c0d07df"
+  },
+  "id": "QKEmxVTUKY5IDmSk",
+  "tags": []
+}

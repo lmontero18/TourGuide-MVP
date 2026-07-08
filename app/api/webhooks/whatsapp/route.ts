@@ -79,7 +79,10 @@ async function callN8nBot(
   try {
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Webhook-Secret': process.env.N8N_WEBHOOK_SECRET ?? '',
+      },
       body: JSON.stringify(params),
       // Si N8N se cuelga no podemos bloquear el after() del webhook.
       signal: AbortSignal.timeout(15_000),

@@ -46,8 +46,9 @@ next-env.d.ts
 # supabase
 supabase/.temp/
 
-# planes de trabajo de M4 (artefactos locales, no parte del repo)
+# planes de trabajo (artefactos locales, no parte del repo)
 docs/m4/
+docs/m5/
 
 # IDE
 .vscode/
