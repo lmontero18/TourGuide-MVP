@@ -256,8 +256,8 @@
       ],
       "credentials": {
         "openAiApi": {
-          "id": "BFHQUydZfKi2shKc",
-          "name": "Tourguide OpenAI Dev"
+          "id": "uRIneI7wUFT03BvL",
+          "name": "Tourguide OpenAI Prod"
         }
       }
     },
