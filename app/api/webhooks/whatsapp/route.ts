@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import * as Sentry from '@sentry/nextjs'
 import { verifyWebhookSignature } from '@/lib/whatsapp/verify'
+import { createLogger, type Logger } from '@/lib/logger'
 
 function getServiceClient() {
   return createClient(
@@ -8,6 +10,8 @@ function getServiceClient() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 }
+
+const baseLog = createLogger({ route: 'webhooks/whatsapp' })
 
 // GET — Webhook verification (Meta sends a challenge when registering)
 export async function GET(request: NextRequest) {
@@ -41,35 +45,63 @@ export async function POST(request: NextRequest) {
     try {
       await processWebhook(body)
     } catch (error) {
-      console.error('Webhook processing error:', error)
+      // Red de seguridad: los errores por-mensaje ya se capturan adentro con
+      // org_id. Meta ya recibio 200, asi que nadie reintenta — sin esta
+      // captura el error muere en los logs de Vercel sin alerta.
+      baseLog.error('webhook processing failed', { error })
+      Sentry.captureException(error, { tags: { route: 'webhooks/whatsapp' } })
+      await Sentry.flush(2000)
     }
   })
 
   return NextResponse.json({ status: 'ok' }, { status: 200 })
 }
 
-async function callN8nBot(params: {
-  org_id: string
-  conversation_id: string
-  contact_phone: string
-  phone_number_id: string
-  access_token: string
-  message: string
-  system_prompt: string
-  n8n_secret: string
-  callback_base_url: string
-}) {
+async function callN8nBot(
+  params: {
+    org_id: string
+    conversation_id: string
+    contact_phone: string
+    phone_number_id: string
+    access_token: string
+    message: string
+    system_prompt: string
+    n8n_secret: string
+    callback_base_url: string
+  },
+  log: Logger
+) {
   const url = process.env.N8N_WEBHOOK_URL
-  if (!url) return
+  if (!url) {
+    log.warn('N8N_WEBHOOK_URL not set — bot call skipped')
+    return
+  }
   try {
-    await fetch(url, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
+      // Si N8N se cuelga no podemos bloquear el after() del webhook.
+      signal: AbortSignal.timeout(15_000),
     })
-  } catch {
-    // Non-critical — log but don't throw
-    console.error('callN8nBot failed')
+    if (!res.ok) {
+      log.error('callN8nBot: N8N returned non-2xx', {
+        status: res.status,
+        conversation_id: params.conversation_id,
+      })
+      Sentry.captureMessage('callN8nBot: N8N returned non-2xx', {
+        level: 'error',
+        tags: { route: 'webhooks/whatsapp', org_id: params.org_id },
+        extra: { status: res.status },
+      })
+    }
+  } catch (error) {
+    // El bot no respondera este mensaje — critico para el producto, pero no
+    // se relanza: el resto del procesamiento (markAsRead) debe continuar.
+    log.error('callN8nBot failed', { error, conversation_id: params.conversation_id })
+    Sentry.captureException(error, {
+      tags: { route: 'webhooks/whatsapp', org_id: params.org_id },
+    })
   }
 }
 
@@ -100,9 +132,13 @@ async function processWebhook(body: Record<string, unknown>) {
         .single()
 
       if (!waAccount) {
-        console.error(`No WhatsApp account found for phone_number_id: ${metadata.phone_number_id}`)
+        baseLog.warn('no WhatsApp account for phone_number_id', {
+          phone_number_id: metadata.phone_number_id,
+        })
         continue
       }
+
+      const log = baseLog.child({ org_id: waAccount.org_id })
 
       // Map wa_id -> profile name from the webhook contacts array
       const nameByWaId = new Map<string, string>()
@@ -163,7 +199,10 @@ async function processWebhook(body: Record<string, unknown>) {
                 content = transcript.text
               }
             }
-          } catch {
+          } catch (error) {
+            // Fallback: el mensaje entra igual como [audio], pero sin log el
+            // fallo de transcripcion (token, Whisper, timeout) era invisible.
+            log.warn('audio transcription failed', { error, wamid: messageId })
             content = '[audio]'
           }
         } else if (type === 'image') {
@@ -188,7 +227,10 @@ async function processWebhook(body: Record<string, unknown>) {
             }
             if (parts.length) content = parts.join(' ')
           } catch (error) {
-            console.error('Inbound image processing failed:', error)
+            log.error('inbound image processing failed', { error, wamid: messageId })
+            Sentry.captureException(error, {
+              tags: { route: 'webhooks/whatsapp', org_id: waAccount.org_id },
+            })
           }
         } else {
           content = `[${type}]`
@@ -271,7 +313,17 @@ async function processWebhook(body: Record<string, unknown>) {
           // 23505 = unique violation en wa_message_id: un reintento concurrente
           // ya inserto este mensaje — no llamar al bot de nuevo.
           if (insertError.code !== '23505') {
-            console.error('Message insert failed:', insertError.message)
+            // Mensaje del cliente perdido: no queda en el dashboard y el bot
+            // no responde — el peor fallo silencioso posible.
+            log.error('message insert failed', {
+              error: insertError,
+              conversation_id: conversation.id,
+              wamid: messageId,
+            })
+            Sentry.captureException(new Error(`message insert failed: ${insertError.message}`), {
+              tags: { route: 'webhooks/whatsapp', org_id: waAccount.org_id },
+              extra: { code: insertError.code, conversation_id: conversation.id },
+            })
           }
           continue
         }
@@ -290,17 +342,20 @@ async function processWebhook(body: Record<string, unknown>) {
           const { getMessagingToken } = await import('@/lib/whatsapp/token')
           const tok = getMessagingToken(waAccount)
 
-          await callN8nBot({
-            org_id: waAccount.org_id,
-            conversation_id: conversation.id,
-            contact_phone: from,
-            phone_number_id: metadata.phone_number_id,
-            access_token: tok ?? waAccount.access_token,
-            message: content,
-            system_prompt: org?.prompt ?? '',
-            n8n_secret: process.env.N8N_INTERNAL_SECRET ?? '',
-            callback_base_url: process.env.TOURGUIDE_API_URL ?? '',
-          })
+          await callN8nBot(
+            {
+              org_id: waAccount.org_id,
+              conversation_id: conversation.id,
+              contact_phone: from,
+              phone_number_id: metadata.phone_number_id,
+              access_token: tok ?? waAccount.access_token,
+              message: content,
+              system_prompt: org?.prompt ?? '',
+              n8n_secret: process.env.N8N_INTERNAL_SECRET ?? '',
+              callback_base_url: process.env.TOURGUIDE_API_URL ?? '',
+            },
+            log
+          )
         }
 
         // Mark as read in WhatsApp
@@ -309,8 +364,10 @@ async function processWebhook(body: Record<string, unknown>) {
           const { getMessagingToken } = await import('@/lib/whatsapp/token')
           const token = getMessagingToken(waAccount)
           if (token) {
-            await markAsRead(metadata.phone_number_id, token, messageId).catch(() => {
-              // Non-critical, don't fail the webhook
+            await markAsRead(metadata.phone_number_id, token, messageId).catch((error) => {
+              // No critico (el doble check azul), pero un fallo sostenido
+              // delata token vencido — dejar rastro.
+              log.warn('markAsRead failed', { error, wamid: messageId })
             })
           }
         }
