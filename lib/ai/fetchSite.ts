@@ -31,6 +31,55 @@ export function normalizeUrl(input: string): string {
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
+function isPrivateIp(host: string): boolean {
+  // IPv6 literal (URL.hostname ya quita los corchetes)
+  if (host.includes(":")) {
+    return (
+      host === "::1" ||
+      host === "::" ||
+      /^f[cd]/i.test(host) || // fc00::/7 (ULA)
+      /^fe80:/i.test(host) || // link-local
+      host.toLowerCase().startsWith("::ffff:") // IPv4-mapped
+    );
+  }
+  const m = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (!m) return false;
+  const a = Number(m[1]);
+  const b = Number(m[2]);
+  return (
+    a === 0 ||
+    a === 10 ||
+    a === 127 ||
+    (a === 169 && b === 254) || // link-local / metadata (169.254.169.254)
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168)
+  );
+}
+
+// Guard SSRF: el fetch directo de fallback sale desde nuestra infra, así que
+// bloquea hosts internos y rangos privados. No cubre DNS rebinding (hostname
+// público que resuelve a IP privada) — superficie admin-only, riesgo aceptado.
+function assertPublicUrl(url: string): void {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    throw new ImportUserError("URL inválida. Revisá la dirección.");
+  }
+  if (u.protocol !== "http:" && u.protocol !== "https:") {
+    throw new ImportUserError("Solo se aceptan URLs http(s).");
+  }
+  const host = u.hostname.toLowerCase();
+  const blockedHost =
+    host === "localhost" ||
+    host.endsWith(".localhost") ||
+    host.endsWith(".local") ||
+    host.endsWith(".internal");
+  if (blockedHost || isPrivateIp(host)) {
+    throw new ImportUserError("Esa URL apunta a una red privada — usá el dominio público del sitio.");
+  }
+}
+
 function stripHtml(html: string): string {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -103,6 +152,7 @@ export interface FetchSiteResult {
 
 export async function fetchSiteContent(url: string): Promise<FetchSiteResult> {
   const base = normalizeUrl(url);
+  assertPublicUrl(base);
 
   // Página inicial: jina, con fallback a HTML crudo.
   let home = await readViaJina(base, 20_000);

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
 import { createLogger } from '@/lib/logger'
+import { safeEqual } from '@/lib/security'
+import { checkRateLimit } from '@/lib/ratelimit'
 
 function getServiceClient() {
   return createClient(
@@ -15,9 +17,26 @@ const log = createLogger({ route: 'internal/save-bot-reply' })
 // N8N guarda la respuesta del bot. A diferencia del webhook de Meta, aqui un
 // 4xx/5xx es util: el workflow de N8N puede reintentar o ramificar en fallo.
 export async function POST(request: NextRequest) {
+  // Sin secret configurado, el header literal "Bearer undefined" autenticaría
+  // con la comparación por template string — fallar cerrado.
+  const secret = process.env.N8N_INTERNAL_SECRET
+  if (!secret) {
+    log.error('N8N_INTERNAL_SECRET not configured')
+    Sentry.captureMessage('N8N_INTERNAL_SECRET missing', {
+      level: 'fatal',
+      tags: { route: 'internal/save-bot-reply' },
+    })
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
+  }
+
   const auth = request.headers.get('authorization')
-  if (auth !== `Bearer ${process.env.N8N_INTERNAL_SECRET}`) {
+  if (!auth || !safeEqual(auth, `Bearer ${secret}`)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // 429 sí sirve acá: el workflow de N8N puede reintentar o ramificar.
+  if (!(await checkRateLimit('internal', 'save-bot-reply'))) {
+    return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
   }
 
   try {

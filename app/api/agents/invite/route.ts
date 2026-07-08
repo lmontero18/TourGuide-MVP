@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { createLogger } from '@/lib/logger'
+
+const log = createLogger({ route: 'agents/invite' })
+
+const inviteSchema = z.object({
+  email: z.email().transform((value) => value.toLowerCase()),
+  full_name: z.string().trim().max(100).optional(),
+  role: z.enum(['admin', 'agent']).default('agent'),
+})
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -20,12 +30,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
   }
 
-  const body = await request.json()
-  const { email, full_name, role } = body as { email: string; full_name?: string; role?: 'admin' | 'agent' }
-
-  if (!email) {
-    return NextResponse.json({ error: 'Missing email' }, { status: 400 })
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
+
+  const parsed = inviteSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'Invalid fields', issues: parsed.error.issues },
+      { status: 400 }
+    )
+  }
+  const { email, full_name, role } = parsed.data
 
   // Use service role to invite user via Supabase Auth
   const { createServiceClient } = await import('@/lib/supabase/server')
@@ -34,13 +53,13 @@ export async function POST(request: NextRequest) {
   const { data: inviteData, error: inviteError } = await serviceClient.auth.admin.inviteUserByEmail(email, {
     data: {
       full_name: full_name || null,
-      role: role || 'agent',
+      role,
       org_id: adminProfile.org_id,
     },
   })
 
   if (inviteError) {
-    console.error('Failed to invite agent:', inviteError)
+    log.error('failed to invite agent', { error: inviteError, org_id: adminProfile.org_id })
     return NextResponse.json({ error: inviteError.message }, { status: 400 })
   }
 

@@ -1,4 +1,5 @@
 import { createHmac } from 'crypto'
+import { safeEqual } from '@/lib/security'
 
 export function verifyWebhookSignature(
   payload: string,
@@ -9,5 +10,5 @@ export function verifyWebhookSignature(
     'sha256=' +
     createHmac('sha256', appSecret).update(payload).digest('hex')
 
-  return expectedSignature === signature
+  return safeEqual(expectedSignature, signature)
 }
