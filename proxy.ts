@@ -16,7 +16,7 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const protectedPaths = ['/conversations', '/metrics', '/settings', '/dashboard']
+  const protectedPaths = ['/conversations', '/metrics', '/settings', '/dashboard', '/onboarding']
   const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
 
   // Redirect unauthenticated users from protected routes to login
@@ -36,8 +36,8 @@ export async function proxy(request: NextRequest) {
     const org = Array.isArray(orgData) ? orgData[0] : orgData
     const isOnboarded = !!org?.onboarded_at
 
-    // Not onboarded → force onboarding
-    if (!isOnboarded && isProtected) {
+    // Not onboarded → force onboarding (sin redirigir si ya está ahí — loop)
+    if (!isOnboarded && isProtected && request.nextUrl.pathname !== '/onboarding') {
       return redirectWithCookies(new URL('/onboarding', request.url), response)
     }
 

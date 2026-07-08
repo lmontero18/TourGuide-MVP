@@ -373,7 +373,12 @@
       }
     },
     "saving": "Saving...",
-    "launching": "Launching..."
+    "launching": "Launching...",
+    "validation": {
+      "0": "Fill in your agency name and country to continue",
+      "1": "Connect your WhatsApp number to continue",
+      "2": "Add at least one tour with a name to continue"
+    }
   },
   "dashboard": {
     "sidebar": {
