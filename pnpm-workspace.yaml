@@ -3,6 +3,8 @@
 # Next.js necesita sharp (imágenes) y @swc/core (compilación).
 allowBuilds:
   '@parcel/watcher': true
+  # @sentry/cli descarga su binario en postinstall (upload de source maps)
+  '@sentry/cli': true
   '@swc/core': true
   sharp: true
   unrs-resolver: true

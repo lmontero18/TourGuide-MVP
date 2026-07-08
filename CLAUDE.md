@@ -460,7 +460,8 @@ export async function getLeadStats(orgId: string, from: Date, to: Date) {
 ### Errores
 - Las queries de Supabase siempre manejan `error`: `const { data, error } = await supabase...`
 - Los webhooks siempre responden 200 aunque fallen internamente (Meta reintenta en 4xx/5xx)
-- Loggear errores criticos — en produccion usar Sentry o similar
+- En API routes usar `lib/logger.ts` con `org_id` en los bindings — no `console.*` directo
+- Errores criticos van a Sentry (`Sentry.captureException` con tag `org_id`) — ver `docs/observability.md`
 
 ### Variables de entorno requeridas
 ```
@@ -475,6 +476,11 @@ STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 CRON_SECRET=                          # Auth del cron de Vercel (limpieza de media)
 OPENAI_API_KEY=                       # Whisper (audio) + vision (descripcion de imagenes)
+NEXT_PUBLIC_SENTRY_DSN=               # Error tracking (ver docs/observability.md)
+SENTRY_ORG=                           # Solo build (source maps)
+SENTRY_PROJECT=                       # Solo build (source maps)
+SENTRY_AUTH_TOKEN=                    # Solo build (source maps), sensitive
+BETTERSTACK_HEARTBEAT_CLEANUP_MEDIA=  # Heartbeat del cron (opcional, solo prod)
 ```
 
 ---

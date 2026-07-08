@@ -7,6 +7,9 @@
 
 import sharp from 'sharp'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { createLogger } from '@/lib/logger'
+
+const log = createLogger({ module: 'whatsapp/media' })
 
 // Overrideable para tests locales (mock de Graph API)
 const GRAPH_API_BASE = process.env.META_GRAPH_API_BASE ?? 'https://graph.facebook.com/v21.0'
@@ -36,7 +39,7 @@ export async function downloadMedia(mediaId: string, accessToken: string): Promi
 
     return Buffer.from(await fileRes.arrayBuffer())
   } catch (error) {
-    console.error('downloadMedia failed:', error)
+    log.error('downloadMedia failed', { error, media_id: mediaId })
     return null
   }
 }
@@ -96,7 +99,7 @@ export async function storeChatImage(
     .upload(path, webp, { contentType: 'image/webp' })
 
   if (error) {
-    console.error('chat-media upload failed:', error.message)
+    log.error('chat-media upload failed', { error, org_id: orgId })
     return null
   }
   return path

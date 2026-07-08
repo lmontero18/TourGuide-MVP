@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import * as Sentry from '@sentry/nextjs'
+import { createLogger } from '@/lib/logger'
 
 // Limpieza diaria de media de chat (Vercel Cron, ver vercel.json).
 // Borra del bucket chat-media los archivos con mas de RETENTION_DAYS y pone
@@ -16,6 +18,27 @@ function getServiceClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
+}
+
+const log = createLogger({ route: 'cron/cleanup-media' })
+
+function reportCronError(msg: string, error: { message: string }, extra?: Record<string, unknown>) {
+  log.error(msg, { error, ...extra })
+  Sentry.captureException(new Error(`${msg}: ${error.message}`), {
+    tags: { route: 'cron/cleanup-media' },
+    extra,
+  })
+}
+
+// Ping al heartbeat de BetterStack: si el cron no corre o falla, no llega el
+// ping y BetterStack alerta por email. Solo se pingea en el camino feliz.
+async function pingHeartbeat() {
+  const url = process.env.BETTERSTACK_HEARTBEAT_CLEANUP_MEDIA
+  if (!url) return
+  await fetch(url, { signal: AbortSignal.timeout(10_000) }).catch((error) => {
+    // Nunca fallar el cron por el ping — el trabajo ya se hizo.
+    log.warn('heartbeat ping failed', { error })
+  })
 }
 
 export async function GET(request: NextRequest) {
@@ -40,7 +63,7 @@ export async function GET(request: NextRequest) {
       .limit(BATCH_SIZE)
 
     if (error) {
-      console.error('cleanup-media query failed:', error.message)
+      reportCronError('cleanup-media query failed', error, { deleted })
       return NextResponse.json({ error: error.message, deleted }, { status: 500 })
     }
 
@@ -57,7 +80,7 @@ export async function GET(request: NextRequest) {
       .in('id', expired.map((m) => m.id))
 
     if (updateError) {
-      console.error('cleanup-media null-out failed:', updateError.message)
+      reportCronError('cleanup-media null-out failed', updateError, { deleted })
       return NextResponse.json({ error: updateError.message, deleted }, { status: 500 })
     }
 
@@ -65,11 +88,11 @@ export async function GET(request: NextRequest) {
     // archivos huerfanos en S3).
     const { error: removeError } = await supabase.storage.from('chat-media').remove(paths)
     if (removeError) {
-      console.error(
-        `cleanup-media storage remove failed (${paths.length} archivos huerfanos):`,
-        removeError.message,
-        paths
-      )
+      reportCronError('cleanup-media storage remove failed', removeError, {
+        deleted,
+        orphaned_count: paths.length,
+        orphaned_paths: paths,
+      })
       return NextResponse.json({ error: removeError.message, deleted }, { status: 500 })
     }
 
@@ -77,5 +100,6 @@ export async function GET(request: NextRequest) {
     if (expired.length < BATCH_SIZE) break
   }
 
+  await pingHeartbeat()
   return NextResponse.json({ deleted })
 }

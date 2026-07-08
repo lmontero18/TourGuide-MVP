@@ -70,3 +70,9 @@ jobs:
           else
             echo "No hay buckets/archivos en Supabase Storage todavia -- nada que sincronizar."
           fi
+
+      # Solo corre si todos los steps anteriores pasaron: backup fallido =>
+      # no llega el ping => BetterStack alerta por email.
+      - name: Heartbeat BetterStack
+        if: ${{ secrets.BETTERSTACK_HEARTBEAT_DB_BACKUP != '' }}
+        run: curl -fsS --retry 3 "${{ secrets.BETTERSTACK_HEARTBEAT_DB_BACKUP }}"
