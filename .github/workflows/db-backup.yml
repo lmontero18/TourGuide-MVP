@@ -72,7 +72,14 @@ jobs:
           fi
 
       # Solo corre si todos los steps anteriores pasaron: backup fallido =>
-      # no llega el ping => BetterStack alerta por email.
+      # no llega el ping => BetterStack alerta por email. El secret se valida
+      # en shell porque el contexto `secrets` no es confiable en `if` de steps.
       - name: Heartbeat BetterStack
-        if: ${{ secrets.BETTERSTACK_HEARTBEAT_DB_BACKUP != '' }}
-        run: curl -fsS --retry 3 "${{ secrets.BETTERSTACK_HEARTBEAT_DB_BACKUP }}"
+        env:
+          HEARTBEAT_URL: ${{ secrets.BETTERSTACK_HEARTBEAT_DB_BACKUP }}
+        run: |
+          if [ -n "$HEARTBEAT_URL" ]; then
+            curl -fsS --retry 3 "$HEARTBEAT_URL"
+          else
+            echo "BETTERSTACK_HEARTBEAT_DB_BACKUP no configurado — heartbeat omitido"
+          fi

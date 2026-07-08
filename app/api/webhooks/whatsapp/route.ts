@@ -81,6 +81,8 @@ async function callN8nBot(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
+      // Si N8N se cuelga no podemos bloquear el after() del webhook.
+      signal: AbortSignal.timeout(15_000),
     })
     if (!res.ok) {
       log.error('callN8nBot: N8N returned non-2xx', {

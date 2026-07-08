@@ -481,6 +481,7 @@ SENTRY_ORG=                           # Solo build (source maps)
 SENTRY_PROJECT=                       # Solo build (source maps)
 SENTRY_AUTH_TOKEN=                    # Solo build (source maps), sensitive
 BETTERSTACK_HEARTBEAT_CLEANUP_MEDIA=  # Heartbeat del cron (opcional, solo prod)
+BETTERSTACK_HEARTBEAT_DB_BACKUP=      # Heartbeat del backup — GitHub Actions secret, no Vercel
 ```
 
 ---
