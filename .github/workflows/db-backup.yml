@@ -1,0 +1,72 @@
+name: DB · Backup externo (R2)
+
+# Respaldo diario de la base de datos de PROD a Cloudflare R2, independiente
+# de los backups automaticos de Supabase. Ver docs/m4/05-pg-dump.md.
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Dump de prod
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PROD }}
+        run: |
+          pnpm exec supabase link --project-ref bppgwfzzrurlqzfzcpzf
+          pnpm exec supabase db dump --linked -f dump.sql
+          gzip dump.sql
+
+      - name: Subir dump a R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          aws s3 cp dump.sql.gz \
+            "s3://${{ secrets.R2_BUCKET }}/db/tourguide-prod-$(date -u +%F).sql.gz" \
+            --endpoint-url "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+
+      - name: Descargar buckets de Supabase Storage
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.SUPABASE_STORAGE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SUPABASE_STORAGE_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.SUPABASE_STORAGE_REGION }}
+        run: |
+          mkdir -p storage-mirror
+          for bucket in $(aws s3 ls --endpoint-url "${{ secrets.SUPABASE_STORAGE_ENDPOINT }}" | awk '{print $3}'); do
+            aws s3 sync "s3://$bucket" "storage-mirror/$bucket" \
+              --endpoint-url "${{ secrets.SUPABASE_STORAGE_ENDPOINT }}"
+          done
+
+      - name: Subir Storage a R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          if [ "$(ls -A storage-mirror 2>/dev/null)" ]; then
+            aws s3 sync storage-mirror "s3://${{ secrets.R2_BUCKET }}/storage" \
+              --endpoint-url "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          else
+            echo "No hay buckets/archivos en Supabase Storage todavia -- nada que sincronizar."
+          fi
