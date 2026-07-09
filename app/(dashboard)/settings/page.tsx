@@ -5,7 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
 import SettingsSkeleton from "@/components/settings/SettingsSkeleton";
-import type { BotTone, Organization } from "@/types";
+import type { Organization } from "@/types";
 
 const DEFAULT_HOURS = { start: "09:00", end: "18:00" };
 
@@ -17,8 +17,6 @@ export default function SettingsPage() {
   const [timezone, setTimezone] = useState("America/Lima");
   const [hoursStart, setHoursStart] = useState(DEFAULT_HOURS.start);
   const [hoursEnd, setHoursEnd] = useState(DEFAULT_HOURS.end);
-  const [prompt, setPrompt] = useState("");
-  const [tone, setTone] = useState<BotTone>("friendly");
 
   useEffect(() => {
     const load = async () => {
@@ -31,8 +29,6 @@ export default function SettingsPage() {
         setTimezone(org.bot_config?.timezone ?? "America/Lima");
         setHoursStart(org.bot_config?.business_hours?.start ?? DEFAULT_HOURS.start);
         setHoursEnd(org.bot_config?.business_hours?.end ?? DEFAULT_HOURS.end);
-        setPrompt(org.prompt ?? "");
-        setTone((org.bot_config?.tone as BotTone) ?? "friendly");
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Failed to load settings");
       } finally {
@@ -54,11 +50,9 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: orgName.trim(),
-          prompt: prompt.trim() || null,
           bot_config: {
             timezone,
             business_hours: { start: hoursStart, end: hoursEnd },
-            tone,
           },
         }),
       });
@@ -156,44 +150,6 @@ export default function SettingsPage() {
                     value={hoursEnd}
                     onChange={(e) => setHoursEnd(e.target.value)}
                     className="w-full h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                  />
-                </div>
-              </div>
-            </section>
-
-            {/* Bot config */}
-            <section className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h2 className="text-sm font-bold text-navy-900 mb-1">Bot personality</h2>
-              <p className="text-xs text-slate-400 mb-4">This prompt defines how your bot responds to customers.</p>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-navy-900 mb-1.5">Tone</label>
-                  <div className="flex gap-2">
-                    {(["formal", "friendly", "casual"] as const).map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => setTone(t)}
-                        className={`flex-1 h-9 rounded-lg border text-xs font-medium capitalize transition-all ${
-                          tone === t
-                            ? "border-navy-900 bg-navy-900/5 text-navy-900 ring-2 ring-navy-900/10"
-                            : "border-slate-200 text-slate-500 hover:border-slate-300"
-                        }`}
-                      >
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-navy-900 mb-1.5">System prompt</label>
-                  <textarea
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    rows={5}
-                    placeholder="Describe how your bot should behave, what it should know, and how it should respond..."
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
                   />
                 </div>
               </div>

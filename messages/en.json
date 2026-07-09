@@ -238,9 +238,7 @@
     "stepNames": {
       "0": "Agency",
       "1": "WhatsApp",
-      "2": "Tours",
-      "3": "Personality",
-      "4": "Go live"
+      "2": "Tours"
     },
     "steps": {
       "agency": {
@@ -330,46 +328,6 @@
         "toursEmpty": "No tours yet. Add one or import from your website.",
         "businessEmpty": "No business info yet. Add a section (about us, payments, contact…).",
         "faqsEmpty": "No FAQs yet. Add one."
-      },
-      "personality": {
-        "number": "04",
-        "title": "Set your bot's personality",
-        "description": "Choose how your bot talks to customers. This sets the tone for every conversation.",
-        "formalLabel": "Professional",
-        "formalDesc": "Polished and courteous. Perfect for luxury travel.",
-        "formalExample": "Good afternoon! Thank you for your interest in our Sacred Valley tour. The price per person is $320 USD, which includes transport, a bilingual guide, and lunch. Shall I check availability for your preferred date?",
-        "friendlyLabel": "Friendly",
-        "friendlyDesc": "Warm and approachable. Great for most agencies.",
-        "friendlyExample": "Hey! 👋 Great choice — the Sacred Valley tour is one of our favorites! It's $320 per person and includes everything: transport, guide, and lunch. When were you thinking of going?",
-        "casualLabel": "Casual",
-        "casualDesc": "Relaxed and fun. Ideal for adventure / backpacker tours.",
-        "casualExample": "Yo! 🏔️ Sacred Valley is amazing, you're gonna love it! $320 per person, all-inclusive. Just tell me your dates and group size and I'll lock it in for you!",
-        "botLabel": "Tourfy Bot",
-        "greetingLabel": "Custom greeting (optional)",
-        "greetingHint": "First message when someone contacts you on WhatsApp",
-        "greetingPlaceholder": "Hi! 👋 I'm the assistant for {agency}. How can I help you?",
-        "greetingFallback": "your agency"
-      },
-      "preview": {
-        "number": "05",
-        "title": "Preview & go live",
-        "description": "Test your bot below, then launch it when you're ready.",
-        "summaryAgency": "Agency",
-        "summaryTours": "Tours",
-        "summaryTone": "Tone",
-        "previewYourAgency": "Your Agency",
-        "botActive": "Bot active",
-        "botLabel": "Tourfy Bot",
-        "inputPlaceholder": "Type a message to test your bot...",
-        "greetingFallback": "Hi! 👋 I'm the assistant for {agency}. How can I help you?",
-        "agencyFallback": "your agency",
-        "sampleTourName": "Machu Picchu Full Day",
-        "sampleTourPrice": "$320 USD",
-        "responseFormal": "Thank you for your interest! Our {name} tour is priced at {price} per person. Would you like me to check availability for a specific date?",
-        "responseCasual": "Nice! 🏔️ The {name} is {price} per person — it's awesome! What dates work for you?",
-        "responseFriendly": "Great question! 😊 The {name} is {price} per person and includes everything. Want me to check dates for you?",
-        "readyTitle": "Your bot is ready to go live",
-        "readyDesc": "Click \"Launch my bot\" to activate it on your WhatsApp number. You can pause it anytime from the dashboard."
       }
     },
     "saving": "Saving...",

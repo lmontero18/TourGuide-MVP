@@ -238,9 +238,7 @@
     "stepNames": {
       "0": "Agencia",
       "1": "WhatsApp",
-      "2": "Tours",
-      "3": "Personalidad",
-      "4": "Salir en vivo"
+      "2": "Tours"
     },
     "steps": {
       "agency": {
@@ -330,46 +328,6 @@
         "toursEmpty": "Todavía no hay tours. Agregá uno o importá desde tu web.",
         "businessEmpty": "Todavía no hay info del negocio. Agregá una sección (sobre nosotros, pagos, contacto…).",
         "faqsEmpty": "Todavía no hay preguntas frecuentes. Agregá una."
-      },
-      "personality": {
-        "number": "04",
-        "title": "Define la personalidad de tu bot",
-        "description": "Elige cómo habla tu bot con los clientes. Esto define el tono de cada conversación.",
-        "formalLabel": "Profesional",
-        "formalDesc": "Pulido y cortés. Perfecto para viajes de lujo.",
-        "formalExample": "¡Buenas tardes! Gracias por su interés en nuestro tour al Valle Sagrado. El precio por persona es de $320 USD, incluye transporte, guía bilingüe y almuerzo. ¿Le consulto disponibilidad para una fecha en particular?",
-        "friendlyLabel": "Amigable",
-        "friendlyDesc": "Cálido y cercano. Ideal para la mayoría de agencias.",
-        "friendlyExample": "¡Hola! 👋 Excelente elección — ¡el tour al Valle Sagrado es uno de nuestros favoritos! Son $320 por persona e incluye todo: transporte, guía y almuerzo. ¿Para cuándo estás pensando?",
-        "casualLabel": "Casual",
-        "casualDesc": "Relajado y divertido. Ideal para tours de aventura / mochileros.",
-        "casualExample": "¡Qué tal! 🏔️ El Valle Sagrado es increíble, ¡te va a encantar! $320 por persona, todo incluido. ¡Dime tus fechas y cuántos son, y te lo aparto!",
-        "botLabel": "Bot de Tourfy",
-        "greetingLabel": "Saludo personalizado (opcional)",
-        "greetingHint": "Primer mensaje cuando alguien te contacta por WhatsApp",
-        "greetingPlaceholder": "¡Hola! 👋 Soy el asistente de {agency}. ¿En qué te puedo ayudar?",
-        "greetingFallback": "tu agencia"
-      },
-      "preview": {
-        "number": "05",
-        "title": "Previsualiza y sal en vivo",
-        "description": "Prueba tu bot abajo y lánzalo cuando estés listo.",
-        "summaryAgency": "Agencia",
-        "summaryTours": "Tours",
-        "summaryTone": "Tono",
-        "previewYourAgency": "Tu Agencia",
-        "botActive": "Bot activo",
-        "botLabel": "Bot de Tourfy",
-        "inputPlaceholder": "Escribe un mensaje para probar tu bot...",
-        "greetingFallback": "¡Hola! 👋 Soy el asistente de {agency}. ¿En qué te puedo ayudar?",
-        "agencyFallback": "tu agencia",
-        "sampleTourName": "Machu Picchu Full Day",
-        "sampleTourPrice": "$320 USD",
-        "responseFormal": "¡Gracias por tu interés! Nuestro tour {name} cuesta {price} por persona. ¿Te consulto disponibilidad para una fecha en particular?",
-        "responseCasual": "¡Genial! 🏔️ El {name} son {price} por persona — ¡es increíble! ¿Qué fechas te sirven?",
-        "responseFriendly": "¡Buena pregunta! 😊 El {name} son {price} por persona e incluye todo. ¿Te reviso fechas?",
-        "readyTitle": "Tu bot está listo para salir en vivo",
-        "readyDesc": "Haz clic en \"Lanzar mi bot\" para activarlo en tu número de WhatsApp. Puedes pausarlo cuando quieras desde el dashboard."
       }
     },
     "saving": "Guardando...",

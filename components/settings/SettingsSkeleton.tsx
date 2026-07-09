@@ -26,7 +26,6 @@ export default function SettingsSkeleton() {
   return (
     <div className="max-w-2xl space-y-6" aria-hidden>
       <SectionSkeleton fields={2} />
-      <SectionSkeleton fields={3} />
       <SectionSkeleton fields={2} />
     </div>
   );
