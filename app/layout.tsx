@@ -37,6 +37,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       className={`${bricolage.variable} ${jakarta.variable} h-full`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
