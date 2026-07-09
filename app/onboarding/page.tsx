@@ -20,8 +20,6 @@ interface OnboardingData {
   tours: Tour[];
   faqs: FaqDraft[];
   business: BusinessSection[];
-  tone: "formal" | "friendly" | "casual";
-  greeting: string;
 }
 
 const INITIAL_DATA: OnboardingData = {
@@ -32,11 +30,9 @@ const INITIAL_DATA: OnboardingData = {
   tours: [{ id: "1", name: "", info: "", source: "manual" }],
   faqs: [{ id: "1", question: "", answer: "" }],
   business: [],
-  tone: "friendly",
-  greeting: "",
 };
 
-const STEP_COUNT = 5;
+const STEP_COUNT = 3;
 
 const COUNTRIES = [
   "Mexico",
@@ -75,7 +71,6 @@ export default function OnboardingPage() {
   );
 
   // Requisitos minimos por paso — sin esto el boton Continuar queda deshabilitado.
-  // Personalidad (3) siempre es valida: tone tiene default y el saludo es opcional.
   const stepValid = useMemo(() => {
     switch (step) {
       case 0:
@@ -168,8 +163,6 @@ export default function OnboardingPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tone: data.tone,
-          greeting: data.greeting.trim() || undefined,
           tours: data.tours
             .filter((tour) => tour.name.trim())
             .map((tour) => ({
@@ -240,19 +233,19 @@ export default function OnboardingPage() {
       {/* ─── Progress stepper ─── */}
       <div className="border-b border-slate-100">
         <div className="mx-auto max-w-3xl px-5 sm:px-6 py-4">
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center justify-center gap-1 sm:gap-2">
             {Array.from({ length: STEP_COUNT }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => goToStep(i)}
                 disabled={i >= step}
-                className={`flex items-center gap-1.5 sm:gap-2 group transition-all ${
+                className={`flex h-7 sm:h-8 items-center gap-1.5 sm:gap-2 group transition-all ${
                   i <= step ? "cursor-pointer" : "cursor-default"
                 }`}
               >
                 {/* Dot / check */}
                 <div
-                  className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
+                  className={`flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
                     i < step
                       ? "bg-navy-900 text-white"
                       : i === step
@@ -287,7 +280,7 @@ export default function OnboardingPage() {
 
                 {/* Connector line */}
                 {i < STEP_COUNT - 1 && (
-                  <div className="w-4 sm:w-8 lg:w-12 h-0.5 rounded-full overflow-hidden bg-slate-100 mx-0.5 sm:mx-1">
+                  <div className="w-4 sm:w-8 lg:w-12 h-0.5 shrink-0 self-center rounded-full overflow-hidden bg-slate-100 mx-0.5 sm:mx-1">
                     <motion.div
                       className="h-full bg-navy-900 rounded-full origin-left"
                       initial={false}
@@ -317,8 +310,6 @@ export default function OnboardingPage() {
               {step === 0 && <StepAgency data={data} update={update} />}
               {step === 1 && <StepWhatsApp data={data} update={update} />}
               {step === 2 && <StepTours data={data} update={update} />}
-              {step === 3 && <StepPersonality data={data} update={update} />}
-              {step === 4 && <StepGoLive data={data} />}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -381,12 +372,17 @@ export default function OnboardingPage() {
               </div>
             ) : (
               <div className="flex items-center gap-3">
+                {!stepValid && (
+                  <p className="text-xs text-slate-500 max-w-[220px] text-right">
+                    {t(`validation.${step}`)}
+                  </p>
+                )}
                 {launchError && (
                   <p className="text-sm text-red-600">{launchError}</p>
                 )}
                 <button
                   onClick={handleLaunch}
-                  disabled={launching}
+                  disabled={launching || !stepValid}
                   className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
                   {launching ? t("launching") : t("finish")}
@@ -866,315 +862,6 @@ function StepTours({
         </div>
         <p className="text-sm text-slate-600 leading-relaxed">{t("tip")}</p>
       </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════
-   STEP 4 — Bot personality
-   ═══════════════════════════════════════════════════ */
-function StepPersonality({
-  data,
-  update,
-}: {
-  data: OnboardingData;
-  update: (p: Partial<OnboardingData>) => void;
-}) {
-  const t = useTranslations("onboarding.steps.personality");
-  const tones = [
-    { value: "formal" as const, labelKey: "formalLabel", descKey: "formalDesc", exampleKey: "formalExample" },
-    { value: "friendly" as const, labelKey: "friendlyLabel", descKey: "friendlyDesc", exampleKey: "friendlyExample" },
-    { value: "casual" as const, labelKey: "casualLabel", descKey: "casualDesc", exampleKey: "casualExample" },
-  ];
-
-  const agency = data.agencyName || t("greetingFallback");
-
-  return (
-    <div>
-      <StepHeader
-        number={t("number")}
-        title={t("title")}
-        description={t("description")}
-      />
-
-      <div className="mt-8 space-y-3">
-        {tones.map((tone) => (
-          <button
-            key={tone.value}
-            type="button"
-            onClick={() => update({ tone: tone.value })}
-            className={`w-full text-left rounded-2xl border p-5 transition-all ${
-              data.tone === tone.value
-                ? "border-navy-900 bg-navy-900/[0.02] ring-2 ring-navy-900/10"
-                : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-            }`}
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <div
-                className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${
-                  data.tone === tone.value
-                    ? "border-navy-900 bg-navy-900"
-                    : "border-slate-300"
-                }`}
-              >
-                {data.tone === tone.value && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="h-2 w-2 rounded-full bg-white"
-                  />
-                )}
-              </div>
-              <div>
-                <span className="text-sm font-bold text-navy-900">
-                  {t(tone.labelKey)}
-                </span>
-                <span className="text-sm text-slate-500 ml-2">
-                  {t(tone.descKey)}
-                </span>
-              </div>
-            </div>
-
-            {/* Example message preview */}
-            <div className="ml-8 rounded-xl bg-slate-50 border border-slate-100 p-3.5">
-              <div className="flex items-center gap-1.5 mb-2">
-                <div className="h-4 w-4 rounded-full bg-navy-900/10 flex items-center justify-center">
-                  <svg
-                    width="8"
-                    height="8"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-navy-700"
-                  >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                </div>
-                <span className="text-[10px] font-bold text-navy-700">
-                  {t("botLabel")}
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                {t(tone.exampleKey)}
-              </p>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      {/* Custom greeting */}
-      <div className="mt-8">
-        <Field
-          label={t("greetingLabel")}
-          htmlFor="greeting"
-          hint={t("greetingHint")}
-        >
-          <textarea
-            id="greeting"
-            value={data.greeting}
-            onChange={(e) => update({ greeting: e.target.value })}
-            placeholder={t("greetingPlaceholder", { agency })}
-            rows={3}
-            className={`${INPUT_CLASS} resize-none`}
-          />
-        </Field>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════
-   STEP 5 — Go Live / Preview
-   ═══════════════════════════════════════════════════ */
-function StepGoLive({ data }: { data: OnboardingData }) {
-  const t = useTranslations("onboarding.steps.preview");
-  const agency = data.agencyName || t("agencyFallback");
-  type PreviewMessage = { from: "bot" | "user"; text: string };
-  const [previewMessages, setPreviewMessages] = useState<PreviewMessage[]>([
-    {
-      from: "bot",
-      text: data.greeting || t("greetingFallback", { agency }),
-    },
-  ]);
-  const [input, setInput] = useState("");
-
-  const sendPreview = () => {
-    if (!input.trim()) return;
-    const userMsg = input.trim();
-    setInput("");
-    setPreviewMessages((prev) => [...prev, { from: "user" as const, text: userMsg }]);
-
-    setTimeout(() => {
-      const tourName = data.tours[0]?.name || t("sampleTourName");
-      const tourInfo = data.tours[0]?.info || t("sampleTourPrice");
-      const responseKey =
-        data.tone === "formal" ? "responseFormal"
-        : data.tone === "casual" ? "responseCasual"
-        : "responseFriendly";
-      const response = t(responseKey, { name: tourName, price: tourInfo });
-      setPreviewMessages((prev) => [...prev, { from: "bot" as const, text: response }]);
-    }, 1200);
-  };
-
-  const toneLabelKey =
-    data.tone === "formal" ? "formalLabel" : data.tone === "casual" ? "casualLabel" : "friendlyLabel";
-  const tPersonality = useTranslations("onboarding.steps.personality");
-
-  return (
-    <div>
-      <StepHeader
-        number={t("number")}
-        title={t("title")}
-        description={t("description")}
-      />
-
-      {/* Summary cards */}
-      <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {[
-          { label: t("summaryAgency"), value: data.agencyName || "—" },
-          { label: t("summaryTours"), value: `${data.tours.filter((tour) => tour.name).length}` },
-          { label: t("summaryTone"), value: tPersonality(toneLabelKey) },
-        ].map((item) => (
-          <div
-            key={item.label}
-            className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center"
-          >
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              {item.label}
-            </p>
-            <p className="mt-1 text-sm font-semibold text-navy-900 truncate">
-              {item.value}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* WhatsApp preview */}
-      <div className="mt-6 rounded-2xl border border-slate-200 overflow-hidden">
-        {/* Phone header */}
-        <div className="bg-navy-900 px-4 py-3 flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-white">
-              {data.agencyName || t("previewYourAgency")}
-            </p>
-            <div className="flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-green-400" />
-              <span className="text-[10px] text-white/60">{t("botActive")}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Messages */}
-        <div className="bg-slate-50 p-4 space-y-2.5 min-h-[260px] max-h-[320px] overflow-y-auto">
-          <AnimatePresence initial={false}>
-            {previewMessages.map((msg, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`rounded-2xl px-3.5 py-2 max-w-[80%] text-sm leading-relaxed ${
-                    msg.from === "user"
-                      ? "bg-blue-500 text-white rounded-tr-md"
-                      : "bg-white border border-slate-200 text-navy-900 rounded-tl-md shadow-sm"
-                  }`}
-                >
-                  {msg.from === "bot" && (
-                    <span className="block text-[10px] font-semibold text-blue-500 mb-0.5">
-                      {t("botLabel")}
-                    </span>
-                  )}
-                  {msg.text}
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-
-        {/* Input */}
-        <div className="bg-white border-t border-slate-200 p-3 flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendPreview()}
-            placeholder={t("inputPlaceholder")}
-            className="flex-1 h-9 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-navy-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-          />
-          <button
-            onClick={sendPreview}
-            className="h-9 w-9 rounded-lg bg-navy-900 flex items-center justify-center text-white hover:bg-navy-800 transition-colors active:scale-95"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M22 2L11 13" />
-              <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Ready callout */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="mt-6 rounded-xl border border-green-200 bg-green-50/50 p-4 flex gap-3"
-      >
-        <div className="shrink-0 mt-0.5">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-green-600"
-          >
-            <path d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-green-900">
-            {t("readyTitle")}
-          </p>
-          <p className="text-sm text-green-700/70 mt-0.5">
-            {t("readyDesc")}
-          </p>
-        </div>
-      </motion.div>
     </div>
   );
 }
