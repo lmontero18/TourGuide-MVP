@@ -9,6 +9,7 @@ import type { BotConfig, BotTone, BusinessSection, FAQ, Tour } from '@/types'
 const finishSchema = z.object({
   tone: z.enum(['formal', 'friendly', 'casual']).optional(),
   greeting: z.string().trim().max(500).optional(),
+  default_lang: z.string().trim().min(2).max(10).optional(),
   faqs: z
     .array(z.object({
       question: z.string().trim().min(1).max(500),
@@ -174,6 +175,7 @@ export async function PATCH(request: NextRequest) {
   const nextBotConfig: BotConfig = { ...currentBotConfig }
   if (parsed.data.tone !== undefined) nextBotConfig.tone = parsed.data.tone
   if (parsed.data.greeting !== undefined) nextBotConfig.greeting = parsed.data.greeting
+  if (parsed.data.default_lang !== undefined) nextBotConfig.default_lang = parsed.data.default_lang
 
   const tours = dedupeTours((parsed.data.tours ?? (current?.tours as Tour[] | null) ?? []) as Tour[])
   const faqs = dedupeFaqs((parsed.data.faqs ?? (current?.faqs as FAQ[] | null) ?? []) as FAQ[])
@@ -185,6 +187,7 @@ export async function PATCH(request: NextRequest) {
     agencyName: current?.name ?? '',
     tone: (nextBotConfig.tone ?? 'friendly') as BotTone,
     greeting: nextBotConfig.greeting ?? null,
+    defaultLang: nextBotConfig.default_lang,
     tours,
     faqs,
     businessInfo,
