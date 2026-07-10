@@ -104,6 +104,7 @@ export interface Conversation {
   contact_id: string
   status: ConversationStatus
   bot_active: boolean
+  unread_count: number
   assigned_agent_id: string | null
   last_message_at: string | null
   created_at: string

@@ -8,6 +8,7 @@ import ChatInput from "./ChatInput";
 import TakeControlButton from "./TakeControlButton";
 import { ChatMessagesSkeleton } from "./ChatSkeleton";
 import { useMessages } from "@/hooks/useMessages";
+import { useMarkConversationRead } from "@/hooks/useMarkConversationRead";
 import type { MessageRole } from "@/types";
 
 interface ChatWindowProps {
@@ -37,6 +38,7 @@ export default function ChatWindow({
 }: ChatWindowProps) {
   const router = useRouter();
   const { messages, loading } = useMessages(conversationId);
+  useMarkConversationRead(conversationId, messages.length);
   const [botActive, setBotActive] = useState(initialBotActive);
   const [toggling, setToggling] = useState(false);
   const [deleting, setDeleting] = useState(false);
