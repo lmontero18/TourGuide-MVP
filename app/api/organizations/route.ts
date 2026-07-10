@@ -46,6 +46,7 @@ const botConfigSchema = z.object({
   business_hours: businessHoursSchema.optional(),
   tone: z.enum(['formal', 'friendly', 'casual']).optional(),
   greeting: z.string().trim().max(500).optional(),
+  default_lang: z.string().trim().min(2).max(10).optional(),
 }).strict()
 
 // Las FAQs se persisten como [{question, answer}] (formato que lee N8N para RAG).
@@ -147,7 +148,8 @@ export async function PATCH(request: NextRequest) {
     parsed.data.tours !== undefined ||
     parsed.data.business_info !== undefined ||
     parsed.data.bot_config?.tone !== undefined ||
-    parsed.data.bot_config?.greeting !== undefined
+    parsed.data.bot_config?.greeting !== undefined ||
+    parsed.data.bot_config?.default_lang !== undefined
 
   if (parsed.data.prompt !== undefined) {
     update.prompt = parsed.data.prompt
@@ -156,6 +158,7 @@ export async function PATCH(request: NextRequest) {
       agencyName: parsed.data.name ?? current?.name ?? '',
       tone: (nextBotConfig.tone ?? 'friendly') as BotTone,
       greeting: nextBotConfig.greeting ?? null,
+      defaultLang: nextBotConfig.default_lang,
       // Dedup también al compilar: si no llegó tours en el body pero la columna
       // tiene duplicados viejos, el prompt sale limpio igual.
       tours: dedupeTours((effTours ?? (current?.tours as Tour[] | null) ?? [])),

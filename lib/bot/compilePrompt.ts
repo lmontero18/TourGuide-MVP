@@ -7,6 +7,7 @@ export interface CompilePromptInput {
   tours: Tour[]
   faqs: FAQ[]
   businessInfo?: BusinessSection[]
+  defaultLang?: string
 }
 
 const TONE_DESCRIPTION: Record<BotTone, string> = {
@@ -60,6 +61,7 @@ function renderSection(section: BusinessSection): string {
 export function compilePrompt(input: CompilePromptInput): string {
   const agency = input.agencyName.trim() || 'la agencia'
   const tone = TONE_DESCRIPTION[input.tone] ?? TONE_DESCRIPTION.friendly
+  const defaultLang = input.defaultLang?.trim() || 'es'
 
   const sections: string[] = []
 
@@ -68,7 +70,10 @@ export function compilePrompt(input: CompilePromptInput): string {
       `Tu tono es ${tone}\n` +
       `Respondes consultas de clientes sobre los tours, precios y condiciones usando UNICAMENTE la informacion de abajo. ` +
       `Los precios pueden variar segun el cliente (locales vs. extranjeros, ninos, grupos): interpreta el detalle de cada tour y responde la combinacion que pregunte el cliente. ` +
-      `Si no tienes la informacion, no la inventes — ofrece conectar con un agente humano.`,
+      `Si no tienes la informacion, no la inventes — ofrece conectar con un agente humano.\n` +
+      `Detecta el idioma en el que te escribe el cliente en cada mensaje y responde siempre en ese idioma. ` +
+      `Si el mensaje es ambiguo (emojis, confirmaciones cortas como "ok", "👍") y no podes determinar el idioma con confianza, ` +
+      `segui respondiendo en el idioma que ya se venia usando en la conversacion; si es el primer mensaje y es ambiguo, responde en ${defaultLang}.`,
   )
 
   const greeting = input.greeting?.trim()
