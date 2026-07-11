@@ -437,14 +437,32 @@ async function processWebhook(body: WebhookPayload) {
           // Hora actual en la timezone de la org: se pega al system_prompt
           // por-request (no se persiste) para que el bot pueda informar
           // cuando derive a un humano — ver lib/bot/compilePrompt.ts.
+          // timezone es user-configurable y no se valida contra IANA en el
+          // schema del API — un valor invalido no debe tumbar la respuesta
+          // del bot, solo perder el contexto de hora (fallback al default).
           const orgTimezone = (org?.bot_config as BotConfig | null)?.timezone || DEFAULT_TIMEZONE
-          const nowFormatted = new Intl.DateTimeFormat('es', {
-            weekday: 'long',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-            timeZone: orgTimezone,
-          }).format(new Date())
+          let nowFormatted: string
+          try {
+            nowFormatted = new Intl.DateTimeFormat('es', {
+              weekday: 'long',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+              timeZone: orgTimezone,
+            }).format(new Date())
+          } catch (error) {
+            log.warn('invalid bot_config.timezone, falling back to default', {
+              timezone: orgTimezone,
+              error,
+            })
+            nowFormatted = new Intl.DateTimeFormat('es', {
+              weekday: 'long',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+              timeZone: DEFAULT_TIMEZONE,
+            }).format(new Date())
+          }
           const systemPrompt =
             `${org?.prompt ?? ''}\n\n` +
             `Fecha y hora actual (zona horaria de la agencia): ${nowFormatted}.`
