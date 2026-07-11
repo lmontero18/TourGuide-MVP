@@ -9,6 +9,8 @@ import {
 } from '@/lib/whatsapp/schemas'
 import { checkRateLimit } from '@/lib/ratelimit'
 import { createLogger, type Logger } from '@/lib/logger'
+import { DEFAULT_TIMEZONE } from '@/lib/bot/businessHours'
+import type { BotConfig } from '@/types'
 
 function getServiceClient() {
   return createClient(
@@ -425,12 +427,45 @@ async function processWebhook(body: WebhookPayload) {
         if (conversation.bot_active && content && !isPlaceholder) {
           const { data: org } = await supabase
             .from('organizations')
-            .select('prompt')
+            .select('prompt, bot_config')
             .eq('id', waAccount.org_id)
             .single()
 
           const { getMessagingToken } = await import('@/lib/whatsapp/token')
           const tok = getMessagingToken(waAccount)
+
+          // Hora actual en la timezone de la org: se pega al system_prompt
+          // por-request (no se persiste) para que el bot pueda informar
+          // cuando derive a un humano — ver lib/bot/compilePrompt.ts.
+          // timezone es user-configurable y no se valida contra IANA en el
+          // schema del API — un valor invalido no debe tumbar la respuesta
+          // del bot, solo perder el contexto de hora (fallback al default).
+          const orgTimezone = (org?.bot_config as BotConfig | null)?.timezone || DEFAULT_TIMEZONE
+          let nowFormatted: string
+          try {
+            nowFormatted = new Intl.DateTimeFormat('es', {
+              weekday: 'long',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+              timeZone: orgTimezone,
+            }).format(new Date())
+          } catch (error) {
+            log.warn('invalid bot_config.timezone, falling back to default', {
+              timezone: orgTimezone,
+              error,
+            })
+            nowFormatted = new Intl.DateTimeFormat('es', {
+              weekday: 'long',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+              timeZone: DEFAULT_TIMEZONE,
+            }).format(new Date())
+          }
+          const systemPrompt =
+            `${org?.prompt ?? ''}\n\n` +
+            `Fecha y hora actual (zona horaria de la agencia): ${nowFormatted}.`
 
           await callN8nBot(
             {
@@ -440,7 +475,7 @@ async function processWebhook(body: WebhookPayload) {
               phone_number_id: metadata.phone_number_id,
               access_token: tok ?? waAccount.access_token,
               message: content,
-              system_prompt: org?.prompt ?? '',
+              system_prompt: systemPrompt,
               n8n_secret: process.env.N8N_INTERNAL_SECRET ?? '',
               callback_base_url: process.env.TOURGUIDE_API_URL ?? '',
             },

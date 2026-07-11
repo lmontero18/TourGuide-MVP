@@ -5,9 +5,8 @@ import Link from "next/link";
 import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
 import SettingsSkeleton from "@/components/settings/SettingsSkeleton";
+import { DEFAULT_RANGE, normalizeBusinessHours } from "@/lib/bot/businessHours";
 import type { Organization } from "@/types";
-
-const DEFAULT_HOURS = { start: "09:00", end: "18:00" };
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -15,8 +14,11 @@ export default function SettingsPage() {
 
   const [orgName, setOrgName] = useState("");
   const [timezone, setTimezone] = useState("America/Lima");
-  const [hoursStart, setHoursStart] = useState(DEFAULT_HOURS.start);
-  const [hoursEnd, setHoursEnd] = useState(DEFAULT_HOURS.end);
+  const [weekdaysStart, setWeekdaysStart] = useState(DEFAULT_RANGE.start);
+  const [weekdaysEnd, setWeekdaysEnd] = useState(DEFAULT_RANGE.end);
+  const [weekendClosed, setWeekendClosed] = useState(false);
+  const [weekendStart, setWeekendStart] = useState(DEFAULT_RANGE.start);
+  const [weekendEnd, setWeekendEnd] = useState(DEFAULT_RANGE.end);
 
   useEffect(() => {
     const load = async () => {
@@ -27,8 +29,12 @@ export default function SettingsPage() {
         const org = result.organization as Organization;
         setOrgName(org.name);
         setTimezone(org.bot_config?.timezone ?? "America/Lima");
-        setHoursStart(org.bot_config?.business_hours?.start ?? DEFAULT_HOURS.start);
-        setHoursEnd(org.bot_config?.business_hours?.end ?? DEFAULT_HOURS.end);
+        const hours = normalizeBusinessHours(org.bot_config?.business_hours);
+        setWeekdaysStart(hours.weekdays.start);
+        setWeekdaysEnd(hours.weekdays.end);
+        setWeekendClosed(hours.weekend === null);
+        setWeekendStart(hours.weekend?.start ?? DEFAULT_RANGE.start);
+        setWeekendEnd(hours.weekend?.end ?? DEFAULT_RANGE.end);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Failed to load settings");
       } finally {
@@ -52,7 +58,10 @@ export default function SettingsPage() {
           name: orgName.trim(),
           bot_config: {
             timezone,
-            business_hours: { start: hoursStart, end: hoursEnd },
+            business_hours: {
+              weekdays: { start: weekdaysStart, end: weekdaysEnd },
+              weekend: weekendClosed ? null : { start: weekendStart, end: weekendEnd },
+            },
           },
         }),
       });
@@ -133,24 +142,67 @@ export default function SettingsPage() {
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
               <h2 className="text-sm font-bold text-navy-900 mb-1">Business hours</h2>
               <p className="text-xs text-slate-400 mb-4">Messages outside these hours are marked as after-hours in your metrics.</p>
-              <div className="grid grid-cols-2 gap-4">
+
+              <div className="space-y-5">
                 <div>
-                  <label className="block text-xs font-medium text-navy-900 mb-1.5">Opens at</label>
-                  <input
-                    type="time"
-                    value={hoursStart}
-                    onChange={(e) => setHoursStart(e.target.value)}
-                    className="w-full h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                  />
+                  <p className="text-xs font-semibold text-navy-900 mb-2">Weekdays (Mon–Fri)</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-navy-900 mb-1.5">Opens at</label>
+                      <input
+                        type="time"
+                        value={weekdaysStart}
+                        onChange={(e) => setWeekdaysStart(e.target.value)}
+                        className="w-full h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-navy-900 mb-1.5">Closes at</label>
+                      <input
+                        type="time"
+                        value={weekdaysEnd}
+                        onChange={(e) => setWeekdaysEnd(e.target.value)}
+                        className="w-full h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                      />
+                    </div>
+                  </div>
                 </div>
+
                 <div>
-                  <label className="block text-xs font-medium text-navy-900 mb-1.5">Closes at</label>
-                  <input
-                    type="time"
-                    value={hoursEnd}
-                    onChange={(e) => setHoursEnd(e.target.value)}
-                    className="w-full h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                  />
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold text-navy-900">Weekend (Sat–Sun)</p>
+                    <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={weekendClosed}
+                        onChange={(e) => setWeekendClosed(e.target.checked)}
+                        className="h-3.5 w-3.5 rounded border-slate-300"
+                      />
+                      Closed on weekends
+                    </label>
+                  </div>
+                  {!weekendClosed && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-navy-900 mb-1.5">Opens at</label>
+                        <input
+                          type="time"
+                          value={weekendStart}
+                          onChange={(e) => setWeekendStart(e.target.value)}
+                          className="w-full h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-navy-900 mb-1.5">Closes at</label>
+                        <input
+                          type="time"
+                          value={weekendEnd}
+                          onChange={(e) => setWeekendEnd(e.target.value)}
+                          className="w-full h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </section>

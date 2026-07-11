@@ -36,14 +36,22 @@ export async function GET() {
   return NextResponse.json({ organization: org })
 }
 
-const businessHoursSchema = z.object({
+const businessHoursRangeSchema = z.object({
   start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Invalid time format (HH:MM)'),
   end: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Invalid time format (HH:MM)'),
+}).refine((data) => data.start < data.end, {
+  message: 'start must be before end',
+  path: ['end'],
+})
+
+const weeklyBusinessHoursSchema = z.object({
+  weekdays: businessHoursRangeSchema,
+  weekend: businessHoursRangeSchema.nullable(),
 })
 
 const botConfigSchema = z.object({
   timezone: z.string().min(1).max(64).optional(),
-  business_hours: businessHoursSchema.optional(),
+  business_hours: weeklyBusinessHoursSchema.optional(),
   tone: z.enum(['formal', 'friendly', 'casual']).optional(),
   greeting: z.string().trim().max(500).optional(),
   default_lang: z.string().trim().min(2).max(10).optional(),
@@ -149,7 +157,9 @@ export async function PATCH(request: NextRequest) {
     parsed.data.business_info !== undefined ||
     parsed.data.bot_config?.tone !== undefined ||
     parsed.data.bot_config?.greeting !== undefined ||
-    parsed.data.bot_config?.default_lang !== undefined
+    parsed.data.bot_config?.default_lang !== undefined ||
+    parsed.data.bot_config?.business_hours !== undefined ||
+    parsed.data.bot_config?.timezone !== undefined
 
   if (parsed.data.prompt !== undefined) {
     update.prompt = parsed.data.prompt
@@ -159,6 +169,8 @@ export async function PATCH(request: NextRequest) {
       tone: (nextBotConfig.tone ?? 'friendly') as BotTone,
       greeting: nextBotConfig.greeting ?? null,
       defaultLang: nextBotConfig.default_lang,
+      businessHours: nextBotConfig.business_hours,
+      timezone: nextBotConfig.timezone,
       // Dedup también al compilar: si no llegó tours en el body pero la columna
       // tiene duplicados viejos, el prompt sale limpio igual.
       tours: dedupeTours((effTours ?? (current?.tours as Tour[] | null) ?? [])),

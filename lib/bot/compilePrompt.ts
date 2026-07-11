@@ -1,4 +1,5 @@
-import type { BotTone, BusinessSection, FAQ, Tour } from '@/types'
+import type { BotTone, BusinessHours, BusinessSection, FAQ, Tour, WeeklyBusinessHours } from '@/types'
+import { DEFAULT_TIMEZONE, describeBusinessHours, normalizeBusinessHours } from './businessHours'
 
 export interface CompilePromptInput {
   agencyName: string
@@ -8,6 +9,8 @@ export interface CompilePromptInput {
   faqs: FAQ[]
   businessInfo?: BusinessSection[]
   defaultLang?: string
+  businessHours?: BusinessHours | WeeklyBusinessHours | null
+  timezone?: string
 }
 
 const TONE_DESCRIPTION: Record<BotTone, string> = {
@@ -80,6 +83,19 @@ export function compilePrompt(input: CompilePromptInput): string {
   if (greeting) {
     sections.push(`Mensaje de bienvenida sugerido:\n${greeting}`)
   }
+
+  const businessHours = normalizeBusinessHours(input.businessHours)
+  const timezone = input.timezone?.trim() || DEFAULT_TIMEZONE
+  sections.push(
+    `## HORARIO DE ATENCION\n` +
+      `${describeBusinessHours(businessHours)}\n` +
+      `Zona horaria: ${timezone}\n\n` +
+      `Si el cliente pide hablar con un humano y vas a usar la herramienta transfer_to_human, ` +
+      `antes de ejecutarla decile en tu misma respuesta cuando le va a contestar alguien. ` +
+      `Vas a recibir la fecha y hora actual en cada mensaje: si cae dentro del horario de arriba, ` +
+      `decile que un agente lo va a atender en breve; si cae fuera de horario, calcula el proximo ` +
+      `horario de apertura segun el dia y la hora actual, y comunicaselo. No menciones el horario en otros casos.`,
+  )
 
   // Los tours van primero: es lo que más consulta el cliente. Si algo se trunca
   // por el tope, que sea la info del negocio o las FAQs, no el catálogo.
