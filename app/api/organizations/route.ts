@@ -39,6 +39,9 @@ export async function GET() {
 const businessHoursRangeSchema = z.object({
   start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Invalid time format (HH:MM)'),
   end: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Invalid time format (HH:MM)'),
+}).refine((data) => data.start < data.end, {
+  message: 'start must be before end',
+  path: ['end'],
 })
 
 const weeklyBusinessHoursSchema = z.object({
