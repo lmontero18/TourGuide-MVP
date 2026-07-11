@@ -30,11 +30,21 @@ export interface BusinessHours {
   end: string    // HH:MM 24h format
 }
 
+// Horario semanal: weekdays (Lu-Vi) y weekend (Sa-Do) por separado.
+// weekend: null = cerrado el fin de semana.
+export interface WeeklyBusinessHours {
+  weekdays: BusinessHours
+  weekend: BusinessHours | null
+}
+
 export interface BotConfig {
   buffer_seconds?: number
   default_lang?: string
   timezone?: string
-  business_hours?: BusinessHours
+  // Formato viejo (BusinessHours) convive con el nuevo (WeeklyBusinessHours)
+  // en orgs que no resavearon todavia — normalizar con
+  // lib/bot/businessHours.ts:normalizeBusinessHours antes de usar.
+  business_hours?: BusinessHours | WeeklyBusinessHours
   tone?: BotTone
   greeting?: string  // primer mensaje sugerido del bot. Se incluye en el prompt compilado.
 }

@@ -188,6 +188,8 @@ export async function PATCH(request: NextRequest) {
     tone: (nextBotConfig.tone ?? 'friendly') as BotTone,
     greeting: nextBotConfig.greeting ?? null,
     defaultLang: nextBotConfig.default_lang,
+    businessHours: nextBotConfig.business_hours,
+    timezone: nextBotConfig.timezone,
     tours,
     faqs,
     businessInfo,
