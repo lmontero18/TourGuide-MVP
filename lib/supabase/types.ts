@@ -88,6 +88,7 @@ export type Database = {
           last_message_at: string | null
           org_id: string
           status: Database["public"]["Enums"]["conversation_status"]
+          unread_count: number
           updated_at: string
         }
         Insert: {
@@ -99,6 +100,7 @@ export type Database = {
           last_message_at?: string | null
           org_id: string
           status?: Database["public"]["Enums"]["conversation_status"]
+          unread_count?: number
           updated_at?: string
         }
         Update: {
@@ -110,6 +112,7 @@ export type Database = {
           last_message_at?: string | null
           org_id?: string
           status?: Database["public"]["Enums"]["conversation_status"]
+          unread_count?: number
           updated_at?: string
         }
         Relationships: [
