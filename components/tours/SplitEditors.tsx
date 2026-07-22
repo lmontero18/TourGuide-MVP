@@ -55,18 +55,20 @@ function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-navy-900 px-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-navy-800 active:scale-[0.98] cursor-pointer"
+      className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-navy-900 px-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-navy-800 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-300 cursor-pointer"
     >
       <PlusIcon /> {label}
     </button>
   );
 }
 
-function DeleteButton({ onClick }: { onClick: () => void }) {
+function DeleteButton({ onClick, confirmMessage }: { onClick: () => void; confirmMessage: string }) {
   return (
     <button
-      onClick={onClick}
-      className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-400 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 cursor-pointer"
+      onClick={() => {
+        if (window.confirm(confirmMessage)) onClick();
+      }}
+      className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-400 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-300 cursor-pointer"
       aria-label="remove"
     >
       <TrashIcon />
@@ -89,6 +91,7 @@ interface RailItem {
   title: string;
   meta: string;
   flag?: boolean;
+  missing?: boolean;
 }
 
 function Rail({
@@ -99,6 +102,7 @@ function Rail({
   onSelect,
   addLabel,
   onAdd,
+  missingLabel,
 }: {
   ns: string;
   heading: string;
@@ -107,6 +111,7 @@ function Rail({
   onSelect: (id: string) => void;
   addLabel: string;
   onAdd: () => void;
+  missingLabel: string;
 }) {
   return (
     <div className="flex shrink-0 flex-col border-b border-slate-100 lg:w-72 lg:border-b-0 lg:border-r">
@@ -129,7 +134,8 @@ function Rail({
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => onSelect(it.id)}
-                className={`relative w-48 shrink-0 rounded-xl px-3 py-2.5 text-left transition-colors cursor-pointer lg:w-full lg:shrink ${
+                aria-current={active ? "true" : undefined}
+                className={`relative w-48 shrink-0 rounded-xl px-3 py-2.5 text-left transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-300 lg:w-full lg:shrink ${
                   active ? "bg-blue-50/70" : "hover:bg-slate-50"
                 }`}
               >
@@ -144,6 +150,14 @@ function Rail({
                   <p className={`flex-1 truncate text-sm font-semibold ${active ? "text-blue-700" : "text-navy-900"}`}>
                     {it.title || "—"}
                   </p>
+                  {it.missing && (
+                    <span
+                      title={missingLabel}
+                      className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-red-100 text-[10px] font-bold leading-none text-red-600"
+                    >
+                      !<span className="sr-only">{missingLabel}</span>
+                    </span>
+                  )}
                   {it.flag && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />}
                 </div>
                 <p className="mt-0.5 truncate text-xs text-slate-400">{it.meta || "·"}</p>
@@ -231,20 +245,30 @@ export function ToursSplit({ tours, onChange }: { tours: Tour[]; onChange: (v: T
       title: tour.name,
       meta: first ? `${first.amount} ${first.currency}` : t("pricesLabel"),
       flag: tour.confidence != null && tour.confidence < 0.6,
+      missing: !tour.name.trim(),
     };
   });
 
   return (
     <Workspace
       rail={
-        <Rail ns="tours" heading={t("toursTitle")} items={items} selectedId={selectedId} onSelect={setSelectedId} addLabel={t("addTour")} onAdd={add} />
+        <Rail
+          ns="tours"
+          heading={t("toursTitle")}
+          items={items}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          addLabel={t("addTour")}
+          onAdd={add}
+          missingLabel={t("missingFlag")}
+        />
       }
       detail={
         selected ? (
           <DetailPane id={selected.id}>
             <div className="mb-4 flex items-center justify-between gap-3">
               {selected.confidence != null && selected.confidence < 0.6 ? <ReviewBadge label={t("reviewFlag")} /> : <span />}
-              <DeleteButton onClick={() => remove(selected.id)} />
+              <DeleteButton onClick={() => remove(selected.id)} confirmMessage={t("confirmDeleteTour")} />
             </div>
 
             <label className={FIELD_LABEL}>{t("tourNameLabel")}</label>
@@ -341,19 +365,29 @@ export function BusinessSplit({ business, onChange }: { business: BusinessSectio
     title: s.title,
     meta: s.content.replace(/\s+/g, " ").trim(),
     flag: s.confidence != null && s.confidence < 0.6,
+    missing: !s.title.trim() || !s.content.trim(),
   }));
 
   return (
     <Workspace
       rail={
-        <Rail ns="business" heading={t("businessTitle")} items={items} selectedId={selectedId} onSelect={setSelectedId} addLabel={t("addBusiness")} onAdd={add} />
+        <Rail
+          ns="business"
+          heading={t("businessTitle")}
+          items={items}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          addLabel={t("addBusiness")}
+          onAdd={add}
+          missingLabel={t("missingFlag")}
+        />
       }
       detail={
         selected ? (
           <DetailPane id={selected.id}>
             <div className="mb-4 flex items-center justify-between gap-3">
               {selected.confidence != null && selected.confidence < 0.6 ? <ReviewBadge label={t("reviewFlag")} /> : <span />}
-              <DeleteButton onClick={() => remove(selected.id)} />
+              <DeleteButton onClick={() => remove(selected.id)} confirmMessage={t("confirmDeleteBusiness")} />
             </div>
             <label className={FIELD_LABEL}>{t("businessTitleLabel")}</label>
             <input
@@ -401,18 +435,28 @@ export function FaqsSplit({ faqs, onChange }: { faqs: FaqDraft[]; onChange: (v: 
     id: f.id,
     title: f.question,
     meta: f.answer.replace(/\s+/g, " ").trim(),
+    missing: !f.question.trim() || !f.answer.trim(),
   }));
 
   return (
     <Workspace
       rail={
-        <Rail ns="faqs" heading={t("faqsTitle")} items={items} selectedId={selectedId} onSelect={setSelectedId} addLabel={t("addFaq")} onAdd={add} />
+        <Rail
+          ns="faqs"
+          heading={t("faqsTitle")}
+          items={items}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          addLabel={t("addFaq")}
+          onAdd={add}
+          missingLabel={t("missingFlag")}
+        />
       }
       detail={
         selected ? (
           <DetailPane id={selected.id}>
             <div className="mb-4 flex items-center justify-end">
-              <DeleteButton onClick={() => remove(selected.id)} />
+              <DeleteButton onClick={() => remove(selected.id)} confirmMessage={t("confirmDeleteFaq")} />
             </div>
             <label className={FIELD_LABEL}>{t("faqQuestionLabel")}</label>
             <input
