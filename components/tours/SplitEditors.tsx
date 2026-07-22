@@ -9,7 +9,7 @@
  * El onboarding sigue usando los editores apilados de `TourCards.tsx`.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import type { FaqDraft } from "./TourCards";
@@ -55,7 +55,7 @@ function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-navy-900 px-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-navy-800 active:scale-[0.98] cursor-pointer"
+      className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-navy-900 px-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-navy-800 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-300 cursor-pointer"
     >
       <PlusIcon /> {label}
     </button>
@@ -66,11 +66,123 @@ function DeleteButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-400 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 cursor-pointer"
+      className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-400 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-300 cursor-pointer"
       aria-label="remove"
     >
       <TrashIcon />
     </button>
+  );
+}
+
+/** Modal de confirmación propio (no window.confirm) para acciones destructivas. */
+function ConfirmDialog({
+  open,
+  title,
+  message,
+  cancelLabel,
+  confirmLabel,
+  onCancel,
+  onConfirm,
+}: {
+  open: boolean;
+  title: string;
+  message: string;
+  cancelLabel: string;
+  confirmLabel: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  // Al abrir: guarda qué elemento tenía el foco (para devolvérselo al cerrar)
+  // y mueve el foco a "Cancelar" — la acción segura por defecto en un diálogo
+  // destructivo. Tab/Shift+Tab quedan atrapados dentro del diálogo mientras
+  // está abierto; Escape cierra igual que clickear afuera.
+  useEffect(() => {
+    if (!open) return;
+    triggerRef.current = document.activeElement as HTMLElement | null;
+    cancelRef.current?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onCancel();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const container = dialogRef.current;
+      if (!container) return;
+      const focusable = container.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      triggerRef.current?.focus();
+    };
+  }, [open, onCancel]);
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="fixed inset-0 z-50 grid place-items-center bg-navy-900/40 p-4 backdrop-blur-sm"
+          onClick={onCancel}
+        >
+          <motion.div
+            ref={dialogRef}
+            initial={{ opacity: 0, scale: 0.96, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 6 }}
+            transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="confirm-dialog-title"
+            aria-describedby="confirm-dialog-message"
+            className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="confirm-dialog-title" className="text-sm font-bold text-navy-900">
+              {title}
+            </h3>
+            <p id="confirm-dialog-message" className="mt-1.5 text-sm leading-relaxed text-slate-500">
+              {message}
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                ref={cancelRef}
+                onClick={onCancel}
+                className="inline-flex h-9 items-center rounded-xl border border-slate-200 px-4 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 cursor-pointer"
+              >
+                {cancelLabel}
+              </button>
+              <button
+                onClick={onConfirm}
+                className="inline-flex h-9 items-center rounded-xl bg-red-500 px-4 text-xs font-bold text-white transition-colors hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 cursor-pointer"
+              >
+                {confirmLabel}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -89,6 +201,7 @@ interface RailItem {
   title: string;
   meta: string;
   flag?: boolean;
+  missing?: boolean;
 }
 
 function Rail({
@@ -99,6 +212,7 @@ function Rail({
   onSelect,
   addLabel,
   onAdd,
+  missingLabel,
 }: {
   ns: string;
   heading: string;
@@ -107,6 +221,7 @@ function Rail({
   onSelect: (id: string) => void;
   addLabel: string;
   onAdd: () => void;
+  missingLabel: string;
 }) {
   return (
     <div className="flex shrink-0 flex-col border-b border-slate-100 lg:w-72 lg:border-b-0 lg:border-r">
@@ -129,7 +244,8 @@ function Rail({
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => onSelect(it.id)}
-                className={`relative w-48 shrink-0 rounded-xl px-3 py-2.5 text-left transition-colors cursor-pointer lg:w-full lg:shrink ${
+                aria-current={active ? "true" : undefined}
+                className={`relative w-48 shrink-0 rounded-xl px-3 py-2.5 text-left transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-300 lg:w-full lg:shrink ${
                   active ? "bg-blue-50/70" : "hover:bg-slate-50"
                 }`}
               >
@@ -144,6 +260,14 @@ function Rail({
                   <p className={`flex-1 truncate text-sm font-semibold ${active ? "text-blue-700" : "text-navy-900"}`}>
                     {it.title || "—"}
                   </p>
+                  {it.missing && (
+                    <span
+                      title={missingLabel}
+                      className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-red-100 text-[10px] font-bold leading-none text-red-600"
+                    >
+                      !<span className="sr-only">{missingLabel}</span>
+                    </span>
+                  )}
                   {it.flag && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />}
                 </div>
                 <p className="mt-0.5 truncate text-xs text-slate-400">{it.meta || "·"}</p>
@@ -207,6 +331,7 @@ export function ToursSplit({ tours, onChange }: { tours: Tour[]; onChange: (v: T
   const t = useTranslations("onboarding.steps.tours");
   const [selectedId, setSelectedId] = useSelection(tours.map((x) => x.id));
   const selected = tours.find((x) => x.id === selectedId) ?? null;
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const add = () => {
     const id = crypto.randomUUID();
@@ -231,20 +356,31 @@ export function ToursSplit({ tours, onChange }: { tours: Tour[]; onChange: (v: T
       title: tour.name,
       meta: first ? `${first.amount} ${first.currency}` : t("pricesLabel"),
       flag: tour.confidence != null && tour.confidence < 0.6,
+      missing: !tour.name.trim(),
     };
   });
 
   return (
+    <>
     <Workspace
       rail={
-        <Rail ns="tours" heading={t("toursTitle")} items={items} selectedId={selectedId} onSelect={setSelectedId} addLabel={t("addTour")} onAdd={add} />
+        <Rail
+          ns="tours"
+          heading={t("toursTitle")}
+          items={items}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          addLabel={t("addTour")}
+          onAdd={add}
+          missingLabel={t("missingFlag")}
+        />
       }
       detail={
         selected ? (
           <DetailPane id={selected.id}>
             <div className="mb-4 flex items-center justify-between gap-3">
               {selected.confidence != null && selected.confidence < 0.6 ? <ReviewBadge label={t("reviewFlag")} /> : <span />}
-              <DeleteButton onClick={() => remove(selected.id)} />
+              <DeleteButton onClick={() => setConfirmDelete(true)} />
             </div>
 
             <label className={FIELD_LABEL}>{t("tourNameLabel")}</label>
@@ -318,6 +454,19 @@ export function ToursSplit({ tours, onChange }: { tours: Tour[]; onChange: (v: T
         )
       }
     />
+    <ConfirmDialog
+      open={confirmDelete}
+      title={t("confirmDeleteTourTitle")}
+      message={t("confirmDeleteTour")}
+      cancelLabel={t("cancelLabel")}
+      confirmLabel={t("deleteLabel")}
+      onCancel={() => setConfirmDelete(false)}
+      onConfirm={() => {
+        if (selected) remove(selected.id);
+        setConfirmDelete(false);
+      }}
+    />
+    </>
   );
 }
 
@@ -326,6 +475,7 @@ export function BusinessSplit({ business, onChange }: { business: BusinessSectio
   const t = useTranslations("onboarding.steps.tours");
   const [selectedId, setSelectedId] = useSelection(business.map((x) => x.id));
   const selected = business.find((x) => x.id === selectedId) ?? null;
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const add = () => {
     const id = crypto.randomUUID();
@@ -341,19 +491,30 @@ export function BusinessSplit({ business, onChange }: { business: BusinessSectio
     title: s.title,
     meta: s.content.replace(/\s+/g, " ").trim(),
     flag: s.confidence != null && s.confidence < 0.6,
+    missing: !s.title.trim() || !s.content.trim(),
   }));
 
   return (
+    <>
     <Workspace
       rail={
-        <Rail ns="business" heading={t("businessTitle")} items={items} selectedId={selectedId} onSelect={setSelectedId} addLabel={t("addBusiness")} onAdd={add} />
+        <Rail
+          ns="business"
+          heading={t("businessTitle")}
+          items={items}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          addLabel={t("addBusiness")}
+          onAdd={add}
+          missingLabel={t("missingFlag")}
+        />
       }
       detail={
         selected ? (
           <DetailPane id={selected.id}>
             <div className="mb-4 flex items-center justify-between gap-3">
               {selected.confidence != null && selected.confidence < 0.6 ? <ReviewBadge label={t("reviewFlag")} /> : <span />}
-              <DeleteButton onClick={() => remove(selected.id)} />
+              <DeleteButton onClick={() => setConfirmDelete(true)} />
             </div>
             <label className={FIELD_LABEL}>{t("businessTitleLabel")}</label>
             <input
@@ -379,6 +540,19 @@ export function BusinessSplit({ business, onChange }: { business: BusinessSectio
         )
       }
     />
+    <ConfirmDialog
+      open={confirmDelete}
+      title={t("confirmDeleteBusinessTitle")}
+      message={t("confirmDeleteBusiness")}
+      cancelLabel={t("cancelLabel")}
+      confirmLabel={t("deleteLabel")}
+      onCancel={() => setConfirmDelete(false)}
+      onConfirm={() => {
+        if (selected) remove(selected.id);
+        setConfirmDelete(false);
+      }}
+    />
+    </>
   );
 }
 
@@ -387,6 +561,7 @@ export function FaqsSplit({ faqs, onChange }: { faqs: FaqDraft[]; onChange: (v: 
   const t = useTranslations("onboarding.steps.tours");
   const [selectedId, setSelectedId] = useSelection(faqs.map((x) => x.id));
   const selected = faqs.find((x) => x.id === selectedId) ?? null;
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const add = () => {
     const id = crypto.randomUUID();
@@ -401,18 +576,29 @@ export function FaqsSplit({ faqs, onChange }: { faqs: FaqDraft[]; onChange: (v: 
     id: f.id,
     title: f.question,
     meta: f.answer.replace(/\s+/g, " ").trim(),
+    missing: !f.question.trim() || !f.answer.trim(),
   }));
 
   return (
+    <>
     <Workspace
       rail={
-        <Rail ns="faqs" heading={t("faqsTitle")} items={items} selectedId={selectedId} onSelect={setSelectedId} addLabel={t("addFaq")} onAdd={add} />
+        <Rail
+          ns="faqs"
+          heading={t("faqsTitle")}
+          items={items}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          addLabel={t("addFaq")}
+          onAdd={add}
+          missingLabel={t("missingFlag")}
+        />
       }
       detail={
         selected ? (
           <DetailPane id={selected.id}>
             <div className="mb-4 flex items-center justify-end">
-              <DeleteButton onClick={() => remove(selected.id)} />
+              <DeleteButton onClick={() => setConfirmDelete(true)} />
             </div>
             <label className={FIELD_LABEL}>{t("faqQuestionLabel")}</label>
             <input
@@ -438,5 +624,18 @@ export function FaqsSplit({ faqs, onChange }: { faqs: FaqDraft[]; onChange: (v: 
         )
       }
     />
+    <ConfirmDialog
+      open={confirmDelete}
+      title={t("confirmDeleteFaqTitle")}
+      message={t("confirmDeleteFaq")}
+      cancelLabel={t("cancelLabel")}
+      confirmLabel={t("deleteLabel")}
+      onCancel={() => setConfirmDelete(false)}
+      onConfirm={() => {
+        if (selected) remove(selected.id);
+        setConfirmDelete(false);
+      }}
+    />
+    </>
   );
 }

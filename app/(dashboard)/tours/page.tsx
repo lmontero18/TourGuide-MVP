@@ -8,7 +8,6 @@ import TopBar from "@/components/layout/TopBar";
 import type { FaqDraft } from "@/components/tours/TourCards";
 import { ToursSplit, BusinessSplit, FaqsSplit } from "@/components/tours/SplitEditors";
 import ToursSkeleton from "@/components/tours/ToursSkeleton";
-import { importFromUrl } from "@/lib/import/client";
 import type { BusinessSection, Organization, Tour } from "@/types";
 
 type Tab = "tours" | "business" | "faqs";
@@ -20,19 +19,6 @@ const TabIcon = ({ tab }: { tab: Tab }) => {
   return <svg {...common}><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><path d="M12 17h.01" /></svg>;
 };
 
-const SparkIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 3l1.9 5.2L19 10l-5.1 1.8L12 17l-1.9-5.2L5 10l5.1-1.8L12 3z" />
-  </svg>
-);
-
-const GlobeIcon = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" /><path d="M2 12h20" />
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-  </svg>
-);
-
 export default function ToursSettingsPage() {
   const t = useTranslations("dashboard.tours");
   const [loading, setLoading] = useState(true);
@@ -41,8 +27,6 @@ export default function ToursSettingsPage() {
   const [tours, setTours] = useState<Tour[]>([]);
   const [faqs, setFaqs] = useState<FaqDraft[]>([]);
   const [business, setBusiness] = useState<BusinessSection[]>([]);
-  const [url, setUrl] = useState("");
-  const [importing, setImporting] = useState(false);
   const [tab, setTab] = useState<Tab>("tours");
 
   // Setters que marcan cambios sin guardar (la carga inicial usa los setters crudos).
@@ -75,34 +59,15 @@ export default function ToursSettingsPage() {
     load();
   }, [t]);
 
-  const runImport = async () => {
-    if (!url.trim()) return;
-    setImporting(true);
-    try {
-      const result = await importFromUrl(url);
-      const total = result.tours.length + result.faqs.length + result.business.length;
-      if (total === 0) {
-        toast.message(result.thin ? t("importThin") : t("importEmpty"));
-      } else {
-        setTours((prev) => [...prev, ...result.tours]);
-        setBusiness((prev) => [...prev, ...result.business]);
-        setFaqs((prev) => [...prev, ...result.faqs.map((faq) => ({ id: crypto.randomUUID(), ...faq }))]);
-        setUrl("");
-        setDirty(true);
-        toast.success(
-          t("importDone", {
-            tours: result.tours.length,
-            sections: result.business.length,
-            faqs: result.faqs.length,
-          }),
-        );
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("importError"));
-    } finally {
-      setImporting(false);
-    }
-  };
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -148,60 +113,17 @@ export default function ToursSettingsPage() {
           <ToursSkeleton />
         ) : (
           <div className="max-w-3xl space-y-5">
-            {/* Importar desde la web */}
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-start gap-3">
-                <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
-                  <SparkIcon />
-                </span>
-                <div className="min-w-0">
-                  <h2 className="font-display text-sm font-bold tracking-tight text-navy-900">{t("importTitle")}</h2>
-                  <p className="mt-0.5 text-xs text-slate-400">{t("importSubtitle")}</p>
-                </div>
-              </div>
-              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                <div className="relative flex-1">
-                  <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
-                    <GlobeIcon />
-                  </span>
-                  <input
-                    type="url"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && !importing && runImport()}
-                    placeholder={t("urlPlaceholder")}
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-                <button
-                  onClick={runImport}
-                  disabled={importing || !url.trim()}
-                  className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-sm shadow-navy-900/20 transition-all hover:bg-navy-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {importing ? (
-                    <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                    </svg>
-                  ) : (
-                    <SparkIcon />
-                  )}
-                  {importing ? t("importing") : t("importCta")}
-                </button>
-              </div>
-              <p className="mt-2 text-xs leading-relaxed text-slate-400">
-                {importing ? t("importingHint") : t("importHint")}
-              </p>
-            </section>
-
             {/* Pestañas con indicador deslizante */}
-            <div className="flex gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+            <div role="tablist" className="flex gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
               {TABS.map((item) => {
                 const active = tab === item.key;
                 return (
                   <button
                     key={item.key}
+                    role="tab"
+                    aria-selected={active}
                     onClick={() => setTab(item.key)}
-                    className={`relative flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
+                    className={`relative flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-300 ${
                       active ? "text-white" : "text-slate-500 hover:text-navy-900"
                     }`}
                   >

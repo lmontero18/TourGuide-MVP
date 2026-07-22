@@ -5,21 +5,6 @@ const RAIL_ROWS = ["w-32", "w-24", "w-36", "w-28", "w-20"];
 export default function ToursSkeleton() {
   return (
     <div className="max-w-3xl space-y-5" aria-hidden>
-      {/* Import card */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex items-start gap-3">
-          <Skeleton className="h-9 w-9 shrink-0 rounded-xl" />
-          <div className="space-y-2 py-0.5">
-            <Skeleton className="h-3.5 w-44" />
-            <Skeleton className="h-2.5 w-64" />
-          </div>
-        </div>
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-          <Skeleton className="h-11 flex-1 rounded-xl" />
-          <Skeleton className="h-11 w-28 rounded-xl" />
-        </div>
-      </section>
-
       {/* Tabs */}
       <div className="flex gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
         {[0, 1, 2].map((i) => (
