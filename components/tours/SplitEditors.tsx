@@ -9,7 +9,7 @@
  * El onboarding sigue usando los editores apilados de `TourCards.tsx`.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import type { FaqDraft } from "./TourCards";
@@ -92,13 +92,46 @@ function ConfirmDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  // Al abrir: guarda qué elemento tenía el foco (para devolvérselo al cerrar)
+  // y mueve el foco a "Cancelar" — la acción segura por defecto en un diálogo
+  // destructivo. Tab/Shift+Tab quedan atrapados dentro del diálogo mientras
+  // está abierto; Escape cierra igual que clickear afuera.
   useEffect(() => {
     if (!open) return;
+    triggerRef.current = document.activeElement as HTMLElement | null;
+    cancelRef.current?.focus();
+
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancel();
+      if (e.key === "Escape") {
+        onCancel();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const container = dialogRef.current;
+      if (!container) return;
+      const focusable = container.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      triggerRef.current?.focus();
+    };
   }, [open, onCancel]);
 
   return (
@@ -113,6 +146,7 @@ function ConfirmDialog({
           onClick={onCancel}
         >
           <motion.div
+            ref={dialogRef}
             initial={{ opacity: 0, scale: 0.96, y: 6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 6 }}
@@ -132,6 +166,7 @@ function ConfirmDialog({
             </p>
             <div className="mt-5 flex justify-end gap-2">
               <button
+                ref={cancelRef}
                 onClick={onCancel}
                 className="inline-flex h-9 items-center rounded-xl border border-slate-200 px-4 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 cursor-pointer"
               >
