@@ -9,7 +9,7 @@
  * El onboarding sigue usando los editores apilados de `TourCards.tsx`.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import type { FaqDraft } from "./TourCards";
@@ -62,17 +62,92 @@ function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
   );
 }
 
-function DeleteButton({ onClick, confirmMessage }: { onClick: () => void; confirmMessage: string }) {
+function DeleteButton({ onClick }: { onClick: () => void }) {
   return (
     <button
-      onClick={() => {
-        if (window.confirm(confirmMessage)) onClick();
-      }}
+      onClick={onClick}
       className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-400 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-300 cursor-pointer"
       aria-label="remove"
     >
       <TrashIcon />
     </button>
+  );
+}
+
+/** Modal de confirmación propio (no window.confirm) para acciones destructivas. */
+function ConfirmDialog({
+  open,
+  title,
+  message,
+  cancelLabel,
+  confirmLabel,
+  onCancel,
+  onConfirm,
+}: {
+  open: boolean;
+  title: string;
+  message: string;
+  cancelLabel: string;
+  confirmLabel: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onCancel]);
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="fixed inset-0 z-50 grid place-items-center bg-navy-900/40 p-4 backdrop-blur-sm"
+          onClick={onCancel}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 6 }}
+            transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="confirm-dialog-title"
+            aria-describedby="confirm-dialog-message"
+            className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="confirm-dialog-title" className="text-sm font-bold text-navy-900">
+              {title}
+            </h3>
+            <p id="confirm-dialog-message" className="mt-1.5 text-sm leading-relaxed text-slate-500">
+              {message}
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={onCancel}
+                className="inline-flex h-9 items-center rounded-xl border border-slate-200 px-4 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 cursor-pointer"
+              >
+                {cancelLabel}
+              </button>
+              <button
+                onClick={onConfirm}
+                className="inline-flex h-9 items-center rounded-xl bg-red-500 px-4 text-xs font-bold text-white transition-colors hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 cursor-pointer"
+              >
+                {confirmLabel}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -221,6 +296,7 @@ export function ToursSplit({ tours, onChange }: { tours: Tour[]; onChange: (v: T
   const t = useTranslations("onboarding.steps.tours");
   const [selectedId, setSelectedId] = useSelection(tours.map((x) => x.id));
   const selected = tours.find((x) => x.id === selectedId) ?? null;
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const add = () => {
     const id = crypto.randomUUID();
@@ -250,6 +326,7 @@ export function ToursSplit({ tours, onChange }: { tours: Tour[]; onChange: (v: T
   });
 
   return (
+    <>
     <Workspace
       rail={
         <Rail
@@ -268,7 +345,7 @@ export function ToursSplit({ tours, onChange }: { tours: Tour[]; onChange: (v: T
           <DetailPane id={selected.id}>
             <div className="mb-4 flex items-center justify-between gap-3">
               {selected.confidence != null && selected.confidence < 0.6 ? <ReviewBadge label={t("reviewFlag")} /> : <span />}
-              <DeleteButton onClick={() => remove(selected.id)} confirmMessage={t("confirmDeleteTour")} />
+              <DeleteButton onClick={() => setConfirmDelete(true)} />
             </div>
 
             <label className={FIELD_LABEL}>{t("tourNameLabel")}</label>
@@ -342,6 +419,19 @@ export function ToursSplit({ tours, onChange }: { tours: Tour[]; onChange: (v: T
         )
       }
     />
+    <ConfirmDialog
+      open={confirmDelete}
+      title={t("confirmDeleteTourTitle")}
+      message={t("confirmDeleteTour")}
+      cancelLabel={t("cancelLabel")}
+      confirmLabel={t("deleteLabel")}
+      onCancel={() => setConfirmDelete(false)}
+      onConfirm={() => {
+        if (selected) remove(selected.id);
+        setConfirmDelete(false);
+      }}
+    />
+    </>
   );
 }
 
@@ -350,6 +440,7 @@ export function BusinessSplit({ business, onChange }: { business: BusinessSectio
   const t = useTranslations("onboarding.steps.tours");
   const [selectedId, setSelectedId] = useSelection(business.map((x) => x.id));
   const selected = business.find((x) => x.id === selectedId) ?? null;
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const add = () => {
     const id = crypto.randomUUID();
@@ -369,6 +460,7 @@ export function BusinessSplit({ business, onChange }: { business: BusinessSectio
   }));
 
   return (
+    <>
     <Workspace
       rail={
         <Rail
@@ -387,7 +479,7 @@ export function BusinessSplit({ business, onChange }: { business: BusinessSectio
           <DetailPane id={selected.id}>
             <div className="mb-4 flex items-center justify-between gap-3">
               {selected.confidence != null && selected.confidence < 0.6 ? <ReviewBadge label={t("reviewFlag")} /> : <span />}
-              <DeleteButton onClick={() => remove(selected.id)} confirmMessage={t("confirmDeleteBusiness")} />
+              <DeleteButton onClick={() => setConfirmDelete(true)} />
             </div>
             <label className={FIELD_LABEL}>{t("businessTitleLabel")}</label>
             <input
@@ -413,6 +505,19 @@ export function BusinessSplit({ business, onChange }: { business: BusinessSectio
         )
       }
     />
+    <ConfirmDialog
+      open={confirmDelete}
+      title={t("confirmDeleteBusinessTitle")}
+      message={t("confirmDeleteBusiness")}
+      cancelLabel={t("cancelLabel")}
+      confirmLabel={t("deleteLabel")}
+      onCancel={() => setConfirmDelete(false)}
+      onConfirm={() => {
+        if (selected) remove(selected.id);
+        setConfirmDelete(false);
+      }}
+    />
+    </>
   );
 }
 
@@ -421,6 +526,7 @@ export function FaqsSplit({ faqs, onChange }: { faqs: FaqDraft[]; onChange: (v: 
   const t = useTranslations("onboarding.steps.tours");
   const [selectedId, setSelectedId] = useSelection(faqs.map((x) => x.id));
   const selected = faqs.find((x) => x.id === selectedId) ?? null;
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const add = () => {
     const id = crypto.randomUUID();
@@ -439,6 +545,7 @@ export function FaqsSplit({ faqs, onChange }: { faqs: FaqDraft[]; onChange: (v: 
   }));
 
   return (
+    <>
     <Workspace
       rail={
         <Rail
@@ -456,7 +563,7 @@ export function FaqsSplit({ faqs, onChange }: { faqs: FaqDraft[]; onChange: (v: 
         selected ? (
           <DetailPane id={selected.id}>
             <div className="mb-4 flex items-center justify-end">
-              <DeleteButton onClick={() => remove(selected.id)} confirmMessage={t("confirmDeleteFaq")} />
+              <DeleteButton onClick={() => setConfirmDelete(true)} />
             </div>
             <label className={FIELD_LABEL}>{t("faqQuestionLabel")}</label>
             <input
@@ -482,5 +589,18 @@ export function FaqsSplit({ faqs, onChange }: { faqs: FaqDraft[]; onChange: (v: 
         )
       }
     />
+    <ConfirmDialog
+      open={confirmDelete}
+      title={t("confirmDeleteFaqTitle")}
+      message={t("confirmDeleteFaq")}
+      cancelLabel={t("cancelLabel")}
+      confirmLabel={t("deleteLabel")}
+      onCancel={() => setConfirmDelete(false)}
+      onConfirm={() => {
+        if (selected) remove(selected.id);
+        setConfirmDelete(false);
+      }}
+    />
+    </>
   );
 }
