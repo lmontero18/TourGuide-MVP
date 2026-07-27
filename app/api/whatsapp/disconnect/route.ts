@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getMessagingToken } from '@/lib/whatsapp/token'
+import { createLogger } from '@/lib/logger'
 
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
+
+const baseLog = createLogger({ route: 'whatsapp/disconnect' })
 
 export async function POST() {
   const supabase = await createClient()
@@ -24,6 +27,8 @@ export async function POST() {
     return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
   }
 
+  const log = baseLog.child({ org_id: userData.org_id })
+
   // Read the account first so we can unsubscribe our app from the WABA.
   const { data: wa } = await supabase
     .from('whatsapp_accounts')
@@ -42,7 +47,7 @@ export async function POST() {
           headers: { Authorization: `Bearer ${token}` },
         })
       } catch (err) {
-        console.error('WABA unsubscribe failed (continuing):', err)
+        log.warn('WABA unsubscribe failed (continuing)', { error: err })
       }
     }
   }
@@ -62,7 +67,7 @@ export async function POST() {
     .select('id')
 
   if (error) {
-    console.error('WhatsApp disconnect error:', error)
+    log.error('WhatsApp disconnect failed', { error })
     return NextResponse.json({ error: 'Failed to disconnect' }, { status: 500 })
   }
 
@@ -70,14 +75,20 @@ export async function POST() {
   // donde el otro gano. Se distinguen releyendo: si la cuenta ya no esta, el
   // estado final es el que el usuario pidio y no hay nada que reportar.
   if (wa && !deleted?.length) {
-    const { data: sigueAhi } = await supabase
+    const { data: sigueAhi, error: recheckError } = await supabase
       .from('whatsapp_accounts')
       .select('id')
       .eq('org_id', userData.org_id)
       .maybeSingle()
 
+    // Si la relectura falla no sabemos si se borro: no se puede reportar exito.
+    if (recheckError) {
+      log.error('no se pudo verificar el disconnect', { error: recheckError })
+      return NextResponse.json({ error: 'Failed to disconnect' }, { status: 500 })
+    }
+
     if (sigueAhi) {
-      console.error('WhatsApp disconnect deleted 0 rows (RLS?)', { org_id: userData.org_id })
+      log.error('disconnect borro 0 filas y la cuenta sigue existiendo (RLS?)')
       return NextResponse.json({ error: 'Failed to disconnect' }, { status: 500 })
     }
   }
