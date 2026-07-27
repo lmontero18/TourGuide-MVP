@@ -66,10 +66,20 @@ export async function POST() {
     return NextResponse.json({ error: 'Failed to disconnect' }, { status: 500 })
   }
 
-  // Si habia cuenta y no se borro ninguna fila, RLS la bloqueo: no mentir.
+  // Cero filas borradas puede ser RLS bloqueando, o dos disconnects concurrentes
+  // donde el otro gano. Se distinguen releyendo: si la cuenta ya no esta, el
+  // estado final es el que el usuario pidio y no hay nada que reportar.
   if (wa && !deleted?.length) {
-    console.error('WhatsApp disconnect deleted 0 rows (RLS?)', { org_id: userData.org_id })
-    return NextResponse.json({ error: 'Failed to disconnect' }, { status: 500 })
+    const { data: sigueAhi } = await supabase
+      .from('whatsapp_accounts')
+      .select('id')
+      .eq('org_id', userData.org_id)
+      .maybeSingle()
+
+    if (sigueAhi) {
+      console.error('WhatsApp disconnect deleted 0 rows (RLS?)', { org_id: userData.org_id })
+      return NextResponse.json({ error: 'Failed to disconnect' }, { status: 500 })
+    }
   }
 
   return NextResponse.json({ success: true })

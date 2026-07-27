@@ -6,7 +6,7 @@ import { createLogger } from '@/lib/logger'
 
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
 
-const log = createLogger({ route: 'whatsapp/connect-manual' })
+const baseLog = createLogger({ route: 'whatsapp/connect-manual' })
 
 const connectSchema = z.object({
   waba_id: z.string().trim().min(1),
@@ -33,6 +33,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
   }
 
+  // org_id como binding fijo: CLAUDE.md pide org_id en los bindings del logger.
+  const log = baseLog.child({ org_id: userData.org_id })
+
   const parsed = connectSchema.safeParse(await request.json())
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 })
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
       // La respuesta cruda de Meta se loguea, no se devuelve: puede traer detalles
       // de nuestra app (id, scopes, trace) que no le corresponden al cliente.
       const details = await phoneRes.json().catch(() => ({}))
-      log.warn('phone number validation failed', { org_id: userData.org_id, details })
+      log.warn('phone number validation failed', { details })
       return NextResponse.json(
         { error: 'Token validation failed — check Phone Number ID and Access Token' },
         { status: 400 }
@@ -67,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     if (!subRes.ok) {
       const details = await subRes.json().catch(() => ({}))
-      log.warn('WABA subscribe failed', { org_id: userData.org_id, details })
+      log.warn('WABA subscribe failed', { details })
       return NextResponse.json(
         { error: 'Failed to subscribe app to WABA — check WABA ID and Access Token permissions' },
         { status: 400 }

@@ -470,7 +470,7 @@ Al agregar una env var nueva, actualizar ese archivo (es la fuente de verdad).
 
 Las que mas se olvidan:
 
-```
+```dotenv
 META_SYSTEM_USER_TOKEN=               # Modelo B: UNICA fuente del token de mensajeria.
                                       # Sin esto el bot no puede responder (lib/whatsapp/token.ts)
 UPSTASH_REDIS_REST_URL=               # Ausentes = rate limiting DESHABILITADO en silencio

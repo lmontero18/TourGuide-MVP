@@ -191,8 +191,13 @@ create policy users_select_own_or_org on public.users
 drop policy if exists whatsapp_select_own   on public.whatsapp_accounts;
 drop policy if exists whatsapp_insert_admin on public.whatsapp_accounts;
 drop policy if exists whatsapp_update_admin on public.whatsapp_accounts;
+-- Las tres usan auth_org_id() y no get_user_org_id(). Son la MISMA query
+-- (`select org_id from public.users where id = auth.uid()`, ambas SECURITY
+-- DEFINER) — el baseline quedo con las dos duplicadas. Se unifica por tabla para
+-- que no haya dos fuentes de verdad aparentes: las de admin necesitan auth_role()
+-- igual, asi que el par auth_org_id/auth_role gana.
 create policy whatsapp_select_own on public.whatsapp_accounts
-  for select to authenticated using (org_id = public.get_user_org_id());
+  for select to authenticated using (org_id = public.auth_org_id());
 create policy whatsapp_insert_admin on public.whatsapp_accounts
   for insert to authenticated
   with check (org_id = public.auth_org_id() and public.auth_role() = 'admin');

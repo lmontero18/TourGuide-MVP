@@ -50,17 +50,35 @@ export async function POST(request: NextRequest) {
   const { createServiceClient } = await import('@/lib/supabase/server')
   const serviceClient = await createServiceClient()
 
+  // role y org_id NO viajan en la metadata del usuario. handle_new_user() dejo de
+  // leerlos de ahi (ver 20260727140000_handle_new_user_no_privesc.sql): eran input
+  // controlable por quien se registra, y un signup directo contra GoTrue con la
+  // anon key daba admin de cualquier org. La asignacion se hace aca abajo, con
+  // service client, despues de haber verificado que quien invita es admin.
   const { data: inviteData, error: inviteError } = await serviceClient.auth.admin.inviteUserByEmail(email, {
-    data: {
-      full_name: full_name || null,
-      role,
-      org_id: adminProfile.org_id,
-    },
+    data: { full_name: full_name || null },
   })
 
   if (inviteError) {
     log.error('failed to invite agent', { error: inviteError, org_id: adminProfile.org_id })
     return NextResponse.json({ error: 'Failed to send invitation' }, { status: 400 })
+  }
+
+  // El trigger ya creo la fila con role='admin' y org_id=null. Asignarle la org y
+  // el rol reales. Si esto falla el invitado queda sin org y caeria en /onboarding
+  // creando una org propia, asi que se reporta como error.
+  const { error: assignError } = await serviceClient
+    .from('users')
+    .update({ org_id: adminProfile.org_id, role })
+    .eq('id', inviteData.user.id)
+
+  if (assignError) {
+    log.error('failed to assign org to invited agent', {
+      error: assignError,
+      org_id: adminProfile.org_id,
+      invited_user_id: inviteData.user.id,
+    })
+    return NextResponse.json({ error: 'Failed to send invitation' }, { status: 500 })
   }
 
   return NextResponse.json({

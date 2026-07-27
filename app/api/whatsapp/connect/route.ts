@@ -6,7 +6,7 @@ import { createLogger } from '@/lib/logger'
 
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
 
-const log = createLogger({ route: 'whatsapp/connect' })
+const baseLog = createLogger({ route: 'whatsapp/connect' })
 
 const connectSchema = z.object({
   code: z.string().min(1),
@@ -32,6 +32,9 @@ export async function POST(request: NextRequest) {
   if (!userData || userData.role !== 'admin') {
     return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
   }
+
+  // org_id como binding fijo: CLAUDE.md pide org_id en los bindings del logger.
+  const log = baseLog.child({ org_id: userData.org_id })
 
   const parsed = connectSchema.safeParse(await request.json())
   if (!parsed.success) {

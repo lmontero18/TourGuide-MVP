@@ -19,7 +19,7 @@
 -- =====================================================================
 
 begin;
-select plan(21);
+select plan(23);
 
 -- ---------- IDs de prueba ----------
 --   Org R: c0000000-...-0001      Org S: c0000000-...-0002
@@ -35,6 +35,17 @@ insert into public.organizations (id, name, slug) values
 insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data) values
   ('00000000-0000-0000-0000-000000000000', 'c0000000-0000-4000-8000-0000000000a1', 'authenticated', 'authenticated', 'r-agent@rls.test', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"role":"agent","org_id":"c0000000-0000-4000-8000-000000000001"}'),
   ('00000000-0000-0000-0000-000000000000', 'c0000000-0000-4000-8000-0000000000b1', 'authenticated', 'authenticated', 's-admin@rls.test', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"role":"admin","org_id":"c0000000-0000-4000-8000-000000000002"}');
+-- Los usuarios se crean en dos pasos a proposito. handle_new_user() ya NO lee
+-- role/org_id de raw_user_meta_data (era una via de escalada: un signup directo
+-- contra GoTrue daba admin de cualquier org — ver
+-- 20260727140000_handle_new_user_no_privesc.sql). El trigger crea la fila con
+-- role='admin' y org_id=null; la asignacion real la hace el service client, que
+-- es lo que replica este update.
+
+update public.users set role = 'agent', org_id = 'c0000000-0000-4000-8000-000000000001'
+ where id = 'c0000000-0000-4000-8000-0000000000a1';
+update public.users set role = 'admin', org_id = 'c0000000-0000-4000-8000-000000000002'
+ where id = 'c0000000-0000-4000-8000-0000000000b1';
 
 insert into public.contacts (org_id, phone, name) values
   ('c0000000-0000-4000-8000-000000000001', '+300000001', 'R uno');
@@ -205,7 +216,22 @@ end $$;
 
 reset role;
 
+-- ============ Bloque SIGNUP: la via GoTrue ============
+-- Un signup es un INSERT en auth.users con raw_user_meta_data 100% controlada por
+-- quien se registra (POST /auth/v1/signup con la anon key, sin pasar por la app).
+-- handle_new_user() es SECURITY DEFINER, asi que si confiara en esa metadata
+-- crearia la fila en public.users con el rol y la org que el atacante pida —
+-- sin tocar PostgREST, o sea sin que los grants por columna lo frenen.
+insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data) values
+  ('00000000-0000-0000-0000-000000000000', 'c0000000-0000-4000-8000-0000000000c1', 'authenticated', 'authenticated', 'atacante@rls.test', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Atacante","role":"admin","org_id":"c0000000-0000-4000-8000-000000000002"}');
+
 -- ============ Aserciones (como postgres) ============
+
+-- El signup no se autoasigna org ni rol privilegiado
+select is( (select org_id from public.users where id = 'c0000000-0000-4000-8000-0000000000c1'),
+           null, 'signup: org_id de raw_user_meta_data IGNORADO (no hay toma de org ajena)');
+select is( (select full_name from public.users where id = 'c0000000-0000-4000-8000-0000000000c1'),
+           'Atacante', 'signup: full_name si se toma de la metadata (no decide autorizacion)');
 
 -- anon: cero superficie sobre public
 select is( current_setting('t.anon_emb_select'),     'blocked', 'anon: NO puede leer embeddings (KB de todos los tenants)');
