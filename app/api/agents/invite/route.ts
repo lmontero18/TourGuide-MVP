@@ -78,6 +78,20 @@ export async function POST(request: NextRequest) {
       org_id: adminProfile.org_id,
       invited_user_id: inviteData.user.id,
     })
+
+    // Compensacion: el usuario de Auth y el mail de invitacion ya existen. Sin
+    // esto, el invitado acepta el link, entra sin org, y /api/onboarding lo deja
+    // crear una organizacion propia — una cuenta huerfana y un tenant que nadie
+    // pidio. Borrarlo deja el sistema como antes del request.
+    const { error: rollbackError } = await serviceClient.auth.admin.deleteUser(inviteData.user.id)
+    if (rollbackError) {
+      log.error('failed to roll back invited user — queda cuenta huerfana sin org', {
+        error: rollbackError,
+        org_id: adminProfile.org_id,
+        invited_user_id: inviteData.user.id,
+      })
+    }
+
     return NextResponse.json({ error: 'Failed to send invitation' }, { status: 500 })
   }
 

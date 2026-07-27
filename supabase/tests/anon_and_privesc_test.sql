@@ -19,7 +19,7 @@
 -- =====================================================================
 
 begin;
-select plan(23);
+select plan(24);
 
 -- ---------- IDs de prueba ----------
 --   Org R: c0000000-...-0001      Org S: c0000000-...-0002
@@ -222,14 +222,21 @@ reset role;
 -- handle_new_user() es SECURITY DEFINER, asi que si confiara en esa metadata
 -- crearia la fila en public.users con el rol y la org que el atacante pida —
 -- sin tocar PostgREST, o sea sin que los grants por columna lo frenen.
+--
+-- El payload pide role='agent' a proposito, NO 'admin': el default del trigger ya
+-- es 'admin', asi que un payload con 'admin' pasaria igual con el codigo viejo y
+-- el assert no probaria nada. Pidiendo un valor DISTINTO del default, que la fila
+-- termine en 'admin' demuestra que la metadata se ignoro de verdad.
 insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data) values
-  ('00000000-0000-0000-0000-000000000000', 'c0000000-0000-4000-8000-0000000000c1', 'authenticated', 'authenticated', 'atacante@rls.test', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Atacante","role":"admin","org_id":"c0000000-0000-4000-8000-000000000002"}');
+  ('00000000-0000-0000-0000-000000000000', 'c0000000-0000-4000-8000-0000000000c1', 'authenticated', 'authenticated', 'atacante@rls.test', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Atacante","role":"agent","org_id":"c0000000-0000-4000-8000-000000000002"}');
 
 -- ============ Aserciones (como postgres) ============
 
 -- El signup no se autoasigna org ni rol privilegiado
 select is( (select org_id from public.users where id = 'c0000000-0000-4000-8000-0000000000c1'),
            null, 'signup: org_id de raw_user_meta_data IGNORADO (no hay toma de org ajena)');
+select is( (select role::text from public.users where id = 'c0000000-0000-4000-8000-0000000000c1'),
+           'admin', 'signup: role de raw_user_meta_data IGNORADO (queda el default, no el pedido)');
 select is( (select full_name from public.users where id = 'c0000000-0000-4000-8000-0000000000c1'),
            'Atacante', 'signup: full_name si se toma de la metadata (no decide autorizacion)');
 

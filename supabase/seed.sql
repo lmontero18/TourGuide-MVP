@@ -23,9 +23,18 @@ insert into public.organizations (id, name, slug, plan, status, prompt) values
   ('22222222-2222-2222-2222-222222222222', 'Caribe Adventures', 'caribe-adventures', 'starter', 'active', 'Eres el asistente de Caribe Adventures. Ofreces tours de buceo y playa en el Caribe.');
 
 -- ============ 2. Usuarios ============
--- Se insertan en auth.users; el trigger handle_new_user() crea automáticamente
--- la fila en public.users leyendo role/org_id/full_name de raw_user_meta_data.
--- Por eso NO insertamos en public.users directamente.
+-- Alta en dos pasos, igual que en producción.
+--
+-- El insert en auth.users dispara handle_new_user(), que crea la fila en
+-- public.users — pero desde CODE-151 ese trigger solo toma `full_name` de
+-- raw_user_meta_data. `role` y `org_id` ya NO se leen de ahí: era input
+-- controlable por quien se registra y permitía darse de alta como admin de
+-- cualquier org (ver 20260727140000_handle_new_user_no_privesc.sql).
+--
+-- Así que la asignación va explícita más abajo, que es exactamente lo que hacen
+-- /api/onboarding y /api/agents/invite con el service client. El role/org_id que
+-- queda en la metadata es decorativo: se deja para que el seed siga siendo
+-- legible de un vistazo.
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password,
   email_confirmed_at, created_at, updated_at,
@@ -36,6 +45,18 @@ insert into auth.users (
   ('00000000-0000-0000-0000-000000000000', 'a2222222-2222-2222-2222-222222222222', 'authenticated', 'authenticated', 'agent-a@tourguide.test', extensions.crypt('password123', extensions.gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Agente Patagonia","role":"agent","org_id":"11111111-1111-1111-1111-111111111111"}', '', '', '', ''),
   ('00000000-0000-0000-0000-000000000000', 'b1111111-1111-1111-1111-111111111111', 'authenticated', 'authenticated', 'admin-b@tourguide.test', extensions.crypt('password123', extensions.gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Caribe","role":"admin","org_id":"22222222-2222-2222-2222-222222222222"}', '', '', '', ''),
   ('00000000-0000-0000-0000-000000000000', 'b2222222-2222-2222-2222-222222222222', 'authenticated', 'authenticated', 'agent-b@tourguide.test', extensions.crypt('password123', extensions.gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Agente Caribe","role":"agent","org_id":"22222222-2222-2222-2222-222222222222"}', '', '', '', '');
+
+-- Asignación de org y rol (lo que en prod hace el service client). Sin esto los
+-- cuatro usuarios quedarían admin sin org y todos los logins locales caerían en
+-- /onboarding en vez de representar Org A / Org B.
+update public.users set role = 'admin', org_id = '11111111-1111-1111-1111-111111111111'
+ where id = 'a1111111-1111-1111-1111-111111111111';
+update public.users set role = 'agent', org_id = '11111111-1111-1111-1111-111111111111'
+ where id = 'a2222222-2222-2222-2222-222222222222';
+update public.users set role = 'admin', org_id = '22222222-2222-2222-2222-222222222222'
+ where id = 'b1111111-1111-1111-1111-111111111111';
+update public.users set role = 'agent', org_id = '22222222-2222-2222-2222-222222222222'
+ where id = 'b2222222-2222-2222-2222-222222222222';
 
 -- Identidad de email por usuario (requerido por GoTrue para login por email/password).
 insert into auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at) values
