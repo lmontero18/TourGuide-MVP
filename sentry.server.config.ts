@@ -3,6 +3,10 @@ import { ImportUserError } from '@/lib/ai/errors'
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  // Explicito a proposito: el default de @sentry/nextjs ya es false, pero el
+  // wizard suele generar `sendDefaultPii: true` y un upgrade o un copy-paste
+  // mandaria cookies, headers Authorization e IPs a Sentry sin que salte nada.
+  sendDefaultPii: false,
   environment: process.env.VERCEL_ENV ?? 'development',
   // Solo error tracking en M6 — tracing/performance queda para despues
   // (cuida la cuota del free tier).

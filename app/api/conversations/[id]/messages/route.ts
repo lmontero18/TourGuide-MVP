@@ -64,7 +64,7 @@ export async function POST(
 
   const { data: wa } = await supabase
     .from('whatsapp_accounts')
-    .select('phone_number_id, access_token')
+    .select('phone_number_id')
     .eq('org_id', profile.org_id)
     .single()
 
@@ -72,7 +72,7 @@ export async function POST(
     return NextResponse.json({ error: 'WhatsApp not connected for this organization' }, { status: 400 })
   }
 
-  const token = getMessagingToken(wa)
+  const token = getMessagingToken()
   if (!token) {
     return NextResponse.json({ error: 'WhatsApp messaging token not configured' }, { status: 500 })
   }

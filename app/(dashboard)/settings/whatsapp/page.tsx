@@ -207,7 +207,8 @@ export default function WhatsAppSettingsPage() {
                     className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-navy-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-mono resize-none"
                   />
                   <p className="mt-1 text-[11px] text-slate-400">
-                    Use a permanent System User token in production. Temporary tokens expire after 24h.
+                    Used only to verify the connection — it is never stored. Messaging runs on
+                    our central System User token.
                   </p>
                 </div>
 

@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { registerPhoneNumber } from '@/lib/whatsapp/client'
+import { createLogger } from '@/lib/logger'
 
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
+
+const log = createLogger({ route: 'whatsapp/connect-manual' })
 
 const connectSchema = z.object({
   waba_id: z.string().trim().min(1),
@@ -44,9 +47,12 @@ export async function POST(request: NextRequest) {
     )
 
     if (!phoneRes.ok) {
+      // La respuesta cruda de Meta se loguea, no se devuelve: puede traer detalles
+      // de nuestra app (id, scopes, trace) que no le corresponden al cliente.
       const details = await phoneRes.json().catch(() => ({}))
+      log.warn('phone number validation failed', { org_id: userData.org_id, details })
       return NextResponse.json(
-        { error: 'Token validation failed — check Phone Number ID and Access Token', details },
+        { error: 'Token validation failed — check Phone Number ID and Access Token' },
         { status: 400 }
       )
     }
@@ -61,8 +67,9 @@ export async function POST(request: NextRequest) {
 
     if (!subRes.ok) {
       const details = await subRes.json().catch(() => ({}))
+      log.warn('WABA subscribe failed', { org_id: userData.org_id, details })
       return NextResponse.json(
-        { error: 'Failed to subscribe app to WABA — check WABA ID and Access Token permissions', details },
+        { error: 'Failed to subscribe app to WABA — check WABA ID and Access Token permissions' },
         { status: 400 }
       )
     }
@@ -77,8 +84,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // En el path manual conservamos el token provisto: es el fallback cuando no hay
-    // System User token central (ver lib/whatsapp/token.ts).
+    // El token provisto se usa solo in-flight (validar el numero, suscribir la app
+    // al WABA y registrarlo). NO se persiste: el runtime opera con el System User
+    // token central (META_SYSTEM_USER_TOKEN, ver lib/whatsapp/token.ts). Eso exige
+    // que el WABA este compartido con nuestro Business Manager — si no lo esta,
+    // este flow conecta pero el bot no va a poder responder.
     const { data: waAccount, error } = await supabase
       .from('whatsapp_accounts')
       .upsert(
@@ -87,7 +97,6 @@ export async function POST(request: NextRequest) {
           waba_id,
           phone_number_id,
           phone_number: phoneNumber,
-          access_token,
           status: 'active',
           connected_at: new Date().toISOString(),
         },
