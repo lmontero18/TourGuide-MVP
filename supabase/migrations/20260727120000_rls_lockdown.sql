@@ -215,6 +215,7 @@ create policy whatsapp_update_admin on public.whatsapp_accounts
 -- PostgREST devuelve 204 sin error y la ruta responde {success:true}.
 -- El numero NUNCA se desconectaba y el usuario creia que si.
 -- =====================================================================
+drop policy if exists whatsapp_delete_admin on public.whatsapp_accounts;
 create policy whatsapp_delete_admin on public.whatsapp_accounts
   for delete to authenticated
   using (org_id = public.auth_org_id() and public.auth_role() = 'admin');
@@ -243,6 +244,13 @@ create policy whatsapp_delete_admin on public.whatsapp_accounts
 -- =====================================================================
 revoke all on all tables    in schema public from anon;
 revoke all on all sequences in schema public from anon;
+
+-- Tambien a PUBLIC: un grant a PUBLIC lo hereda TODO rol, anon incluido, y no
+-- aparece listado con grantee='anon'. Hoy no hay ninguno, pero revocarlo es
+-- gratis y evita que un grant futuro reabra la superficie por la puerta de al
+-- lado sin que el guard test lo note por buscar solo 'anon'.
+revoke all on all tables    in schema public from public;
+revoke all on all sequences in schema public from public;
 
 alter default privileges for role postgres in schema public revoke all on tables    from anon;
 alter default privileges for role postgres in schema public revoke all on sequences from anon;

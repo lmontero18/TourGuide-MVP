@@ -87,7 +87,7 @@ do $$
 begin
   insert into public.contacts (org_id, phone) values ('b0000000-0000-4000-8000-000000000002', '+199999999');
   perform set_config('t.p_write_blocked', 'no', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.p_write_blocked', 'yes', true);
 end $$;
 reset role;

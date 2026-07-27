@@ -19,7 +19,7 @@
 -- =====================================================================
 
 begin;
-select plan(7);
+select plan(8);
 
 -- ---------------------------------------------------------------------
 -- 1. Toda tabla de public tiene RLS habilitado.
@@ -72,13 +72,28 @@ select is(
 -- ---------------------------------------------------------------------
 -- 4. anon no tiene ningun privilegio sobre tablas de public.
 --    La app siempre autentica; el login va por GoTrue, no por PostgREST.
+--    Se incluye PUBLIC: un grant a PUBLIC lo hereda todo rol, anon incluido,
+--    y NO aparece listado con grantee='anon'.
 -- ---------------------------------------------------------------------
 select is(
-  (select coalesce(string_agg(distinct table_name, ', ' order by table_name), '')
+  (select coalesce(string_agg(distinct table_name || ':' || grantee, ', ' order by table_name || ':' || grantee), '')
      from information_schema.role_table_grants
-    where table_schema = 'public' and grantee = 'anon'),
+    where table_schema = 'public' and grantee in ('anon', 'PUBLIC')),
   '',
-  'anon: cero privilegios sobre tablas de public');
+  'anon/PUBLIC: cero privilegios de tabla en public');
+
+-- ---------------------------------------------------------------------
+-- 4b. Lo mismo a nivel COLUMNA. role_table_grants no ve los grants por columna,
+--     y este mismo PR estrena ese patron (users.full_name,
+--     organizations.name/..., whatsapp_accounts.*) — asi que el agujero no es
+--     teorico: se podria otorgar una columna a anon y el assert 4 pasaria igual.
+-- ---------------------------------------------------------------------
+select is(
+  (select coalesce(string_agg(distinct table_name || '.' || column_name || ':' || grantee, ', '), '')
+     from information_schema.role_column_grants
+    where table_schema = 'public' and grantee in ('anon', 'PUBLIC')),
+  '',
+  'anon/PUBLIC: cero privilegios de columna en public');
 
 -- ---------------------------------------------------------------------
 -- 5. Nadie tiene TRUNCATE. RLS NO se aplica a TRUNCATE — no hay policy que

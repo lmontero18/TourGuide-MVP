@@ -16,6 +16,14 @@
 -- postgres. Cada operacion va en su propio DO ... EXCEPTION porque un
 -- "permission denied" (SQLSTATE 42501) aborta la transaccion; el rollback de
 -- subtransaccion del DO la deja usable para el resto del test.
+--
+-- Los handlers capturan `insufficient_privilege` (42501) y NO `others`: con
+-- `others`, un typo en un nombre de tabla (42P01) o una columna renombrada
+-- (42703) tambien se reportarian como 'blocked' y el test quedaria en verde
+-- mientras la superficie sigue abierta — exactamente el modo de falla que este
+-- archivo existe para prevenir. 42501 cubre tanto el privilegio denegado como el
+-- rechazo de RLS ("new row violates row-level security policy"); cualquier otro
+-- error se propaga y rompe el test, que es lo que queremos.
 -- =====================================================================
 
 begin;
@@ -65,21 +73,21 @@ select set_config('request.jwt.claims', '{"role":"anon"}', true);
 do $$ begin
   perform count(*) from public.embeddings;
   perform set_config('t.anon_emb_select', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.anon_emb_select', 'blocked', true);
 end $$;
 
 do $$ begin
   insert into public.embeddings (content) values ('poison');
   perform set_config('t.anon_emb_insert', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.anon_emb_insert', 'blocked', true);
 end $$;
 
 do $$ begin
   delete from public.embeddings;
   perform set_config('t.anon_emb_delete', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.anon_emb_delete', 'blocked', true);
 end $$;
 
@@ -93,42 +101,42 @@ do $$ declare n int; begin
   select count(*) into n from public.match_documents(
     array_fill(0::real, array[1536])::public.vector, 5, '{}'::jsonb);
   perform set_config('t.anon_match_docs', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.anon_match_docs', 'blocked', true);
 end $$;
 
 do $$ begin
   perform count(*) from public.contacts;
   perform set_config('t.anon_contacts', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.anon_contacts', 'blocked', true);
 end $$;
 
 do $$ begin
   perform count(*) from public.users;
   perform set_config('t.anon_users', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.anon_users', 'blocked', true);
 end $$;
 
 do $$ begin
   perform count(*) from public.whatsapp_accounts;
   perform set_config('t.anon_wa', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.anon_wa', 'blocked', true);
 end $$;
 
 do $$ begin
   perform count(*) from public.login_attempts;
   perform set_config('t.anon_login_attempts', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.anon_login_attempts', 'blocked', true);
 end $$;
 
 do $$ begin
   perform count(*) from public.organizations;
   perform set_config('t.anon_orgs', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.anon_orgs', 'blocked', true);
 end $$;
 
@@ -142,7 +150,7 @@ do $$ begin
   update public.users set role = 'admin'
    where id = 'c0000000-0000-4000-8000-0000000000a1';
   perform set_config('t.escala_role', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.escala_role', 'blocked', true);
 end $$;
 
@@ -150,7 +158,7 @@ do $$ begin
   update public.users set org_id = 'c0000000-0000-4000-8000-000000000002'
    where id = 'c0000000-0000-4000-8000-0000000000a1';
   perform set_config('t.escala_org', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.escala_org', 'blocked', true);
 end $$;
 
@@ -158,14 +166,14 @@ do $$ begin
   update public.organizations set plan = 'pro'
    where id = 'c0000000-0000-4000-8000-000000000001';
   perform set_config('t.escala_plan', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.escala_plan', 'blocked', true);
 end $$;
 
 do $$ begin
   perform count(*) from public.embeddings;
   perform set_config('t.auth_emb_select', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.auth_emb_select', 'blocked', true);
 end $$;
 
@@ -175,7 +183,7 @@ do $$ begin
   update public.whatsapp_accounts set access_token = 'robado'
    where org_id = 'c0000000-0000-4000-8000-000000000001';
   perform set_config('t.wa_token_write', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.wa_token_write', 'blocked', true);
 end $$;
 
@@ -183,7 +191,7 @@ do $$ declare v text; begin
   select access_token into v from public.whatsapp_accounts
    where org_id = 'c0000000-0000-4000-8000-000000000001';
   perform set_config('t.wa_token_read', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.wa_token_read', 'blocked', true);
 end $$;
 
@@ -210,7 +218,7 @@ do $$ begin
     status       = excluded.status,
     connected_at = excluded.connected_at;
   perform set_config('t.admin_upsert_wa', 'allowed', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.admin_upsert_wa', 'blocked', true);
 end $$;
 
