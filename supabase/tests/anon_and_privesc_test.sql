@@ -27,7 +27,7 @@
 -- =====================================================================
 
 begin;
-select plan(25);
+select plan(23);
 
 -- ---------- IDs de prueba ----------
 --   Org R: c0000000-...-0001      Org S: c0000000-...-0002
@@ -177,24 +177,6 @@ exception when insufficient_privilege then
   perform set_config('t.auth_emb_select', 'blocked', true);
 end $$;
 
--- El token ya no se puede escribir ni leer por PostgREST: los grants de
--- whatsapp_accounts pasaron de nivel tabla a nivel columna, salteando access_token.
-do $$ begin
-  update public.whatsapp_accounts set access_token = 'robado'
-   where org_id = 'c0000000-0000-4000-8000-000000000001';
-  perform set_config('t.wa_token_write', 'allowed', true);
-exception when insufficient_privilege then
-  perform set_config('t.wa_token_write', 'blocked', true);
-end $$;
-
-do $$ declare v text; begin
-  select access_token into v from public.whatsapp_accounts
-   where org_id = 'c0000000-0000-4000-8000-000000000001';
-  perform set_config('t.wa_token_read', 'allowed', true);
-exception when insufficient_privilege then
-  perform set_config('t.wa_token_read', 'blocked', true);
-end $$;
-
 reset role;
 
 -- ============ Bloque REGRESION: el admin sigue pudiendo conectar ============
@@ -220,27 +202,6 @@ do $$ begin
   perform set_config('t.admin_upsert_wa', 'allowed', true);
 exception when insufficient_privilege then
   perform set_config('t.admin_upsert_wa', 'blocked', true);
-end $$;
-
--- El mismo upsert pero NOMBRANDO access_token, aunque sea como null.
--- Esto es lo que rompio /api/whatsapp/connect en produccion: el payload mandaba
--- `access_token: null` y PostgREST incluye en el statement toda clave presente
--- en el body, asi que el upsert entero moria con 42501. El assert de arriba no
--- lo agarraba justamente porque omitia la columna.
---
--- Se espera 'blocked': nombrar la columna DEBE fallar. Es el contrato — el codigo
--- de la app no puede nombrarla. Cuando la columna se dropee (PR B) este bloque
--- se cae solo por columna inexistente, que es senal de que hay que borrarlo.
-do $$ begin
-  insert into public.whatsapp_accounts
-    (org_id, waba_id, phone_number_id, phone_number, access_token, status, connected_at)
-  values
-    ('c0000000-0000-4000-8000-000000000002', 'waba-s', 'pnid-s', '+400000000', null, 'active', now())
-  on conflict (org_id) do update set
-    waba_id = excluded.waba_id;
-  perform set_config('t.upsert_nombrando_token', 'allowed', true);
-exception when insufficient_privilege then
-  perform set_config('t.upsert_nombrando_token', 'blocked', true);
 end $$;
 
 reset role;
@@ -286,13 +247,16 @@ select is( current_setting('t.escala_org'),      'blocked', 'agent: NO puede cam
 select is( current_setting('t.escala_plan'),     'blocked', 'agent: NO puede cambiar el plan de su org');
 select is( current_setting('t.auth_emb_select'), 'blocked', 'authenticated: NO puede leer embeddings');
 
--- access_token: sin grant de columna, ni lectura ni escritura por PostgREST
-select is( current_setting('t.wa_token_write'), 'blocked', 'authenticated: NO puede escribir whatsapp_accounts.access_token');
-select is( current_setting('t.wa_token_read'),  'blocked', 'authenticated: NO puede leer whatsapp_accounts.access_token');
+-- access_token ya no existe como columna. Los asserts de "no se puede leer /
+-- escribir" quedaron obsoletos: la garantia dejo de ser un grant (revocable por
+-- error) y paso a ser estructural.
+select is( (select count(*)::int from information_schema.columns
+             where table_schema='public' and table_name='whatsapp_accounts'
+               and column_name='access_token'),
+           0, 'whatsapp_accounts.access_token NO existe — no hay credencial que filtrar');
 
 -- Regresion: los grants por columna no rompieron el flujo de conectar WhatsApp
 select is( current_setting('t.admin_upsert_wa'), 'allowed', 'admin: SI puede hacer upsert de su cuenta de WhatsApp (connect no se rompio)');
-select is( current_setting('t.upsert_nombrando_token'), 'blocked', 'admin: nombrar access_token en el upsert FALLA — el codigo no debe mandar la columna');
 
 -- Estado real de la DB despues de los intentos.
 -- NO es redundante con los asserts de arriba: un UPDATE bloqueado por RLS (a

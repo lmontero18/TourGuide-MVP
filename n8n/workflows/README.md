@@ -62,7 +62,8 @@ ahora, a criterio del que edita.
 |---|---|---|
 | `n8n_secret` | Recibido en el payload del webhook; su valor es `N8N_INTERNAL_SECRET` de la app | Autentica las llamadas de N8N hacia `/api/internal/*` |
 | `callback_base_url` | Recibido en el payload | Base URL de la app según el entorno (evita hardcodear localhost/staging/prod en N8N) |
-| `phone_number_id` / `access_token` | Recibido en el payload (viene de `whatsapp_accounts`) | Enviar el mensaje directo a Meta Graph API |
+| `phone_number_id` | Recibido en el payload (viene de `whatsapp_accounts`) | Identifica el numero desde el que se responde |
+| `access_token` | Recibido en el payload. **No** sale de `whatsapp_accounts`: es el System User token central, `META_SYSTEM_USER_TOKEN` de la app (CODE-151 dropeo la columna) | Enviar el mensaje directo a Meta Graph API |
 
 ## Diferencias reales entre dev/stage/prod
 

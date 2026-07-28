@@ -232,7 +232,9 @@ export interface WhatsAppAccount {
   waba_id: string            // WhatsApp Business Account ID (de Meta)
   phone_number_id: string    // ID que Meta asigna al numero — se usa para enviar mensajes
   phone_number: string       // formato E.164, el numero del cliente
-  access_token: string       // token para Graph API — sensible, considerar encriptar
+  // Sin access_token: la tabla NO guarda credenciales. El token de mensajeria es
+  // central (META_SYSTEM_USER_TOKEN, ver lib/whatsapp/token.ts). La columna se
+  // dropeo en CODE-151 — no volver a agregarla en claro.
   status: OrgStatus
   connected_at: string | null
   created_at: string
