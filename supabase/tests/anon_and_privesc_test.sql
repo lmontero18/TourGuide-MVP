@@ -27,7 +27,7 @@
 -- =====================================================================
 
 begin;
-select plan(24);
+select plan(25);
 
 -- ---------- IDs de prueba ----------
 --   Org R: c0000000-...-0001      Org S: c0000000-...-0002
@@ -222,6 +222,27 @@ exception when insufficient_privilege then
   perform set_config('t.admin_upsert_wa', 'blocked', true);
 end $$;
 
+-- El mismo upsert pero NOMBRANDO access_token, aunque sea como null.
+-- Esto es lo que rompio /api/whatsapp/connect en produccion: el payload mandaba
+-- `access_token: null` y PostgREST incluye en el statement toda clave presente
+-- en el body, asi que el upsert entero moria con 42501. El assert de arriba no
+-- lo agarraba justamente porque omitia la columna.
+--
+-- Se espera 'blocked': nombrar la columna DEBE fallar. Es el contrato — el codigo
+-- de la app no puede nombrarla. Cuando la columna se dropee (PR B) este bloque
+-- se cae solo por columna inexistente, que es senal de que hay que borrarlo.
+do $$ begin
+  insert into public.whatsapp_accounts
+    (org_id, waba_id, phone_number_id, phone_number, access_token, status, connected_at)
+  values
+    ('c0000000-0000-4000-8000-000000000002', 'waba-s', 'pnid-s', '+400000000', null, 'active', now())
+  on conflict (org_id) do update set
+    waba_id = excluded.waba_id;
+  perform set_config('t.upsert_nombrando_token', 'allowed', true);
+exception when insufficient_privilege then
+  perform set_config('t.upsert_nombrando_token', 'blocked', true);
+end $$;
+
 reset role;
 
 -- ============ Bloque SIGNUP: la via GoTrue ============
@@ -271,6 +292,7 @@ select is( current_setting('t.wa_token_read'),  'blocked', 'authenticated: NO pu
 
 -- Regresion: los grants por columna no rompieron el flujo de conectar WhatsApp
 select is( current_setting('t.admin_upsert_wa'), 'allowed', 'admin: SI puede hacer upsert de su cuenta de WhatsApp (connect no se rompio)');
+select is( current_setting('t.upsert_nombrando_token'), 'blocked', 'admin: nombrar access_token en el upsert FALLA — el codigo no debe mandar la columna');
 
 -- Estado real de la DB despues de los intentos.
 -- NO es redundante con los asserts de arriba: un UPDATE bloqueado por RLS (a

@@ -137,6 +137,13 @@ export async function POST(request: NextRequest) {
 
     // 5. Save routing identifiers. NO guardamos el access_token: el runtime usa el
     // System User token central (ver lib/whatsapp/token.ts).
+    //
+    // La columna access_token NO se nombra en el payload, ni siquiera como null.
+    // authenticated ya no tiene privilegio sobre ella (CODE-151), y PostgREST
+    // incluye en el INSERT/UPDATE toda clave presente en el body: mandar
+    // `access_token: null` hacia fallar el upsert entero con
+    // "permission denied for table whatsapp_accounts" (42501). La columna es
+    // nullable y su default es null, asi que omitirla da el mismo resultado.
     const { data: waAccount, error } = await supabase
       .from('whatsapp_accounts')
       .upsert(
@@ -145,7 +152,6 @@ export async function POST(request: NextRequest) {
           waba_id,
           phone_number_id,
           phone_number: phoneNumber,
-          access_token: null,
           status: 'active',
           connected_at: new Date().toISOString(),
         },
