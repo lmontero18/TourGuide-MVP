@@ -4,6 +4,8 @@
 // request. El flujo de mensajes de WhatsApp nunca puede cortarse por un
 // problema del rate limiter — el costo de un flood puntual es menor que
 // perder mensajes de clientes reales.
+
+import 'server-only'
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 import { createLogger } from '@/lib/logger'

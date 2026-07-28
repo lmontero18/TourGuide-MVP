@@ -5,6 +5,8 @@
 // vez al recibirla: la descripcion queda como texto del mensaje y es lo que el
 // bot usa en turnos siguientes (no se re-envia la imagen al LLM).
 
+import 'server-only'
+
 import sharp from 'sharp'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createLogger } from '@/lib/logger'

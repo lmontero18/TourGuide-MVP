@@ -31,10 +31,11 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
+# Patron generico: la lista explicita dejaba pasar .env.development, .env.test,
+# .env.preview y cualquier variante nueva.
 .env
-.env*.local
-.env.staging
-.env.production
+.env.*
+!.env.example
 
 # vercel
 .vercel

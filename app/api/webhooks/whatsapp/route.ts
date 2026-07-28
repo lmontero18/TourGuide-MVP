@@ -208,7 +208,7 @@ async function processWebhook(body: WebhookPayload) {
       // Find org by phone_number_id
       const { data: waAccount } = await supabase
         .from('whatsapp_accounts')
-        .select('org_id, phone_number_id, access_token')
+        .select('org_id, phone_number_id')
         .eq('phone_number_id', metadata.phone_number_id)
         .single()
 
@@ -266,7 +266,7 @@ async function processWebhook(body: WebhookPayload) {
         } else if (type === 'audio') {
           try {
             const { getMessagingToken } = await import('@/lib/whatsapp/token')
-            const tok = getMessagingToken(waAccount)
+            const tok = getMessagingToken()
             const audioId = message.audio?.id
             if (audioId && tok) {
               const mediaRes = await fetch(
@@ -300,7 +300,7 @@ async function processWebhook(body: WebhookPayload) {
           content = '[image]'
           try {
             const { getMessagingToken } = await import('@/lib/whatsapp/token')
-            const tok = getMessagingToken(waAccount)
+            const tok = getMessagingToken()
             const image = message.image
             const parts: string[] = []
             if (image?.caption) parts.push(image.caption)
@@ -432,7 +432,19 @@ async function processWebhook(body: WebhookPayload) {
             .single()
 
           const { getMessagingToken } = await import('@/lib/whatsapp/token')
-          const tok = getMessagingToken(waAccount)
+          const tok = getMessagingToken()
+
+          // Desde CODE-151 el token central es la UNICA fuente (ya no hay fallback
+          // a whatsapp_accounts.access_token). Si falta el env var, n8n recibe un
+          // Bearer vacio y Graph responde 401: el bot deja de contestar sin que
+          // nada mas lo delate. Que sea ruidoso.
+          if (!tok) {
+            log.error('META_SYSTEM_USER_TOKEN not configured — el bot no puede responder')
+            Sentry.captureMessage('META_SYSTEM_USER_TOKEN missing', {
+              level: 'fatal',
+              tags: { route: 'webhooks/whatsapp', org_id: waAccount.org_id },
+            })
+          }
 
           // Hora actual en la timezone de la org: se pega al system_prompt
           // por-request (no se persiste) para que el bot pueda informar
@@ -473,7 +485,7 @@ async function processWebhook(body: WebhookPayload) {
               conversation_id: conversation.id,
               contact_phone: from,
               phone_number_id: metadata.phone_number_id,
-              access_token: tok ?? waAccount.access_token,
+              access_token: tok,
               message: content,
               system_prompt: systemPrompt,
               n8n_secret: process.env.N8N_INTERNAL_SECRET ?? '',
@@ -487,7 +499,7 @@ async function processWebhook(body: WebhookPayload) {
         if (messageId) {
           const { markAsRead } = await import('@/lib/whatsapp/client')
           const { getMessagingToken } = await import('@/lib/whatsapp/token')
-          const token = getMessagingToken(waAccount)
+          const token = getMessagingToken()
           if (token) {
             await markAsRead(metadata.phone_number_id, token, messageId).catch((error) => {
               // No critico (el doble check azul), pero un fallo sostenido

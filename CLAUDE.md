@@ -464,27 +464,24 @@ export async function getLeadStats(orgId: string, from: Date, to: Date) {
 - Errores criticos van a Sentry (`Sentry.captureException` con tag `org_id`) — ver `docs/observability.md`
 
 ### Variables de entorno requeridas
-```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=        # Solo en API Routes, nunca en cliente
-META_APP_ID=
-META_APP_SECRET=                      # Validar firma del webhook
-META_WEBHOOK_VERIFY_TOKEN=            # Token para verificacion inicial del webhook
-N8N_WEBHOOK_URL=
-N8N_WEBHOOK_SECRET=                   # Header X-Webhook-Secret al llamar al webhook de N8N (evita invocacion anonima)
-N8N_INTERNAL_SECRET=                  # Bearer que N8N manda al llamar de vuelta a /api/internal/*
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-CRON_SECRET=                          # Auth del cron de Vercel (limpieza de media)
-OPENAI_API_KEY=                       # Whisper (audio) + vision (descripcion de imagenes)
-NEXT_PUBLIC_SENTRY_DSN=               # Error tracking (ver docs/observability.md)
-SENTRY_ORG=                           # Solo build (source maps)
-SENTRY_PROJECT=                       # Solo build (source maps)
-SENTRY_AUTH_TOKEN=                    # Solo build (source maps), sensitive
-BETTERSTACK_HEARTBEAT_CLEANUP_MEDIA=  # Heartbeat del cron (opcional, solo prod)
+
+La lista completa y comentada vive en **`.env.example`** — copiarlo a `.env.local`.
+Al agregar una env var nueva, actualizar ese archivo (es la fuente de verdad).
+
+Las que mas se olvidan:
+
+```dotenv
+META_SYSTEM_USER_TOKEN=               # Modelo B: UNICA fuente del token de mensajeria.
+                                      # Sin esto el bot no puede responder (lib/whatsapp/token.ts)
+UPSTASH_REDIS_REST_URL=               # Ausentes = rate limiting DESHABILITADO en silencio
+UPSTASH_REDIS_REST_TOKEN=             # (fail-open por diseno, ver lib/ratelimit.ts)
+NEXT_PUBLIC_META_APP_ID=              # Embedded Signup: sin esto el popup de Meta no abre
+NEXT_PUBLIC_META_CONFIG_ID=
 BETTERSTACK_HEARTBEAT_DB_BACKUP=      # Heartbeat del backup — GitHub Actions secret, no Vercel
 ```
+
+> Stripe (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) todavia no se usa en el
+> codigo — llega con M7 (CODE-150).
 
 ---
 
@@ -494,9 +491,11 @@ BETTERSTACK_HEARTBEAT_DB_BACKUP=      # Heartbeat del backup — GitHub Actions 
 - [x] `SUPABASE_SERVICE_ROLE_KEY` nunca en codigo cliente ni en `NEXT_PUBLIC_`
 - [x] Firma de Meta validada en el webhook (`X-Hub-Signature-256` via `lib/whatsapp/verify.ts`)
 - [x] Middleware protegiendo todas las rutas de `/dashboard`, `/conversations`, `/metrics`, `/settings`
-- [ ] Rate limiting en `/api/webhooks/whatsapp` (Vercel Edge Config o Upstash)
-- [ ] `access_token` de WhatsApp encriptado en DB o en Vault
-- [ ] Inputs sanitizados antes de insertar en DB
+- [x] Rate limiting en `/api/webhooks/whatsapp` — implementado en `lib/ratelimit.ts` (Upstash, sliding window). **Fail-open por diseno**: sin `UPSTASH_REDIS_REST_*` queda deshabilitado y no corta mensajes
+- [x] `access_token` de WhatsApp **no se persiste** — token central en `META_SYSTEM_USER_TOKEN` (`lib/whatsapp/token.ts`). No hace falta cifrarlo: no esta en la DB
+- [x] Inputs validados con zod antes de insertar (webhook, `/api/agents/invite`, `/api/organizations`)
+- [x] `anon` sin privilegios sobre `public`; policies con `TO` y `WITH CHECK` explicitos; grants por columna en `users`/`organizations`. Invariantes verificadas en CI por `supabase/tests/schema_guard_test.sql`
+- [ ] Aislamiento por tenant en `embeddings` (el RAG todavia busca cross-org — ver ticket propio)
 - [ ] Stripe webhook validado con `stripe.webhooks.constructEvent`
 
 ---

@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { registerPhoneNumber } from '@/lib/whatsapp/client'
+import { createLogger } from '@/lib/logger'
 
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
+
+const baseLog = createLogger({ route: 'whatsapp/connect' })
 
 const connectSchema = z.object({
   code: z.string().min(1),
@@ -30,6 +33,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
   }
 
+  // org_id como binding fijo: CLAUDE.md pide org_id en los bindings del logger.
+  const log = baseLog.child({ org_id: userData.org_id })
+
   const parsed = connectSchema.safeParse(await request.json())
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
@@ -38,17 +44,31 @@ export async function POST(request: NextRequest) {
   const { code, waba_id, phone_number_id } = parsed.data
 
   try {
-    // 1. Exchange code for a business integration system user access token
-    const tokenUrl =
-      `${GRAPH_API_BASE}/oauth/access_token?` +
-      `client_id=${process.env.META_APP_ID}&` +
-      `client_secret=${process.env.META_APP_SECRET}&` +
-      `code=${encodeURIComponent(code)}`
+    // 1. Exchange code for a business integration system user access token.
+    //
+    // El client_secret va en el body, no en el query string: las URLs quedan en
+    // los logs de proxies, CDNs y del edge de Vercel; los bodies de POST no.
+    const appId = process.env.META_APP_ID
+    const appSecret = process.env.META_APP_SECRET
+    if (!appId || !appSecret) {
+      log.error('META_APP_ID/META_APP_SECRET not configured')
+      return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
+    }
 
-    const tokenRes = await fetch(tokenUrl)
+    const tokenRes = await fetch(`${GRAPH_API_BASE}/oauth/access_token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: appId,
+        client_secret: appSecret,
+        code,
+      }),
+    })
     if (!tokenRes.ok) {
+      // La respuesta cruda de Meta se loguea, no se devuelve al cliente.
       const details = await tokenRes.json().catch(() => ({}))
-      return NextResponse.json({ error: 'Token exchange failed', details }, { status: 400 })
+      log.warn('token exchange failed', { details })
+      return NextResponse.json({ error: 'Token exchange failed' }, { status: 400 })
     }
 
     const { access_token } = (await tokenRes.json()) as { access_token: string }
@@ -61,7 +81,8 @@ export async function POST(request: NextRequest) {
 
     if (!subRes.ok) {
       const details = await subRes.json().catch(() => ({}))
-      return NextResponse.json({ error: 'Failed to subscribe app to WABA', details }, { status: 400 })
+      log.warn('WABA subscribe failed', { waba_id, details })
+      return NextResponse.json({ error: 'Failed to subscribe app to WABA' }, { status: 400 })
     }
 
     // 3. Register the phone number on Cloud API (sets the two-step PIN). Idempotente.

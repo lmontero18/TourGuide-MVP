@@ -24,9 +24,21 @@ insert into public.organizations (id, name, slug) values
   ('b0000000-0000-4000-8000-000000000002', 'Org Q (test)', 'org-q-rls-test');
 
 -- Usuarios: insert en auth.users (mínimo) -> el trigger crea public.users.
+-- Los usuarios se crean en dos pasos a proposito. handle_new_user() ya NO lee
+-- role/org_id de raw_user_meta_data (era una via de escalada: un signup directo
+-- contra GoTrue daba admin de cualquier org — ver
+-- 20260727140000_handle_new_user_no_privesc.sql). El trigger crea la fila con
+-- role='admin' y org_id=null; la asignacion real la hace el service client, que
+-- es lo que replica este update.
+
 insert into auth.users (instance_id, id, aud, role, email, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data) values
   ('00000000-0000-0000-0000-000000000000', 'a0000000-0000-4000-8000-0000000000a1', 'authenticated', 'authenticated', 'p-admin@rls.test', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"role":"admin","org_id":"a0000000-0000-4000-8000-000000000001"}'),
   ('00000000-0000-0000-0000-000000000000', 'b0000000-0000-4000-8000-0000000000b1', 'authenticated', 'authenticated', 'q-admin@rls.test', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"role":"admin","org_id":"b0000000-0000-4000-8000-000000000002"}');
+
+update public.users set role = 'admin', org_id = 'a0000000-0000-4000-8000-000000000001'
+ where id = 'a0000000-0000-4000-8000-0000000000a1';
+update public.users set role = 'admin', org_id = 'b0000000-0000-4000-8000-000000000002'
+ where id = 'b0000000-0000-4000-8000-0000000000b1';
 
 -- Contactos: P tiene 2, Q tiene 1
 insert into public.contacts (id, org_id, phone, name) values
@@ -75,7 +87,7 @@ do $$
 begin
   insert into public.contacts (org_id, phone) values ('b0000000-0000-4000-8000-000000000002', '+199999999');
   perform set_config('t.p_write_blocked', 'no', true);
-exception when others then
+exception when insufficient_privilege then
   perform set_config('t.p_write_blocked', 'yes', true);
 end $$;
 reset role;

@@ -5,6 +5,10 @@ import * as Sentry from '@sentry/nextjs'
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  // Explicito a proposito: el default de @sentry/nextjs ya es false, pero el
+  // wizard suele generar `sendDefaultPii: true` y un upgrade o un copy-paste
+  // mandaria cookies, headers Authorization e IPs a Sentry sin que salte nada.
+  sendDefaultPii: false,
   // NEXT_PUBLIC_VERCEL_ENV solo existe si el proyecto expone las system env
   // vars — NODE_ENV (inyectado en el bundle) es el fallback confiable.
   environment: process.env.NEXT_PUBLIC_VERCEL_ENV ?? process.env.NODE_ENV ?? 'development',
