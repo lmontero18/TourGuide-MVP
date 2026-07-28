@@ -68,9 +68,9 @@ insert into public.subscriptions (org_id) values
   ('b0000000-0000-4000-8000-000000000002');
 
 -- WhatsApp accounts: 1 por org
-insert into public.whatsapp_accounts (org_id, waba_id, phone_number_id, phone_number, access_token) values
-  ('a0000000-0000-4000-8000-000000000001', 'waba-p', 'pnid-p', '+100000000', 'tok-p'),
-  ('b0000000-0000-4000-8000-000000000002', 'waba-q', 'pnid-q', '+200000000', 'tok-q');
+insert into public.whatsapp_accounts (org_id, waba_id, phone_number_id, phone_number) values
+  ('a0000000-0000-4000-8000-000000000001', 'waba-p', 'pnid-p', '+100000000'),
+  ('b0000000-0000-4000-8000-000000000002', 'waba-q', 'pnid-q', '+200000000');
 
 -- ============ Captura de lo que ve la ORG P ============
 set local role authenticated;
