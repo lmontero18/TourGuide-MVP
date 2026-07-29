@@ -28,13 +28,19 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      - name: Dump de prod
+      # `supabase db dump` sin flags solo exporta el schema (DDL) -- NO filas ni
+      # roles custom. Hacen falta 3 dumps separados para un respaldo completo,
+      # igual que recomienda la guia oficial de restore:
+      # https://supabase.com/docs/guides/self-hosting/restore-from-platform
+      - name: Dump de prod (roles, schema, data)
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PROD }}
         run: |
           pnpm exec supabase link --project-ref bppgwfzzrurlqzfzcpzf
-          pnpm exec supabase db dump --linked -f dump.sql
-          gzip dump.sql
+          pnpm exec supabase db dump --linked -f roles.sql --role-only
+          pnpm exec supabase db dump --linked -f schema.sql
+          pnpm exec supabase db dump --linked -f data.sql --use-copy --data-only
+          gzip roles.sql schema.sql data.sql
 
       - name: Subir dump a R2
         env:
@@ -42,9 +48,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: auto
         run: |
-          aws s3 cp dump.sql.gz \
-            "s3://${{ secrets.R2_BUCKET }}/db/tourguide-prod-$(date -u +%F).sql.gz" \
-            --endpoint-url "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          date=$(date -u +%F)
+          for part in roles schema data; do
+            aws s3 cp "$part.sql.gz" \
+              "s3://${{ secrets.R2_BUCKET }}/db/tourguide-prod-$date-$part.sql.gz" \
+              --endpoint-url "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          done
 
       - name: Descargar buckets de Supabase Storage
         env:

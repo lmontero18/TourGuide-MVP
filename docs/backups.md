@@ -26,7 +26,15 @@ Confirmación del plan actual (ticket CODE-147 / M4) y por qué existe el pipeli
 3. **Independencia del proveedor:** si Supabase tiene un incidente o se pierde el proyecto, el dump en R2 (cuenta propia, Cloudflare) es un respaldo fuera de su plataforma.
 4. **Storage no cubierto:** como se explica arriba, hay que respaldarlo aparte.
 
-`db-backup.yml` corre diario (`0 9 * * *` UTC), hace `supabase db dump` + sync de Storage, sube todo a R2, y notifica a BetterStack via heartbeat si falla.
+`db-backup.yml` corre diario (`0 9 * * *` UTC) y sube a R2 tres archivos por corrida (`supabase db dump` sin flags solo exporta el schema — hacen falta 3 dumps separados para roles, schema y datos):
+
+| Artefacto en R2 | Comando | Contenido |
+|---|---|---|
+| `db/tourguide-prod-<fecha>-roles.sql.gz` | `supabase db dump --linked -f roles.sql --role-only` | Roles custom (sin passwords) |
+| `db/tourguide-prod-<fecha>-schema.sql.gz` | `supabase db dump --linked -f schema.sql` | DDL: tablas, políticas RLS, funciones, triggers |
+| `db/tourguide-prod-<fecha>-data.sql.gz` | `supabase db dump --linked -f data.sql --use-copy --data-only` | Filas de todas las tablas |
+
+Además sincroniza Storage a `storage/` en el mismo bucket, y notifica a BetterStack via heartbeat si falla.
 
 ## Decisión
 
@@ -38,14 +46,30 @@ Confirmación del plan actual (ticket CODE-147 / M4) y por qué existe el pipeli
 Ver `docs/m4/` (notas locales, no versionadas) para el log del restore de prueba. Resumen:
 
 1. **Backup nativo de Supabase (daily):** Dashboard → Database → Backups → elegir fecha → Restore. Proyecto queda offline durante el proceso.
-2. **Dump propio (R2):**
+2. **Dump propio (R2) — orden importa: roles → schema → data → Storage.**
+   Restaurar Storage antes que la DB deja archivos huérfanos sin fila que los referencie; por eso la DB va primero.
    ```bash
-   # Descargar el dump más reciente
-   aws s3 cp "s3://$R2_BUCKET/db/tourguide-prod-<fecha>.sql.gz" ./dump.sql.gz \
-     --endpoint-url "https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com"
-   gunzip dump.sql.gz
+   fecha=<fecha>  # ej. 2026-07-29
 
-   # Restaurar a un proyecto (local o uno nuevo de Supabase)
-   psql "$DATABASE_URL" -f dump.sql
+   # Descargar los 3 archivos
+   for part in roles schema data; do
+     aws s3 cp "s3://$R2_BUCKET/db/tourguide-prod-$fecha-$part.sql.gz" "./$part.sql.gz" \
+       --endpoint-url "https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com"
+     gunzip "$part.sql.gz"
+   done
+
+   # Restaurar a un proyecto (local o uno nuevo de Supabase), en este orden
+   psql \
+     --single-transaction \
+     --variable ON_ERROR_STOP=1 \
+     --file roles.sql \
+     --file schema.sql \
+     --command 'SET session_replication_role = replica' \
+     --file data.sql \
+     --dbname "$DATABASE_URL"
+
+   # Recién después, restaurar Storage (sync desde storage/ en R2 al bucket destino)
    ```
-   Verificado localmente contra el stack de `supabase start`: el dump aplica limpio y los datos quedan consistentes.
+   `session_replication_role = replica` desactiva triggers durante la carga de datos (evita, ej., doble-encriptación en columnas con trigger de cifrado).
+
+   Verificado localmente contra el stack de `supabase start`: los 3 dumps aplican limpios en ese orden y los datos quedan consistentes.
