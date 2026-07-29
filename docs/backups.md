@@ -41,6 +41,17 @@ Además sincroniza Storage a `storage/` en el mismo bucket, y notifica a BetterS
 - **No se activa PITR** por ahora — el costo no se justifica dado que ya existe el dump diario a R2 como red de seguridad adicional a los 7 días nativos de Supabase.
 - Revisar esta decisión si el volumen de datos/transacciones crece al punto de que perder hasta 24h de datos sea inaceptable — en ese caso, evaluar PITR con retención de 7 días (~$100/mes).
 
+## Manejo de datos de producción — controles obligatorios
+
+Los dumps en R2 contienen PII real de clientes (teléfonos, contenido de conversaciones de WhatsApp, emails). Reglas no negociables:
+
+1. **Nunca restaurar un dump de prod al Supabase local de uso diario.** Un restore real (no un drill de prueba) va siempre a un proyecto Supabase temporal y descartable — nunca al ambiente donde alguien desarrolla features día a día.
+2. **Tear down inmediato después de cualquier restore.** Al terminar de verificar: eliminar el proyecto/instancia destino y borrar los `.sql` locales (`rm roles.sql schema.sql data.sql`). No deben quedar copias de datos reales en un laptop.
+3. **Acceso a R2 restringido.** `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` viven solo como GitHub Actions secrets — no se bajan a máquinas personales salvo para un restore explícitamente autorizado.
+4. **Restore real requiere aprobación previa** (mismo criterio que un incidente) — no es un comando que cualquiera corre para "revisar algo".
+
+El restore de prueba documentado abajo se verificó con datos de fixtures/seed local (`supabase start` + `seed.sql`), **no con un dump real de prod** — confirma que los comandos y el orden funcionan sin exponer PII real.
+
 ## Restore — procedimiento probado
 
 Ver `docs/m4/` (notas locales, no versionadas) para el log del restore de prueba. Resumen:
@@ -58,7 +69,9 @@ Ver `docs/m4/` (notas locales, no versionadas) para el log del restore de prueba
      gunzip "$part.sql.gz"
    done
 
-   # Restaurar a un proyecto (local o uno nuevo de Supabase), en este orden
+   # $DATABASE_URL debe apuntar a un proyecto TEMPORAL Y DESCARTABLE
+   # (ver "Manejo de datos de producción" arriba) -- nunca al Supabase
+   # local de uso diario ni a un ambiente compartido.
    psql \
      --single-transaction \
      --variable ON_ERROR_STOP=1 \
@@ -69,7 +82,10 @@ Ver `docs/m4/` (notas locales, no versionadas) para el log del restore de prueba
      --dbname "$DATABASE_URL"
 
    # Recién después, restaurar Storage (sync desde storage/ en R2 al bucket destino)
+
+   # Al terminar de verificar: borrar el proyecto destino y los .sql locales
+   rm roles.sql schema.sql data.sql
    ```
    `session_replication_role = replica` desactiva triggers durante la carga de datos (evita, ej., doble-encriptación en columnas con trigger de cifrado).
 
-   Verificado localmente contra el stack de `supabase start`: los 3 dumps aplican limpios en ese orden y los datos quedan consistentes.
+   Verificado localmente contra el stack de `supabase start`: los 3 dumps aplican limpios en ese orden y los datos quedan consistentes. Este drill usó datos de fixtures/seed, no un dump real de prod.
