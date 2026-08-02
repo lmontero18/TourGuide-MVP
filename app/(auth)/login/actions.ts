@@ -113,7 +113,33 @@ export async function login(formData: FormData) {
   redirect('/conversations')
 }
 
+// BETA CERRADA — el registro publico esta desactivado.
+//
+// Las altas se hacen invitando desde Supabase (Authentication -> Users -> Invite):
+// el invitado confirma el mail y cae en /onboarding sin org, donde crea su agencia.
+//
+// Esta action queda cortada de entrada en vez de borrada: es una server action, o
+// sea un endpoint POST que Next expone igual aunque ningun formulario la use. Si
+// solo sacaramos el form, seguiria siendo invocable.
+//
+// Ojo: esto NO es el gate. El gate es "Allow new users to sign up" desactivado en
+// el proyecto de Supabase — sin eso, POST /auth/v1/signup con la anon key (que va
+// en el bundle del browser) sigue creando usuarios sin pasar por aca.
+//
+// Para reabrir el registro publico: poner SIGNUP_ENABLED = true, restaurar la
+// pagina /register y su redirect en next.config (ver historial de git), y
+// reactivar el signup en Supabase.
+const SIGNUP_ENABLED = false
+
 export async function signup(formData: FormData) {
+  if (!SIGNUP_ENABLED) {
+    // Sin ?error=: el mensaje iria crudo al toast, en español y sin pasar por
+    // next-intl, y un usuario en locale `en` lo veria en el idioma equivocado.
+    // La pagina de login ya muestra "Beta cerrada — el acceso es por invitacion"
+    // traducido (auth.login.noAccount), asi que el toast seria redundante.
+    redirect('/login')
+  }
+
   const parsed = signupSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),

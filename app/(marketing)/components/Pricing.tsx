@@ -77,7 +77,7 @@ export function Pricing() {
               </ul>
 
               <Link
-                href="/register"
+                href="/login"
                 className="mt-8 flex h-11 items-center justify-center rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2"
               >
                 {t("tiers.0.cta")}
@@ -128,7 +128,7 @@ export function Pricing() {
 
               {/* Features */}
               <ul className="mt-6 space-y-3 flex-1">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
+                {[0, 1, 2, 3, 4].map((i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <CheckIcon className="text-slate-400" />
                     <span className="text-sm text-slate-600">

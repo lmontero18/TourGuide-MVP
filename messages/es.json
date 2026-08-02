@@ -4,7 +4,6 @@
     "howItWorks": "Cómo funciona",
     "results": "Resultados",
     "login": "Iniciar sesión",
-    "cta": "Empezar",
     "account": "Cuenta",
     "dashboard": "Ir al dashboard",
     "finishOnboarding": "Terminar onboarding",
@@ -17,7 +16,7 @@
     "headline2": "solos a las",
     "headline3": "2 AM",
     "sub": "Un bot de WhatsApp entrenado con tus tours, tus precios y tu tono. Responde en segundos a cualquier hora, califica al viajero y te deja la venta lista para cerrar.",
-    "ctaPrimary": "Crear mi bot",
+    "ctaPrimary": "Iniciar sesión",
     "ctaSecondary": "Ver cómo funciona",
     "trust": "Sin costos de setup · Cancela cuando quieras · En vivo en 10 minutos",
     "mock": {
@@ -131,7 +130,7 @@
     "title1": "Tu próximo cliente",
     "title2": "te está escribiendo ahora",
     "sub": "Cada consulta sin responder es una reserva que se va con otra agencia. Pon a tu bot a trabajar hoy.",
-    "button": "Crear mi bot",
+    "button": "Iniciar sesión",
     "note": "Configuración en 10 minutos · Cancela cuando quieras"
   },
   "pricing": {
@@ -145,10 +144,10 @@
         "badge": "Disponible ahora",
         "name": "Tourfy",
         "desc": "Tu vendedor 24/7 en WhatsApp. Responde, califica leads y nunca duerme.",
-        "cta": "Crear mi bot",
+        "cta": "Iniciar sesión",
         "f0": "Bot 24/7 con respuestas ilimitadas",
         "f1": "Catálogo de tours con importación automática (web o PDF)",
-        "f2": "Chat en vivo con toma de control — hasta 3 agentes",
+        "f2": "Chat en vivo con toma de control — agentes ilimitados",
         "f3": "Calificación de leads y métricas de ROI",
         "f4": "Tu número de WhatsApp, conectado en un click"
       },
@@ -160,9 +159,8 @@
         "f0": "Todo lo de Tourfy",
         "f1": "Follow-ups automáticos a leads",
         "f2": "Cobros y anticipos por link de pago en el chat",
-        "f3": "Agentes ilimitados y hasta 3 números",
-        "f4": "Reportes avanzados y exportación",
-        "f5": "Onboarding hecho por nosotros + soporte prioritario"
+        "f3": "Reportes avanzados y exportación",
+        "f4": "Onboarding hecho por nosotros + soporte prioritario"
       }
     }
   },
@@ -194,7 +192,7 @@
       "passwordPlaceholder": "••••••••",
       "forgot": "¿Olvidaste tu contraseña?",
       "submit": "Iniciar sesión",
-      "noAccount": "¿No tienes cuenta?",
+      "noAccount": "Beta cerrada — el acceso es por invitación.",
       "signUp": "Regístrate"
     },
     "register": {
