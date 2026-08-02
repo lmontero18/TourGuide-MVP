@@ -29,13 +29,6 @@ export function MobileAuthLinks({ onSelect }: { onSelect: () => void }) {
           onClick={onSelect}
           className="flex h-10 items-center justify-center rounded-lg bg-navy-900 text-sm font-semibold text-white"
         >
-          {t("cta")}
-        </Link>
-        <Link
-          href="/login"
-          onClick={onSelect}
-          className="flex h-10 items-center justify-center rounded-lg border border-slate-200 text-sm font-medium text-slate-600"
-        >
           {t("login")}
         </Link>
       </div>
@@ -92,22 +85,16 @@ export function UserMenu() {
     return <div className="h-8 w-8 rounded-full bg-slate-200 animate-pulse" aria-hidden />;
   }
 
+  // Beta cerrada: antes eran dos acciones distintas (entrar / registrarse). Sin
+  // registro publico las dos van a /login, asi que queda un solo boton.
   if (!user) {
     return (
-      <>
-        <Link
-          href="/login"
-          className="text-sm font-medium text-slate-500 hover:text-navy-900 transition-colors hidden md:block"
-        >
-          {t("login")}
-        </Link>
-        <Link
-          href="/login"
-          className="hidden sm:inline-flex h-8 sm:h-9 items-center rounded-lg bg-navy-900 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-white transition-all hover:bg-navy-800 hover:shadow-lg hover:shadow-navy-900/20 active:scale-[0.98]"
-        >
-          {t("cta")}
-        </Link>
-      </>
+      <Link
+        href="/login"
+        className="inline-flex h-8 sm:h-9 items-center rounded-lg bg-navy-900 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-white transition-all hover:bg-navy-800 hover:shadow-lg hover:shadow-navy-900/20 active:scale-[0.98]"
+      >
+        {t("login")}
+      </Link>
     );
   }
 
