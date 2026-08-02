@@ -4,7 +4,7 @@
     "howItWorks": "How it works",
     "results": "Results",
     "login": "Log in",
-    "cta": "Get started",
+    "cta": "Log in",
     "account": "Account",
     "dashboard": "Go to dashboard",
     "finishOnboarding": "Finish onboarding",
@@ -17,7 +17,7 @@
     "headline2": "themselves at",
     "headline3": "2 AM",
     "sub": "A WhatsApp bot trained on your tours, your prices, and your tone. It replies in seconds at any hour, qualifies the traveler, and hands you a sale ready to close.",
-    "ctaPrimary": "Create my bot",
+    "ctaPrimary": "Log in",
     "ctaSecondary": "See how it works",
     "trust": "No setup fees · Cancel anytime · Live in 10 minutes",
     "mock": {
@@ -131,7 +131,7 @@
     "title1": "Your next customer",
     "title2": "is texting you right now",
     "sub": "Every unanswered inquiry is a booking that goes to another agency. Put your bot to work today.",
-    "button": "Create my bot",
+    "button": "Log in",
     "note": "Setup in 10 minutes · Cancel anytime"
   },
   "pricing": {
@@ -145,10 +145,10 @@
         "badge": "Available now",
         "name": "Tourfy",
         "desc": "Your 24/7 salesperson on WhatsApp. Replies, qualifies leads, never sleeps.",
-        "cta": "Create my bot",
+        "cta": "Log in",
         "f0": "24/7 bot with unlimited replies",
         "f1": "Tour catalog with automatic import (web or PDF)",
-        "f2": "Live chat with agent takeover — up to 3 agents",
+        "f2": "Live chat with agent takeover — unlimited agents",
         "f3": "Lead qualification & ROI metrics",
         "f4": "Your WhatsApp number, connected in one click"
       },
@@ -160,9 +160,8 @@
         "f0": "Everything in Tourfy",
         "f1": "Automatic lead follow-ups",
         "f2": "Payments & deposits via payment link in chat",
-        "f3": "Unlimited agents and up to 3 numbers",
-        "f4": "Advanced reports & export",
-        "f5": "Onboarding done by us + priority support"
+        "f3": "Advanced reports & export",
+        "f4": "Onboarding done by us + priority support"
       }
     }
   },
@@ -194,7 +193,7 @@
       "passwordPlaceholder": "••••••••",
       "forgot": "Forgot password?",
       "submit": "Log in",
-      "noAccount": "Don’t have an account?",
+      "noAccount": "Closed beta — access is by invitation.",
       "signUp": "Sign up"
     },
     "register": {

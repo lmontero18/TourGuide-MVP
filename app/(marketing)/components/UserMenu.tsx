@@ -25,7 +25,7 @@ export function MobileAuthLinks({ onSelect }: { onSelect: () => void }) {
     return (
       <div className="flex flex-col gap-2">
         <Link
-          href="/register"
+          href="/login"
           onClick={onSelect}
           className="flex h-10 items-center justify-center rounded-lg bg-navy-900 text-sm font-semibold text-white"
         >
@@ -102,7 +102,7 @@ export function UserMenu() {
           {t("login")}
         </Link>
         <Link
-          href="/register"
+          href="/login"
           className="hidden sm:inline-flex h-8 sm:h-9 items-center rounded-lg bg-navy-900 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-white transition-all hover:bg-navy-800 hover:shadow-lg hover:shadow-navy-900/20 active:scale-[0.98]"
         >
           {t("cta")}

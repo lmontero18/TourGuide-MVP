@@ -115,15 +115,9 @@ function LoginForm() {
         </button>
       </form>
 
-      {/* Register link */}
+      {/* Beta cerrada: no hay registro publico, las altas las hacemos por invitacion */}
       <p className="mt-8 text-center text-sm text-slate-500">
-        {t("noAccount")}{" "}
-        <Link
-          href="/register"
-          className="font-semibold text-navy-900 hover:text-navy-700 transition-colors"
-        >
-          {t("signUp")}
-        </Link>
+        {t("noAccount")}
       </p>
     </div>
   );
