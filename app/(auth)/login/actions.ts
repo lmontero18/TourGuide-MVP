@@ -126,13 +126,18 @@ export async function login(formData: FormData) {
 // el proyecto de Supabase — sin eso, POST /auth/v1/signup con la anon key (que va
 // en el bundle del browser) sigue creando usuarios sin pasar por aca.
 //
-// Para reabrir el registro publico: borrar este bloque y restaurar la pagina
-// /register (ver historial de git), ademas de reactivar el signup en Supabase.
+// Para reabrir el registro publico: poner SIGNUP_ENABLED = true, restaurar la
+// pagina /register y su redirect en next.config (ver historial de git), y
+// reactivar el signup en Supabase.
 const SIGNUP_ENABLED = false
 
 export async function signup(formData: FormData) {
   if (!SIGNUP_ENABLED) {
-    redirect('/login?error=' + encodeURIComponent('Beta cerrada — el acceso es por invitacion.'))
+    // Sin ?error=: el mensaje iria crudo al toast, en español y sin pasar por
+    // next-intl, y un usuario en locale `en` lo veria en el idioma equivocado.
+    // La pagina de login ya muestra "Beta cerrada — el acceso es por invitacion"
+    // traducido (auth.login.noAccount), asi que el toast seria redundante.
+    redirect('/login')
   }
 
   const parsed = signupSchema.safeParse({
