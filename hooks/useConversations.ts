@@ -12,6 +12,7 @@ export interface ConversationListItem {
   lastMessageAt: string
   status: ConversationStatus
   botActive: boolean
+  unreadCount: number
 }
 
 interface ConversationRow {
@@ -19,6 +20,7 @@ interface ConversationRow {
   status: ConversationStatus
   bot_active: boolean
   last_message_at: string | null
+  unread_count: number
   contact: { name: string | null; phone: string } | null
   messages: { content: string }[]
 }
@@ -51,7 +53,7 @@ export function useConversations(orgId: string | null) {
     const { data, error } = await supabase
       .from('conversations')
       .select(
-        `id, status, bot_active, last_message_at,
+        `id, status, bot_active, last_message_at, unread_count,
          contact:contacts(name, phone),
          messages(content, created_at)`
       )
@@ -76,6 +78,7 @@ export function useConversations(orgId: string | null) {
         lastMessageAt: formatRelative(c.last_message_at),
         status: c.status,
         botActive: c.bot_active,
+        unreadCount: c.unread_count,
       }))
     )
     setLoading(false)

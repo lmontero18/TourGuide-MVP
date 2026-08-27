@@ -3,6 +3,42 @@
 import { useState } from "react";
 import type { MessageRole } from "@/types";
 import { useChatMediaUrl } from "@/hooks/useChatMediaUrl";
+import LinkPreview from "./LinkPreview";
+
+const URL_REGEX = /https?:\/\/[^\s<>"]+/g;
+
+// Puntuación de cierre pegada al final del link no es parte de la URL
+// ("mirá https://x.com/tour." → link sin el punto).
+function trimTrailingPunctuation(url: string): string {
+  return url.replace(/[),.!?;:\]]+$/, "");
+}
+
+function extractUrls(text: string): string[] {
+  return (text.match(URL_REGEX) ?? []).map(trimTrailingPunctuation);
+}
+
+function linkifyContent(text: string, role: MessageRole): React.ReactNode[] {
+  const linkClass =
+    role === "agent"
+      ? "underline text-blue-200 hover:text-blue-100 break-all"
+      : "underline text-blue-600 hover:text-blue-700 break-all";
+
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  for (const match of text.matchAll(URL_REGEX)) {
+    const url = trimTrailingPunctuation(match[0]);
+    const start = match.index;
+    if (start > lastIndex) nodes.push(text.slice(lastIndex, start));
+    nodes.push(
+      <a key={`${url}-${start}`} href={url} target="_blank" rel="noopener noreferrer" className={linkClass}>
+        {url}
+      </a>
+    );
+    lastIndex = start + url.length;
+  }
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return nodes;
+}
 
 interface MessageBubbleProps {
   content: string;
@@ -36,6 +72,7 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
   const mediaUrl = useChatMediaUrl(mediaPath);
   const [imgFailed, setImgFailed] = useState(false);
   const isMediaPlaceholder = /^\[[a-z_]+\]$/.test(content);
+  const firstUrl = extractUrls(content)[0];
 
   return (
     <div className={`flex ${style.wrapper}`}>
@@ -60,8 +97,9 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
             />
           </a>
         )}
+        {firstUrl && <LinkPreview url={firstUrl} />}
         {!(mediaUrl && !imgFailed && isMediaPlaceholder) && (
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">{linkifyContent(content, role)}</p>
         )}
         <span className={`flex items-center gap-1 text-[10px] mt-1 ${
           role === "agent" ? "text-white/50" : "text-slate-400"

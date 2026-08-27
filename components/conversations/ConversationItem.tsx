@@ -12,7 +12,7 @@ interface ConversationItemProps {
   lastMessageAt: string;
   status: ConversationStatus;
   botActive: boolean;
-  unread?: boolean;
+  unreadCount?: number;
   active?: boolean;
 }
 
@@ -24,9 +24,10 @@ export default function ConversationItem({
   lastMessageAt,
   status,
   botActive,
-  unread,
+  unreadCount = 0,
   active,
 }: ConversationItemProps) {
+  const unread = unreadCount > 0;
   const displayName = contactName || contactPhone;
   const initials = contactName
     ? contactName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
@@ -52,7 +53,14 @@ export default function ConversationItem({
           <span className={`text-sm truncate ${unread ? "font-bold text-navy-900" : "font-medium text-navy-900"}`}>
             {displayName}
           </span>
-          <span className="shrink-0 text-[10px] text-slate-400">{lastMessageAt}</span>
+          <span className="flex shrink-0 items-center gap-1.5">
+            <span className="text-[10px] text-slate-400">{lastMessageAt}</span>
+            {unread && (
+              <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold text-white">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </span>
         </div>
         <p className={`text-xs mt-0.5 truncate ${unread ? "text-navy-700 font-medium" : "text-slate-500"}`}>
           {lastMessage}
