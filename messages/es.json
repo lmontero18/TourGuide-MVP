@@ -447,7 +447,7 @@
         "responseTime": "Respuesta del bot",
         "responseTimeHint": "Mediana del tiempo entre el primer mensaje del cliente y la respuesta del bot.",
         "botHandled": "Atendidas solo por el bot",
-        "botHandledHint": "Conversaciones activas que no se transfirieron a un agente.",
+        "botHandledHint": "Conversaciones activas en las que ningún agente escribió ni tomó el control.",
         "totalConversations": "Total de conversaciones",
         "qualifiedLeads": "Leads calificados",
         "conversionRate": "Tasa de conversión",
@@ -455,9 +455,9 @@
       },
       "afterHours": {
         "title": "Fuera de horario",
-        "sub": "Conversaciones que el bot atendió con la oficina cerrada",
+        "sub": "Conversaciones que escribieron con la oficina cerrada",
         "conversations": "conversaciones",
-        "messages": "{count} mensajes respondidos mientras no había nadie",
+        "messages": "{count, plural, one {# mensaje de cliente llegó} other {# mensajes de clientes llegaron}} fuera de horario",
         "slotEvening": "Después del cierre",
         "slotNight": "Antes de abrir",
         "slotWeekend": "Fin de semana"
