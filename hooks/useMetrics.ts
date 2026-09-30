@@ -2,52 +2,45 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { LeadStatus } from '@/types'
+import type { MetricsPeriod, OrgMetrics } from '@/types'
 
-interface LeadStats {
-  total: number
-  byStatus: Record<LeadStatus, number>
-  loading: boolean
+const PERIOD_DAYS: Record<MetricsPeriod, number> = { '7d': 7, '30d': 30, '90d': 90 }
+
+interface MetricsResult {
+  period: MetricsPeriod | null
+  data: OrgMetrics | null
+  error: boolean
 }
 
-export function useMetrics(orgId: string, from: Date, to: Date) {
-  const [stats, setStats] = useState<LeadStats>({
-    total: 0,
-    byStatus: { new: 0, contacted: 0, qualified: 0, converted: 0, lost: 0 },
-    loading: true,
-  })
-  const supabase = createClient()
+// La agregacion vive en Postgres (RPC get_org_metrics): la org sale de
+// get_user_org_id() del lado de la DB, no se pasa desde el cliente.
+export function useMetrics(period: MetricsPeriod) {
+  // loading se deriva: el resultado guardado es de otro periodo mientras llega
+  // el nuevo. Se conserva `data` anterior para no parpadear a vacio.
+  const [result, setResult] = useState<MetricsResult>({ period: null, data: null, error: false })
 
   useEffect(() => {
+    let cancelled = false
+    const supabase = createClient()
+    const to = new Date()
+    const from = new Date(to.getTime() - PERIOD_DAYS[period] * 24 * 60 * 60 * 1000)
+
     supabase
-      .from('leads')
-      .select('status, metadata, created_at')
-      .eq('org_id', orgId)
-      .gte('created_at', from.toISOString())
-      .lte('created_at', to.toISOString())
+      .rpc('get_org_metrics', { p_from: from.toISOString(), p_to: to.toISOString() })
       .then(({ data, error }) => {
+        if (cancelled) return
         if (error) {
           console.error('Error loading metrics:', error)
-          setStats((prev) => ({ ...prev, loading: false }))
+          setResult({ period, data: null, error: true })
           return
         }
-
-        const byStatus: Record<LeadStatus, number> = {
-          new: 0, contacted: 0, qualified: 0, converted: 0, lost: 0,
-        }
-
-        for (const lead of data ?? []) {
-          const status = lead.status as LeadStatus
-          if (status in byStatus) byStatus[status]++
-        }
-
-        setStats({
-          total: data?.length ?? 0,
-          byStatus,
-          loading: false,
-        })
+        setResult({ period, data: data as unknown as OrgMetrics, error: false })
       })
-  }, [orgId, from, to, supabase])
 
-  return stats
+    return () => {
+      cancelled = true
+    }
+  }, [period])
+
+  return { data: result.data, error: result.error, loading: result.period !== period }
 }

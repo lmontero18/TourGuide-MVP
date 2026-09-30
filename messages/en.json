@@ -425,8 +425,18 @@
         "30d": "Last 30 days",
         "90d": "Last 90 days"
       },
-      "change": "vs last period",
+      "change": "vs previous period",
+      "noChange": "No data for the previous period",
+      "loadError": "We couldn't load your metrics. Please try again in a moment.",
       "cards": {
+        "activeConversations": "Active conversations",
+        "activeConversationsHint": "Conversations with at least one customer message in the period.",
+        "newContacts": "New contacts",
+        "newContactsHint": "People who messaged you for the first time in the period.",
+        "responseTime": "Bot response time",
+        "responseTimeHint": "Median time between the customer's first message and the bot's reply.",
+        "botHandled": "Handled by the bot only",
+        "botHandledHint": "Active conversations that were not handed off to an agent.",
         "totalConversations": "Total conversations",
         "qualifiedLeads": "Qualified leads",
         "conversionRate": "Conversion rate",
@@ -434,26 +444,23 @@
       },
       "afterHours": {
         "title": "After hours",
-        "sub": "Conversations handled by bot outside business hours",
-        "conversations": "conversations this week",
-        "revenueCaptured": "{amount} in potential revenue captured",
-        "revenueSub": "Leads that would have been lost without the bot responding 24/7",
-        "slotEvening": "6pm — 10pm",
-        "slotNight": "10pm — 6am",
-        "slotWeekend": "Weekends"
+        "sub": "Conversations the bot handled while your office was closed",
+        "conversations": "conversations",
+        "messages": "{count} messages answered while nobody was around",
+        "slotEvening": "After closing",
+        "slotNight": "Before opening",
+        "slotWeekend": "Weekend"
       },
-      "funnel": {
-        "title": "Lead funnel",
-        "new": "New",
-        "contacted": "Contacted",
-        "qualified": "Qualified",
-        "converted": "Converted",
-        "lost": "Lost"
+      "messages": {
+        "title": "Messages",
+        "sub": "Who wrote during the period",
+        "client": "Customers",
+        "bot": "Bot",
+        "agent": "Agents"
       },
       "chart": {
-        "title": "Leads this week",
-        "sub": "Conversations that became qualified leads",
-        "period": "Last 7 days",
+        "title": "Conversations per day",
+        "sub": "Active conversations on each day of the period",
         "days": {
           "mon": "Mon",
           "tue": "Tue",
@@ -463,7 +470,8 @@
           "sat": "Sat",
           "sun": "Sun"
         }
-      }
+      },
+      "empty": "No activity in this period yet. Once your customers message your WhatsApp, you'll see it here."
     },
     "settings": {
       "title": "Settings",

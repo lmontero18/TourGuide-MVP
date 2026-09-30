@@ -1,95 +1,109 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import TopBar from "@/components/layout/TopBar";
 import MetricCard from "@/components/metrics/MetricCard";
-import LeadsChart from "@/components/metrics/LeadsChart";
+import ActivityChart from "@/components/metrics/ActivityChart";
 import AfterHoursCard from "@/components/metrics/AfterHoursCard";
+import MessagesCard from "@/components/metrics/MessagesCard";
+import { useMetrics } from "@/hooks/useMetrics";
+import type { MetricsPeriod } from "@/types";
 
-const FUNNEL_STAGES = [
-  { key: "new", count: 284, pct: 100, color: "bg-blue-500" },
-  { key: "contacted", count: 196, pct: 69, color: "bg-blue-400" },
-  { key: "qualified", count: 118, pct: 42, color: "bg-navy-900" },
-  { key: "converted", count: 47, pct: 17, color: "bg-green-500" },
-  { key: "lost", count: 23, pct: 8, color: "bg-slate-300" },
-] as const;
+const PERIODS: MetricsPeriod[] = ["7d", "30d", "90d"];
+
+// % vs período anterior. Sin base (prev = 0) no hay % que mostrar.
+function delta(cur: number, prev: number): { change?: string; positive?: boolean } {
+  if (prev === 0) return {};
+  const pct = Math.round(((cur - prev) / prev) * 100);
+  return { change: `${pct}%`, positive: pct >= 0 };
+}
+
+function formatSeconds(seconds: number | null): string {
+  if (seconds === null) return "—";
+  if (seconds < 60) return `${Math.round(seconds)} s`;
+  const min = Math.floor(seconds / 60);
+  const sec = Math.round(seconds % 60);
+  return sec ? `${min} min ${sec} s` : `${min} min`;
+}
 
 export default function MetricsPage() {
   const t = useTranslations("dashboard.metrics");
+  const [period, setPeriod] = useState<MetricsPeriod>("7d");
+  const { data, loading, error } = useMetrics(period);
+
+  const active = data?.active_conversations ?? 0;
+  const botHandled = active > 0 ? `${Math.round(((active - (data?.handoffs ?? 0)) / active) * 100)}%` : "—";
+  const isEmpty = !!data && active === 0 && data.new_contacts === 0;
+  const placeholder = loading && !data;
+
   return (
     <div className="flex h-full flex-col">
       <TopBar title={t("title")}>
-        <select className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-navy-900 outline-none">
-          <option>{t("period.7d")}</option>
-          <option>{t("period.30d")}</option>
-          <option>{t("period.90d")}</option>
+        <select
+          value={period}
+          onChange={(e) => setPeriod(e.target.value as MetricsPeriod)}
+          className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-navy-900 outline-none"
+        >
+          {PERIODS.map((p) => (
+            <option key={p} value={p}>{t(`period.${p}`)}</option>
+          ))}
         </select>
       </TopBar>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-5">
-        {/* Demo data notice — these metrics are sample data, not real activity */}
-        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-medium text-amber-800">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 16v-4" />
-            <path d="M12 8h.01" />
-          </svg>
-          <span><strong>Demo data</strong> — sample metrics for preview, not real activity.</span>
-        </div>
+      <div className={`flex-1 overflow-y-auto p-5 space-y-5 transition-opacity ${loading ? "opacity-60" : ""}`}>
+        {error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-medium text-red-700">
+            {t("loadError")}
+          </div>
+        )}
+        {isEmpty && (
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-medium text-slate-500">
+            {t("empty")}
+          </div>
+        )}
 
         {/* Top metric cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
-            label={t("cards.totalConversations")}
-            value="284"
-            change="12%"
-            positive
+            label={t("cards.activeConversations")}
+            hint={t("cards.activeConversationsHint")}
+            value={placeholder ? "—" : active}
+            {...(data ? delta(active, data.active_conversations_prev) : {})}
+            note={data && data.active_conversations_prev === 0 && active > 0 ? t("noChange") : undefined}
             icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>}
           />
           <MetricCard
-            label={t("cards.qualifiedLeads")}
-            value="118"
-            change="23%"
-            positive
+            label={t("cards.newContacts")}
+            hint={t("cards.newContactsHint")}
+            value={placeholder ? "—" : data?.new_contacts ?? 0}
+            {...(data ? delta(data.new_contacts, data.new_contacts_prev) : {})}
+            note={data && data.new_contacts_prev === 0 && data.new_contacts > 0 ? t("noChange") : undefined}
             icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><path d="M20 8v6" /><path d="M23 11h-6" /></svg>}
           />
           <MetricCard
-            label={t("cards.conversionRate")}
-            value="41.5%"
-            change="3.2%"
-            positive
-            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
+            label={t("cards.responseTime")}
+            hint={t("cards.responseTimeHint")}
+            value={formatSeconds(data?.response_time.median_seconds ?? null)}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>}
           />
           <MetricCard
-            label={t("cards.revenue")}
-            value="$8,420"
-            change="18%"
-            positive
-            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1v22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>}
+            label={t("cards.botHandled")}
+            hint={t("cards.botHandledHint")}
+            value={placeholder ? "—" : botHandled}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
           />
         </div>
 
         {/* Charts row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <LeadsChart />
-          <AfterHoursCard />
-        </div>
-
-        {/* Leads funnel */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <h3 className="text-sm font-bold text-navy-900 mb-4">{t("funnel.title")}</h3>
-          <div className="space-y-3">
-            {FUNNEL_STAGES.map((stage) => (
-              <div key={stage.key} className="flex items-center gap-4">
-                <span className="text-xs font-medium text-slate-500 w-20 shrink-0">{t(`funnel.${stage.key}`)}</span>
-                <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden">
-                  <div className={`h-full rounded-full ${stage.color} transition-all duration-700`} style={{ width: `${stage.pct}%` }} />
-                </div>
-                <span className="text-xs font-bold text-navy-900 w-8 text-right">{stage.count}</span>
-              </div>
-            ))}
+        {data && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <ActivityChart daily={data.daily} />
+            <AfterHoursCard afterHours={data.after_hours} />
           </div>
-        </div>
+        )}
+
+        {data && <MessagesCard messages={data.messages} />}
       </div>
     </div>
   );
