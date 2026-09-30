@@ -38,8 +38,12 @@ export default function ConversationItem({
     : "#";
 
   return (
+    // Sin prefetch: Next precargaria cada conversacion visible en cada
+    // navegacion (50 en pantalla = 50 requests por click). El chat carga sus
+    // datos en el cliente, el prefetch no aporta.
     <Link
       href={`/conversations/${id}`}
+      prefetch={false}
       className={`flex items-start gap-3 px-4 py-3 border-b border-slate-100 transition-colors hover:bg-slate-50 ${
         active ? "bg-navy-900/[0.03]" : ""
       }`}
