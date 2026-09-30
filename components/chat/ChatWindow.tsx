@@ -218,6 +218,12 @@ export default function ChatWindow({
       setConfirmTakeover(assignee.name);
       return;
     }
+    // Esperando agente (bot pausado, sin dueño): el boton toma la
+    // conversacion en vez de devolverla al bot.
+    if (!botActive && !assignee) {
+      setBotActiveRemote(false);
+      return;
+    }
     setBotActiveRemote(!botActive);
   };
 
@@ -267,7 +273,7 @@ export default function ChatWindow({
             </button>
           ) : (
             <>
-              <TakeControlButton botActive={botActive} heldByOther={heldByOther} onToggle={handleToggleBot} />
+              <TakeControlButton botActive={botActive} heldByOther={heldByOther} unassigned={!assignee} onToggle={handleToggleBot} />
               <button
                 onClick={() => setStatusRemote("resolved")}
                 disabled={toggling}

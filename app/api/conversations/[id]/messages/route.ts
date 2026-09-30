@@ -60,13 +60,33 @@ export async function POST(
   }
 
   // Solo escribe quien atiende la conversacion: si no, dos agentes podian
-  // contestarle al mismo cliente a la vez. (assigned_agent_id null con el bot
-  // pausado = estado viejo previo a este chequeo; se permite.)
+  // contestarle al mismo cliente a la vez.
   if (conv.assigned_agent_id && conv.assigned_agent_id !== user.id) {
     return NextResponse.json(
       { error: 'Another agent is handling this conversation', code: 'not_assignee' },
       { status: 403 }
     )
+  }
+
+  // Responder = tomar la conversacion. Sin dueño (tipicamente "esperando
+  // agente" tras un handoff del bot), el primer agente que responde queda
+  // asignado y la conversacion pasa a abierta. Atomico: si otro la tomo en el
+  // medio, el update no matchea y este mensaje no se envia.
+  if (!conv.assigned_agent_id) {
+    const { data: claimed } = await supabase
+      .from('conversations')
+      .update({ assigned_agent_id: user.id, status: 'open' })
+      .eq('id', conv.id)
+      .eq('org_id', profile.org_id)
+      .is('assigned_agent_id', null)
+      .select('id')
+      .maybeSingle()
+    if (!claimed) {
+      return NextResponse.json(
+        { error: 'Another agent is handling this conversation', code: 'not_assignee' },
+        { status: 403 }
+      )
+    }
   }
 
   if (!conv.contact?.phone) {
