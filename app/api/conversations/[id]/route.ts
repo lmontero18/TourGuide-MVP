@@ -196,24 +196,23 @@ export async function DELETE(
     return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
   }
 
-  const { error: msgError } = await supabase.from('messages').delete().eq('conversation_id', id)
-  if (msgError) {
-    console.error('Failed to delete messages:', msgError)
-    return NextResponse.json({ error: 'Failed to delete conversation' }, { status: 500 })
-  }
-
-  const { error, count } = await supabase
+  // Borrado logico: oculta la conversacion del inbox pero conserva los
+  // mensajes. Borrarlos hacia bajar las metricas y el contador del tier
+  // gratis de Meta, aunque esos mensajes ya se habian enviado y cobrado.
+  const { data: hidden, error } = await supabase
     .from('conversations')
-    .delete({ count: 'exact' })
+    .update({ deleted_at: new Date().toISOString() })
     .eq('id', id)
     .eq('org_id', profile.org_id)
+    .select('id')
+    .maybeSingle()
 
   if (error) {
     console.error('Failed to delete conversation:', error)
     return NextResponse.json({ error: 'Failed to delete conversation' }, { status: 500 })
   }
 
-  if (count === 0) {
+  if (!hidden) {
     return NextResponse.json({ error: 'Conversation not deleted (RLS blocked)' }, { status: 403 })
   }
 

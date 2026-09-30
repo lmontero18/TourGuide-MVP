@@ -110,6 +110,7 @@ export function useConversations(orgId: string | null, activeId: string | null =
         .from('conversations')
         .select(LIST_SELECT)
         .eq('id', id)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false, foreignTable: 'messages' })
         .limit(1, { foreignTable: 'messages' })
         .maybeSingle()
@@ -142,6 +143,7 @@ export function useConversations(orgId: string | null, activeId: string | null =
       .from('conversations')
       .select(LIST_SELECT)
       .eq('org_id', orgId)
+      .is('deleted_at', null)
       .order('last_message_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false, foreignTable: 'messages' })
       .limit(1, { foreignTable: 'messages' })
@@ -182,6 +184,12 @@ export function useConversations(orgId: string | null, activeId: string | null =
             bot_active: boolean
             last_message_at: string | null
             assigned_agent_id: string | null
+            deleted_at: string | null
+          }
+          // Eliminada (borrado logico): sale de la lista.
+          if (row.deleted_at) {
+            commit(listRef.current.filter((c) => c.id !== row.id))
+            return
           }
           const current = listRef.current.find((c) => c.id === row.id)
           // Agente nuevo: el payload trae el id pero no el nombre.

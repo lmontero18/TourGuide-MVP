@@ -144,7 +144,7 @@ export default function ChatWindow({
 
   const handleDelete = async () => {
     if (deleting) return;
-    if (!confirm("Delete this conversation? This will remove all messages permanently.")) return;
+    if (!confirm("Delete this conversation? It will be hidden from the inbox. If the customer writes again, it comes back.")) return;
     setDeleting(true);
     try {
       const res = await fetch(`/api/conversations/${conversationId}`, { method: "DELETE" });
