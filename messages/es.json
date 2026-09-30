@@ -471,7 +471,16 @@
           "sun": "Dom"
         }
       },
-      "empty": "Todavía no hay actividad en este período. Cuando tus clientes escriban al WhatsApp, vas a verla acá."
+      "empty": "Todavía no hay actividad en este período. Cuando tus clientes escriban al WhatsApp, vas a verla acá.",
+      "usage": {
+        "title": "Mensajes de WhatsApp este mes",
+        "sub": "Respuestas del bot y de agentes. Meta regala 1.000 por mes; desde la 1.001 cobra por mensaje a tu método de pago en Meta.",
+        "ofFree": "de {free} gratis",
+        "warn": "Estás cerca del límite gratis. Revisa que tengas un método de pago en Meta para que el bot no se detenga.",
+        "over": "Pasaste el límite gratis: Meta cobra {count} mensajes extra a tu método de pago. Sin tarjeta, el bot deja de responder.",
+        "checkPayment": "Revisar método de pago",
+        "note": "Estimado. Se reinicia el 1 de cada mes."
+      }
     },
     "settings": {
       "title": "Configuración",

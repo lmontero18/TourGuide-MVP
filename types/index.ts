@@ -193,3 +193,10 @@ export interface OrgMetrics {
   response_time: { median_seconds: number | null; samples: number }
   daily: { date: string; conversations: number }[]
 }
+
+// Respuesta de la RPC get_org_monthly_usage (CODE-173): mensajes de servicio
+// enviados este mes, para el tier gratis de Meta.
+export interface MonthlyUsage {
+  period_start: string
+  sent: number
+}
