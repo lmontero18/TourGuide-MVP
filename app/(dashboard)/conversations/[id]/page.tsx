@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import ConversationList from "@/components/conversations/ConversationList";
 import ChatWindow from "@/components/chat/ChatWindow";
 import ChatSkeleton from "@/components/chat/ChatSkeleton";
-import TopBar from "@/components/layout/TopBar";
 import { createClient } from "@/lib/supabase/client";
 import { ASSIGNED_AGENT_EMBED, toAssignee } from "@/lib/assignee";
 
@@ -24,6 +22,9 @@ export default function ConversationDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Clicks rapidos entre conversaciones: una respuesta vieja que llega tarde
+    // no debe pisar a la actual.
+    let cancelled = false;
     const load = async () => {
       const supabase = createClient();
       const { data, error } = await supabase
@@ -31,9 +32,11 @@ export default function ConversationDetailPage() {
         .select(`id, bot_active, contact:contacts(name, phone), ${ASSIGNED_AGENT_EMBED}`)
         .eq("id", id)
         .single();
+      if (cancelled) return;
 
       if (error) {
         toast.error("Failed to load conversation");
+        setConv(null);
         setLoading(false);
         return;
       }
@@ -41,34 +44,30 @@ export default function ConversationDetailPage() {
       setLoading(false);
     };
     load();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
-  return (
-    <div className="flex h-full flex-col">
-      <TopBar title="Conversations" />
-      <div className="flex flex-1 overflow-hidden">
-        <div className="hidden lg:block w-full max-w-md border-r border-slate-200 bg-white overflow-hidden">
-          <ConversationList activeId={id} />
-        </div>
-
-        <div className="flex-1 overflow-hidden">
-          {loading ? (
-            <ChatSkeleton />
-          ) : conv ? (
-            <ChatWindow
-              conversationId={conv.id}
-              contactName={conv.contact?.name ?? null}
-              contactPhone={conv.contact?.phone ?? ""}
-              initialBotActive={conv.bot_active}
-              initialAssignee={toAssignee(conv.assigned_agent)}
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-sm text-slate-400">
-              Conversation not found
-            </div>
-          )}
-        </div>
+  // La lista y el TopBar viven en conversations/layout.tsx: aca solo el chat.
+  // La pagina no se re-monta al cambiar de conversacion: mientras llega la
+  // nueva, `conv` todavia es la anterior. Id distinto = cargando.
+  if (loading || (conv && conv.id !== id)) return <ChatSkeleton />;
+  if (!conv) {
+    return (
+      <div className="flex h-full items-center justify-center text-sm text-slate-400">
+        Conversation not found
       </div>
-    </div>
+    );
+  }
+  return (
+    <ChatWindow
+      key={conv.id}
+      conversationId={conv.id}
+      contactName={conv.contact?.name ?? null}
+      contactPhone={conv.contact?.phone ?? ""}
+      initialBotActive={conv.bot_active}
+      initialAssignee={toAssignee(conv.assigned_agent)}
+    />
   );
 }
