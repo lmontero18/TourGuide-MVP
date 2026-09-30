@@ -8,11 +8,13 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import ChatSkeleton from "@/components/chat/ChatSkeleton";
 import TopBar from "@/components/layout/TopBar";
 import { createClient } from "@/lib/supabase/client";
+import { ASSIGNED_AGENT_EMBED, toAssignee } from "@/lib/assignee";
 
 interface ConversationDetail {
   id: string;
   bot_active: boolean;
   contact: { name: string | null; phone: string } | null;
+  assigned_agent: { id: string; full_name: string | null; email: string } | null;
 }
 
 export default function ConversationDetailPage() {
@@ -26,7 +28,7 @@ export default function ConversationDetailPage() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("conversations")
-        .select("id, bot_active, contact:contacts(name, phone)")
+        .select(`id, bot_active, contact:contacts(name, phone), ${ASSIGNED_AGENT_EMBED}`)
         .eq("id", id)
         .single();
 
@@ -58,6 +60,7 @@ export default function ConversationDetailPage() {
               contactName={conv.contact?.name ?? null}
               contactPhone={conv.contact?.phone ?? ""}
               initialBotActive={conv.bot_active}
+              initialAssignee={toAssignee(conv.assigned_agent)}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-slate-400">

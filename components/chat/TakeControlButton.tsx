@@ -4,10 +4,13 @@ import { useTranslations } from "next-intl";
 
 interface TakeControlButtonProps {
   botActive: boolean;
+  // Otro agente atiende la conversacion: el boton ofrece tomarla (con
+  // confirmacion en ChatWindow) en lugar de "devolver al bot".
+  heldByOther?: boolean;
   onToggle: () => void;
 }
 
-export default function TakeControlButton({ botActive, onToggle }: TakeControlButtonProps) {
+export default function TakeControlButton({ botActive, heldByOther, onToggle }: TakeControlButtonProps) {
   const t = useTranslations("dashboard.chat");
   return (
     <button
@@ -15,10 +18,20 @@ export default function TakeControlButton({ botActive, onToggle }: TakeControlBu
       className={`inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-bold transition-all active:scale-[0.97] ${
         botActive
           ? "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
-          : "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
+          : heldByOther
+            ? "bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100"
+            : "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
       }`}
     >
-      {botActive ? (
+      {heldByOther && !botActive ? (
+        <>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" />
+            <path d="M17 11l2 2 4-4" />
+          </svg>
+          {t("takeOver")}
+        </>
+      ) : botActive ? (
         <>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18.36 6.64A9 9 0 0 1 20.77 15" />

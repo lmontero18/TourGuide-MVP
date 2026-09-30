@@ -19,7 +19,7 @@ interface ConversationListProps {
 }
 
 export default function ConversationList({ activeId }: ConversationListProps) {
-  const { orgId, loading: authLoading } = useAuth();
+  const { orgId, user, loading: authLoading } = useAuth();
   const { conversations, loading } = useConversations(orgId);
   const [filter, setFilter] = useState<ConversationStatus | "all">("all");
   const [search, setSearch] = useState("");
@@ -118,7 +118,7 @@ export default function ConversationList({ activeId }: ConversationListProps) {
           </div>
         ) : (
           filtered.map((conv) => (
-            <ConversationItem key={conv.id} {...conv} active={conv.id === activeId} />
+            <ConversationItem key={conv.id} {...conv} currentUserId={user?.id} active={conv.id === activeId} />
           ))
         )}
       </div>

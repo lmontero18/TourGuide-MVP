@@ -2,19 +2,23 @@
 
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
 import TakeControlButton from "./TakeControlButton";
 import { ChatMessagesSkeleton } from "./ChatSkeleton";
 import { useMessages } from "@/hooks/useMessages";
-import type { MessageRole } from "@/types";
+import { useConversationControl } from "@/hooks/useConversationControl";
+import { useAuth } from "@/hooks/useAuth";
+import type { Assignee, MessageRole } from "@/types";
 
 interface ChatWindowProps {
   conversationId: string;
   contactName: string | null;
   contactPhone: string;
   initialBotActive?: boolean;
+  initialAssignee?: Assignee | null;
 }
 
 interface OptimisticMessage {
@@ -34,10 +38,20 @@ export default function ChatWindow({
   contactName,
   contactPhone,
   initialBotActive = true,
+  initialAssignee = null,
 }: ChatWindowProps) {
   const router = useRouter();
+  const t = useTranslations("dashboard.chat");
+  const { user } = useAuth();
   const { messages, loading } = useMessages(conversationId);
-  const [botActive, setBotActive] = useState(initialBotActive);
+  const { botActive, assignee, setState: setControl, refresh: refreshControl } = useConversationControl(
+    conversationId,
+    { botActive: initialBotActive, assignee: initialAssignee }
+  );
+  // Nombre del agente que la tiene, si NO soy yo. Mientras carga el usuario
+  // (user null) no se asume nada: evita mostrar "otro agente" a uno mismo.
+  const heldByOther = !botActive && !!assignee && !!user && assignee.id !== user.id;
+  const [confirmTakeover, setConfirmTakeover] = useState<string | null>(null);
   const [toggling, setToggling] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -55,10 +69,6 @@ export default function ChatWindow({
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [menuOpen]);
-
-  useEffect(() => {
-    setBotActive(initialBotActive);
-  }, [initialBotActive]);
 
   // Dedupe optimistic when realtime delivers the persisted message
   useEffect(() => {
@@ -146,27 +156,51 @@ export default function ChatWindow({
     }
   };
 
-  const handleToggleBot = async () => {
+  // Tomar control / devolver al bot. Sin `force`, si otro agente la tiene la
+  // API responde 409 y se pide confirmacion antes de quitarsela.
+  const setBotActiveRemote = async (next: boolean, force = false) => {
     if (toggling) return;
-    const next = !botActive;
     setToggling(true);
-    setBotActive(next);
     try {
       const res = await fetch(`/api/conversations/${conversationId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bot_active: next }),
+        body: JSON.stringify({ bot_active: next, force }),
       });
       const result = await res.json();
+      if (res.status === 409 && result.code === "taken") {
+        setConfirmTakeover(result.holder ?? t("anotherAgent"));
+        await refreshControl();
+        return;
+      }
       if (!res.ok) throw new Error(result.error ?? "Failed to update");
-      toast.success(next ? "Returned to bot" : "You are now in control");
+      setControl({
+        botActive: next,
+        assignee: next || !user ? null : { id: user.id, name: t("you") },
+      });
+      setConfirmTakeover(null);
+      await refreshControl();
+      toast.success(next ? t("returnedToBot") : t("nowInControl"));
     } catch (err) {
-      setBotActive(!next);
       toast.error(err instanceof Error ? err.message : "Failed to update");
     } finally {
       setToggling(false);
     }
   };
+
+  const handleToggleBot = () => {
+    if (heldByOther && assignee) {
+      setConfirmTakeover(assignee.name);
+      return;
+    }
+    setBotActiveRemote(!botActive);
+  };
+
+  const banner = botActive
+    ? { tone: "green", text: t("botBanner") }
+    : heldByOther && assignee
+      ? { tone: "indigo", text: t("otherAgentBanner", { name: assignee.name }) }
+      : { tone: "amber", text: t("agentBanner") };
 
   return (
     <div className="flex h-full flex-col bg-slate-50">
@@ -184,7 +218,7 @@ export default function ChatWindow({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <TakeControlButton botActive={botActive} onToggle={handleToggleBot} />
+          <TakeControlButton botActive={botActive} heldByOther={heldByOther} onToggle={handleToggleBot} />
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen((v) => !v)}
@@ -218,21 +252,51 @@ export default function ChatWindow({
         </div>
       </div>
 
-      {/* Bot status banner */}
-      {botActive ? (
-        <div className="flex items-center gap-2 bg-green-50 border-b border-green-100 px-4 py-2">
+      {/* Estado: bot / yo / otro agente */}
+      <div
+        className={`flex items-center gap-2 border-b px-4 py-2 ${
+          banner.tone === "green"
+            ? "bg-green-50 border-green-100"
+            : banner.tone === "indigo"
+              ? "bg-indigo-50 border-indigo-100"
+              : "bg-amber-50 border-amber-100"
+        }`}
+      >
+        {banner.tone === "green" ? (
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
           </span>
-          <span className="text-xs font-medium text-green-700">Bot is handling this conversation</span>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2 bg-amber-50 border-b border-amber-100 px-4 py-2">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600">
-            <circle cx="12" cy="12" r="10" /><path d="M12 8v4" /><path d="M12 16h.01" />
-          </svg>
-          <span className="text-xs font-medium text-amber-700">You are in control — bot is paused</span>
+        ) : (
+          <span className={`h-2 w-2 rounded-full ${banner.tone === "indigo" ? "bg-indigo-500" : "bg-amber-500"}`} />
+        )}
+        <span
+          className={`text-xs font-medium ${
+            banner.tone === "green" ? "text-green-700" : banner.tone === "indigo" ? "text-indigo-700" : "text-amber-700"
+          }`}
+        >
+          {banner.text}
+        </span>
+      </div>
+
+      {confirmTakeover && (
+        <div className="flex items-center justify-between gap-3 border-b border-indigo-100 bg-white px-4 py-2.5">
+          <p className="text-xs text-navy-900">{t("takeOverConfirm", { name: confirmTakeover })}</p>
+          <div className="flex shrink-0 gap-2">
+            <button
+              onClick={() => setConfirmTakeover(null)}
+              className="h-7 rounded-lg px-2.5 text-xs font-medium text-slate-500 hover:text-navy-900"
+            >
+              {t("cancel")}
+            </button>
+            <button
+              onClick={() => setBotActiveRemote(false, true)}
+              disabled={toggling}
+              className="h-7 rounded-lg bg-indigo-600 px-2.5 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {t("takeOverYes")}
+            </button>
+          </div>
         </div>
       )}
 
@@ -260,8 +324,14 @@ export default function ChatWindow({
       {/* Input — only enabled when agent has control */}
       <ChatInput
         onSend={handleSend}
-        disabled={botActive}
-        placeholder={botActive ? "Take control to send a message..." : "Type a message..."}
+        disabled={botActive || heldByOther}
+        placeholder={
+          botActive
+            ? t("takeControlPlaceholder")
+            : heldByOther && assignee
+              ? t("heldByOtherPlaceholder", { name: assignee.name })
+              : t("typePlaceholder")
+        }
       />
     </div>
   );

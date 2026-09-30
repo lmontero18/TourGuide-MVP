@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import StatusBadge from "./StatusBadge";
-import type { ConversationStatus } from "@/types";
+import AssigneeBadge from "./AssigneeBadge";
+import type { Assignee, ConversationStatus } from "@/types";
 
 interface ConversationItemProps {
   id: string;
@@ -12,6 +13,8 @@ interface ConversationItemProps {
   lastMessageAt: string;
   status: ConversationStatus;
   botActive: boolean;
+  assignee: Assignee | null;
+  currentUserId?: string | null;
   unread?: boolean;
   active?: boolean;
 }
@@ -24,6 +27,8 @@ export default function ConversationItem({
   lastMessageAt,
   status,
   botActive,
+  assignee,
+  currentUserId,
   unread,
   active,
 }: ConversationItemProps) {
@@ -57,8 +62,11 @@ export default function ConversationItem({
         <p className={`text-xs mt-0.5 truncate ${unread ? "text-navy-700 font-medium" : "text-slate-500"}`}>
           {lastMessage}
         </p>
-        <div className="mt-1.5">
+        <div className="mt-1.5 flex items-center gap-1.5">
           <StatusBadge status={status} botActive={botActive} />
+          {!botActive && assignee && (
+            <AssigneeBadge assignee={assignee} isSelf={assignee.id === currentUserId} />
+          )}
         </div>
       </div>
     </Link>

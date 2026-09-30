@@ -414,7 +414,8 @@
         "open": "Open",
         "pending": "Pending",
         "resolved": "Resolved",
-        "bot": "BOT"
+        "bot": "BOT",
+        "you": "You"
       }
     },
     "chat": {
@@ -424,10 +425,20 @@
       "takeControl": "Take control",
       "returnToBot": "Return to bot",
       "botBanner": "Bot is handling this conversation",
-      "agentBanner": "You are in control — bot is paused",
+      "agentBanner": "You're handling this conversation. The bot is paused.",
       "roleClient": "Client",
       "roleBot": "Tourfy Bot",
-      "roleYou": "You"
+      "roleYou": "You",
+      "otherAgentBanner": "{name} is handling this conversation",
+      "heldByOtherPlaceholder": "{name} is handling this. Take the conversation to reply...",
+      "takeOver": "Take conversation",
+      "takeOverConfirm": "{name} is handling this conversation. Do you want to take it?",
+      "takeOverYes": "Yes, take it",
+      "cancel": "Cancel",
+      "anotherAgent": "Another agent",
+      "you": "You",
+      "nowInControl": "You're now in control",
+      "returnedToBot": "Conversation returned to the bot"
     },
     "metrics": {
       "title": "Metrics",

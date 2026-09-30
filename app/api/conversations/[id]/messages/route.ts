@@ -37,13 +37,14 @@ export async function POST(
 
   const { data: conv } = await supabase
     .from('conversations')
-    .select('id, org_id, contact_id, bot_active, contact:contacts(phone)')
+    .select('id, org_id, contact_id, bot_active, assigned_agent_id, contact:contacts(phone)')
     .eq('id', id)
     .single<{
       id: string
       org_id: string
       contact_id: string
       bot_active: boolean
+      assigned_agent_id: string | null
       contact: { phone: string } | null
     }>()
 
@@ -55,6 +56,16 @@ export async function POST(
     return NextResponse.json(
       { error: 'Take control of the conversation before sending a message' },
       { status: 400 }
+    )
+  }
+
+  // Solo escribe quien atiende la conversacion: si no, dos agentes podian
+  // contestarle al mismo cliente a la vez. (assigned_agent_id null con el bot
+  // pausado = estado viejo previo a este chequeo; se permite.)
+  if (conv.assigned_agent_id && conv.assigned_agent_id !== user.id) {
+    return NextResponse.json(
+      { error: 'Another agent is handling this conversation', code: 'not_assignee' },
+      { status: 403 }
     )
   }
 
