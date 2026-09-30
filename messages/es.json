@@ -360,6 +360,7 @@
       "conversations": "Conversaciones",
       "tours": "Tours y FAQs",
       "metrics": "Métricas",
+      "agents": "Agentes",
       "settings": "Configuración"
     },
     "tours": {
@@ -494,7 +495,6 @@
     },
     "settings": {
       "title": "Configuración",
-      "manageAgents": "Gestionar agentes",
       "org": {
         "title": "Organización",
         "name": "Nombre de la agencia",

@@ -87,17 +87,6 @@ export default function SettingsPage() {
           </svg>
           WhatsApp
         </Link>
-        <Link
-          href="/settings/agents"
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="8.5" cy="7" r="4" />
-            <path d="M20 8v6" /><path d="M23 11h-6" />
-          </svg>
-          Manage agents
-        </Link>
       </TopBar>
 
       <div className="flex-1 overflow-y-auto p-5">
