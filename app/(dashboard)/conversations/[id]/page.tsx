@@ -7,10 +7,12 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import ChatSkeleton from "@/components/chat/ChatSkeleton";
 import { createClient } from "@/lib/supabase/client";
 import { ASSIGNED_AGENT_EMBED, toAssignee } from "@/lib/assignee";
+import type { ConversationStatus } from "@/types";
 
 interface ConversationDetail {
   id: string;
   bot_active: boolean;
+  status: ConversationStatus;
   contact: { name: string | null; phone: string } | null;
   assigned_agent: { id: string; full_name: string | null; email: string } | null;
 }
@@ -29,7 +31,7 @@ export default function ConversationDetailPage() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("conversations")
-        .select(`id, bot_active, contact:contacts(name, phone), ${ASSIGNED_AGENT_EMBED}`)
+        .select(`id, bot_active, status, contact:contacts(name, phone), ${ASSIGNED_AGENT_EMBED}`)
         .eq("id", id)
         .single();
       if (cancelled) return;
@@ -67,6 +69,7 @@ export default function ConversationDetailPage() {
       contactName={conv.contact?.name ?? null}
       contactPhone={conv.contact?.phone ?? ""}
       initialBotActive={conv.bot_active}
+      initialStatus={conv.status}
       initialAssignee={toAssignee(conv.assigned_agent)}
     />
   );

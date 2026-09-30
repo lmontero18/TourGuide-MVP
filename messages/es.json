@@ -398,9 +398,11 @@
       "searchPlaceholder": "Buscar conversaciones...",
       "tabs": {
         "all": "Todas",
+        "waiting": "Esperando agente",
+        "mine": "Mías",
+        "resolved": "Resueltas",
         "open": "Abiertas",
-        "pending": "Pendientes",
-        "resolved": "Resueltas"
+        "pending": "Pendientes"
       },
       "noResults": {
         "title": "No hay conversaciones",
@@ -412,7 +414,7 @@
       },
       "status": {
         "open": "Abierta",
-        "pending": "Pendiente",
+        "pending": "Esperando agente",
         "resolved": "Resuelta",
         "bot": "BOT",
         "you": "Tú"
@@ -438,7 +440,13 @@
       "anotherAgent": "Otro agente",
       "you": "Tú",
       "nowInControl": "Ahora tienes el control",
-      "returnedToBot": "Conversación devuelta al bot"
+      "returnedToBot": "Conversación devuelta al bot",
+      "resolve": "Resolver",
+      "reopen": "Reabrir",
+      "resolvedBanner": "Conversación resuelta. Si el cliente vuelve a escribir, se reabre con el bot.",
+      "pendingBanner": "Esperando agente: el bot pidió que una persona atienda esta conversación",
+      "resolvedToast": "Conversación resuelta",
+      "reopenedToast": "Conversación reabierta"
     },
     "metrics": {
       "title": "Métricas",

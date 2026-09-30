@@ -11,7 +11,7 @@ import { ChatMessagesSkeleton } from "./ChatSkeleton";
 import { useMessages } from "@/hooks/useMessages";
 import { useConversationControl } from "@/hooks/useConversationControl";
 import { useAuth } from "@/hooks/useAuth";
-import type { Assignee, MessageRole } from "@/types";
+import type { Assignee, ConversationStatus, MessageRole } from "@/types";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -19,6 +19,7 @@ interface ChatWindowProps {
   contactPhone: string;
   initialBotActive?: boolean;
   initialAssignee?: Assignee | null;
+  initialStatus?: ConversationStatus;
 }
 
 interface OptimisticMessage {
@@ -39,14 +40,15 @@ export default function ChatWindow({
   contactPhone,
   initialBotActive = true,
   initialAssignee = null,
+  initialStatus = "open",
 }: ChatWindowProps) {
   const router = useRouter();
   const t = useTranslations("dashboard.chat");
   const { user } = useAuth();
   const { messages, loading } = useMessages(conversationId);
-  const { botActive, assignee, setState: setControl, refresh: refreshControl } = useConversationControl(
+  const { botActive, assignee, status, setState: setControl, refresh: refreshControl } = useConversationControl(
     conversationId,
-    { botActive: initialBotActive, assignee: initialAssignee }
+    { botActive: initialBotActive, assignee: initialAssignee, status: initialStatus }
   );
   // Nombre del agente que la tiene, si NO soy yo. Mientras carga el usuario
   // (user null) no se asume nada: evita mostrar "otro agente" a uno mismo.
@@ -176,11 +178,34 @@ export default function ChatWindow({
       if (!res.ok) throw new Error(result.error ?? "Failed to update");
       setControl({
         botActive: next,
+        status: "open",
         assignee: next || !user ? null : { id: user.id, name: t("you") },
       });
       setConfirmTakeover(null);
       await refreshControl();
       toast.success(next ? t("returnedToBot") : t("nowInControl"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update");
+    } finally {
+      setToggling(false);
+    }
+  };
+
+  // Ciclo de vida (CODE-162): resolver deja el bot activo y sin agente; si el
+  // cliente vuelve a escribir, el webhook reabre la conversacion.
+  const setStatusRemote = async (next: "resolved" | "open") => {
+    if (toggling) return;
+    setToggling(true);
+    try {
+      const res = await fetch(`/api/conversations/${conversationId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: next }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error ?? "Failed to update");
+      await refreshControl();
+      toast.success(next === "resolved" ? t("resolvedToast") : t("reopenedToast"));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update");
     } finally {
@@ -196,11 +221,25 @@ export default function ChatWindow({
     setBotActiveRemote(!botActive);
   };
 
-  const banner = botActive
-    ? { tone: "green", text: t("botBanner") }
-    : heldByOther && assignee
-      ? { tone: "indigo", text: t("otherAgentBanner", { name: assignee.name }) }
-      : { tone: "amber", text: t("agentBanner") };
+  const banner =
+    status === "resolved"
+      ? { tone: "slate", text: t("resolvedBanner") }
+      : status === "pending" && !assignee
+        ? { tone: "red", text: t("pendingBanner") }
+        : botActive
+          ? { tone: "green", text: t("botBanner") }
+          : heldByOther && assignee
+            ? { tone: "indigo", text: t("otherAgentBanner", { name: assignee.name }) }
+            : { tone: "amber", text: t("agentBanner") };
+
+  const BANNER_STYLES: Record<string, { bar: string; dot: string; text: string }> = {
+    green: { bar: "bg-green-50 border-green-100", dot: "bg-green-500", text: "text-green-700" },
+    indigo: { bar: "bg-indigo-50 border-indigo-100", dot: "bg-indigo-500", text: "text-indigo-700" },
+    amber: { bar: "bg-amber-50 border-amber-100", dot: "bg-amber-500", text: "text-amber-700" },
+    red: { bar: "bg-red-50 border-red-100", dot: "bg-red-500", text: "text-red-700" },
+    slate: { bar: "bg-slate-100 border-slate-200", dot: "bg-slate-400", text: "text-slate-600" },
+  };
+  const bannerStyle = BANNER_STYLES[banner.tone];
 
   return (
     <div className="flex h-full flex-col bg-slate-50">
@@ -218,7 +257,29 @@ export default function ChatWindow({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <TakeControlButton botActive={botActive} heldByOther={heldByOther} onToggle={handleToggleBot} />
+          {status === "resolved" ? (
+            <button
+              onClick={() => setStatusRemote("open")}
+              disabled={toggling}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+            >
+              {t("reopen")}
+            </button>
+          ) : (
+            <>
+              <TakeControlButton botActive={botActive} heldByOther={heldByOther} onToggle={handleToggleBot} />
+              <button
+                onClick={() => setStatusRemote("resolved")}
+                disabled={toggling}
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                {t("resolve")}
+              </button>
+            </>
+          )}
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen((v) => !v)}
@@ -252,31 +313,17 @@ export default function ChatWindow({
         </div>
       </div>
 
-      {/* Estado: bot / yo / otro agente */}
-      <div
-        className={`flex items-center gap-2 border-b px-4 py-2 ${
-          banner.tone === "green"
-            ? "bg-green-50 border-green-100"
-            : banner.tone === "indigo"
-              ? "bg-indigo-50 border-indigo-100"
-              : "bg-amber-50 border-amber-100"
-        }`}
-      >
+      {/* Estado: resuelta / esperando agente / bot / yo / otro agente */}
+      <div className={`flex items-center gap-2 border-b px-4 py-2 ${bannerStyle.bar}`}>
         {banner.tone === "green" ? (
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
           </span>
         ) : (
-          <span className={`h-2 w-2 rounded-full ${banner.tone === "indigo" ? "bg-indigo-500" : "bg-amber-500"}`} />
+          <span className={`h-2 w-2 rounded-full ${bannerStyle.dot}`} />
         )}
-        <span
-          className={`text-xs font-medium ${
-            banner.tone === "green" ? "text-green-700" : banner.tone === "indigo" ? "text-indigo-700" : "text-amber-700"
-          }`}
-        >
-          {banner.text}
-        </span>
+        <span className={`text-xs font-medium ${bannerStyle.text}`}>{banner.text}</span>
       </div>
 
       {confirmTakeover && (
