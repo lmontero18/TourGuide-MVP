@@ -243,10 +243,16 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Templates de invitacion y recuperacion: linkean a /auth/confirm con token_hash
+# y next=/set-password. En prod se configuran a mano en el dashboard (Authentication
+# -> Emails) con el mismo HTML de supabase/templates/.
+[auth.email.template.invite]
+subject = "Te invitaron a Tourfy"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.recovery]
+subject = "Restablece tu contraseña de Tourfy"
+content_path = "./supabase/templates/recovery.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]

@@ -50,6 +50,19 @@ export async function POST(request: NextRequest) {
   const { createServiceClient } = await import('@/lib/supabase/server')
   const serviceClient = await createServiceClient()
 
+  // Email ya registrado: inviteUserByEmail sobre un usuario existente sin
+  // confirmar REENVIA la invitacion y devuelve ese usuario — y el update de mas
+  // abajo le cambiaria la org, robandoselo a otra agencia. Cortar antes.
+  const { data: existing } = await serviceClient
+    .from('users')
+    .select('id, org_id')
+    .eq('email', email)
+    .maybeSingle()
+  if (existing) {
+    const code = existing.org_id === adminProfile.org_id ? 'already_in_team' : 'email_taken'
+    return NextResponse.json({ error: 'Email already registered', code }, { status: 409 })
+  }
+
   // role y org_id NO viajan en la metadata del usuario. handle_new_user() dejo de
   // leerlos de ahi (ver 20260727140000_handle_new_user_no_privesc.sql): eran input
   // controlable por quien se registra, y un signup directo contra GoTrue con la
