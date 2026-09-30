@@ -447,7 +447,7 @@
         "responseTime": "Bot response time",
         "responseTimeHint": "Median time between the customer's first message and the bot's reply.",
         "botHandled": "Handled by the bot only",
-        "botHandledHint": "Active conversations that were not handed off to an agent.",
+        "botHandledHint": "Active conversations where no agent wrote or took over.",
         "totalConversations": "Total conversations",
         "qualifiedLeads": "Qualified leads",
         "conversionRate": "Conversion rate",
@@ -455,9 +455,9 @@
       },
       "afterHours": {
         "title": "After hours",
-        "sub": "Conversations the bot handled while your office was closed",
+        "sub": "Conversations that reached out while your office was closed",
         "conversations": "conversations",
-        "messages": "{count} messages answered while nobody was around",
+        "messages": "{count, plural, one {# customer message arrived} other {# customer messages arrived}} after hours",
         "slotEvening": "After closing",
         "slotNight": "Before opening",
         "slotWeekend": "Weekend"
