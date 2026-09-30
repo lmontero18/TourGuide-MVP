@@ -14,7 +14,10 @@ create table public.conversation_reads (
 
 alter table public.conversation_reads enable row level security;
 
-revoke all on table public.conversation_reads from anon, public;
+-- Revocar a authenticated tambien: los default privileges de Supabase le dan
+-- ALL (incluido TRUNCATE) a cada tabla nueva, y TRUNCATE no pasa por RLS.
+-- Despues se otorga solo lo que la app usa.
+revoke all on table public.conversation_reads from anon, authenticated, public;
 grant select, insert, update on table public.conversation_reads to authenticated;
 
 create policy conversation_reads_select_own on public.conversation_reads
