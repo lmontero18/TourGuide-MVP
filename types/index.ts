@@ -170,3 +170,26 @@ export interface Subscription {
   created_at: string
   updated_at: string
 }
+
+// Respuesta de la RPC get_org_metrics (supabase/migrations/20260930010000_org_metrics.sql).
+// Capa 1 de metricas: actividad del bot. Leads y revenue van en CODE-171/172.
+export type MetricsPeriod = '7d' | '30d' | '90d'
+
+export interface OrgMetrics {
+  timezone: string
+  active_conversations: number
+  active_conversations_prev: number
+  new_contacts: number
+  new_contacts_prev: number
+  messages: { client: number; bot: number; agent: number }
+  handoffs: number
+  after_hours: {
+    conversations: number
+    messages: number
+    evening: number
+    night: number
+    weekend: number
+  }
+  response_time: { median_seconds: number | null; samples: number }
+  daily: { date: string; conversations: number }[]
+}

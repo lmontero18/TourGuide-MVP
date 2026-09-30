@@ -464,6 +464,10 @@ export type Database = {
     Functions: {
       auth_org_id: { Args: never; Returns: string }
       auth_role: { Args: never; Returns: string }
+      get_org_metrics: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       get_user_org_id: { Args: never; Returns: string }
       match_documents: {
         Args: { filter?: Json; match_count?: number; query_embedding: string }
