@@ -475,9 +475,12 @@ async function processWebhook(body: WebhookPayload) {
               timeZone: DEFAULT_TIMEZONE,
             }).format(new Date())
           }
+          // El recordatorio de idioma va al final a proposito: es lo ultimo que
+          // lee el modelo y el prompt entero esta en español (gpt-5-mini mezclaba).
           const systemPrompt =
             `${org?.prompt ?? ''}\n\n` +
-            `Fecha y hora actual (zona horaria de la agencia): ${nowFormatted}.`
+            `Fecha y hora actual (zona horaria de la agencia): ${nowFormatted}.\n` +
+            `Recordatorio: responde todo el mensaje en el idioma del ultimo mensaje del cliente, sin mezclar idiomas.`
 
           await callN8nBot(
             {
