@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
+import { useConversationsContext } from "@/components/providers/ConversationsProvider";
 
 const NAV_ITEMS = [
   {
@@ -70,6 +71,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const t = useTranslations("dashboard.sidebar");
   const { role } = useAuth();
+  const { unreadTotal } = useConversationsContext();
   // Mientras carga el rol (null) se muestran todos: ocultarlos haria parpadear
   // el menu a cada admin. El proxy igual bloquea las rutas para agentes.
   const navItems = NAV_ITEMS.filter((item) => !item.adminOnly || role !== "agent");
@@ -125,10 +127,20 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   : "text-slate-500 hover:bg-slate-50 hover:text-navy-900"
               }`}
             >
-              <span className="shrink-0">{item.icon}</span>
+              <span className="relative shrink-0">
+                {item.icon}
+                {/* Colapsado: solo un punto sobre el icono */}
+                {collapsed && item.key === "conversations" && unreadTotal > 0 && (
+                  <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+                )}
+              </span>
               {!collapsed && <span className="whitespace-nowrap">{t(item.key)}</span>}
-              {active && !collapsed && (
-                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-navy-900" />
+              {!collapsed && item.key === "conversations" && unreadTotal > 0 ? (
+                <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+                  {unreadTotal > 99 ? "99+" : unreadTotal}
+                </span>
+              ) : (
+                active && !collapsed && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-navy-900" />
               )}
             </Link>
           );
