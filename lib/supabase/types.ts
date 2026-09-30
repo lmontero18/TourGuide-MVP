@@ -78,6 +78,39 @@ export type Database = {
           },
         ]
       }
+      conversation_reads: {
+        Row: {
+          conversation_id: string
+          last_read_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          last_read_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_reads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           assigned_agent_id: string | null
@@ -466,7 +499,18 @@ export type Database = {
       auth_role: { Args: never; Returns: string }
       get_org_metrics: { Args: { p_from: string; p_to: string }; Returns: Json }
       get_org_monthly_usage: { Args: never; Returns: Json }
+      get_unread_counts: {
+        Args: never
+        Returns: {
+          conversation_id: string
+          unread: number
+        }[]
+      }
       get_user_org_id: { Args: never; Returns: string }
+      mark_conversation_read: {
+        Args: { p_conversation_id: string }
+        Returns: undefined
+      }
       match_documents: {
         Args: { filter?: Json; match_count?: number; query_embedding: string }
         Returns: {

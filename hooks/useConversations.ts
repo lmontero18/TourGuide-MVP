@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ASSIGNED_AGENT_EMBED, toAssignee } from '@/lib/assignee'
 import type { Assignee, ConversationStatus } from '@/types'
@@ -16,6 +16,8 @@ export interface ConversationListItem {
   status: ConversationStatus
   botActive: boolean
   assignee: Assignee | null
+  // Mensajes del cliente sin leer por el usuario actual (0 en la abierta).
+  unreadCount: number
 }
 
 interface ConversationRow {
@@ -58,6 +60,7 @@ function toItem(c: ConversationRow): ConversationListItem {
     status: c.status,
     botActive: c.bot_active,
     assignee: toAssignee(c.assigned_agent),
+    unreadCount: 0,
   }
 }
 
@@ -74,9 +77,16 @@ function sortByRecent(list: ConversationListItem[]): ConversationListItem[] {
 // (antes cada mensaje de cualquier conversacion volvia a pedir la lista entera
 // con un sub-select de mensajes por fila). Solo va a la red cuando falta un
 // dato: conversacion nueva o agente recien asignado (hace falta su nombre).
-export function useConversations(orgId: string | null) {
+export function useConversations(orgId: string | null, activeId: string | null = null) {
   const [conversations, setConversations] = useState<ConversationListItem[]>([])
   const [loading, setLoading] = useState(true)
+  // No leidos por conversacion para el usuario actual (conversation_reads).
+  const [unread, setUnread] = useState<Record<string, number>>({})
+  // activeId leido desde los handlers de realtime sin re-suscribir el canal.
+  const activeRef = useRef<string | null>(activeId)
+  useEffect(() => {
+    activeRef.current = activeId
+  }, [activeId])
   // Espejo sincronico del estado: los handlers de realtime deciden si hace
   // falta ir a la red sin meter side effects dentro de setState.
   const listRef = useRef<ConversationListItem[]>([])
@@ -108,6 +118,21 @@ export function useConversations(orgId: string | null) {
     [upsert]
   )
 
+  // Marca leida en la DB y limpia el contador local. Se llama al abrir una
+  // conversacion y cuando llega un mensaje a la que esta abierta.
+  const markRead = useCallback((id: string) => {
+    createClient()
+      .rpc('mark_conversation_read', { p_conversation_id: id })
+      .then(({ error }) => {
+        if (error) console.error('Error marking conversation read:', error)
+        setUnread((prev) => (prev[id] ? { ...prev, [id]: 0 } : prev))
+      })
+  }, [])
+
+  useEffect(() => {
+    if (activeId) markRead(activeId)
+  }, [activeId, markRead])
+
   useEffect(() => {
     if (!orgId) return
     let cancelled = false
@@ -129,6 +154,16 @@ export function useConversations(orgId: string | null) {
         }
         setLoading(false)
       })
+
+    supabase.rpc('get_unread_counts').then(({ data, error }) => {
+      if (cancelled) return
+      if (error) {
+        console.error('Error loading unread counts:', error)
+        return
+      }
+      const rows = (data ?? []) as { conversation_id: string; unread: number }[]
+      setUnread(Object.fromEntries(rows.map((r) => [r.conversation_id, Number(r.unread)])))
+    })
 
     const channel = supabase
       .channel(`conversations:${orgId}`)
@@ -178,7 +213,14 @@ export function useConversations(orgId: string | null) {
         // messages no tiene org_id: RLS de realtime solo entrega los de la org.
         { event: 'INSERT', schema: 'public', table: 'messages' },
         (payload) => {
-          const msg = payload.new as { conversation_id: string; content: string; created_at: string }
+          const msg = payload.new as { conversation_id: string; content: string; created_at: string; role: string }
+          if (msg.role === 'user') {
+            if (msg.conversation_id === activeRef.current) {
+              markRead(msg.conversation_id)
+            } else {
+              setUnread((prev) => ({ ...prev, [msg.conversation_id]: (prev[msg.conversation_id] ?? 0) + 1 }))
+            }
+          }
           const current = listRef.current.find((c) => c.id === msg.conversation_id)
           if (!current) {
             fetchOne(msg.conversation_id)
@@ -198,9 +240,16 @@ export function useConversations(orgId: string | null) {
       cancelled = true
       supabase.removeChannel(channel)
     }
-  }, [orgId, commit, fetchOne, upsert])
+  }, [orgId, commit, fetchOne, upsert, markRead])
+
+  // La abierta siempre cuenta 0 (se marca leida al abrir, sin esperar la DB).
+  const withUnread = useMemo(
+    () => conversations.map((c) => ({ ...c, unreadCount: c.id === activeId ? 0 : unread[c.id] ?? 0 })),
+    [conversations, unread, activeId]
+  )
+  const unreadTotal = useMemo(() => withUnread.reduce((sum, c) => sum + c.unreadCount, 0), [withUnread])
 
   // Sin org (usuario sin onboarding) no hay nada que cargar.
-  if (!orgId) return { conversations: [] as ConversationListItem[], loading: false }
-  return { conversations, loading }
+  if (!orgId) return { conversations: [] as ConversationListItem[], loading: false, unreadTotal: 0 }
+  return { conversations: withUnread, loading, unreadTotal }
 }

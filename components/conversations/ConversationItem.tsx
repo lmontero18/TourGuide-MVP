@@ -16,6 +16,7 @@ interface ConversationItemProps {
   assignee: Assignee | null;
   currentUserId?: string | null;
   unread?: boolean;
+  unreadCount?: number;
   active?: boolean;
 }
 
@@ -30,6 +31,7 @@ export default function ConversationItem({
   assignee,
   currentUserId,
   unread,
+  unreadCount = 0,
   active,
 }: ConversationItemProps) {
   const displayName = contactName || contactPhone;
@@ -61,11 +63,18 @@ export default function ConversationItem({
           <span className={`text-sm truncate ${unread ? "font-bold text-navy-900" : "font-medium text-navy-900"}`}>
             {displayName}
           </span>
-          <span className="shrink-0 text-[10px] text-slate-400">{lastMessageAt}</span>
+          <span className={`shrink-0 text-[10px] ${unread ? "font-bold text-blue-600" : "text-slate-400"}`}>{lastMessageAt}</span>
         </div>
-        <p className={`text-xs mt-0.5 truncate ${unread ? "text-navy-700 font-medium" : "text-slate-500"}`}>
-          {lastMessage}
-        </p>
+        <div className="flex items-center justify-between gap-2 mt-0.5">
+          <p className={`text-xs truncate ${unread ? "text-navy-700 font-medium" : "text-slate-500"}`}>
+            {lastMessage}
+          </p>
+          {unreadCount > 0 && (
+            <span className="shrink-0 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 text-[10px] font-bold text-white">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </div>
         <div className="mt-1.5 flex items-center gap-1.5">
           <StatusBadge status={status} botActive={botActive} />
           {!botActive && assignee && (

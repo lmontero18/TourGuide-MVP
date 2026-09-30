@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import ConversationItem from "./ConversationItem";
 import ConversationListSkeleton from "./ConversationListSkeleton";
 import { useAuth } from "@/hooks/useAuth";
-import { useConversations } from "@/hooks/useConversations";
+import { useConversationsContext } from "@/components/providers/ConversationsProvider";
 import type { ConversationListItem } from "@/hooks/useConversations";
 
 // Pestañas por lo que el agente necesita hacer, no por el estado crudo
@@ -18,8 +18,9 @@ interface ConversationListProps {
 }
 
 export default function ConversationList({ activeId }: ConversationListProps) {
-  const { orgId, user, loading: authLoading } = useAuth();
-  const { conversations, loading } = useConversations(orgId);
+  const { user, loading: authLoading } = useAuth();
+  // Datos compartidos con el sidebar (ConversationsProvider en el layout del dashboard).
+  const { conversations, loading } = useConversationsContext();
   const t = useTranslations("dashboard.conversations");
   const [filter, setFilter] = useState<Tab>("all");
   const [search, setSearch] = useState("");
@@ -131,7 +132,7 @@ export default function ConversationList({ activeId }: ConversationListProps) {
           </div>
         ) : (
           filtered.map((conv) => (
-            <ConversationItem key={conv.id} {...conv} currentUserId={user?.id} active={conv.id === activeId} />
+            <ConversationItem key={conv.id} {...conv} currentUserId={user?.id} active={conv.id === activeId} unread={conv.unreadCount > 0} />
           ))
         )}
       </div>
