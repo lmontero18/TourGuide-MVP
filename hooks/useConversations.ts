@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ASSIGNED_AGENT_EMBED, toAssignee } from '@/lib/assignee'
 import type { Assignee, ConversationStatus } from '@/types'
@@ -11,6 +11,8 @@ export interface ConversationListItem {
   contactPhone: string
   lastMessage: string
   lastMessageAt: string
+  // ISO crudo para ordenar y recalcular el "hace X" al parchear en vivo.
+  lastMessageIso: string | null
   status: ConversationStatus
   botActive: boolean
   assignee: Assignee | null
@@ -26,6 +28,11 @@ interface ConversationRow {
   messages: { content: string }[]
 }
 
+const LIST_SELECT = `id, status, bot_active, last_message_at,
+  contact:contacts(name, phone),
+  ${ASSIGNED_AGENT_EMBED},
+  messages(content, created_at)`
+
 function formatRelative(iso: string | null): string {
   if (!iso) return ''
   const diff = Date.now() - new Date(iso).getTime()
@@ -40,68 +47,121 @@ function formatRelative(iso: string | null): string {
   return new Date(iso).toLocaleDateString()
 }
 
+function toItem(c: ConversationRow): ConversationListItem {
+  return {
+    id: c.id,
+    contactName: c.contact?.name ?? null,
+    contactPhone: c.contact?.phone ?? '',
+    lastMessage: c.messages?.[0]?.content ?? '',
+    lastMessageAt: formatRelative(c.last_message_at),
+    lastMessageIso: c.last_message_at,
+    status: c.status,
+    botActive: c.bot_active,
+    assignee: toAssignee(c.assigned_agent),
+  }
+}
+
+function sortByRecent(list: ConversationListItem[]): ConversationListItem[] {
+  return [...list].sort((a, b) => {
+    if (!a.lastMessageIso) return 1
+    if (!b.lastMessageIso) return -1
+    return b.lastMessageIso.localeCompare(a.lastMessageIso)
+  })
+}
+
+// Lista de conversaciones de la org con realtime. La carga completa ocurre una
+// sola vez; despues cada evento parchea solo la fila afectada en memoria
+// (antes cada mensaje de cualquier conversacion volvia a pedir la lista entera
+// con un sub-select de mensajes por fila). Solo va a la red cuando falta un
+// dato: conversacion nueva o agente recien asignado (hace falta su nombre).
 export function useConversations(orgId: string | null) {
   const [conversations, setConversations] = useState<ConversationListItem[]>([])
   const [loading, setLoading] = useState(true)
+  // Espejo sincronico del estado: los handlers de realtime deciden si hace
+  // falta ir a la red sin meter side effects dentro de setState.
+  const listRef = useRef<ConversationListItem[]>([])
 
-  const fetchAll = useCallback(async () => {
-    if (!orgId) {
-      setConversations([])
-      setLoading(false)
-      return
-    }
+  const commit = useCallback((next: ConversationListItem[]) => {
+    listRef.current = next
+    setConversations(next)
+  }, [])
+
+  const upsert = useCallback(
+    (item: ConversationListItem) => {
+      const rest = listRef.current.filter((c) => c.id !== item.id)
+      commit(sortByRecent([item, ...rest]))
+    },
+    [commit]
+  )
+
+  const fetchOne = useCallback(
+    async (id: string) => {
+      const { data } = await createClient()
+        .from('conversations')
+        .select(LIST_SELECT)
+        .eq('id', id)
+        .order('created_at', { ascending: false, foreignTable: 'messages' })
+        .limit(1, { foreignTable: 'messages' })
+        .maybeSingle()
+      if (data) upsert(toItem(data as unknown as ConversationRow))
+    },
+    [upsert]
+  )
+
+  useEffect(() => {
+    if (!orgId) return
+    let cancelled = false
     const supabase = createClient()
-    const { data, error } = await supabase
+
+    supabase
       .from('conversations')
-      .select(
-        `id, status, bot_active, last_message_at,
-         contact:contacts(name, phone),
-         ${ASSIGNED_AGENT_EMBED},
-         messages(content, created_at)`
-      )
+      .select(LIST_SELECT)
       .eq('org_id', orgId)
       .order('last_message_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false, foreignTable: 'messages' })
       .limit(1, { foreignTable: 'messages' })
+      .then(({ data, error }) => {
+        if (cancelled) return
+        if (error) {
+          console.error('Error loading conversations:', error)
+        } else {
+          commit(((data ?? []) as unknown as ConversationRow[]).map(toItem))
+        }
+        setLoading(false)
+      })
 
-    if (error) {
-      console.error('Error loading conversations:', error)
-      setLoading(false)
-      return
-    }
-
-    const rows = (data ?? []) as unknown as ConversationRow[]
-    setConversations(
-      rows.map((c) => ({
-        id: c.id,
-        contactName: c.contact?.name ?? null,
-        contactPhone: c.contact?.phone ?? '',
-        lastMessage: c.messages?.[0]?.content ?? '',
-        lastMessageAt: formatRelative(c.last_message_at),
-        status: c.status,
-        botActive: c.bot_active,
-        assignee: toAssignee(c.assigned_agent),
-      }))
-    )
-    setLoading(false)
-  }, [orgId])
-
-  useEffect(() => {
-    fetchAll()
-
-    if (!orgId) return
-    const supabase = createClient()
     const channel = supabase
       .channel(`conversations:${orgId}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'conversations', filter: `org_id=eq.${orgId}` },
-        () => { fetchAll() }
+        (payload) => { fetchOne((payload.new as { id: string }).id) }
       )
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'conversations', filter: `org_id=eq.${orgId}` },
-        () => { fetchAll() }
+        (payload) => {
+          const row = payload.new as {
+            id: string
+            status: ConversationStatus
+            bot_active: boolean
+            last_message_at: string | null
+            assigned_agent_id: string | null
+          }
+          const current = listRef.current.find((c) => c.id === row.id)
+          // Agente nuevo: el payload trae el id pero no el nombre.
+          if (!current || (row.assigned_agent_id ?? null) !== (current.assignee?.id ?? null)) {
+            fetchOne(row.id)
+            return
+          }
+          upsert({
+            ...current,
+            status: row.status,
+            botActive: row.bot_active,
+            lastMessageIso: row.last_message_at,
+            lastMessageAt: formatRelative(row.last_message_at),
+          })
+        }
       )
       .on(
         'postgres_changes',
@@ -110,20 +170,37 @@ export function useConversations(orgId: string | null) {
         { event: 'DELETE', schema: 'public', table: 'conversations' },
         (payload) => {
           const deletedId = (payload.old as { id?: string })?.id
-          if (deletedId) {
-            setConversations((prev) => prev.filter((c) => c.id !== deletedId))
-          }
+          if (deletedId) commit(listRef.current.filter((c) => c.id !== deletedId))
         }
       )
       .on(
         'postgres_changes',
+        // messages no tiene org_id: RLS de realtime solo entrega los de la org.
         { event: 'INSERT', schema: 'public', table: 'messages' },
-        () => { fetchAll() }
+        (payload) => {
+          const msg = payload.new as { conversation_id: string; content: string; created_at: string }
+          const current = listRef.current.find((c) => c.id === msg.conversation_id)
+          if (!current) {
+            fetchOne(msg.conversation_id)
+            return
+          }
+          upsert({
+            ...current,
+            lastMessage: msg.content,
+            lastMessageIso: msg.created_at,
+            lastMessageAt: formatRelative(msg.created_at),
+          })
+        }
       )
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
-  }, [orgId, fetchAll])
+    return () => {
+      cancelled = true
+      supabase.removeChannel(channel)
+    }
+  }, [orgId, commit, fetchOne, upsert])
 
+  // Sin org (usuario sin onboarding) no hay nada que cargar.
+  if (!orgId) return { conversations: [] as ConversationListItem[], loading: false }
   return { conversations, loading }
 }
