@@ -471,7 +471,16 @@
           "sun": "Sun"
         }
       },
-      "empty": "No activity in this period yet. Once your customers message your WhatsApp, you'll see it here."
+      "empty": "No activity in this period yet. Once your customers message your WhatsApp, you'll see it here.",
+      "usage": {
+        "title": "WhatsApp messages this month",
+        "sub": "Replies from the bot and agents. Meta includes 1,000 free per month; from the 1,001st it charges per message to your payment method in Meta.",
+        "ofFree": "of {free} free",
+        "warn": "You're close to the free limit. Make sure you have a payment method in Meta so your bot doesn't stop.",
+        "over": "You passed the free limit: Meta charges {count} extra messages to your payment method. Without a card, the bot stops replying.",
+        "checkPayment": "Check payment method",
+        "note": "Estimate. Resets on the 1st of each month."
+      }
     },
     "settings": {
       "title": "Settings",

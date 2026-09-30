@@ -7,7 +7,9 @@ import MetricCard from "@/components/metrics/MetricCard";
 import ActivityChart from "@/components/metrics/ActivityChart";
 import AfterHoursCard from "@/components/metrics/AfterHoursCard";
 import MessagesCard from "@/components/metrics/MessagesCard";
+import UsageCard from "@/components/metrics/UsageCard";
 import { useMetrics } from "@/hooks/useMetrics";
+import { useMonthlyUsage } from "@/hooks/useMonthlyUsage";
 import type { MetricsPeriod } from "@/types";
 
 const PERIODS: MetricsPeriod[] = ["7d", "30d", "90d"];
@@ -31,6 +33,7 @@ export default function MetricsPage() {
   const t = useTranslations("dashboard.metrics");
   const [period, setPeriod] = useState<MetricsPeriod>("7d");
   const { data, loading, error } = useMetrics(period);
+  const usage = useMonthlyUsage();
 
   const active = data?.active_conversations ?? 0;
   const botHandled = active > 0 ? `${Math.round(((active - (data?.handoffs ?? 0)) / active) * 100)}%` : "—";
@@ -103,7 +106,12 @@ export default function MetricsPage() {
           </div>
         )}
 
-        {data && <MessagesCard messages={data.messages} />}
+        {(data || usage) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {usage && <UsageCard usage={usage} />}
+            {data && <MessagesCard messages={data.messages} />}
+          </div>
+        )}
       </div>
     </div>
   );
