@@ -224,7 +224,17 @@
       "submit": "Enviar link",
       "sentTitle": "Revisa tu email",
       "sentSub": "Te enviamos un link para restablecer tu contraseña. Puede tardar un minuto — revisa también la carpeta de spam.",
-      "resend": "¿No llega? Reenviar"
+      "resend": "¿No llega? Reenviar",
+      "tooMany": "Demasiados intentos. Prueba de nuevo en {minutes} min."
+    },
+    "setPassword": {
+      "title": "Crea tu contraseña",
+      "sub": "La vas a usar para entrar a Tourfy de ahora en adelante.",
+      "password": "Contraseña",
+      "confirm": "Repite la contraseña",
+      "rules": "Mínimo 8 caracteres, con una mayúscula, una minúscula y un número.",
+      "toggle": "Mostrar contraseña",
+      "submit": "Guardar y entrar"
     }
   },
   "onboarding": {
@@ -515,18 +525,41 @@
     "agents": {
       "title": "Agentes",
       "invite": "Invitar agente",
-      "inviteTitle": "Invitar a un nuevo agente",
+      "inviteTitle": "Invitar a un nuevo miembro",
       "email": "Email",
       "emailPlaceholder": "agente@tuempresa.com",
+      "name": "Nombre (opcional)",
+      "namePlaceholder": "Ana Martínez",
       "role": "Rol",
       "admin": "admin",
       "agent": "agente",
-      "roleHelp": "Los agentes pueden ver y responder conversaciones. Los admins también pueden acceder a métricas, configuración y gestionar otros agentes.",
+      "roleHelp": "Los agentes pueden ver y responder conversaciones. Los admins también pueden acceder a métricas, configuración y gestionar el equipo.",
       "cancel": "Cancelar",
       "send": "Enviar invitación",
       "teamTitle": "Miembros del equipo",
-      "teamCount": "{count} agentes en tu organización",
-      "inactive": "INACTIVO"
+      "teamCount": "{count, plural, one {# miembro} other {# miembros}} en tu organización",
+      "loading": "Cargando equipo…",
+      "you": "TÚ",
+      "pending": "INVITACIÓN PENDIENTE",
+      "actions": "Acciones",
+      "makeAdmin": "Hacer admin",
+      "makeAgent": "Cambiar a agente",
+      "resend": "Reenviar invitación",
+      "remove": "Quitar del equipo",
+      "removeConfirm": "Pierde el acceso de inmediato. Las conversaciones que tenía tomadas vuelven al bot.",
+      "removeYes": "Sí, quitar",
+      "inviteSent": "Invitación enviada a {email}",
+      "resent": "Invitación reenviada a {email}",
+      "removed": "Miembro quitado del equipo",
+      "errors": {
+        "load": "No pudimos cargar el equipo. Recarga la página.",
+        "invite": "No pudimos enviar la invitación. Intenta de nuevo.",
+        "alreadyInTeam": "Esa persona ya está en tu equipo. Si no aceptó, reenvíale la invitación desde la lista.",
+        "emailTaken": "Ese email ya tiene una cuenta en Tourfy con otra agencia.",
+        "role": "No pudimos cambiar el rol.",
+        "resend": "No pudimos reenviar la invitación.",
+        "remove": "No pudimos quitar a este miembro."
+      }
     }
   },
   "blog": {

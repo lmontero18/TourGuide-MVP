@@ -2,6 +2,11 @@ import { createMiddlewareClient } from '@/lib/supabase/middleware'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+// Solo admins: los agentes atienden conversaciones, no configuran la agencia
+// (CLAUDE.md > Auth y roles). Las API routes validan el rol por su cuenta;
+// esto evita que un agente llegue a las pantallas escribiendo la URL.
+const ADMIN_ONLY_PATHS = ['/metrics', '/settings', '/tours']
+
 function redirectWithCookies(url: URL, response: NextResponse) {
   const redirect = NextResponse.redirect(url)
   // Copy refreshed auth cookies to the redirect response
@@ -16,7 +21,7 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const protectedPaths = ['/conversations', '/metrics', '/settings', '/dashboard', '/onboarding']
+  const protectedPaths = ['/conversations', '/metrics', '/settings', '/tours', '/dashboard', '/onboarding']
   const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
 
   // Redirect unauthenticated users from protected routes to login
@@ -28,7 +33,7 @@ export async function proxy(request: NextRequest) {
     // Check if the user's org has completed onboarding
     const { data: profile } = await supabase
       .from('users')
-      .select('org_id, organizations(onboarded_at)')
+      .select('org_id, role, organizations(onboarded_at)')
       .eq('id', user.id)
       .maybeSingle()
 
@@ -49,11 +54,16 @@ export async function proxy(request: NextRequest) {
     if (isOnboarded && request.nextUrl.pathname === '/onboarding') {
       return redirectWithCookies(new URL('/conversations', request.url), response)
     }
+
+    const isAdminOnly = ADMIN_ONLY_PATHS.some(p => request.nextUrl.pathname.startsWith(p))
+    if (isOnboarded && isAdminOnly && profile?.role !== 'admin') {
+      return redirectWithCookies(new URL('/conversations', request.url), response)
+    }
   }
 
   return response
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register', '/onboarding', '/conversations/:path*', '/metrics/:path*', '/settings/:path*'],
+  matcher: ['/dashboard/:path*', '/login', '/register', '/onboarding', '/conversations/:path*', '/metrics/:path*', '/settings/:path*', '/tours/:path*'],
 }

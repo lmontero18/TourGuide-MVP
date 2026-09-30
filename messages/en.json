@@ -224,7 +224,17 @@
       "submit": "Send reset link",
       "sentTitle": "Check your email",
       "sentSub": "We sent a password reset link. It may take a minute to arrive — check your spam folder too.",
-      "resend": "Didn’t get it? Resend"
+      "resend": "Didn’t get it? Resend",
+      "tooMany": "Too many attempts. Try again in {minutes} min."
+    },
+    "setPassword": {
+      "title": "Create your password",
+      "sub": "You'll use it to log in to Tourfy from now on.",
+      "password": "Password",
+      "confirm": "Repeat password",
+      "rules": "At least 8 characters, with an uppercase letter, a lowercase letter and a number.",
+      "toggle": "Show password",
+      "submit": "Save and continue"
     }
   },
   "onboarding": {
@@ -515,18 +525,41 @@
     "agents": {
       "title": "Agents",
       "invite": "Invite agent",
-      "inviteTitle": "Invite a new agent",
+      "inviteTitle": "Invite a new team member",
       "email": "Email",
       "emailPlaceholder": "agent@yourcompany.com",
+      "name": "Name (optional)",
+      "namePlaceholder": "Ana Martinez",
       "role": "Role",
       "admin": "admin",
       "agent": "agent",
-      "roleHelp": "Agents can view and respond to conversations. Admins can also access metrics, settings, and manage other agents.",
+      "roleHelp": "Agents can view and reply to conversations. Admins can also access metrics, settings and manage the team.",
       "cancel": "Cancel",
-      "send": "Send invite",
+      "send": "Send invitation",
       "teamTitle": "Team members",
-      "teamCount": "{count} agents in your organization",
-      "inactive": "INACTIVE"
+      "teamCount": "{count, plural, one {# member} other {# members}} in your organization",
+      "loading": "Loading team…",
+      "you": "YOU",
+      "pending": "INVITE PENDING",
+      "actions": "Actions",
+      "makeAdmin": "Make admin",
+      "makeAgent": "Change to agent",
+      "resend": "Resend invitation",
+      "remove": "Remove from team",
+      "removeConfirm": "They lose access immediately. Conversations they had taken go back to the bot.",
+      "removeYes": "Yes, remove",
+      "inviteSent": "Invitation sent to {email}",
+      "resent": "Invitation resent to {email}",
+      "removed": "Member removed from the team",
+      "errors": {
+        "load": "We couldn't load your team. Reload the page.",
+        "invite": "We couldn't send the invitation. Please try again.",
+        "alreadyInTeam": "That person is already on your team. If they haven't accepted, resend the invitation from the list.",
+        "emailTaken": "That email already has a Tourfy account with another agency.",
+        "role": "We couldn't change the role.",
+        "resend": "We couldn't resend the invitation.",
+        "remove": "We couldn't remove this member."
+      }
     }
   },
   "blog": {

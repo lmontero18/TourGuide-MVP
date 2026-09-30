@@ -200,3 +200,15 @@ export interface MonthlyUsage {
   period_start: string
   sent: number
 }
+
+// Miembro del equipo tal como lo devuelve GET /api/agents.
+export interface TeamMember {
+  id: string
+  email: string
+  full_name: string | null
+  role: Role
+  status: 'active' | 'pending'
+  invited_at: string | null
+  last_sign_in_at: string | null
+  is_self: boolean
+}

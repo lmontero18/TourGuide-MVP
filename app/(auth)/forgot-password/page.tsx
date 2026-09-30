@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { requestPasswordReset } from "./actions";
 
 export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
+  const [email, setEmail] = useState("");
+  const [pending, startTransition] = useTransition();
   const t = useTranslations("auth.forgot");
 
   if (sent) {
@@ -80,7 +84,11 @@ export default function ForgotPasswordPage() {
         className="mt-8 space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
-          setSent(true);
+          startTransition(async () => {
+            const res = await requestPasswordReset(email);
+            if (res.ok) setSent(true);
+            else toast.error(t("tooMany", { minutes: res.retryAfter }));
+          });
         }}
       >
         {/* Email */}
@@ -94,6 +102,9 @@ export default function ForgotPasswordPage() {
           <input
             id="email"
             type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
             placeholder={t("emailPlaceholder")}
             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -103,9 +114,10 @@ export default function ForgotPasswordPage() {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full h-11 rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
+          disabled={pending}
+          className="w-full h-11 rounded-xl bg-navy-900 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {t("submit")}
+          {pending ? `${t("submit")}...` : t("submit")}
         </button>
       </form>
     </div>
