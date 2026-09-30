@@ -37,6 +37,18 @@ const NAV_ITEMS = [
     ),
   },
   {
+    key: "agents",
+    adminOnly: true,
+    href: "/settings/agents",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="8.5" cy="7" r="4" />
+        <path d="M20 8v6" /><path d="M23 11h-6" />
+      </svg>
+    ),
+  },
+  {
     key: "settings",
     adminOnly: true,
     href: "/settings",
@@ -61,6 +73,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   // Mientras carga el rol (null) se muestran todos: ocultarlos haria parpadear
   // el menu a cada admin. El proxy igual bloquea las rutas para agentes.
   const navItems = NAV_ITEMS.filter((item) => !item.adminOnly || role !== "agent");
+  // Item activo = el href mas largo que matchee. /settings/agents cae tambien
+  // bajo /settings, y sin esto se marcarian los dos.
+  const activeHref = navItems
+    .map((item) => item.href)
+    .filter((href) => pathname === href || pathname.startsWith(href + "/"))
+    .sort((a, b) => b.length - a.length)[0];
 
   return (
     <motion.aside
@@ -93,7 +111,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Nav */}
       <nav className="flex-1 px-2 py-3 space-y-0.5">
         {navItems.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
+          const active = item.href === activeHref;
           return (
             <Link
               key={item.href}
