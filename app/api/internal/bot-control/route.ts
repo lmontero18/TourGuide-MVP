@@ -75,7 +75,9 @@ export async function POST(request: NextRequest) {
 
     const { error: updateError } = await supabase
       .from('conversations')
-      .update({ bot_active: false, status: 'pending' })
+      // pending = "esperando agente": el bot pidio un humano y nadie la tomo
+      // todavia (CODE-162). Sin agente asignado hasta que alguien la tome.
+      .update({ bot_active: false, status: 'pending', assigned_agent_id: null })
       .eq('id', conversation_id)
 
     if (updateError) {

@@ -398,9 +398,11 @@
       "searchPlaceholder": "Search conversations...",
       "tabs": {
         "all": "All",
+        "waiting": "Waiting for agent",
+        "mine": "Mine",
+        "resolved": "Resolved",
         "open": "Open",
-        "pending": "Pending",
-        "resolved": "Resolved"
+        "pending": "Pending"
       },
       "noResults": {
         "title": "No conversations found",
@@ -412,7 +414,7 @@
       },
       "status": {
         "open": "Open",
-        "pending": "Pending",
+        "pending": "Waiting for agent",
         "resolved": "Resolved",
         "bot": "BOT",
         "you": "You"
@@ -438,7 +440,13 @@
       "anotherAgent": "Another agent",
       "you": "You",
       "nowInControl": "You're now in control",
-      "returnedToBot": "Conversation returned to the bot"
+      "returnedToBot": "Conversation returned to the bot",
+      "resolve": "Resolve",
+      "reopen": "Reopen",
+      "resolvedBanner": "Conversation resolved. If the customer writes again, it reopens with the bot.",
+      "pendingBanner": "Waiting for agent: the bot asked for a person to handle this conversation",
+      "resolvedToast": "Conversation resolved",
+      "reopenedToast": "Conversation reopened"
     },
     "metrics": {
       "title": "Metrics",

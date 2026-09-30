@@ -22,12 +22,18 @@ export async function GET(
   return NextResponse.json(data)
 }
 
-const patchSchema = z.object({
+const controlSchema = z.object({
   bot_active: z.boolean(),
   // Tomar una conversacion que ya atiende otro agente requiere confirmarlo
   // explicitamente en la UI ("X la esta atendiendo, ¿tomarla?").
   force: z.boolean().optional(),
 })
+
+// Ciclo de vida (CODE-162): resolver / reabrir a mano. La reapertura
+// automatica cuando el cliente vuelve a escribir vive en el webhook.
+const statusSchema = z.object({ status: z.enum(['resolved', 'open']) })
+
+const patchSchema = z.union([controlSchema, statusSchema])
 
 // Nombre visible de un miembro: full_name o la parte local del email.
 function displayName(u: { full_name: string | null; email: string } | null): string | null {
@@ -62,6 +68,27 @@ export async function PATCH(
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
   }
 
+  if ('status' in parsed.data) {
+    // Resolver deja el bot activo y sin agente: si el cliente vuelve a
+    // escribir, el webhook la reabre y el bot contesta con todo el contexto.
+    const update =
+      parsed.data.status === 'resolved'
+        ? { status: 'resolved' as const, bot_active: true, assigned_agent_id: null }
+        : { status: 'open' as const }
+    const { data, error } = await supabase
+      .from('conversations')
+      .update(update)
+      .eq('id', id)
+      .eq('org_id', profile.org_id)
+      .select('id, status, bot_active, assigned_agent_id')
+      .maybeSingle()
+    if (error || !data) {
+      console.error('Failed to update conversation status:', error)
+      return NextResponse.json({ error: 'Failed to update conversation' }, { status: error ? 500 : 404 })
+    }
+    return NextResponse.json({ success: true, conversation: data })
+  }
+
   const { bot_active, force } = parsed.data
 
   const { data: current } = await supabase
@@ -90,8 +117,10 @@ export async function PATCH(
     )
   }
 
+  // Devolver al bot o tomar control dejan la conversacion abierta: sale de
+  // "esperando agente" (pending) si venia de un handoff.
   const update = bot_active
-    ? { bot_active: true, assigned_agent_id: null }
+    ? { bot_active: true, assigned_agent_id: null, status: 'open' as const }
     : { bot_active: false, assigned_agent_id: user.id, status: 'open' as const }
 
   let query = supabase

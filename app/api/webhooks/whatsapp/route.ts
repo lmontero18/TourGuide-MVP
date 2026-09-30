@@ -353,17 +353,20 @@ async function processWebhook(body: WebhookPayload) {
 
         if (!contact) continue
 
-        // Find or create conversation
+        // Una conversacion por contacto (CODE-162). Si esta resuelta y el
+        // cliente vuelve a escribir, se REABRE la misma con el bot activo en
+        // vez de crear otra: mantiene el historial en un hilo, el bot tiene el
+        // contexto anterior y las metricas no ven contactos duplicados.
         let { data: conversation } = await supabase
           .from('conversations')
-          .select('id, bot_active')
+          .select('id, bot_active, status')
           .eq('org_id', waAccount.org_id)
           .eq('contact_id', contact.id)
-          .neq('status', 'resolved')
           .order('created_at', { ascending: false })
           .limit(1)
-          .single()
+          .maybeSingle()
 
+        const nowTs = new Date().toISOString()
         if (!conversation) {
           const { data: newConv } = await supabase
             .from('conversations')
@@ -372,17 +375,27 @@ async function processWebhook(body: WebhookPayload) {
               contact_id: contact.id,
               status: 'open',
               bot_active: true,
-              last_message_at: new Date().toISOString(),
+              last_message_at: nowTs,
             })
-            .select('id, bot_active')
+            .select('id, bot_active, status')
             .single()
 
           conversation = newConv
+        } else if (conversation.status === 'resolved') {
+          const { data: reopened } = await supabase
+            .from('conversations')
+            .update({ status: 'open', bot_active: true, assigned_agent_id: null, last_message_at: nowTs })
+            .eq('id', conversation.id)
+            .select('id, bot_active, status')
+            .single()
+
+          conversation = reopened ?? conversation
         } else {
-          // Update last_message_at
+          // open / pending: el estado no cambia. Una conversacion "esperando
+          // agente" sigue esperando aunque el cliente insista.
           await supabase
             .from('conversations')
-            .update({ last_message_at: new Date().toISOString() })
+            .update({ last_message_at: nowTs })
             .eq('id', conversation.id)
         }
 

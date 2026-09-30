@@ -1,18 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import ConversationItem from "./ConversationItem";
 import ConversationListSkeleton from "./ConversationListSkeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversations } from "@/hooks/useConversations";
-import type { ConversationStatus } from "@/types";
+import type { ConversationListItem } from "@/hooks/useConversations";
 
-const FILTERS: { label: string; value: ConversationStatus | "all" }[] = [
-  { label: "All", value: "all" },
-  { label: "Open", value: "open" },
-  { label: "Pending", value: "pending" },
-  { label: "Resolved", value: "resolved" },
-];
+// Pestañas por lo que el agente necesita hacer, no por el estado crudo
+// (CODE-162). "Abierta" es lo normal y no tiene pestaña propia.
+type Tab = "all" | "waiting" | "mine" | "resolved";
+const TABS: Tab[] = ["all", "waiting", "mine", "resolved"];
 
 interface ConversationListProps {
   activeId?: string;
@@ -21,12 +20,24 @@ interface ConversationListProps {
 export default function ConversationList({ activeId }: ConversationListProps) {
   const { orgId, user, loading: authLoading } = useAuth();
   const { conversations, loading } = useConversations(orgId);
-  const [filter, setFilter] = useState<ConversationStatus | "all">("all");
+  const t = useTranslations("dashboard.conversations");
+  const [filter, setFilter] = useState<Tab>("all");
   const [search, setSearch] = useState("");
+
+  const inTab = useMemo(() => {
+    const me = user?.id;
+    return {
+      all: () => true,
+      // Esperando agente = el bot pidio un humano y nadie la tomo.
+      waiting: (c: ConversationListItem) => c.status === "pending" && !c.assignee,
+      mine: (c: ConversationListItem) => c.status !== "resolved" && !!me && c.assignee?.id === me,
+      resolved: (c: ConversationListItem) => c.status === "resolved",
+    } satisfies Record<Tab, (c: ConversationListItem) => boolean>;
+  }, [user?.id]);
 
   const filtered = useMemo(() => {
     return conversations.filter((c) => {
-      if (filter !== "all" && c.status !== filter) return false;
+      if (!inTab[filter](c)) return false;
       if (search) {
         const q = search.toLowerCase();
         return (
@@ -37,16 +48,12 @@ export default function ConversationList({ activeId }: ConversationListProps) {
       }
       return true;
     });
-  }, [conversations, filter, search]);
+  }, [conversations, filter, search, inTab]);
 
   const counts = useMemo(
-    () => ({
-      all: conversations.length,
-      open: conversations.filter((c) => c.status === "open").length,
-      pending: conversations.filter((c) => c.status === "pending").length,
-      resolved: conversations.filter((c) => c.status === "resolved").length,
-    }),
-    [conversations]
+    () =>
+      Object.fromEntries(TABS.map((tab) => [tab, conversations.filter(inTab[tab]).length])) as Record<Tab, number>,
+    [conversations, inTab]
   );
 
   const isLoading = authLoading || loading;
@@ -73,21 +80,27 @@ export default function ConversationList({ activeId }: ConversationListProps) {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-1 px-4 py-2 border-b border-slate-100">
-        {FILTERS.map((f) => (
+      <div className="flex items-center gap-1 px-4 py-2 border-b border-slate-100 overflow-x-auto">
+        {TABS.map((tab) => (
           <button
-            key={f.value}
-            onClick={() => setFilter(f.value)}
+            key={tab}
+            onClick={() => setFilter(tab)}
             className={`inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors ${
-              filter === f.value
+              filter === tab
                 ? "bg-navy-900 text-white"
                 : "text-slate-500 hover:bg-slate-100 hover:text-navy-900"
             }`}
           >
-            {f.label}
-            <span className={`text-[10px] ${filter === f.value ? "text-white/60" : "text-slate-400"}`}>
-              {counts[f.value]}
-            </span>
+            {t(`tabs.${tab}`)}
+            {tab === "waiting" && counts.waiting > 0 && filter !== tab ? (
+              <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                {counts.waiting}
+              </span>
+            ) : (
+              <span className={`text-[10px] ${filter === tab ? "text-white/60" : "text-slate-400"}`}>
+                {counts[tab]}
+              </span>
+            )}
           </button>
         ))}
       </div>
