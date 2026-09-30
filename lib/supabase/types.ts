@@ -117,6 +117,7 @@ export type Database = {
           bot_active: boolean
           contact_id: string
           created_at: string
+          deleted_at: string | null
           id: string
           last_message_at: string | null
           org_id: string
@@ -128,6 +129,7 @@ export type Database = {
           bot_active?: boolean
           contact_id: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           last_message_at?: string | null
           org_id: string
@@ -139,6 +141,7 @@ export type Database = {
           bot_active?: boolean
           contact_id?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           last_message_at?: string | null
           org_id?: string

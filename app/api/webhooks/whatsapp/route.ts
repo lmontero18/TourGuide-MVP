@@ -359,7 +359,7 @@ async function processWebhook(body: WebhookPayload) {
         // contexto anterior y las metricas no ven contactos duplicados.
         let { data: conversation } = await supabase
           .from('conversations')
-          .select('id, bot_active, status')
+          .select('id, bot_active, status, deleted_at')
           .eq('org_id', waAccount.org_id)
           .eq('contact_id', contact.id)
           .order('created_at', { ascending: false })
@@ -377,16 +377,18 @@ async function processWebhook(body: WebhookPayload) {
               bot_active: true,
               last_message_at: nowTs,
             })
-            .select('id, bot_active, status')
+            .select('id, bot_active, status, deleted_at')
             .single()
 
           conversation = newConv
-        } else if (conversation.status === 'resolved') {
+        } else if (conversation.status === 'resolved' || conversation.deleted_at) {
+          // Resuelta o eliminada (borrado logico): el cliente volvio, se
+          // reabre la misma y vuelve a aparecer en el inbox.
           const { data: reopened } = await supabase
             .from('conversations')
-            .update({ status: 'open', bot_active: true, assigned_agent_id: null, last_message_at: nowTs })
+            .update({ status: 'open', bot_active: true, assigned_agent_id: null, deleted_at: null, last_message_at: nowTs })
             .eq('id', conversation.id)
-            .select('id, bot_active, status')
+            .select('id, bot_active, status, deleted_at')
             .single()
 
           conversation = reopened ?? conversation

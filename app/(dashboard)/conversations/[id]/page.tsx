@@ -33,6 +33,7 @@ export default function ConversationDetailPage() {
         .from("conversations")
         .select(`id, bot_active, status, contact:contacts(name, phone), ${ASSIGNED_AGENT_EMBED}`)
         .eq("id", id)
+        .is("deleted_at", null)
         .single();
       if (cancelled) return;
 
