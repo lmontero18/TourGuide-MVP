@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { ConversationStatus } from '@/types'
+import { ASSIGNED_AGENT_EMBED, toAssignee } from '@/lib/assignee'
+import type { Assignee, ConversationStatus } from '@/types'
 
 export interface ConversationListItem {
   id: string
@@ -12,6 +13,7 @@ export interface ConversationListItem {
   lastMessageAt: string
   status: ConversationStatus
   botActive: boolean
+  assignee: Assignee | null
 }
 
 interface ConversationRow {
@@ -20,6 +22,7 @@ interface ConversationRow {
   bot_active: boolean
   last_message_at: string | null
   contact: { name: string | null; phone: string } | null
+  assigned_agent: { id: string; full_name: string | null; email: string } | null
   messages: { content: string }[]
 }
 
@@ -53,6 +56,7 @@ export function useConversations(orgId: string | null) {
       .select(
         `id, status, bot_active, last_message_at,
          contact:contacts(name, phone),
+         ${ASSIGNED_AGENT_EMBED},
          messages(content, created_at)`
       )
       .eq('org_id', orgId)
@@ -76,6 +80,7 @@ export function useConversations(orgId: string | null) {
         lastMessageAt: formatRelative(c.last_message_at),
         status: c.status,
         botActive: c.bot_active,
+        assignee: toAssignee(c.assigned_agent),
       }))
     )
     setLoading(false)

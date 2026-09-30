@@ -414,7 +414,8 @@
         "open": "Abierta",
         "pending": "Pendiente",
         "resolved": "Resuelta",
-        "bot": "BOT"
+        "bot": "BOT",
+        "you": "Tú"
       }
     },
     "chat": {
@@ -424,10 +425,20 @@
       "takeControl": "Tomar control",
       "returnToBot": "Devolver al bot",
       "botBanner": "El bot está manejando esta conversación",
-      "agentBanner": "Tú tienes el control — bot en pausa",
+      "agentBanner": "Estás atendiendo esta conversación. El bot está en pausa.",
       "roleClient": "Cliente",
       "roleBot": "Bot de Tourfy",
-      "roleYou": "Tú"
+      "roleYou": "Tú",
+      "otherAgentBanner": "{name} está atendiendo esta conversación",
+      "heldByOtherPlaceholder": "{name} está atendiendo. Toma la conversación para escribir...",
+      "takeOver": "Tomar conversación",
+      "takeOverConfirm": "{name} está atendiendo esta conversación. ¿Quieres tomarla tú?",
+      "takeOverYes": "Sí, tomarla",
+      "cancel": "Cancelar",
+      "anotherAgent": "Otro agente",
+      "you": "Tú",
+      "nowInControl": "Ahora tienes el control",
+      "returnedToBot": "Conversación devuelta al bot"
     },
     "metrics": {
       "title": "Métricas",

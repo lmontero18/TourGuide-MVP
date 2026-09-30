@@ -212,3 +212,9 @@ export interface TeamMember {
   last_sign_in_at: string | null
   is_self: boolean
 }
+
+// Quien atiende una conversacion cuando el bot esta pausado.
+export interface Assignee {
+  id: string
+  name: string
+}
