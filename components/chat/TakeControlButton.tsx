@@ -7,16 +7,21 @@ interface TakeControlButtonProps {
   // Otro agente atiende la conversacion: el boton ofrece tomarla (con
   // confirmacion en ChatWindow) en lugar de "devolver al bot".
   heldByOther?: boolean;
+  // Bot pausado pero nadie la tomo (esperando agente): ofrecer tomarla, no
+  // "devolver al bot" algo que ningun agente atendio.
+  unassigned?: boolean;
   onToggle: () => void;
 }
 
-export default function TakeControlButton({ botActive, heldByOther, onToggle }: TakeControlButtonProps) {
+export default function TakeControlButton({ botActive, heldByOther, unassigned, onToggle }: TakeControlButtonProps) {
+  // Mismo boton y estilo que "Tomar control" desde el bot.
+  const offerTake = botActive || (unassigned && !heldByOther);
   const t = useTranslations("dashboard.chat");
   return (
     <button
       onClick={onToggle}
       className={`inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-bold transition-all active:scale-[0.97] ${
-        botActive
+        offerTake
           ? "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
           : heldByOther
             ? "bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100"
@@ -31,7 +36,7 @@ export default function TakeControlButton({ botActive, heldByOther, onToggle }: 
           </svg>
           {t("takeOver")}
         </>
-      ) : botActive ? (
+      ) : offerTake ? (
         <>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18.36 6.64A9 9 0 0 1 20.77 15" />
