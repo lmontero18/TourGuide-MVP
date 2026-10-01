@@ -579,6 +579,21 @@
         "resend": "No pudimos reenviar la invitación.",
         "remove": "No pudimos quitar a este miembro."
       }
+    },
+    "notifications": {
+      "open": "Ver",
+      "handoffTitle": "{name} quiere hablar con una persona",
+      "handoffBody": "El bot pidió que alguien del equipo atienda esta conversación.",
+      "messageTitle": "Nuevo mensaje de {name}",
+      "takenTitle": "{agent} tomó tu conversación",
+      "takenBody": "Ahora atiende a {name}.",
+      "bell": "Avisos",
+      "desktop": "Notificaciones del escritorio",
+      "desktopHint": "Te avisa aunque estés en otra pestaña o aplicación.",
+      "sound": "Sonido",
+      "denied": "Bloqueaste las notificaciones en este navegador. Actívalas desde el candado de la barra de direcciones.",
+      "unsupported": "Este navegador no soporta notificaciones del escritorio.",
+      "events": "Te avisamos cuando el bot pide una persona, cuando un cliente te escribe en una conversación tuya y cuando otro agente toma una conversación que tenías."
     }
   },
   "blog": {

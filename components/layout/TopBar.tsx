@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useLocale } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import { logout } from "@/app/(auth)/login/actions";
 import { setLocale } from "@/app/actions/locale";
 import { LOCALES, type Locale } from "@/i18n/config";
@@ -59,6 +60,7 @@ export default function TopBar({ title, children }: TopBarProps) {
       </h1>
       <div className="flex items-center gap-3">
         {children}
+        <NotificationBell />
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setMenuOpen((v) => !v)}
