@@ -27,6 +27,32 @@ export const webhookMessageSchema = z
         caption: z.string().max(4096).optional(),
       })
       .optional(),
+    // Medios que el bot no puede ver completos: se le pasan como una nota
+    // ("[Ubicación: ...]") para que responda como una persona en vez de
+    // quedarse callado (CODE-177).
+    sticker: z.looseObject({ id: z.string().max(256) }).optional(),
+    video: z
+      .looseObject({ id: z.string().max(256), caption: z.string().max(4096).optional() })
+      .optional(),
+    document: z
+      .looseObject({
+        id: z.string().max(256).optional(),
+        filename: z.string().max(512).optional(),
+        caption: z.string().max(4096).optional(),
+      })
+      .optional(),
+    location: z
+      .looseObject({
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
+        name: z.string().max(512).optional(),
+        address: z.string().max(1024).optional(),
+      })
+      .optional(),
+    contacts: z
+      .array(z.looseObject({ name: z.looseObject({ formatted_name: z.string().max(512).optional() }).optional() }))
+      .max(20)
+      .optional(),
   })
   // El payload debe corresponder al type declarado — un 'text' sin text.body
   // terminaría insertado como mensaje vacío. Types desconocidos (video,
