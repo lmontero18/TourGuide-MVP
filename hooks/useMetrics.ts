@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { MetricsPeriod, OrgMetrics } from '@/types'
 
-const PERIOD_DAYS: Record<MetricsPeriod, number> = { '7d': 7, '30d': 30, '90d': 90 }
+const PERIOD_DAYS = { '7d': 7, '30d': 30, '90d': 90 } as const
 
 interface MetricsResult {
   period: MetricsPeriod | null
@@ -23,10 +23,14 @@ export function useMetrics(period: MetricsPeriod) {
     let cancelled = false
     const supabase = createClient()
     const to = new Date()
-    const from = new Date(to.getTime() - PERIOD_DAYS[period] * 24 * 60 * 60 * 1000)
+    const days = PERIOD_DAYS[period as keyof typeof PERIOD_DAYS] ?? 7
+    const from = new Date(to.getTime() - days * 24 * 60 * 60 * 1000)
 
-    supabase
-      .rpc('get_org_metrics', { p_from: from.toISOString(), p_to: to.toISOString() })
+    // Mes calendario: los limites los calcula Postgres en la zona de la agencia.
+    const request = period.startsWith('month:')
+      ? supabase.rpc('get_org_metrics_month', { p_month: `${period.slice(6)}-01` })
+      : supabase.rpc('get_org_metrics', { p_from: from.toISOString(), p_to: to.toISOString() })
+    request
       .then(({ data, error }) => {
         if (cancelled) return
         if (error) {

@@ -474,7 +474,9 @@
       "period": {
         "7d": "Últimos 7 días",
         "30d": "Últimos 30 días",
-        "90d": "Últimos 90 días"
+        "90d": "Últimos 90 días",
+        "thisMonth": "Este mes",
+        "lastMonth": "Mes pasado"
       },
       "change": "vs período anterior",
       "noChange": "Sin datos del período anterior",
@@ -538,7 +540,25 @@
         "warn": "Estás cerca del límite gratis. Revisa que tengas un método de pago en Meta para que el bot no se detenga.",
         "over": "Pasaste el límite gratis: Meta cobra {count} mensajes extra a tu método de pago. Sin tarjeta, el bot deja de responder.",
         "checkPayment": "Revisar método de pago",
-        "note": "Estimado. Se reinicia el 1 de cada mes, según la zona horaria de tu agencia."
+        "note": "Estimado. Se reinicia el 1 de cada mes, según la zona horaria de tu agencia.",
+        "history": "Últimos 6 meses (en rojo, los que pasaron las 1.000 gratis)"
+      },
+      "periodLabel": "Período",
+      "periodGroups": {
+        "months": "Meses",
+        "rolling": "Últimos días"
+      },
+      "export": "Exportar CSV",
+      "csv": {
+        "period": "Período",
+        "clientMessages": "Mensajes de clientes",
+        "botMessages": "Respuestas del bot",
+        "agentMessages": "Respuestas de agentes",
+        "botResponseSeconds": "Respuesta del bot (segundos, mediana)",
+        "teamPickupSeconds": "Tiempo de respuesta del equipo (segundos, mediana)",
+        "afterHoursConversations": "Conversaciones fuera de horario",
+        "date": "Fecha",
+        "conversations": "Conversaciones activas"
       }
     },
     "settings": {
