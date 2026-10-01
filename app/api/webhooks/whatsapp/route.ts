@@ -274,12 +274,12 @@ async function processWebhook(body: WebhookPayload) {
             if (audioId && tok) {
               const mediaRes = await fetch(
                 `https://graph.facebook.com/v21.0/${audioId}`,
-                { headers: { Authorization: `Bearer ${tok}` }, signal: AbortSignal.timeout(10_000) }
+                { headers: { Authorization: `Bearer ${tok}`, 'User-Agent': 'Tourfy/1.0 (+https://www.tourfy.app)' }, signal: AbortSignal.timeout(10_000) }
               )
               const mediaData = await mediaRes.json() as { url?: string }
               if (mediaData.url) {
                 const audioRes = await fetch(mediaData.url, {
-                  headers: { Authorization: `Bearer ${tok}` },
+                  headers: { Authorization: `Bearer ${tok}`, 'User-Agent': 'Tourfy/1.0 (+https://www.tourfy.app)' },
                   signal: AbortSignal.timeout(20_000),
                 })
                 const audioBuffer = await audioRes.arrayBuffer()
@@ -300,13 +300,16 @@ async function processWebhook(body: WebhookPayload) {
           }
         } else if (type === 'image') {
           mediaType = 'image'
-          content = '[image]'
+          // "[Imagen]" (mayuscula) SI va al bot: si el procesamiento falla, el
+          // bot igual responde en vez de quedarse callado (antes "[image]").
+          content = '[Imagen]'
+          mediaNote = 'una imagen'
+          const image = message.image
+          const parts: string[] = []
+          if (image?.caption) parts.push(image.caption)
           try {
             const { getMessagingToken } = await import('@/lib/whatsapp/token')
             const tok = getMessagingToken()
-            const image = message.image
-            const parts: string[] = []
-            if (image?.caption) parts.push(image.caption)
             if (image?.id && tok) {
               const { downloadMedia, compressImage, describeImage, storeChatImage } =
                 await import('@/lib/whatsapp/media')
@@ -315,16 +318,22 @@ async function processWebhook(body: WebhookPayload) {
                 const webp = await compressImage(original)
                 mediaPath = await storeChatImage(supabase, waAccount.org_id, webp)
                 const description = await describeImage(webp)
-                if (description) parts.push(`[Imagen: ${description}]`)
+                parts.push(description ? `[Imagen: ${description}]` : '[Imagen]')
+              } else {
+                Sentry.captureMessage('inbound image download failed', {
+                  level: 'error',
+                  tags: { route: 'webhooks/whatsapp', org_id: waAccount.org_id },
+                })
               }
             }
-            if (parts.length) content = parts.join(' ')
           } catch (error) {
             log.error('inbound image processing failed', { error, wamid: messageId })
             Sentry.captureException(error, {
               tags: { route: 'webhooks/whatsapp', org_id: waAccount.org_id },
             })
           }
+          if (!parts.some((p) => p.startsWith('[Imagen'))) parts.push('[Imagen]')
+          content = parts.join(' ')
         } else if (type === 'sticker') {
           // Un sticker es una imagen webp: se describe con el mismo camino que
           // las imagenes para que el bot pueda reaccionar ("[Sticker: pulgar
@@ -554,7 +563,13 @@ async function processWebhook(body: WebhookPayload) {
                 `(a un sticker, con calidez; a una ubicacion, confirmando que la recibiste y relacionandola con los tours si aplica; ` +
                 `si es un video o un documento que no puedes abrir, dilo con sencillez y pidele que te cuente por escrito que necesita) ` +
                 `y pregunta en que mas puedes ayudar. No transfieras a un agente solo por esto: usa transfer_to_human ` +
-                `si el cliente insiste en que alguien revise ese contenido o si lo que necesita requiere a una persona.`
+                `si el cliente insiste en que alguien revise ese contenido o si lo que necesita requiere a una persona. ` +
+                `Si es una imagen sin descripcion, di que no la ves bien y pregunta que te quiere mostrar. ` +
+                // Pagos: una foto de un comprobante se falsifica facil. Solo el
+                // equipo, mirando la cuenta, puede confirmar que el dinero llego.
+                `IMPORTANTE: si parece un comprobante de pago, transferencia o deposito, NUNCA confirmes que el pago llego ` +
+                `ni des la reserva por confirmada. Agradece, di que el equipo va a verificar el pago y te confirma, ` +
+                `y usa transfer_to_human.`
               : '')
 
           await callN8nBot(

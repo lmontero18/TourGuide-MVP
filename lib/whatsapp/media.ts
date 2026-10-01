@@ -21,23 +21,48 @@ const WEBP_QUALITY = 75
 const LOOKUP_TIMEOUT_MS = 10_000
 const DOWNLOAD_TIMEOUT_MS = 20_000
 
+// La descarga desde lookaside.fbsbx.com puede devolver error/HTML si la
+// request no trae User-Agent (gotcha conocido de la Cloud API desde Node).
+const MEDIA_HEADERS = (accessToken: string) => ({
+  Authorization: `Bearer ${accessToken}`,
+  'User-Agent': 'Tourfy/1.0 (+https://www.tourfy.app)',
+})
+
 export async function downloadMedia(mediaId: string, accessToken: string): Promise<Buffer | null> {
   try {
     const metaRes = await fetch(`${GRAPH_API_BASE}/${mediaId}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: MEDIA_HEADERS(accessToken),
       signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS),
     })
-    if (!metaRes.ok) return null
+    if (!metaRes.ok) {
+      // Antes se devolvia null sin log: imposible saber por que fallaba.
+      log.error('media lookup failed', {
+        media_id: mediaId,
+        status: metaRes.status,
+        body: (await metaRes.text().catch(() => '')).slice(0, 300),
+      })
+      return null
+    }
 
     const { url } = (await metaRes.json()) as { url?: string }
-    if (!url) return null
+    if (!url) {
+      log.error('media lookup without url', { media_id: mediaId })
+      return null
+    }
 
     // La URL de descarga de Meta expira en ~5 minutos — descargar de inmediato.
     const fileRes = await fetch(url, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: MEDIA_HEADERS(accessToken),
       signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
     })
-    if (!fileRes.ok) return null
+    if (!fileRes.ok) {
+      log.error('media download failed', {
+        media_id: mediaId,
+        status: fileRes.status,
+        content_type: fileRes.headers.get('content-type'),
+      })
+      return null
+    }
 
     return Buffer.from(await fileRes.arrayBuffer())
   } catch (error) {
