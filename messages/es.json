@@ -446,7 +446,12 @@
       "resolvedBanner": "Conversación resuelta. Si el cliente vuelve a escribir, se reabre con el bot.",
       "pendingBanner": "Esperando agente: el bot pidió que una persona atienda esta conversación",
       "resolvedToast": "Conversación resuelta",
-      "reopenedToast": "Conversación reabierta"
+      "reopenedToast": "Conversación reabierta",
+      "windowClosedTitle": "Pasaron más de 24 h desde el último mensaje del cliente.",
+      "windowClosedBody": "WhatsApp no permite responder con texto libre hasta que el cliente vuelva a escribir.",
+      "windowClosedPlaceholder": "La ventana de 24 h se cerró: espera a que el cliente escriba",
+      "windowClosing": "Quedan {left} para responder: después WhatsApp cierra la ventana de 24 h.",
+      "windowClosedToast": "Pasaron más de 24 h desde el último mensaje del cliente: WhatsApp no deja responder hasta que vuelva a escribir."
     },
     "metrics": {
       "title": "Métricas",

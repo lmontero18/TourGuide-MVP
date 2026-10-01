@@ -30,6 +30,17 @@ interface OptimisticMessage {
   status: "pending" | "failed";
 }
 
+const WINDOW_MS = 24 * 60 * 60 * 1000;
+// Desde cuando avisar que la ventana esta por cerrarse.
+const WINDOW_WARN_MS = 2 * 60 * 60 * 1000;
+
+function formatLeft(ms: number) {
+  const min = Math.max(1, Math.round(ms / 60_000));
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return h > 0 ? `${h} h ${m} min` : `${m} min`;
+}
+
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
@@ -118,6 +129,19 @@ export default function ChatWindow({
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [combined.length]);
 
+  // Ventana de 24h de WhatsApp (CODE-176): texto libre solo hasta 24h despues
+  // del ultimo mensaje del cliente. El reloj se actualiza cada minuto.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
+  const lastClient = messages.findLast((m) => m.role === "user");
+  const lastClientAt = lastClient ? new Date(lastClient.created_at).getTime() : null;
+  const windowLeftMs = lastClientAt === null ? 0 : lastClientAt + WINDOW_MS - now;
+  const windowClosed = !loading && windowLeftMs <= 0;
+  const windowClosing = !windowClosed && windowLeftMs < WINDOW_WARN_MS;
+
   const handleSend = async (content: string) => {
     const tempId = `opt-${crypto.randomUUID()}`;
     const sentAt = Date.now();
@@ -132,6 +156,7 @@ export default function ChatWindow({
         body: JSON.stringify({ content }),
       });
       const result = await res.json();
+      if (res.status === 409 && result.code === "window_closed") throw new Error(t("windowClosedToast"));
       if (!res.ok) throw new Error(result.error ?? "Failed to send message");
       // success: realtime will deliver the persisted message and dedupe removes the optimistic one
     } catch (err) {
@@ -375,11 +400,23 @@ export default function ChatWindow({
       </div>
 
       {/* Input — only enabled when agent has control */}
+      {windowClosed ? (
+        <div className="border-t border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
+          <strong className="font-semibold">{t("windowClosedTitle")}</strong> {t("windowClosedBody")}
+        </div>
+      ) : windowClosing && !botActive && !heldByOther ? (
+        <div className="border-t border-amber-100 bg-amber-50/60 px-4 py-2 text-xs text-amber-700">
+          {t("windowClosing", { left: formatLeft(windowLeftMs) })}
+        </div>
+      ) : null}
+
       <ChatInput
         onSend={handleSend}
-        disabled={botActive || heldByOther}
+        disabled={botActive || heldByOther || windowClosed}
         placeholder={
-          botActive
+          windowClosed
+            ? t("windowClosedPlaceholder")
+            : botActive
             ? t("takeControlPlaceholder")
             : heldByOther && assignee
               ? t("heldByOtherPlaceholder", { name: assignee.name })

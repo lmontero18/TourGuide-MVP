@@ -4,6 +4,9 @@ import { createClient } from '@/lib/supabase/server'
 import { sendTextMessage } from '@/lib/whatsapp/client'
 import { getMessagingToken } from '@/lib/whatsapp/token'
 
+// Ventana de atencion de WhatsApp: 24h desde el ultimo mensaje del cliente.
+const WINDOW_MS = 24 * 60 * 60 * 1000
+
 const sendSchema = z.object({
   content: z.string().trim().min(1).max(4096),
 })
@@ -56,6 +59,24 @@ export async function POST(
     return NextResponse.json(
       { error: 'Take control of the conversation before sending a message' },
       { status: 400 }
+    )
+  }
+
+  // Ventana de 24h de Meta (CODE-176): texto libre solo hasta 24h despues del
+  // ultimo mensaje del cliente. Se chequea antes de tomar la conversacion y
+  // de llamar a Graph, para devolver un error claro en vez del de Meta.
+  const { data: lastClientMsg } = await supabase
+    .from('messages')
+    .select('created_at')
+    .eq('conversation_id', conv.id)
+    .eq('role', 'user')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (!lastClientMsg || Date.now() - new Date(lastClientMsg.created_at).getTime() > WINDOW_MS) {
+    return NextResponse.json(
+      { error: 'The 24-hour window to reply has closed', code: 'window_closed' },
+      { status: 409 }
     )
   }
 
@@ -112,8 +133,16 @@ export async function POST(
     await sendTextMessage(wa.phone_number_id, token, conv.contact.phone, parsed.data.content)
   } catch (err) {
     console.error('WhatsApp send failed:', err)
+    const message = err instanceof Error ? err.message : ''
+    // 131047 = Meta rechazo por ventana de 24h (por si el reloj difiere del nuestro).
+    if (message.includes('131047')) {
+      return NextResponse.json(
+        { error: 'The 24-hour window to reply has closed', code: 'window_closed' },
+        { status: 409 }
+      )
+    }
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Failed to send message via WhatsApp' },
+      { error: message || 'Failed to send message via WhatsApp' },
       { status: 502 }
     )
   }

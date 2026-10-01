@@ -259,6 +259,9 @@ async function processWebhook(body: WebhookPayload) {
         let content = ''
         let mediaPath: string | null = null
         let mediaType: string | null = null
+        // Tipo de medio que el bot no puede ver completo: agrega una guia al
+        // system prompt para que responda con naturalidad (ver abajo).
+        let mediaNote: string | null = null
         if (type === 'text') {
           content = message.text?.body ?? ''
         } else if (type === 'interactive') {
@@ -322,7 +325,54 @@ async function processWebhook(body: WebhookPayload) {
               tags: { route: 'webhooks/whatsapp', org_id: waAccount.org_id },
             })
           }
+        } else if (type === 'sticker') {
+          // Un sticker es una imagen webp: se describe con el mismo camino que
+          // las imagenes para que el bot pueda reaccionar ("[Sticker: pulgar
+          // arriba]") en vez de quedarse callado.
+          mediaType = 'image'
+          content = '[Sticker]'
+          mediaNote = 'un sticker'
+          try {
+            const { getMessagingToken } = await import('@/lib/whatsapp/token')
+            const tok = getMessagingToken()
+            const stickerId = message.sticker?.id
+            if (stickerId && tok) {
+              const { downloadMedia, compressImage, describeImage, storeChatImage } =
+                await import('@/lib/whatsapp/media')
+              const original = await downloadMedia(stickerId, tok)
+              if (original) {
+                const webp = await compressImage(original)
+                mediaPath = await storeChatImage(supabase, waAccount.org_id, webp)
+                const description = await describeImage(webp)
+                if (description) content = `[Sticker: ${description}]`
+              }
+            }
+          } catch (error) {
+            log.warn('inbound sticker processing failed', { error, wamid: messageId })
+          }
+        } else if (type === 'location') {
+          const loc = message.location
+          const place = [loc?.name, loc?.address].filter(Boolean).join(', ')
+          const coords =
+            loc?.latitude !== undefined && loc?.longitude !== undefined ? `${loc.latitude}, ${loc.longitude}` : ''
+          content = `[Ubicación: ${place || coords || 'sin detalle'}]`
+          mediaNote = 'una ubicación'
+        } else if (type === 'video') {
+          const caption = message.video?.caption?.trim()
+          content = caption ? `[Video] ${caption}` : '[Video]'
+          mediaNote = 'un video'
+        } else if (type === 'document') {
+          const doc = message.document
+          const caption = doc?.caption?.trim()
+          content = `[Documento: ${doc?.filename ?? 'archivo'}]${caption ? ` ${caption}` : ''}`
+          mediaNote = 'un documento'
+        } else if (type === 'contacts') {
+          const names = (message.contacts ?? []).map((c) => c.name?.formatted_name).filter(Boolean)
+          content = `[Contacto compartido: ${names.join(', ') || 'sin nombre'}]`
+          mediaNote = 'un contacto'
         } else {
+          // reaction, unsupported, etc.: placeholder en minuscula, no va al bot
+          // (una reaccion con emoji no pide respuesta).
           content = `[${type}]`
         }
 
@@ -495,7 +545,17 @@ async function processWebhook(body: WebhookPayload) {
           const systemPrompt =
             `${org?.prompt ?? ''}\n\n` +
             `Fecha y hora actual (zona horaria de la agencia): ${nowFormatted}.\n` +
-            `Recordatorio: responde todo el mensaje en el idioma del ultimo mensaje del cliente, sin mezclar idiomas.`
+            `Recordatorio: responde todo el mensaje en el idioma del ultimo mensaje del cliente, sin mezclar idiomas.` +
+            // Medios (CODE-177): el bot recibe una nota entre corchetes. Que
+            // responda como una persona; transferir solo si hace falta.
+            (mediaNote
+              ? `\nEl ultimo mensaje del cliente no es texto: es ${mediaNote} (lo ves como una nota entre corchetes). ` +
+                `Responde con naturalidad, como una persona del equipo: reacciona brevemente a lo que haya ` +
+                `(a un sticker, con calidez; a una ubicacion, confirmando que la recibiste y relacionandola con los tours si aplica; ` +
+                `si es un video o un documento que no puedes abrir, dilo con sencillez y pidele que te cuente por escrito que necesita) ` +
+                `y pregunta en que mas puedes ayudar. No transfieras a un agente solo por esto: usa transfer_to_human ` +
+                `si el cliente insiste en que alguien revise ese contenido o si lo que necesita requiere a una persona.`
+              : '')
 
           await callN8nBot(
             {
