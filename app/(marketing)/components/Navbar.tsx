@@ -102,7 +102,7 @@ export function Navbar() {
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
-              aria-label="Menu"
+              aria-label={t("menu")}
               aria-expanded={mobileOpen}
               aria-controls="mobile-menu"
             >

@@ -64,7 +64,7 @@ function assertPublicUrl(url: string): void {
   try {
     u = new URL(url);
   } catch {
-    throw new ImportUserError("URL inválida. Revisá la dirección.");
+    throw new ImportUserError("URL inválida. Revisa la dirección.");
   }
   if (u.protocol !== "http:" && u.protocol !== "https:") {
     throw new ImportUserError("Solo se aceptan URLs http(s).");
@@ -76,7 +76,7 @@ function assertPublicUrl(url: string): void {
     host.endsWith(".local") ||
     host.endsWith(".internal");
   if (blockedHost || isPrivateIp(host)) {
-    throw new ImportUserError("Esa URL apunta a una red privada — usá el dominio público del sitio.");
+    throw new ImportUserError("Esa URL apunta a una red privada — usa el dominio público del sitio.");
   }
 }
 
@@ -183,7 +183,7 @@ export async function fetchSiteContent(url: string): Promise<FetchSiteResult> {
     }
   }
   if (!home) {
-    throw new ImportUserError("No pudimos acceder al sitio. Revisá la URL.");
+    throw new ImportUserError("No pudimos acceder al sitio. Revisa la URL.");
   }
 
   const pages: string[] = [`# Página principal: ${base}\n${home.slice(0, MAX_PER_PAGE)}`];

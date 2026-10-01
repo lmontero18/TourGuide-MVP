@@ -14,7 +14,10 @@ interface TourDrawerProps {
 }
 
 const CURRENCIES = ["USD", "NIO", "CRC", "MXN", "PEN", "COP", "GTQ", "EUR"];
-const PRESETS = ["Adulto", "Niño", "Grupo (4+)", "Privado", "Local", "Extranjero"];
+// Sugerencias que se muestran traducidas segun el idioma; el valor elegido se
+// guarda tal cual (texto libre del tour).
+const PRESETS = ["adult", "child", "group", "private", "local", "foreigner"] as const;
+const CATEGORIES = ["dayTour", "trek", "adventure", "multiDay", "transfer"] as const;
 
 // Misma forma que renderTour en lib/bot/compilePrompt.ts: asi le llega al bot.
 function botLine(tour: Tour) {
@@ -101,11 +104,11 @@ export default function TourDrawer({ tour, saveState, onChange, onDelete, onClos
                   list="tour-category-options"
                   value={tour.category ?? ""}
                   onChange={(e) => onChange({ ...tour, category: e.target.value })}
-                  placeholder="Day tour"
+                  placeholder={t("categoryPlaceholder")}
                   className={input}
                 />
                 <datalist id="tour-category-options">
-                  {["Day tour", "Trek", "Adventure", "Multi-day", "Transfer"].map((c) => <option key={c} value={c} />)}
+                  {CATEGORIES.map((c) => <option key={c} value={t(`categories.${c}`)} />)}
                 </datalist>
               </div>
 
@@ -141,7 +144,7 @@ export default function TourDrawer({ tour, saveState, onChange, onDelete, onClos
                   ))}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {PRESETS.map((label) => (
+                  {PRESETS.map((preset) => t(`presets.${preset}`)).map((label) => (
                     <button
                       key={label}
                       onClick={() => setPrices([...prices, { label, amount: NaN, currency: prices[0]?.currency ?? "USD" }])}

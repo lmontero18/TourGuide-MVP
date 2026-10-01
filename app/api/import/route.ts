@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { fetchSiteContent } from "@/lib/ai/fetchSite";
@@ -24,11 +25,12 @@ const EMPTY_DRAFT = { tours: [], faqs: [], business: [] };
 // POST — extrae un borrador de tours+faqs desde una fuente (URL o tarifario).
 // NO persiste nada; el guardado lo hace el flujo de aprobación vía PATCH /api/organizations.
 export async function POST(request: NextRequest) {
+  const t = await getTranslations("apiErrors");
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: t("unauthorized") }, { status: 401 });
   }
 
   const { data: profile } = await supabase
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (!profile?.org_id || profile.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden — admin only" }, { status: 403 });
+    return NextResponse.json({ error: t("adminOnly") }, { status: 403 });
   }
 
   const contentType = request.headers.get("content-type") ?? "";
@@ -49,9 +51,10 @@ export async function POST(request: NextRequest) {
 
 // Rama URL — lee el sitio y extrae el borrador.
 async function handleUrlImport(request: NextRequest) {
+  const t = await getTranslations("apiErrors");
   const parsed = urlSchema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid input" }, { status: 400 });
+    return NextResponse.json({ error: t("importInvalidUrl") }, { status: 400 });
   }
 
   try {
@@ -67,39 +70,40 @@ async function handleUrlImport(request: NextRequest) {
     console.error("Import failed:", err);
     // Solo ImportUserError es seguro de mostrar; errores del SDK (OpenAI, red)
     // filtran detalles internos en su message.
-    const message = err instanceof ImportUserError ? err.message : "No pudimos importar desde esa URL";
+    const message = err instanceof ImportUserError ? err.message : t("importUrlFailed");
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }
 
 // Rama tarifario — lee PDF/fotos subidos y extrae el borrador con visión.
 async function handleFileImport(request: NextRequest) {
+  const t = await getTranslations("apiErrors");
   const form = await request.formData().catch(() => null);
   if (!form) {
-    return NextResponse.json({ error: "No pudimos leer los archivos" }, { status: 400 });
+    return NextResponse.json({ error: t("importReadFilesFailed") }, { status: 400 });
   }
 
   const files = form.getAll("files").filter((f): f is File => f instanceof File);
 
   if (files.length === 0) {
-    return NextResponse.json({ error: "No subiste ningún archivo" }, { status: 400 });
+    return NextResponse.json({ error: t("importNoFiles") }, { status: 400 });
   }
   if (files.length > MAX_FILES) {
-    return NextResponse.json({ error: `Máximo ${MAX_FILES} archivos a la vez` }, { status: 400 });
+    return NextResponse.json({ error: t("importTooManyFiles", { max: MAX_FILES }) }, { status: 400 });
   }
 
   let total = 0;
   for (const file of files) {
     if (!ALLOWED_MIMES.includes(file.type)) {
-      return NextResponse.json({ error: "Tipo de archivo no soportado (PDF, JPG, PNG o WEBP)" }, { status: 400 });
+      return NextResponse.json({ error: t("importUnsupportedType") }, { status: 400 });
     }
     if (file.size > MAX_FILE_BYTES) {
-      return NextResponse.json({ error: "Cada archivo debe pesar máximo 10MB" }, { status: 400 });
+      return NextResponse.json({ error: t("importFileTooLarge", { mb: MAX_FILE_BYTES / 1024 / 1024 }) }, { status: 400 });
     }
     total += file.size;
   }
   if (total > MAX_TOTAL_BYTES) {
-    return NextResponse.json({ error: "Los archivos juntos superan los 25MB" }, { status: 400 });
+    return NextResponse.json({ error: t("importTotalTooLarge", { mb: MAX_TOTAL_BYTES / 1024 / 1024 }) }, { status: 400 });
   }
 
   try {
@@ -121,7 +125,7 @@ async function handleFileImport(request: NextRequest) {
     return NextResponse.json({ success: true, draft, thin: isEmpty });
   } catch (err) {
     console.error("File import failed:", err);
-    const message = err instanceof ImportUserError ? err.message : "No pudimos procesar el archivo";
+    const message = err instanceof ImportUserError ? err.message : t("importFileFailed");
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }

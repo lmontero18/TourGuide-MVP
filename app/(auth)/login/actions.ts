@@ -3,20 +3,31 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { checkRateLimit, getClientIp, recordAttempt } from '@/lib/auth/rateLimit'
 import { passwordSchema } from '@/lib/auth/password'
 
+// Los mensajes de zod son claves de `auth.errors`: se traducen al locale del
+// request antes de viajar en ?error= (la pagina los muestra tal cual en el toast).
 const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().trim().toLowerCase().email('invalidEmail'),
+  password: z.string().min(1, 'passwordRequired'),
 })
 
 const signupSchema = z.object({
-  email: z.string().trim().toLowerCase().email('Invalid email address'),
+  email: z.string().trim().toLowerCase().email('invalidEmail'),
   password: passwordSchema,
-  fullName: z.string().trim().min(1, 'Full name is required').max(100).optional().or(z.literal('')),
+  fullName: z.string().trim().min(1, 'fullNameRequired').max(100).optional().or(z.literal('')),
 })
+
+async function issueMessage(issue: { message: string; path: PropertyKey[] } | undefined): Promise<string> {
+  const t = await getTranslations('auth.errors')
+  if (issue && t.has(issue.message)) return t(issue.message)
+  // passwordSchema (lib/auth/password) trae mensajes propios en ingles.
+  if (issue?.path[0] === 'password') return t('passwordRules')
+  return t('invalidInput')
+}
 
 export async function login(formData: FormData) {
   const parsed = loginSchema.safeParse({
@@ -25,7 +36,7 @@ export async function login(formData: FormData) {
   })
 
   if (!parsed.success) {
-    const msg = parsed.error.issues[0]?.message ?? 'Invalid input'
+    const msg = await issueMessage(parsed.error.issues[0])
     redirect(`/login?error=${encodeURIComponent(msg)}`)
   }
 
@@ -35,7 +46,8 @@ export async function login(formData: FormData) {
 
   const limit = await checkRateLimit(identifier)
   if (!limit.ok) {
-    redirect(`/login?error=${encodeURIComponent(`Too many attempts. Try again in ${limit.retryAfter} min.`)}`)
+    const t = await getTranslations('auth.errors')
+    redirect(`/login?error=${encodeURIComponent(t('tooMany', { minutes: limit.retryAfter ?? 1 }))}`)
   }
 
   const supabase = await createClient()
@@ -43,7 +55,8 @@ export async function login(formData: FormData) {
 
   if (error) {
     await recordAttempt(identifier, false)
-    redirect(`/login?error=${encodeURIComponent('Invalid email or password')}`)
+    const t = await getTranslations('auth.errors')
+    redirect(`/login?error=${encodeURIComponent(t('invalidCredentials'))}`)
   }
 
   await recordAttempt(identifier, true)
@@ -99,7 +112,7 @@ export async function signup(formData: FormData) {
   })
 
   if (!parsed.success) {
-    const msg = parsed.error.issues[0]?.message ?? 'Invalid input'
+    const msg = await issueMessage(parsed.error.issues[0])
     redirect(`/register?error=${encodeURIComponent(msg)}`)
   }
 
@@ -110,7 +123,8 @@ export async function signup(formData: FormData) {
 
   const limit = await checkRateLimit(identifier, { countAll: true })
   if (!limit.ok) {
-    redirect(`/register?error=${encodeURIComponent(`Too many attempts. Try again in ${limit.retryAfter} min.`)}`)
+    const t = await getTranslations('auth.errors')
+    redirect(`/register?error=${encodeURIComponent(t('tooMany', { minutes: limit.retryAfter ?? 1 }))}`)
   }
 
   const supabase = await createClient()
@@ -125,7 +139,8 @@ export async function signup(formData: FormData) {
   await recordAttempt(identifier, !error)
 
   if (error) {
-    redirect(`/register?error=${encodeURIComponent(error.message)}`)
+    const t = await getTranslations('auth.errors')
+    redirect(`/register?error=${encodeURIComponent(t('signupFailed'))}`)
   }
 
   revalidatePath('/', 'layout')

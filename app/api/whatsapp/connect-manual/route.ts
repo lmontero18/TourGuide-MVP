@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { registerPhoneNumber } from '@/lib/whatsapp/client'
@@ -16,11 +17,12 @@ const connectSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  const t = await getTranslations('apiErrors')
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
   const { data: userData } = await supabase
@@ -30,7 +32,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (!userData?.org_id || userData.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
+    return NextResponse.json({ error: t('adminOnly') }, { status: 403 })
   }
 
   // org_id como binding fijo: CLAUDE.md pide org_id en los bindings del logger.
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest) {
 
   const parsed = connectSchema.safeParse(await request.json())
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 })
+    return NextResponse.json({ error: t('whatsappManualMissingFields') }, { status: 400 })
   }
 
   const { waba_id, phone_number_id, access_token } = parsed.data
@@ -55,7 +57,7 @@ export async function POST(request: NextRequest) {
       const details = await phoneRes.json().catch(() => ({}))
       log.warn('phone number validation failed', { details })
       return NextResponse.json(
-        { error: 'Token validation failed — check Phone Number ID and Access Token' },
+        { error: t('whatsappManualTokenInvalid') },
         { status: 400 }
       )
     }
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
       const details = await subRes.json().catch(() => ({}))
       log.warn('WABA subscribe failed', { details })
       return NextResponse.json(
-        { error: 'Failed to subscribe app to WABA — check WABA ID and Access Token permissions' },
+        { error: t('whatsappManualSubscribeFailed') },
         { status: 400 }
       )
     }
@@ -113,6 +115,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, account: waAccount })
   } catch (error) {
     console.error('WhatsApp manual connect error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: t('whatsappConnectFailed') }, { status: 500 })
   }
 }

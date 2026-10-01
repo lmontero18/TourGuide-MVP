@@ -9,7 +9,8 @@
     "finishOnboarding": "Finish onboarding",
     "signOut": "Sign out",
     "pricing": "Pricing",
-    "blog": "Blog"
+    "blog": "Blog",
+    "menu": "Menu"
   },
   "hero": {
     "headline1": "Your tours sell",
@@ -171,7 +172,9 @@
     "company": "Company",
     "legal": "Legal",
     "rights": "Tourfy Inc. All rights reserved.",
-    "status": "All systems operational"
+    "status": "All systems operational",
+    "privacy": "Privacy",
+    "dataDeletion": "Data deletion"
   },
   "auth": {
     "panel": {
@@ -235,6 +238,27 @@
       "rules": "At least 8 characters, with an uppercase letter, a lowercase letter and a number.",
       "toggle": "Show password",
       "submit": "Save and continue"
+    },
+    "confirmed": {
+      "title": "Email verified",
+      "sub1": "Your account has been confirmed.",
+      "sub2": "You can now log in and start setting up your agency.",
+      "cta": "Log in"
+    },
+    "errors": {
+      "invalidEmail": "Invalid email address.",
+      "passwordRequired": "Enter your password.",
+      "fullNameRequired": "Enter your full name.",
+      "invalidInput": "Some of the information isn't valid. Please check it and try again.",
+      "passwordRules": "Your password needs at least 8 characters, with an uppercase letter, a lowercase letter and a number.",
+      "passwordMismatch": "Passwords don't match.",
+      "samePassword": "Your new password must be different from the old one.",
+      "passwordSaveFailed": "We couldn't save your password. Please try again.",
+      "tooMany": "Too many attempts. Try again in {minutes} min.",
+      "invalidCredentials": "Incorrect email or password.",
+      "signupFailed": "We couldn't create your account. Please try again.",
+      "linkExpired": "Your link has expired or was already used. Ask for a new one.",
+      "callbackFailed": "We couldn't log you in. Please try again."
     }
   },
   "onboarding": {
@@ -344,7 +368,8 @@
         "editLaterHint": "Everything you import can be edited and added to later — this is just to get started fast.",
         "toursEmpty": "No tours yet. Add one or import from your website.",
         "businessEmpty": "No business info yet. Add a section (about us, payments, contact…).",
-        "faqsEmpty": "No FAQs yet. Add one."
+        "faqsEmpty": "No FAQs yet. Add one.",
+        "removePriceLabel": "Remove price"
       }
     },
     "saving": "Saving...",
@@ -353,6 +378,30 @@
       "0": "Fill in your agency name and country to continue",
       "1": "Connect your WhatsApp number to continue",
       "2": "Add at least one tour with a name to continue"
+    },
+    "errors": {
+      "agencyNameRequired": "Enter your agency name to continue.",
+      "createOrgFailed": "We couldn't create your agency. Please try again.",
+      "slugUnavailable": "There's already an agency with a very similar name. Try a different name.",
+      "finishFailed": "We couldn't finish setting up. Please try again.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "countries": {
+      "mx": "Mexico",
+      "co": "Colombia",
+      "pe": "Peru",
+      "ar": "Argentina",
+      "cl": "Chile",
+      "br": "Brazil",
+      "cr": "Costa Rica",
+      "ec": "Ecuador",
+      "gt": "Guatemala",
+      "pa": "Panama",
+      "do": "Dominican Republic",
+      "uy": "Uruguay",
+      "bo": "Bolivia",
+      "hn": "Honduras",
+      "other": "Other"
     }
   },
   "dashboard": {
@@ -362,7 +411,9 @@
       "metrics": "Metrics",
       "templates": "Templates",
       "agents": "Agents",
-      "settings": "Settings"
+      "settings": "Settings",
+      "expand": "Expand menu",
+      "collapse": "Collapse menu"
     },
     "tours": {
       "title": "What your bot knows",
@@ -433,10 +484,31 @@
       "importingHint": "Reading your site and building your catalog… this takes a moment, don't reload the page.",
       "loadError": "We couldn't load your tours",
       "brainTag": "Bot knowledge base",
-      "save": "Save changes"
+      "save": "Save changes",
+      "categoryPlaceholder": "E.g. Day tour",
+      "categories": {
+        "dayTour": "Day tour",
+        "trek": "Trek",
+        "adventure": "Adventure",
+        "multiDay": "Multi-day",
+        "transfer": "Transfer"
+      },
+      "presets": {
+        "adult": "Adult",
+        "child": "Child",
+        "group": "Group (4+)",
+        "private": "Private",
+        "local": "Local",
+        "foreigner": "Foreigner"
+      }
     },
     "topbar": {
-      "search": "Search..."
+      "search": "Search...",
+      "account": "Account",
+      "userFallback": "User",
+      "language": "Language",
+      "signOut": "Sign out",
+      "signingOut": "Signing out…"
     },
     "conversations": {
       "title": "Conversations",
@@ -463,6 +535,16 @@
         "resolved": "Resolved",
         "bot": "BOT",
         "you": "You"
+      },
+      "emptyInbox": {
+        "title": "No conversations yet",
+        "sub": "When customers message your WhatsApp, they will show up here."
+      },
+      "time": {
+        "now": "now",
+        "minutes": "{count}m ago",
+        "hours": "{count}h ago",
+        "days": "{count}d ago"
       }
     },
     "chat": {
@@ -511,7 +593,23 @@
         "costNote": "Meta charges for each template sent. Sending it takes over the conversation.",
         "send": "Send template",
         "sent": "Template sent"
-      }
+      },
+      "imageAlt": "Image sent by the customer",
+      "failed": "Not sent",
+      "errors": {
+        "send": "We couldn't send the message. Try again.",
+        "delete": "We couldn't delete the conversation.",
+        "update": "We couldn't update the conversation.",
+        "load": "We couldn't load the conversation."
+      },
+      "deleteConfirm": "Delete this conversation? It will be hidden from the inbox. If the customer writes again, it comes back.",
+      "deleted": "Conversation deleted",
+      "moreOptions": "More options",
+      "deleting": "Deleting…",
+      "deleteConversation": "Delete conversation",
+      "noMessages": "No messages yet",
+      "notFound": "Conversation not found",
+      "timeLeft": "{h, plural, =0 {{m} min} other {# h {m} min}}"
     },
     "metrics": {
       "title": "Metrics",
@@ -590,7 +688,7 @@
       "periodLabel": "Period",
       "periodGroups": {
         "months": "Months",
-        "rolling": "Last days"
+        "rolling": "Recent days"
       },
       "export": "Export CSV",
       "csv": {
@@ -602,7 +700,8 @@
         "teamPickupSeconds": "Team pickup time (seconds, median)",
         "afterHoursConversations": "After-hours conversations",
         "date": "Date",
-        "conversations": "Active conversations"
+        "conversations": "Active conversations",
+        "filename": "tourfy-metrics"
       }
     },
     "settings": {
@@ -616,7 +715,10 @@
         "title": "Business hours",
         "sub": "Messages outside these hours are marked as after-hours in your metrics.",
         "opens": "Opens at",
-        "closes": "Closes at"
+        "closes": "Closes at",
+        "weekdays": "Weekdays (Mon–Fri)",
+        "weekend": "Weekend (Sat–Sun)",
+        "closedWeekends": "Closed on weekends"
       },
       "bot": {
         "title": "Bot personality",
@@ -630,9 +732,64 @@
       "whatsapp": {
         "title": "WhatsApp connection",
         "connected": "Connected",
-        "disconnect": "Disconnect"
+        "disconnect": "Disconnect",
+        "errors": {
+          "missingFields": "WABA ID, Phone Number ID and access token are required",
+          "connect": "We couldn't connect the number. Check the details and try again.",
+          "disconnect": "We couldn't disconnect the number."
+        },
+        "connectedToast": "WhatsApp connected",
+        "disconnectConfirm": "Disconnect this WhatsApp number? Incoming messages will stop being received.",
+        "disconnectedToast": "WhatsApp disconnected",
+        "loading": "Loading…",
+        "connectedNumber": "Connected number",
+        "disconnecting": "Disconnecting…",
+        "connectTitle": "Connect WhatsApp",
+        "connectSub": "Connect your number in one click: log in with Facebook and pick your WhatsApp Business number.",
+        "manualTitle": "Connect manually (advanced)",
+        "manualSub": "Get these values from the Meta developer console → WhatsApp → API Setup.",
+        "wabaId": "WhatsApp Business Account ID (WABA ID)",
+        "phoneNumberId": "Phone Number ID",
+        "accessToken": "Access token",
+        "accessTokenHint": "Used only to verify the connection — it is never stored. Messages are sent with Tourfy's central token.",
+        "displayPhone": "Display phone number",
+        "optional": "optional",
+        "connecting": "Connecting…"
       },
-      "save": "Save changes"
+      "save": "Save changes",
+      "errors": {
+        "load": "We couldn't load your settings. Reload the page.",
+        "save": "We couldn't save your changes. Try again.",
+        "nameRequired": "Agency name is required"
+      },
+      "saved": "Settings saved",
+      "saving": "Saving…",
+      "timezones": {
+        "America_Mexico_City": "Mexico (Mexico City)",
+        "America_Cancun": "Mexico (Cancún)",
+        "America_Guatemala": "Guatemala",
+        "America_El_Salvador": "El Salvador",
+        "America_Tegucigalpa": "Honduras",
+        "America_Managua": "Nicaragua",
+        "America_Costa_Rica": "Costa Rica",
+        "America_Panama": "Panama",
+        "America_Havana": "Cuba",
+        "America_Santo_Domingo": "Dominican Republic",
+        "America_Puerto_Rico": "Puerto Rico",
+        "America_Bogota": "Colombia",
+        "America_Guayaquil": "Ecuador",
+        "America_Lima": "Peru",
+        "America_Caracas": "Venezuela",
+        "America_La_Paz": "Bolivia",
+        "America_Santiago": "Chile",
+        "America_Asuncion": "Paraguay",
+        "America_Argentina_Buenos_Aires": "Argentina",
+        "America_Montevideo": "Uruguay",
+        "America_Sao_Paulo": "Brazil (São Paulo)",
+        "America_New_York": "USA (Eastern)",
+        "America_Los_Angeles": "USA (Pacific)",
+        "Europe_Madrid": "Spain"
+      }
     },
     "agents": {
       "title": "Agents",
@@ -732,7 +889,7 @@
         "header": "Header",
         "headerPlaceholder": "Your tour reminder",
         "body": "Message",
-        "bodyPlaceholder": "Hi {{nombre}}, a reminder of your {{tour}} tour on {{fecha}}.",
+        "bodyPlaceholder": "Hi {{name}}, a reminder of your {{tour}} tour on {{date}}.",
         "insertVariable": "Insert variable:",
         "examples": "Example for each variable",
         "examplesHint": "Meta needs them to review the template. They're not sent to the customer.",
@@ -750,8 +907,72 @@
         "preview": "Preview",
         "reviewNote": "When you create it, it goes to Meta for review. Once approved, your team can use it in the chat.",
         "cancel": "Cancel",
-        "submit": "Send for review"
+        "submit": "Send for review",
+        "suggestedVars": [
+          "name",
+          "tour",
+          "date",
+          "time",
+          "price"
+        ]
+      },
+      "errors": {
+        "create": "We couldn't create the template. Try again.",
+        "metaRejected": "Meta didn't accept the template: {reason}",
+        "delete": "We couldn't delete the template."
+      },
+      "starters": {
+        "reminder": {
+          "title": "Tour reminder",
+          "header": "Your tour reminder",
+          "body": "Hi {{name}}, this is a reminder of your {{tour}} tour on {{date}}. If you have any questions, reply to this message.",
+          "quickReplies": [
+            "Confirm",
+            "I have a question"
+          ],
+          "examples": {
+            "name": "Anna",
+            "tour": "Granada Islets",
+            "date": "December 15"
+          }
+        },
+        "followup": {
+          "title": "Follow up on inquiry",
+          "body": "Hi {{name}}, we're reaching out to continue with your inquiry about the {{tour}} tour. Shall we go ahead with your booking?",
+          "quickReplies": [
+            "Yes, let's go",
+            "Later"
+          ],
+          "examples": {
+            "name": "Anna",
+            "tour": "Masaya Volcano"
+          }
+        },
+        "promo": {
+          "title": "Quote follow-up",
+          "body": "Hi {{name}}, did you get a chance to review the details of the {{tour}} tour? If you'd like, I can help you book your date.",
+          "quickReplies": [
+            "I want to book",
+            "More information"
+          ],
+          "examples": {
+            "name": "Anna",
+            "tour": "Masaya Volcano"
+          }
+        }
       }
+    },
+    "connectWhatsApp": {
+      "notConfigured": "WhatsApp setup is not configured yet.",
+      "cancelled": "Connection cancelled.",
+      "metaError": "We couldn't complete the connection with Meta. Try again or use the manual connection.",
+      "connectError": "We couldn't connect WhatsApp. Try again or use the manual connection.",
+      "connected": "WhatsApp connected: {phone}",
+      "connecting": "Connecting…",
+      "cta": "Connect with Facebook",
+      "popupOpen": "A Facebook window opened. If you don't see it, allow pop-ups for this site and try again.",
+      "popupHint": "A Facebook window will open. If your browser blocks pop-ups, allow them for this site.",
+      "connectErrorWithReason": "We couldn't connect WhatsApp: {reason}. If it keeps failing, use the manual connection."
     }
   },
   "blog": {
@@ -762,5 +983,86 @@
     "sub": "WhatsApp automation, CRM, and booking management — no fluff, for LATAM operators.",
     "readMore": "Read more",
     "back": "Blog"
+  },
+  "localeToggle": {
+    "switchTo": "Switch to {lang}",
+    "names": {
+      "es": "Spanish",
+      "en": "English"
+    }
+  },
+  "meta": {
+    "title": "Tourfy — WhatsApp AI for Tour Agencies",
+    "description": "Your tours sell themselves at 2 AM. WhatsApp bots that answer, qualify, and book — trained on your tours, your prices, your voice."
+  },
+  "apiErrors": {
+    "unauthorized": "Your session has expired. Please log in again.",
+    "forbidden": "You don't have permission to do this.",
+    "adminOnly": "Only an admin can do this.",
+    "invalidInput": "Some of the information isn't valid. Please check it and try again.",
+    "serverMisconfigured": "The server isn't configured correctly. Please contact support.",
+    "noOrganization": "Your account doesn't have an agency yet.",
+    "orgNotFound": "We couldn't find your agency.",
+    "orgUpdateFailed": "We couldn't save your changes. Please try again.",
+    "invalidTime": "Invalid time format (HH:MM).",
+    "startBeforeEnd": "Opening time must be before closing time.",
+    "noFieldsToUpdate": "There are no changes to save.",
+    "teamLoadFailed": "We couldn't load your team. Please try again.",
+    "inviteInvalidFields": "Check the email and name — something isn't valid.",
+    "emailTaken": "That email is already registered with Tourfy.",
+    "alreadyInTeam": "That person is already on your team.",
+    "inviteFailed": "We couldn't send the invitation. Please try again.",
+    "cannotChangeOwnAccess": "You can't change your own access.",
+    "agentNotFound": "We couldn't find that team member.",
+    "roleUpdateFailed": "We couldn't change the role. Please try again.",
+    "agentRemoveFailed": "We couldn't remove this team member. Please try again.",
+    "invitationAlreadyAccepted": "This person has already accepted the invitation.",
+    "resendFailed": "We couldn't resend the invitation. Please try again.",
+    "conversationNotFound": "We couldn't find this conversation.",
+    "conversationUpdateFailed": "We couldn't update the conversation. Please try again.",
+    "notAssigneeReturn": "Only the assigned agent or an admin can hand this conversation back to the bot.",
+    "takenByOther": "Another agent is handling this conversation.",
+    "deleteAdminOnly": "Only admins can delete conversations.",
+    "conversationDeleteFailed": "We couldn't delete the conversation. Please try again.",
+    "takeControlFirst": "Take control of the conversation before sending a message.",
+    "windowClosed": "It's been more than 24 hours since the customer's last message. Send a template to restart the conversation.",
+    "contactPhoneMissing": "This contact doesn't have a phone number.",
+    "whatsappNotConnected": "Your WhatsApp number isn't connected.",
+    "messagingTokenMissing": "WhatsApp messaging isn't configured. Please contact support.",
+    "sendFailed": "We couldn't send the message via WhatsApp. Please try again.",
+    "messageNotSaved": "The message was sent, but we couldn't save it to the history.",
+    "templatesLoadFailed": "We couldn't load your templates. Please try again.",
+    "templateNotApproved": "This template hasn't been approved by Meta yet.",
+    "templateMissingVariables": "Fill in all the template variables.",
+    "templateSendFailed": "We couldn't send the template. Please try again.",
+    "templateSendFailedReason": "We couldn't send the template. Meta said: {reason}",
+    "templateNotSaved": "The template was sent, but we couldn't save it to the history.",
+    "templateNameFormat": "The name can only contain lowercase letters, numbers and underscores.",
+    "templateVariableExample": "Every variable needs an example.",
+    "templateRejected": "Meta rejected the template: {reason}",
+    "templateCreateFailed": "We couldn't create the template. Please try again.",
+    "invalidTemplateName": "That template name isn't valid.",
+    "templateDeleteFailed": "We couldn't delete the template. Please try again.",
+    "templateDeleteFailedReason": "We couldn't delete the template. Meta said: {reason}",
+    "importInvalidUrl": "Enter a valid URL.",
+    "importUrlFailed": "We couldn't import from that URL.",
+    "importReadFilesFailed": "We couldn't read the files.",
+    "importNoFiles": "You didn't upload any files.",
+    "importTooManyFiles": "You can upload up to {max} files at a time.",
+    "importUnsupportedType": "Unsupported file type (PDF, JPG, PNG or WEBP).",
+    "importFileTooLarge": "Each file can be up to {mb} MB.",
+    "importTotalTooLarge": "The files together exceed {mb} MB.",
+    "importFileFailed": "We couldn't process the file.",
+    "slugTaken": "That agency identifier is already taken.",
+    "orgCreateFailed": "We couldn't create your agency. Please try again.",
+    "onboardingFinishFailed": "We couldn't finish setting up. Please try again.",
+    "whatsappTokenExchangeFailed": "Meta didn't confirm the connection. Please try again.",
+    "whatsappSubscribeFailed": "We couldn't link Tourfy to your WhatsApp Business account.",
+    "whatsappNumberInUse": "This WhatsApp number is already connected to another account. Disconnect it first or contact support.",
+    "whatsappConnectFailed": "We couldn't connect your WhatsApp number. Please try again.",
+    "whatsappManualMissingFields": "Fill in all the fields to connect the number.",
+    "whatsappManualTokenInvalid": "Meta couldn't validate the details. Check the Phone Number ID and the Access Token.",
+    "whatsappManualSubscribeFailed": "We couldn't link Tourfy to your WhatsApp Business account. Check the WABA ID and the Access Token permissions.",
+    "whatsappDisconnectFailed": "We couldn't disconnect the number. Please try again."
   }
 }

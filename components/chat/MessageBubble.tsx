@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { MessageRole } from "@/types";
 import { useChatMediaUrl } from "@/hooks/useChatMediaUrl";
 
@@ -13,25 +14,26 @@ interface MessageBubbleProps {
   failed?: boolean;
 }
 
-const ROLE_STYLES: Record<MessageRole, { wrapper: string; bubble: string; label: string }> = {
+const ROLE_STYLES: Record<MessageRole, { wrapper: string; bubble: string; label: "roleClient" | "roleBot" | "roleYou" }> = {
   user: {
     wrapper: "justify-start",
     bubble: "bg-white border border-slate-200 text-navy-900 rounded-tl-md shadow-sm",
-    label: "Client",
+    label: "roleClient",
   },
   assistant: {
     wrapper: "justify-start",
     bubble: "bg-blue-50 border border-blue-100 text-navy-900 rounded-tl-md",
-    label: "Tourfy Bot",
+    label: "roleBot",
   },
   agent: {
     wrapper: "justify-end",
     bubble: "bg-navy-900 text-white rounded-tr-md shadow-md",
-    label: "You",
+    label: "roleYou",
   },
 };
 
 export default function MessageBubble({ content, role, createdAt, mediaPath, pending, failed }: MessageBubbleProps) {
+  const t = useTranslations("dashboard.chat");
   const style = ROLE_STYLES[role];
   const mediaUrl = useChatMediaUrl(mediaPath);
   const [imgFailed, setImgFailed] = useState(false);
@@ -44,7 +46,7 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
           <span className={`block text-[10px] font-bold mb-0.5 ${
             role === "assistant" ? "text-blue-500" : "text-slate-400"
           }`}>
-            {style.label}
+            {t(style.label)}
           </span>
         )}
         {mediaUrl && (
@@ -52,7 +54,7 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
             {/* eslint-disable-next-line @next/next/no-img-element -- signed URL efímera, no optimizable por next/image */}
             <img
               src={mediaUrl}
-              alt="Imagen enviada por el cliente"
+              alt={t("imageAlt")}
               className="max-h-64 rounded-lg object-cover"
               loading="lazy"
               onLoad={() => setImgFailed(false)}
@@ -72,7 +74,7 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
               <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
             </svg>
           )}
-          {failed && <span className="text-red-300">Failed</span>}
+          {failed && <span className="text-red-300">{t("failed")}</span>}
         </span>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
@@ -36,5 +37,7 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_error`)
+  // /login muestra ?error= tal cual en un toast: va el texto ya traducido.
+  const t = await getTranslations('auth.errors')
+  return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(t('callbackFailed'))}`)
 }

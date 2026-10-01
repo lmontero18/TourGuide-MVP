@@ -37,8 +37,6 @@ const LANGUAGES = [
   { code: "de", label: "Deutsch" },
 ];
 
-const SUGGESTED_VARS = ["nombre", "tour", "fecha", "hora", "precio"];
-
 // Nombre interno que exige Meta: minusculas, numeros y guion bajo.
 export function slugify(title: string) {
   return title
@@ -56,7 +54,7 @@ function extractVariables(text: string): string[] {
 
 interface TemplateFormProps {
   initial: TemplateDraft;
-  onSubmit: (input: NewTemplate) => Promise<{ ok: true } | { ok: false; error: string }>;
+  onSubmit: (input: NewTemplate) => Promise<{ ok: true } | { ok: false; error: string; code?: string }>;
   onCancel: () => void;
 }
 
@@ -97,7 +95,14 @@ export default function TemplateForm({ initial, onSubmit, onCancel }: TemplateFo
       examples: Object.fromEntries(variables.map((v) => [v, draft.examples[v]?.trim() ?? ""])),
     });
     setSending(false);
-    if (!res.ok) setError(res.error);
+    if (!res.ok) {
+      // El motivo de Meta viene tal cual de Meta: se presenta con texto traducido.
+      setError(
+        res.code === "meta_rejected" && res.error
+          ? t("errors.metaRejected", { reason: res.error })
+          : res.error || t("errors.create")
+      );
+    }
   }
 
   const input =
@@ -150,10 +155,10 @@ export default function TemplateForm({ initial, onSubmit, onCancel }: TemplateFo
             <label htmlFor="tpl-body" className={label}>{t("form.body")}</label>
             <span className="text-[10px] text-slate-400 tabular-nums">{draft.body.length}/1024</span>
           </div>
-          <textarea id="tpl-body" className={`${input} min-h-32 resize-y`} value={draft.body} maxLength={1024} onChange={(e) => set("body", e.target.value)} placeholder={t("form.bodyPlaceholder")} />
+          <textarea id="tpl-body" className={`${input} min-h-32 resize-y`} value={draft.body} maxLength={1024} onChange={(e) => set("body", e.target.value)} placeholder={t.raw("form.bodyPlaceholder") as string} />
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <span className="text-[11px] text-slate-500">{t("form.insertVariable")}</span>
-            {SUGGESTED_VARS.map((v) => (
+            {(t.raw("form.suggestedVars") as string[]).map((v) => (
               <button key={v} type="button" onClick={() => insertVariable(v)} className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-navy-900 hover:border-slate-300">
                 {`{{${v}}}`}
               </button>

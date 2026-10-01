@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { sendTextMessage } from '@/lib/whatsapp/client'
@@ -16,11 +17,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  const t = await getTranslations('apiErrors')
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
   const { data: profile } = await supabase
@@ -30,12 +32,12 @@ export async function POST(
     .single()
 
   if (!profile?.org_id) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    return NextResponse.json({ error: t('forbidden') }, { status: 403 })
   }
 
   const parsed = sendSchema.safeParse(await request.json())
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+    return NextResponse.json({ error: t('invalidInput') }, { status: 400 })
   }
 
   const { data: conv } = await supabase
@@ -52,12 +54,12 @@ export async function POST(
     }>()
 
   if (!conv || conv.org_id !== profile.org_id) {
-    return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
+    return NextResponse.json({ error: t('conversationNotFound') }, { status: 404 })
   }
 
   if (conv.bot_active) {
     return NextResponse.json(
-      { error: 'Take control of the conversation before sending a message' },
+      { error: t('takeControlFirst') },
       { status: 400 }
     )
   }
@@ -75,7 +77,7 @@ export async function POST(
     .maybeSingle()
   if (!lastClientMsg || Date.now() - new Date(lastClientMsg.created_at).getTime() > WINDOW_MS) {
     return NextResponse.json(
-      { error: 'The 24-hour window to reply has closed', code: 'window_closed' },
+      { error: t('windowClosed'), code: 'window_closed' },
       { status: 409 }
     )
   }
@@ -84,7 +86,7 @@ export async function POST(
   // contestarle al mismo cliente a la vez.
   if (conv.assigned_agent_id && conv.assigned_agent_id !== user.id) {
     return NextResponse.json(
-      { error: 'Another agent is handling this conversation', code: 'not_assignee' },
+      { error: t('takenByOther'), code: 'not_assignee' },
       { status: 403 }
     )
   }
@@ -104,14 +106,14 @@ export async function POST(
       .maybeSingle()
     if (!claimed) {
       return NextResponse.json(
-        { error: 'Another agent is handling this conversation', code: 'not_assignee' },
+        { error: t('takenByOther'), code: 'not_assignee' },
         { status: 403 }
       )
     }
   }
 
   if (!conv.contact?.phone) {
-    return NextResponse.json({ error: 'Contact phone missing' }, { status: 400 })
+    return NextResponse.json({ error: t('contactPhoneMissing') }, { status: 400 })
   }
 
   const { data: wa } = await supabase
@@ -121,12 +123,12 @@ export async function POST(
     .single()
 
   if (!wa) {
-    return NextResponse.json({ error: 'WhatsApp not connected for this organization' }, { status: 400 })
+    return NextResponse.json({ error: t('whatsappNotConnected') }, { status: 400 })
   }
 
   const token = getMessagingToken()
   if (!token) {
-    return NextResponse.json({ error: 'WhatsApp messaging token not configured' }, { status: 500 })
+    return NextResponse.json({ error: t('messagingTokenMissing') }, { status: 500 })
   }
 
   try {
@@ -137,12 +139,13 @@ export async function POST(
     // 131047 = Meta rechazo por ventana de 24h (por si el reloj difiere del nuestro).
     if (message.includes('131047')) {
       return NextResponse.json(
-        { error: 'The 24-hour window to reply has closed', code: 'window_closed' },
+        { error: t('windowClosed'), code: 'window_closed' },
         { status: 409 }
       )
     }
+    // El detalle de Meta (en ingles) queda en el log; al usuario, texto propio.
     return NextResponse.json(
-      { error: message || 'Failed to send message via WhatsApp' },
+      { error: t('sendFailed') },
       { status: 502 }
     )
   }
@@ -162,7 +165,7 @@ export async function POST(
 
   if (insertError || !msg) {
     console.error('Failed to insert message:', insertError)
-    return NextResponse.json({ error: 'Message sent but not saved locally' }, { status: 500 })
+    return NextResponse.json({ error: t('messageNotSaved') }, { status: 500 })
   }
 
   await supabase

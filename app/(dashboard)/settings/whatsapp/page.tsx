@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
 import { createClient } from "@/lib/supabase/client";
@@ -14,6 +15,7 @@ interface ConnectedAccount {
 }
 
 export default function WhatsAppSettingsPage() {
+  const t = useTranslations("dashboard.settings.whatsapp");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
@@ -60,7 +62,7 @@ export default function WhatsAppSettingsPage() {
 
   const handleConnect = async () => {
     if (!wabaId.trim() || !phoneNumberId.trim() || !accessToken.trim()) {
-      toast.error("WABA ID, Phone Number ID and Access Token are required");
+      toast.error(t("errors.missingFields"));
       return;
     }
     setSubmitting(true);
@@ -76,31 +78,31 @@ export default function WhatsAppSettingsPage() {
         }),
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error ?? "Failed to connect");
+      if (!res.ok) throw new Error(result.error ?? t("errors.connect"));
       setAccount(result.account);
-      toast.success("WhatsApp connected successfully");
+      toast.success(t("connectedToast"));
       setWabaId("");
       setPhoneNumberId("");
       setAccessToken("");
       setPhoneNumber("");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to connect");
+      toast.error(err instanceof Error ? err.message : t("errors.connect"));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDisconnect = async () => {
-    if (!confirm("Disconnect this WhatsApp number? Incoming messages will stop being received.")) return;
+    if (!confirm(t("disconnectConfirm"))) return;
     setDisconnecting(true);
     try {
       const res = await fetch("/api/whatsapp/disconnect", { method: "POST" });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error ?? "Failed to disconnect");
+      if (!res.ok) throw new Error(result.error ?? t("errors.disconnect"));
       setAccount(null);
-      toast.success("WhatsApp disconnected");
+      toast.success(t("disconnectedToast"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to disconnect");
+      toast.error(err instanceof Error ? err.message : t("errors.disconnect"));
     } finally {
       setDisconnecting(false);
     }
@@ -108,17 +110,17 @@ export default function WhatsAppSettingsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <TopBar title="WhatsApp connection" />
+      <TopBar title={t("title")} />
 
       <div className="flex-1 overflow-y-auto p-5">
         <div className="max-w-2xl space-y-6">
           {loading ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500">
-              Loading...
+              {t("loading")}
             </div>
           ) : account ? (
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h2 className="text-sm font-bold text-navy-900 mb-4">Connected number</h2>
+              <h2 className="text-sm font-bold text-navy-900 mb-4">{t("connectedNumber")}</h2>
               <div className="flex items-center justify-between rounded-xl bg-green-50 border border-green-200 p-4">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
@@ -127,7 +129,7 @@ export default function WhatsAppSettingsPage() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-green-900">Connected</p>
+                    <p className="text-sm font-semibold text-green-900">{t("connected")}</p>
                     <p className="text-xs text-green-700/70">{account.phone_number || "—"}</p>
                   </div>
                 </div>
@@ -136,7 +138,7 @@ export default function WhatsAppSettingsPage() {
                   disabled={disconnecting}
                   className="text-xs font-medium text-green-600 hover:text-green-700 underline underline-offset-2 transition-colors disabled:opacity-50"
                 >
-                  {disconnecting ? "Disconnecting..." : "Disconnect"}
+                  {disconnecting ? t("disconnecting") : t("disconnect")}
                 </button>
               </div>
             </section>
@@ -144,9 +146,9 @@ export default function WhatsAppSettingsPage() {
             <>
             {/* Acción primaria: conectar con un clic vía Embedded Signup */}
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h2 className="text-sm font-bold text-navy-900 mb-1">Connect WhatsApp</h2>
+              <h2 className="text-sm font-bold text-navy-900 mb-1">{t("connectTitle")}</h2>
               <p className="text-xs text-slate-400 mb-4">
-                Connect your number in one click — log in with Facebook and pick your WhatsApp Business number.
+                {t("connectSub")}
               </p>
               <ConnectWhatsAppButton onConnected={() => { void loadAccount(); }} />
             </section>
@@ -158,7 +160,7 @@ export default function WhatsAppSettingsPage() {
                 onClick={() => setShowManual((s) => !s)}
                 className="flex w-full items-center justify-between text-left"
               >
-                <span className="text-sm font-bold text-navy-900">Connect manually (advanced)</span>
+                <span className="text-sm font-bold text-navy-900">{t("manualTitle")}</span>
                 <svg
                   width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -171,12 +173,12 @@ export default function WhatsAppSettingsPage() {
               {showManual && (
               <div className="mt-4">
               <p className="text-xs text-slate-400 mb-4">
-                Get these values from Meta Developer Console → WhatsApp → Configuración de la API.
+                {t("manualSub")}
               </p>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-medium text-navy-900 mb-1.5">WhatsApp Business Account ID (WABA ID)</label>
+                  <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("wabaId")}</label>
                   <input
                     type="text"
                     value={wabaId}
@@ -187,7 +189,7 @@ export default function WhatsAppSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-navy-900 mb-1.5">Phone Number ID</label>
+                  <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("phoneNumberId")}</label>
                   <input
                     type="text"
                     value={phoneNumberId}
@@ -198,7 +200,7 @@ export default function WhatsAppSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-navy-900 mb-1.5">Access Token</label>
+                  <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("accessToken")}</label>
                   <textarea
                     value={accessToken}
                     onChange={(e) => setAccessToken(e.target.value)}
@@ -207,14 +209,13 @@ export default function WhatsAppSettingsPage() {
                     className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-navy-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-mono resize-none"
                   />
                   <p className="mt-1 text-[11px] text-slate-400">
-                    Used only to verify the connection — it is never stored. Messaging runs on
-                    our central System User token.
+                    {t("accessTokenHint")}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-navy-900 mb-1.5">
-                    Display phone number <span className="text-slate-400 font-normal">(optional)</span>
+                    {t("displayPhone")} <span className="text-slate-400 font-normal">({t("optional")})</span>
                   </label>
                   <input
                     type="text"
@@ -232,7 +233,7 @@ export default function WhatsAppSettingsPage() {
                   disabled={submitting}
                   className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
-                  {submitting ? "Connecting..." : "Connect WhatsApp"}
+                  {submitting ? t("connecting") : t("connectTitle")}
                 </button>
               </div>
               </div>

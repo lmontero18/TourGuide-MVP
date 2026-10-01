@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { registerPhoneNumber } from '@/lib/whatsapp/client'
@@ -16,11 +17,12 @@ const connectSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  const t = await getTranslations('apiErrors')
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
   const { data: userData } = await supabase
@@ -30,7 +32,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (!userData || userData.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
+    return NextResponse.json({ error: t('adminOnly') }, { status: 403 })
   }
 
   // org_id como binding fijo: CLAUDE.md pide org_id en los bindings del logger.
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest) {
 
   const parsed = connectSchema.safeParse(await request.json())
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    return NextResponse.json({ error: t('invalidInput') }, { status: 400 })
   }
 
   const { code, waba_id, phone_number_id } = parsed.data
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
     const appSecret = process.env.META_APP_SECRET
     if (!appId || !appSecret) {
       log.error('META_APP_ID/META_APP_SECRET not configured')
-      return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
+      return NextResponse.json({ error: t('serverMisconfigured') }, { status: 500 })
     }
 
     const tokenRes = await fetch(`${GRAPH_API_BASE}/oauth/access_token`, {
@@ -68,7 +70,7 @@ export async function POST(request: NextRequest) {
       // La respuesta cruda de Meta se loguea, no se devuelve al cliente.
       const details = await tokenRes.json().catch(() => ({}))
       log.warn('token exchange failed', { details })
-      return NextResponse.json({ error: 'Token exchange failed' }, { status: 400 })
+      return NextResponse.json({ error: t('whatsappTokenExchangeFailed') }, { status: 400 })
     }
 
     const { access_token } = (await tokenRes.json()) as { access_token: string }
@@ -82,7 +84,7 @@ export async function POST(request: NextRequest) {
     if (!subRes.ok) {
       const details = await subRes.json().catch(() => ({}))
       log.warn('WABA subscribe failed', { waba_id, details })
-      return NextResponse.json({ error: 'Failed to subscribe app to WABA' }, { status: 400 })
+      return NextResponse.json({ error: t('whatsappSubscribeFailed') }, { status: 400 })
     }
 
     // 3. Register the phone number on Cloud API (sets the two-step PIN). Idempotente.
@@ -129,7 +131,7 @@ export async function POST(request: NextRequest) {
         await serviceClient.from('whatsapp_accounts').delete().eq('id', existing.id)
       } else {
         return NextResponse.json(
-          { error: 'Este número de WhatsApp ya está conectado a otra cuenta. Desconectalo primero o contactá soporte.' },
+          { error: t('whatsappNumberInUse') },
           { status: 409 }
         )
       }
@@ -165,6 +167,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, account: waAccount })
   } catch (error) {
     console.error('WhatsApp connect error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: t('whatsappConnectFailed') }, { status: 500 })
   }
 }

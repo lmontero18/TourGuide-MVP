@@ -14,7 +14,8 @@ export interface NewTemplate {
   examples: Record<string, string>
 }
 
-type Result = { ok: true } | { ok: false; error: string }
+// `error` vacio = la API no dio motivo: la UI muestra su mensaje traducido.
+type Result = { ok: true } | { ok: false; error: string; code?: string }
 
 // Plantillas del WABA de la org via /api/templates (Meta es la fuente de verdad).
 export function useTemplates() {
@@ -50,7 +51,7 @@ export function useTemplates() {
         body: JSON.stringify(input),
       })
       const body = await res.json().catch(() => ({}))
-      if (!res.ok) return { ok: false, error: body.error ?? 'Request failed' }
+      if (!res.ok) return { ok: false, error: body.error ?? '', code: body.code }
       reload()
       return { ok: true }
     },
@@ -61,7 +62,7 @@ export function useTemplates() {
     async (name: string): Promise<Result> => {
       const res = await fetch(`/api/templates/${name}`, { method: 'DELETE' })
       const body = await res.json().catch(() => ({}))
-      if (!res.ok) return { ok: false, error: body.error ?? 'Request failed' }
+      if (!res.ok) return { ok: false, error: body.error ?? '', code: body.code }
       reload()
       return { ok: true }
     },

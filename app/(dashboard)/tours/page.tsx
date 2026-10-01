@@ -106,7 +106,7 @@ export default function ToursSettingsPage() {
       try {
         const res = await fetch("/api/organizations");
         const result = await res.json();
-        if (!res.ok) throw new Error(result.error ?? "Failed to load");
+        if (!res.ok) throw new Error(result.error ?? t("loadError"));
         const org = result.organization as Organization;
         const loaded: Knowledge = {
           tours: org.tours ?? [],

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 
@@ -16,7 +17,8 @@ export async function GET(
     .single()
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 404 })
+    const t = await getTranslations('apiErrors')
+    return NextResponse.json({ error: t('conversationNotFound') }, { status: 404 })
   }
 
   return NextResponse.json(data)
@@ -46,11 +48,12 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  const t = await getTranslations('apiErrors')
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
   const { data: profile } = await supabase
@@ -60,12 +63,12 @@ export async function PATCH(
     .single()
 
   if (!profile?.org_id) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    return NextResponse.json({ error: t('forbidden') }, { status: 403 })
   }
 
   const parsed = patchSchema.safeParse(await request.json())
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+    return NextResponse.json({ error: t('invalidInput') }, { status: 400 })
   }
 
   if ('status' in parsed.data) {
@@ -84,7 +87,7 @@ export async function PATCH(
       .maybeSingle()
     if (error || !data) {
       console.error('Failed to update conversation status:', error)
-      return NextResponse.json({ error: 'Failed to update conversation' }, { status: error ? 500 : 404 })
+      return NextResponse.json({ error: t('conversationUpdateFailed') }, { status: error ? 500 : 404 })
     }
     return NextResponse.json({ success: true, conversation: data })
   }
@@ -103,7 +106,7 @@ export async function PATCH(
     }>()
 
   if (!current || current.org_id !== profile.org_id) {
-    return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
+    return NextResponse.json({ error: t('conversationNotFound') }, { status: 404 })
   }
 
   const heldByOther = !!current.assigned_agent_id && current.assigned_agent_id !== user.id
@@ -112,7 +115,7 @@ export async function PATCH(
   // devolverle al bot la conversacion que otro estaba atendiendo.
   if (bot_active && heldByOther && profile.role !== 'admin') {
     return NextResponse.json(
-      { error: 'Only the assigned agent or an admin can return this conversation', code: 'not_assignee' },
+      { error: t('notAssigneeReturn'), code: 'not_assignee' },
       { status: 403 }
     )
   }
@@ -142,7 +145,7 @@ export async function PATCH(
 
   if (error) {
     console.error('Failed to update conversation:', error)
-    return NextResponse.json({ error: 'Failed to update conversation' }, { status: 500 })
+    return NextResponse.json({ error: t('conversationUpdateFailed') }, { status: 500 })
   }
 
   if (!data) {
@@ -152,7 +155,7 @@ export async function PATCH(
       .eq('id', id)
       .single<{ assigned_agent: { full_name: string | null; email: string } | null }>()
     return NextResponse.json(
-      { error: 'Another agent is handling this conversation', code: 'taken', holder: displayName(holder?.assigned_agent ?? null) },
+      { error: t('takenByOther'), code: 'taken', holder: displayName(holder?.assigned_agent ?? null) },
       { status: 409 }
     )
   }
@@ -165,11 +168,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  const t = await getTranslations('apiErrors')
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
   const { data: profile } = await supabase
@@ -179,11 +183,11 @@ export async function DELETE(
     .single()
 
   if (!profile?.org_id) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    return NextResponse.json({ error: t('forbidden') }, { status: 403 })
   }
 
   if (profile.role !== 'admin') {
-    return NextResponse.json({ error: 'Only admins can delete conversations' }, { status: 403 })
+    return NextResponse.json({ error: t('deleteAdminOnly') }, { status: 403 })
   }
 
   const { data: conv } = await supabase
@@ -193,7 +197,7 @@ export async function DELETE(
     .single()
 
   if (!conv || conv.org_id !== profile.org_id) {
-    return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
+    return NextResponse.json({ error: t('conversationNotFound') }, { status: 404 })
   }
 
   // Borrado logico: oculta la conversacion del inbox pero conserva los
@@ -209,11 +213,11 @@ export async function DELETE(
 
   if (error) {
     console.error('Failed to delete conversation:', error)
-    return NextResponse.json({ error: 'Failed to delete conversation' }, { status: 500 })
+    return NextResponse.json({ error: t('conversationDeleteFailed') }, { status: 500 })
   }
 
   if (!hidden) {
-    return NextResponse.json({ error: 'Conversation not deleted (RLS blocked)' }, { status: 403 })
+    return NextResponse.json({ error: t('conversationDeleteFailed') }, { status: 403 })
   }
 
   return NextResponse.json({ success: true })

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { createLogger } from '@/lib/logger'
@@ -13,6 +14,7 @@ export async function POST(
   const ctx = await requireAdmin()
   if (!ctx.ok) return ctx.response
   const { id } = await params
+  const t = await getTranslations('apiErrors')
 
   const service = await createServiceClient()
   const { data: target } = await service
@@ -21,12 +23,12 @@ export async function POST(
     .eq('id', id)
     .maybeSingle()
   if (!target || target.org_id !== ctx.orgId) {
-    return NextResponse.json({ error: 'Agent not found' }, { status: 404 })
+    return NextResponse.json({ error: t('agentNotFound') }, { status: 404 })
   }
 
   const { data: authData } = await service.auth.admin.getUserById(id)
   if (authData?.user?.email_confirmed_at) {
-    return NextResponse.json({ error: 'Invitation already accepted' }, { status: 409 })
+    return NextResponse.json({ error: t('invitationAlreadyAccepted') }, { status: 409 })
   }
 
   const { error } = await service.auth.admin.inviteUserByEmail(target.email, {
@@ -34,7 +36,7 @@ export async function POST(
   })
   if (error) {
     log.error('failed to resend invitation', { error, org_id: ctx.orgId, agent_id: id })
-    return NextResponse.json({ error: 'Failed to resend invitation' }, { status: 400 })
+    return NextResponse.json({ error: t('resendFailed') }, { status: 400 })
   }
   return NextResponse.json({ success: true })
 }
