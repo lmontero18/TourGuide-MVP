@@ -6,12 +6,14 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import { FadeUp } from "./Motion";
 import { Bubble, CheckIcon, Reveal, TypingDots } from "./PreviewBits";
+import { demoLink } from "@/lib/marketing/demoLink";
 
 type MockView = "conversations" | "tours" | "metrics";
 
 export function Hero() {
   const t = useTranslations("hero");
   const [view, setView] = useState<MockView>("conversations");
+  const demo = demoLink(t("demoMessage"));
 
   return (
     <section className="relative pt-24 pb-6 sm:pt-28 sm:pb-8 lg:pt-36 lg:pb-16 bg-white overflow-hidden">
@@ -57,7 +59,8 @@ export function Hero() {
           <FadeUp delay={0.3}>
             <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
               <a
-                href="/login"
+                href={demo.href}
+                {...(demo.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl bg-navy-900 px-6 text-sm font-bold text-white shadow-lg shadow-navy-900/25 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2"
               >
                 {t("ctaPrimary")}
@@ -99,7 +102,7 @@ export function Hero() {
               <div className="flex-1 mx-2 sm:mx-3">
                 <div className="mx-auto max-w-md h-5 sm:h-6 rounded-md bg-slate-100 flex items-center justify-center px-3">
                   <span className="text-[10px] sm:text-[11px] text-slate-600 font-medium tracking-wide truncate">
-                    {`app.tourfy.com/${view}`}
+                    {`www.tourfy.app/${view}`}
                   </span>
                 </div>
               </div>
@@ -128,8 +131,9 @@ function DashboardSkeleton({
 }) {
   const tSide = useTranslations("dashboard.sidebar");
   const tConv = useTranslations("dashboard.conversations");
-  const tTours = useTranslations("dashboard.tours");
   const tMetrics = useTranslations("dashboard.metrics");
+  const tMock = useTranslations("hero.mock");
+  const tAgents = useTranslations("dashboard.agents");
 
   const navItems: { key: MockView | null; label: string; icon: string }[] = [
     { key: "conversations", label: tSide("conversations"), icon: NavIcons.chat },
@@ -140,7 +144,7 @@ function DashboardSkeleton({
 
   const titles: Record<MockView, string> = {
     conversations: tConv("title"),
-    tours: tTours("title"),
+    tours: tMock("toursTitle"),
     metrics: tMetrics("title"),
   };
 
@@ -187,11 +191,11 @@ function DashboardSkeleton({
         {/* Org al fondo */}
         <div className="mt-auto flex items-center gap-2 px-1 pt-3 border-t border-slate-100">
           <div className="h-6 w-6 rounded-full bg-navy-900/10 flex items-center justify-center">
-            <span className="text-[9px] font-bold text-navy-900">CE</span>
+            <span className="text-[9px] font-bold text-navy-900">TG</span>
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-bold text-navy-950 truncate">Cusco Expeditions</p>
-            <p className="text-[9px] text-slate-500 truncate">admin@cuscoexp.com</p>
+            <p className="text-[10px] font-bold text-navy-950 truncate">{tMock("orgName")}</p>
+            <p className="text-[9px] text-slate-500 truncate">{tAgents("admin")}</p>
           </div>
         </div>
       </div>
@@ -254,7 +258,6 @@ function DashboardSkeleton({
 
 function ConversationsView() {
   const tDemo = useTranslations("features.demo");
-  const tHow = useTranslations("how.preview");
   const tConv = useTranslations("dashboard.conversations");
   const tChat = useTranslations("dashboard.chat");
   const tMock = useTranslations("hero.mock");
@@ -371,7 +374,7 @@ function ConversationsView() {
               <p className="text-[11px] font-bold text-navy-950 truncate">María González</p>
               <div className="flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
-                <span className="text-[9px] text-slate-500">WhatsApp · +51 984 ···</span>
+                <span className="text-[9px] text-slate-500">WhatsApp · +505 8··· ····</span>
               </div>
             </div>
           </div>
@@ -401,7 +404,7 @@ function ConversationsView() {
             </Reveal>
             <TypingDots at={4.3} duration={1.2} side="right" />
 
-            {/* Toast: lead calificado capturado */}
+            {/* Toast: el bot pasa al cliente listo para cerrar */}
             <Reveal at={5.6} pop className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3">
               <div className="flex items-center gap-2.5 rounded-xl bg-white border border-green-200 shadow-lg shadow-green-900/5 px-3 py-2.5">
                 <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
@@ -409,10 +412,10 @@ function ConversationsView() {
                 </div>
                 <div>
                   <p className="text-[11px] font-bold text-navy-950 leading-tight">
-                    {tHow("leadTitle")}
+                    {tMock("handoffTitle")}
                   </p>
                   <p className="text-[10px] text-slate-500 leading-tight">
-                    Machu Picchu · {tHow("leadGroupV")}
+                    {tMock("handoffSub")}
                   </p>
                 </div>
               </div>
@@ -436,92 +439,65 @@ function ConversationsView() {
   );
 }
 
-/* ─── Vista: Tours y FAQs ─── */
+/* ─── Vista: Lo que sabe tu bot (espejo de /tours) ─── */
 
 function ToursView() {
   const t = useTranslations("dashboard.tours");
+  const tMock = useTranslations("hero.mock");
 
   const tours = [
-    { name: "Machu Picchu Full Day", price: "$320 USD", faqs: 5 },
-    { name: "Valle Sagrado + Almuerzo", price: "$180 USD", faqs: 3 },
-    { name: "Laguna Humantay", price: "$95 USD", faqs: 4 },
+    { name: "Volcán Masaya de noche", type: tMock("typeDay"), price: "$45 USD", more: true },
+    { name: "Isletas de Granada en lancha", type: tMock("typeDay"), price: "$25 USD", more: false },
+    { name: "Laguna de Apoyo", type: tMock("typeAdventure"), price: "$35 USD", more: true },
+    { name: "Cañón de Somoto", type: tMock("typeAdventure"), price: "$60 USD", more: false },
   ];
 
   return (
     <div className="h-full bg-slate-50/50 p-3 sm:p-4 overflow-hidden pointer-events-none">
-      {/* Header de la vista */}
-      <Reveal at={0.05} className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200/60 px-2 py-0.5 text-[9px] font-bold text-blue-600">
-            {t("brainTag")}
-          </span>
-          <span className="text-[10px] text-slate-500">
-            {t("summary", { tours: 3, sections: 2, faqs: 5 })}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="h-6 rounded-lg border border-slate-200 bg-white px-2.5 flex items-center">
-            <span className="text-[9px] font-bold text-navy-900">{t("importCta")}</span>
-          </div>
-          <div className="h-6 rounded-lg bg-navy-900 px-2.5 flex items-center">
-            <span className="text-[9px] font-bold text-white">{t("save")}</span>
-          </div>
-        </div>
-      </Reveal>
-
-      {/* Tabs */}
-      <Reveal at={0.15} className="mt-3 flex gap-1">
+      {/* Tabs con conteo, como en el panel */}
+      <Reveal at={0.05} className="flex gap-4 border-b border-slate-200">
         {[
-          { label: t("tabTours"), active: true },
-          { label: t("tabBusiness"), active: false },
-          { label: t("tabFaqs"), active: false },
+          { label: t("tabTours"), count: 4, active: true },
+          { label: t("tabBusiness"), count: 3, active: false },
+          { label: t("tabFaqs"), count: 8, active: false },
         ].map((tab) => (
           <span
             key={tab.label}
-            className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold ${
-              tab.active ? "bg-navy-900 text-white" : "bg-white border border-slate-200 text-slate-500"
+            className={`-mb-px inline-flex items-center gap-1.5 border-b-2 pb-1.5 text-[10px] font-bold ${
+              tab.active ? "border-navy-900 text-navy-950" : "border-transparent text-slate-400"
             }`}
           >
             {tab.label}
+            <span className={`rounded-full px-1 text-[8px] ${tab.active ? "bg-navy-900 text-white" : "bg-slate-100 text-slate-400"}`}>
+              {tab.count}
+            </span>
           </span>
         ))}
       </Reveal>
 
-      {/* Cards de tours */}
-      <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+      {/* Tabla de tours */}
+      <Reveal at={0.2} className="mt-3 overflow-hidden rounded-xl border border-slate-200/80 bg-white">
+        <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)] gap-2 border-b border-slate-100 bg-slate-50/70 px-3 py-1.5 text-[8px] font-bold uppercase tracking-wider text-slate-400">
+          <span>{tMock("colTour")}</span>
+          <span>{tMock("colType")}</span>
+          <span>{tMock("colPrice")}</span>
+        </div>
         {tours.map((tour, i) => (
           <Reveal
             key={tour.name}
-            at={0.25 + i * 0.15}
-            pop
-            className="rounded-xl bg-white border border-slate-200/80 p-3"
+            at={0.35 + i * 0.12}
+            className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 border-t border-slate-100 px-3 py-2 first:border-t-0"
           >
-            <div className="flex items-start justify-between gap-2">
-              <p className="text-[11px] font-bold text-navy-950 leading-tight">{tour.name}</p>
-              <span className="h-1.5 w-1.5 rounded-full bg-green-400 shrink-0 mt-1" />
-            </div>
-            <p className="mt-1.5 text-sm font-extrabold text-navy-950">{tour.price}</p>
-            <div className="mt-2 flex items-center justify-between">
-              <span className="inline-flex rounded-full bg-slate-100 px-1.5 py-px text-[8px] font-bold text-slate-600">
-                {tour.faqs} FAQs
-              </span>
-              <svg className="h-3 w-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-            </div>
+            <span className="truncate text-[10px] font-bold text-navy-950">{tour.name}</span>
+            <span>
+              <span className="rounded-full border border-slate-200 px-1.5 py-px text-[8px] font-bold text-slate-500">{tour.type}</span>
+            </span>
+            <span className="text-[10px] font-bold tabular-nums text-navy-950">
+              {tour.price}
+              {tour.more && <span className="block text-[8px] font-medium text-slate-400">{tMock("morePrices")}</span>}
+            </span>
           </Reveal>
         ))}
-      </div>
-
-      {/* Import banner */}
-      <Reveal at={0.75} className="mt-3 rounded-xl border border-dashed border-slate-300 bg-white/60 p-3 flex items-center justify-between">
-        <div className="min-w-0">
-          <p className="text-[10px] font-bold text-navy-950">{t("importTitle")}</p>
-          <p className="text-[9px] text-slate-500 truncate">{t("importSubtitle")}</p>
-        </div>
-        <div className="h-6 rounded-lg bg-navy-900 px-2.5 flex items-center shrink-0 ml-2">
-          <span className="text-[9px] font-bold text-white">{t("importCta")}</span>
-        </div>
       </Reveal>
     </div>
   );
@@ -533,10 +509,10 @@ function MetricsView() {
   const t = useTranslations("dashboard.metrics");
 
   const cards = [
-    { label: t("cards.totalConversations"), value: "1,284", delta: "+18%" },
-    { label: t("cards.qualifiedLeads"), value: "312", delta: "+24%" },
-    { label: t("cards.conversionRate"), value: "24%", delta: "+6%" },
-    { label: t("cards.revenue"), value: "$8,420", delta: "+31%" },
+    { label: t("cards.activeConversations"), value: "248", delta: "+18%" },
+    { label: t("cards.botReplies"), value: "86%", delta: "+4%" },
+    { label: t("cards.readyToClose"), value: "41", delta: "+12%" },
+    { label: t("cards.teamPickup"), value: "52 s", delta: "-9%" },
   ];
 
   const bars = [42, 58, 45, 70, 62, 88, 76];

@@ -117,7 +117,7 @@ export function HowItWorks() {
                 <div className="flex-1 mx-2 sm:mx-3">
                   <div className="mx-auto max-w-md h-5 sm:h-6 rounded-md bg-slate-100 flex items-center justify-center px-3">
                     <span className="text-[10px] sm:text-[11px] text-slate-600 font-medium tracking-wide truncate">
-                      {["app.tourfy.com/onboarding", "app.tourfy.com/onboarding", "app.tourfy.com/conversations"][active]}
+                      {["www.tourfy.app/onboarding", "www.tourfy.app/onboarding", "www.tourfy.app/conversations"][active]}
                     </span>
                   </div>
                 </div>
@@ -136,7 +136,7 @@ export function HowItWorks() {
                   >
                     {active === 0 && <ImportPreview />}
                     {active === 1 && <ConnectPreview />}
-                    {active === 2 && <LeadsPreview />}
+                    {active === 2 && <HandoffPreview />}
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -165,9 +165,9 @@ export function HowItWorks() {
 function ImportPreview() {
   const t = useTranslations("onboarding.steps.tours");
   const tours = [
-    { name: "Machu Picchu Full Day", price: "$320 USD" },
-    { name: "Valle Sagrado + Almuerzo", price: "$180 USD" },
-    { name: "Laguna Humantay", price: "$95 USD" },
+    { name: "Volcán Masaya de noche", price: "$45 USD" },
+    { name: "Isletas de Granada en lancha", price: "$25 USD" },
+    { name: "Laguna de Apoyo", price: "$35 USD" },
   ];
 
   return (
@@ -185,7 +185,7 @@ function ImportPreview() {
               animate={{ width: "auto" }}
               transition={{ delay: 0.5, duration: 0.9, ease: "linear" }}
             >
-              https://cuscoexpeditions.com
+              https://tuagencia.com
             </motion.span>
           </div>
           <motion.div
@@ -283,7 +283,7 @@ function ConnectPreview() {
           {t("connectedTitle")}
         </p>
         <p className="mt-1 text-xs text-slate-500 leading-relaxed">
-          {t("connectedSub", { phone: "+51 984 123 456" })}
+          {t("connectedSub", { phone: "+505 8123 4567" })}
         </p>
         <div className="mt-4 inline-flex h-9 items-center rounded-lg bg-[#1877F2] px-4 opacity-90">
           <span className="text-xs font-bold text-white">{t("connectCta")}</span>
@@ -293,12 +293,13 @@ function ConnectPreview() {
   );
 }
 
-/* ─── Paso 3: leads calificados (espejo del dashboard) ─── */
+/* ─── Paso 3: el bot atiende y pasa al cliente listo para cerrar ─── */
 
-function LeadsPreview() {
+function HandoffPreview() {
   const tDemo = useTranslations("features.demo");
   const tChat = useTranslations("dashboard.chat");
   const tHow = useTranslations("how.preview");
+  const tConv = useTranslations("dashboard.conversations");
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-5">
@@ -320,7 +321,7 @@ function LeadsPreview() {
           </div>
           <div className="flex items-center gap-1 rounded-full bg-green-50 border border-green-200/60 px-2 py-0.5">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-            <span className="text-[10px] font-semibold text-green-700">Bot</span>
+            <span className="text-[10px] font-semibold text-green-700">{tConv("status.bot")}</span>
           </div>
         </div>
         {/* Conversacion que se reproduce en vivo */}
@@ -351,41 +352,34 @@ function LeadsPreview() {
           <Reveal at={2.9} pop>
             <Bubble side="left" text={tDemo("msg2")} />
           </Reveal>
+          <Reveal at={5.2} pop>
+            <Bubble side="right" text={tHow("agentReply")} />
+          </Reveal>
         </div>
       </div>
 
-      {/* Panel de lead calificado — se llena campo por campo */}
+      {/* Panel del agente: aviso de traspaso → toma el control */}
       <div className="md:col-span-2 p-4 sm:p-5">
-        <Reveal at={3.3} className="flex items-center justify-between">
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            {tHow("leadTitle")}
-          </p>
-          <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
-            {tHow("leadStatus")}
+        <Reveal at={3.4} pop className="rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+            {tHow("handoffBadge")}
           </span>
+          <p className="mt-2 text-xs font-bold text-navy-950">{tHow("handoffTitle")}</p>
+          <p className="mt-0.5 text-[11px] text-slate-500">{tHow("handoffSub")}</p>
         </Reveal>
-        <div className="mt-3 space-y-2.5">
-          {[
-            [tHow("leadInterest"), "Machu Picchu Full Day"],
-            [tHow("leadDates"), tHow("leadDatesV")],
-            [tHow("leadGroup"), tHow("leadGroupV")],
-            [tHow("leadBudget"), "$1,280 USD"],
-          ].map(([label, value], i) => (
-            <Reveal
-              key={label}
-              at={3.5 + i * 0.25}
-              pop
-              className="flex items-center justify-between rounded-lg bg-slate-50 border border-slate-200/60 px-3 py-2"
-            >
-              <span className="text-[11px] text-slate-500">{label}</span>
-              <span className="text-[11px] font-bold text-navy-950">{value}</span>
-            </Reveal>
-          ))}
-        </div>
-        <Reveal at={4.6} className="mt-4">
-          <div className="h-9 rounded-lg border border-slate-200 bg-white flex items-center justify-center">
-            <span className="text-xs font-semibold text-navy-900">{tChat("takeControl")}</span>
-          </div>
+        <Reveal at={4.1} className="mt-4">
+          <motion.div
+            className="h-9 rounded-lg bg-navy-900 flex items-center justify-center"
+            animate={{ scale: [1, 1.04, 1] }}
+            transition={{ delay: 4.4, duration: 0.4 }}
+          >
+            <span className="text-xs font-bold text-white">{tChat("takeControl")}</span>
+          </motion.div>
+        </Reveal>
+        <Reveal at={4.8} className="mt-3 flex items-center gap-2">
+          <CheckIcon className="h-4 w-4 text-green-600" />
+          <span className="text-[11px] font-semibold text-slate-600">{tHow("taken")}</span>
         </Reveal>
       </div>
     </div>

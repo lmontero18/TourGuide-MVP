@@ -2,7 +2,7 @@
   "nav": {
     "features": "Funciones",
     "howItWorks": "Cómo funciona",
-    "results": "Resultados",
+    "results": "En números",
     "login": "Iniciar sesión",
     "account": "Cuenta",
     "dashboard": "Ir al panel",
@@ -16,15 +16,26 @@
     "headline1": "Tus tours se venden",
     "headline2": "solos a las",
     "headline3": "2 AM",
-    "sub": "Un bot de WhatsApp entrenado con tus tours, tus precios y tu tono. Responde en segundos a cualquier hora, califica al viajero y te deja la venta lista para cerrar.",
-    "ctaPrimary": "Iniciar sesión",
+    "sub": "Un bot de WhatsApp entrenado con tus tours, tus precios y tu tono. Responde en segundos a cualquier hora y, cuando el cliente quiere reservar, se lo pasa a tu equipo para cerrar la venta.",
+    "ctaPrimary": "Agenda una demo",
     "ctaSecondary": "Ver cómo funciona",
-    "trust": "Sin costo de instalación · Cancela cuando quieras · En vivo en 10 minutos",
+    "trust": "Te lo dejamos funcionando en una llamada · Cancela cuando quieras · Soporte en español",
     "mock": {
       "c1": "¿Hacen tours privados para empresas?",
       "c2": "¡Gracias! Nos vemos el sábado 🙌",
-      "c3": "¿Incluye el traslado desde el hotel?"
-    }
+      "c3": "¿Incluye el traslado desde el hotel?",
+      "orgName": "Tours Granada",
+      "handoffTitle": "Listo para cerrar",
+      "handoffSub": "Volcán Masaya · 4 personas",
+      "toursTitle": "Lo que sabe tu bot",
+      "colTour": "Tour",
+      "colType": "Tipo",
+      "colPrice": "Precio",
+      "morePrices": "+2 precios",
+      "typeDay": "Tour de día",
+      "typeAdventure": "Aventura"
+    },
+    "demoMessage": "Hola, quiero una demo de Tourfy para mi agencia."
   },
   "logos": {
     "title": "Construido sobre la plataforma oficial de Meta",
@@ -35,41 +46,45 @@
   },
   "features": {
     "label": "Funciones",
-    "title": "Todo lo que tu agencia necesita para no perder ni un cliente potencial",
-    "sub": "Un bot que conoce tus tours a fondo, un panel en vivo para tu equipo y las métricas que demuestran que la inversión rinde.",
+    "title": "Todo lo que tu agencia necesita para no perder ni una consulta",
+    "sub": "Un bot que conoce tus tours a fondo, un panel en vivo para tu equipo y métricas para ver cómo rinde.",
     "items": {
       "0": {
         "title": "Habla como tu mejor vendedor",
-        "desc": "Entrénalo con tus tours, precios, preguntas frecuentes y tono de voz. Responde en español, inglés o portugués, las 24 horas, y nunca inventa un precio."
+        "desc": "Entrénalo con tus tours, precios, preguntas frecuentes y tono. Responde en el idioma del cliente (español, inglés, francés, alemán…), las 24 horas, y nunca inventa un precio."
       },
       "1": {
-        "title": "Toma el control en un clic",
-        "desc": "Entra a cualquier conversación cuando quieras. El bot se pausa al instante, hablas tú, y se lo devuelves al terminar."
+        "title": "Te pasa al cliente listo para cerrar",
+        "desc": "Cuando alguien quiere reservar o pide hablar con una persona, el bot se lo pasa a tu equipo con aviso sonoro. Tomas el control en un clic y se lo devuelves al terminar."
       },
       "2": {
-        "title": "Captura fuera de horario",
-        "desc": "El 60% de las consultas por WhatsApp llegan cuando la oficina está cerrada. El bot las responde todas, a las 2 de la tarde o a las 2 de la madrugada."
+        "title": "Responde fuera de horario",
+        "desc": "Muchas consultas llegan cuando la oficina está cerrada. El bot las atiende todas, a las 2 de la tarde o a las 2 de la madrugada."
       },
       "3": {
-        "title": "Clientes potenciales calificados, no solo chats",
-        "desc": "De cada conversación extrae fechas, tamaño del grupo, presupuesto e interés. Abres el panel y sabes con quién cerrar primero."
+        "title": "Entiende fotos, audios y ubicaciones",
+        "desc": "Lee capturas, escucha notas de voz y reconoce stickers o ubicaciones. Si llega un comprobante de pago, nunca lo confirma solo: se lo pasa a tu equipo."
       },
       "4": {
-        "title": "Métricas que demuestran el ROI",
-        "desc": "Clientes potenciales captados, reservas atribuidas, ingresos generados. Los números para decidir con datos, no por intuición."
+        "title": "Retoma clientes después de 24 h",
+        "desc": "Con plantillas aprobadas por Meta le vuelves a escribir a quien dejó de responder: recordatorios, seguimientos y confirmaciones."
+      },
+      "5": {
+        "title": "Métricas mes a mes",
+        "desc": "Conversaciones, qué parte respondió el bot, cuántos clientes te pasó y qué tan rápido los tomó tu equipo. Con historial y exportación a CSV."
       }
     },
     "demo": {
       "botName": "Tourfy Bot",
-      "msg0": "¡Hola! ¿Cuánto cuesta el tour a Machu Picchu para 4 personas?",
-      "msg1": "¡Hola! 🏔️ El tour a Machu Picchu para 4 personas es $320 USD por persona. Incluye transporte, guía bilingüe y almuerzo. ¿Te gustaría reservar una fecha?",
-      "msg2": "Sí, ¿tienen disponibilidad el próximo sábado?"
+      "msg0": "¡Hola! ¿Cuánto cuesta el tour al Volcán Masaya de noche para 4 personas?",
+      "msg1": "¡Hola! 🌋 El tour nocturno al Volcán Masaya cuesta $45 por persona, $180 los cuatro. Incluye transporte desde Granada, guía y entrada al parque. ¿Para qué fecha lo buscas?",
+      "msg2": "Para este sábado. ¿Cómo hago para reservar?"
     }
   },
   "how": {
     "label": "Cómo funciona",
-    "title": "De cero a bot vendiendo en 10 minutos",
-    "sub": "Sin programación y sin proyectos de semanas. Si sabes usar WhatsApp, sabes usar Tourfy.",
+    "title": "De cero a bot respondiendo en una llamada",
+    "sub": "Sin programación. En una videollamada conectamos tu WhatsApp, cargamos tus tours y lo dejamos funcionando.",
     "steps": {
       "0": {
         "step": "PASO 1",
@@ -79,78 +94,76 @@
       "1": {
         "step": "PASO 2",
         "title": "Conecta tu WhatsApp",
-        "desc": "Un clic con el registro oficial de Meta y tu número queda vinculado. Todo el proceso toma menos de 2 minutos."
+        "desc": "Un clic con el registro oficial de Meta y tu número queda vinculado. Ahí mismo agregas el método de pago de WhatsApp."
       },
       "2": {
         "step": "PASO 3",
-        "title": "Recibe clientes potenciales calificados",
-        "desc": "El bot responde a cada viajero al instante. Tú ves todas las conversaciones en vivo y entras cuando quieras."
+        "title": "Atiende desde el panel",
+        "desc": "El bot responde a cada viajero al instante. Ves todas las conversaciones en vivo y, cuando un cliente quiere reservar, te avisa para que cierres tú."
       }
     },
     "checks": {
       "0": "Sin programación",
-      "1": "En vivo en 10 minutos",
+      "1": "Te lo dejamos funcionando",
       "2": "Cancela cuando quieras"
     },
     "preview": {
-      "leadTitle": "Cliente potencial calificado",
-      "leadStatus": "Nuevo",
-      "leadInterest": "Interés",
-      "leadDates": "Fechas",
-      "leadDatesV": "15–18 de marzo",
-      "leadGroup": "Grupo",
-      "leadGroupV": "4 personas",
-      "leadBudget": "Presupuesto est."
+      "handoffBadge": "Esperando agente",
+      "handoffTitle": "El bot te pasó a este cliente",
+      "handoffSub": "Quiere reservar para el sábado · hace 5 s",
+      "taken": "Tomaste el control",
+      "agentReply": "¡Perfecto! Te reservo para este sábado. ¿A nombre de quién?"
     }
   },
   "metrics": {
-    "label": "Resultados",
-    "title": "El impacto en los números de tu agencia",
-    "sub": "Proyecciones basadas en referencias del sector y datos de WhatsApp Business.",
+    "label": "En números",
+    "title": "Hecho para no perder ni una consulta",
+    "sub": "Lo que Tourfy hace por tu agencia desde el primer día.",
     "items": {
       "0": {
-        "label": "Clientes potenciales que llegan fuera de horario y hoy se pierden",
-        "unit": "más clientes potenciales"
+        "label": "El bot contesta en segundos, de día o de madrugada.",
+        "unit": "primera respuesta"
       },
       "1": {
-        "label": "Consultas que el bot convierte en cliente potencial calificado",
-        "unit": "tasa de conversión"
+        "label": "Fines de semana, feriados y madrugadas incluidos.",
+        "unit": "sin días libres"
       },
       "2": {
-        "label": "Primera respuesta, de día o de madrugada",
-        "unit": "tiempo de respuesta"
+        "label": "Meta regala los primeros 1.000 mensajes de servicio de cada mes, por número.",
+        "unit": "mensajes gratis al mes"
       },
       "3": {
-        "label": "Ingreso extra estimado por mes en los primeros 90 días",
-        "unit": "ingreso mensual"
+        "label": "Invita a todo tu equipo sin costo extra, cada uno con su cuenta.",
+        "unit": "agentes"
       }
     },
-    "note": "* Proyecciones ilustrativas, no resultados garantizados."
+    "note": "Meta cobra aparte las plantillas y los mensajes que pasen del límite gratuito, directo a tu agencia.",
+    "freeMessages": "1.000"
   },
   "ctaSection": {
     "title1": "Tu próximo cliente",
     "title2": "te está escribiendo ahora",
     "sub": "Cada consulta sin responder es una reserva que se va con otra agencia. Pon a tu bot a trabajar hoy.",
-    "button": "Iniciar sesión",
-    "note": "Configuración en 10 minutos · Cancela cuando quieras"
+    "button": "Agenda una demo",
+    "note": "Te lo dejamos funcionando en una llamada · Cancela cuando quieras"
   },
   "pricing": {
     "label": "Precios",
     "title": "Un precio simple, sin sorpresas",
-    "sub": "Todo lo que necesitas para no perder ni un cliente más. Respuestas ilimitadas, sin costos ocultos.",
+    "sub": "Respuestas ilimitadas y sin costos ocultos. Meta cobra aparte las plantillas y los mensajes que pasen del límite gratuito, directo a tu agencia.",
     "month": "mes",
     "popular": "Todo incluido",
     "tiers": {
       "0": {
         "badge": "Disponible ahora",
         "name": "Tourfy",
-        "desc": "Tu vendedor 24/7 en WhatsApp. Responde, califica a los interesados y nunca duerme.",
-        "cta": "Iniciar sesión",
+        "desc": "Tu vendedor 24/7 en WhatsApp. Te lo dejamos funcionando en una llamada.",
+        "cta": "Agenda una demo",
         "f0": "Bot 24/7 con respuestas ilimitadas",
-        "f1": "Catálogo de tours con importación automática (web o PDF)",
-        "f2": "Chat en vivo con toma de control — agentes ilimitados",
-        "f3": "Calificación de clientes potenciales y métricas de ROI",
-        "f4": "Tu número de WhatsApp, conectado en un clic"
+        "f1": "Catálogo de tours con importación desde tu web o PDF",
+        "f2": "Chat en vivo con toma de control y agentes ilimitados",
+        "f3": "Plantillas de WhatsApp para retomar clientes",
+        "f4": "Métricas mensuales con exportación a CSV"
       },
       "1": {
         "badge": "Próximamente",
@@ -160,8 +173,8 @@
         "f0": "Todo lo de Tourfy",
         "f1": "Seguimientos automáticos a interesados",
         "f2": "Cobros y anticipos con enlace de pago en el chat",
-        "f3": "Reportes avanzados y exportación",
-        "f4": "Configuración inicial hecha por nosotros + soporte prioritario"
+        "f3": "Calificación automática de clientes (fechas, grupo, presupuesto)",
+        "f4": "Varios números de WhatsApp y soporte prioritario"
       }
     }
   },
@@ -179,10 +192,9 @@
   "auth": {
     "panel": {
       "badge": "Hecho para LATAM",
-      "quote": "“El 60% de las consultas de viajeros llegan fuera de horario. Tu bot las responde todas; tú solo cierras la venta.”",
+      "quote": "“Muchas consultas de viajeros llegan fuera de horario. Tu bot las responde todas; tú solo cierras la venta.”",
       "quoteName": "Tourfy",
       "quoteRole": "Tu vendedor 24/7 en WhatsApp",
-      "statMoreLeads": "más interesados",
       "statReplyTime": "tiempo de respuesta",
       "statAvailability": "disponibilidad"
     },
@@ -1006,7 +1018,7 @@
   },
   "meta": {
     "title": "Tourfy — IA de WhatsApp para agencias de turismo",
-    "description": "Tus tours se venden solos a las 2 a. m. Bots de WhatsApp que responden, califican y reservan, entrenados con tus tours, tus precios y tu estilo."
+    "description": "Tus tours se venden solos a las 2 a. m. Un bot de WhatsApp entrenado con tus tours, tus precios y tu tono que responde en segundos y te pasa a los clientes listos para reservar."
   },
   "apiErrors": {
     "unauthorized": "Tu sesión expiró. Vuelve a iniciar sesión.",

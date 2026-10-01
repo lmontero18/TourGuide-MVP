@@ -2,7 +2,7 @@
   "nav": {
     "features": "Features",
     "howItWorks": "How it works",
-    "results": "Results",
+    "results": "By the numbers",
     "login": "Log in",
     "account": "Account",
     "dashboard": "Go to dashboard",
@@ -16,15 +16,26 @@
     "headline1": "Your tours sell",
     "headline2": "themselves at",
     "headline3": "2 AM",
-    "sub": "A WhatsApp bot trained on your tours, your prices, and your tone. It replies in seconds at any hour, qualifies the traveler, and hands you a sale ready to close.",
-    "ctaPrimary": "Log in",
+    "sub": "A WhatsApp bot trained on your tours, your prices and your tone. It replies in seconds at any hour and, when a customer wants to book, hands them to your team to close the sale.",
+    "ctaPrimary": "Book a demo",
     "ctaSecondary": "See how it works",
-    "trust": "No setup fees · Cancel anytime · Live in 10 minutes",
+    "trust": "We set it up with you on a call · Cancel anytime · Spanish & English support",
     "mock": {
-      "c1": "Do you do private tours for companies?",
-      "c2": "Thanks! See you Saturday 🙌",
-      "c3": "Does it include hotel pickup?"
-    }
+      "c1": "Do you run private tours for companies?",
+      "c2": "Thanks! See you on Saturday 🙌",
+      "c3": "Is hotel pickup included?",
+      "orgName": "Granada Tours",
+      "handoffTitle": "Ready to close",
+      "handoffSub": "Masaya Volcano · 4 people",
+      "toursTitle": "What your bot knows",
+      "colTour": "Tour",
+      "colType": "Type",
+      "colPrice": "Price",
+      "morePrices": "+2 prices",
+      "typeDay": "Day tour",
+      "typeAdventure": "Adventure"
+    },
+    "demoMessage": "Hi, I'd like a Tourfy demo for my agency."
   },
   "logos": {
     "title": "Built on Meta's official platform",
@@ -35,41 +46,45 @@
   },
   "features": {
     "label": "Features",
-    "title": "Everything your agency needs to stop losing leads",
-    "sub": "A bot that knows your tours inside out, a live dashboard for your team, and the metrics that prove the investment pays.",
+    "title": "Everything your agency needs to never miss an inquiry",
+    "sub": "A bot that knows your tours inside out, a live dashboard for your team and metrics to see how it performs.",
     "items": {
       "0": {
         "title": "Talks like your best salesperson",
-        "desc": "Train it on your tours, prices, FAQs, and tone of voice. It replies in Spanish, English, or Portuguese, around the clock — and never makes up a price."
+        "desc": "Train it with your tours, prices, FAQs and tone. It replies in the customer's language (Spanish, English, French, German…), 24/7, and never makes up a price."
       },
       "1": {
-        "title": "Take over in one click",
-        "desc": "Jump into any conversation whenever you want. The bot pauses instantly, you talk, and you hand it back when you're done."
+        "title": "Hands you customers ready to close",
+        "desc": "When someone wants to book or asks for a person, the bot passes them to your team with a sound alert. Take over in one click and hand it back when you're done."
       },
       "2": {
-        "title": "After-hours capture",
-        "desc": "60% of WhatsApp inquiries arrive when the office is closed. The bot answers every one — at 2 in the afternoon or 2 in the morning."
+        "title": "Answers after hours",
+        "desc": "Many inquiries arrive when the office is closed. The bot handles all of them, at 2 in the afternoon or 2 in the morning."
       },
       "3": {
-        "title": "Qualified leads, not just chats",
-        "desc": "It pulls dates, group size, budget, and interest out of every conversation. Open the dashboard and know who to close first."
+        "title": "Understands photos, voice notes and locations",
+        "desc": "It reads screenshots, listens to voice notes and recognizes stickers or locations. If a payment receipt arrives, it never confirms it alone: it passes it to your team."
       },
       "4": {
-        "title": "Metrics that prove ROI",
-        "desc": "Leads captured, bookings attributed, revenue generated. The numbers to decide with data, not gut feeling."
+        "title": "Re-engage customers after 24h",
+        "desc": "With Meta-approved templates you can message people who stopped replying: reminders, follow-ups and confirmations."
+      },
+      "5": {
+        "title": "Month-by-month metrics",
+        "desc": "Conversations, how much the bot answered, how many customers it handed over and how fast your team picked them up. With history and CSV export."
       }
     },
     "demo": {
       "botName": "Tourfy Bot",
-      "msg0": "Hi! How much is the Machu Picchu tour for 4 people?",
-      "msg1": "Hi! 🏔️ The Machu Picchu tour for 4 people is $320 USD per person. It includes transport, a bilingual guide, and lunch. Would you like to book a date?",
-      "msg2": "Yes, do you have availability next Saturday?"
+      "msg0": "Hi! How much is the Masaya Volcano night tour for 4 people?",
+      "msg1": "Hi! 🌋 The Masaya Volcano night tour is $45 per person, $180 for the four of you. It includes transport from Granada, a guide and park entry. What date are you looking at?",
+      "msg2": "This Saturday. How do I book?"
     }
   },
   "how": {
     "label": "How it works",
-    "title": "From zero to a selling bot in 10 minutes",
-    "sub": "No code and no weeks-long projects. If you can use WhatsApp, you can use Tourfy.",
+    "title": "From zero to a working bot in one call",
+    "sub": "No coding. On a video call we connect your WhatsApp, load your tours and leave it running.",
     "steps": {
       "0": {
         "step": "STEP 1",
@@ -79,78 +94,76 @@
       "1": {
         "step": "STEP 2",
         "title": "Connect your WhatsApp",
-        "desc": "One click with Meta's official signup and your number is linked. The whole process takes under 2 minutes."
+        "desc": "One click with Meta's official signup and your number is linked. You add your WhatsApp payment method right there."
       },
       "2": {
         "step": "STEP 3",
-        "title": "Get qualified leads",
-        "desc": "The bot replies to every traveler instantly. You watch every conversation live and step in whenever you want."
+        "title": "Work from the dashboard",
+        "desc": "The bot replies to every traveler instantly. You see every conversation live and, when a customer wants to book, it alerts you so you close the sale."
       }
     },
     "checks": {
-      "0": "No code",
-      "1": "Live in 10 minutes",
+      "0": "No coding",
+      "1": "We set it up for you",
       "2": "Cancel anytime"
     },
     "preview": {
-      "leadTitle": "Qualified lead",
-      "leadStatus": "New",
-      "leadInterest": "Interest",
-      "leadDates": "Dates",
-      "leadDatesV": "March 15–18",
-      "leadGroup": "Group",
-      "leadGroupV": "4 people",
-      "leadBudget": "Est. budget"
+      "handoffBadge": "Waiting for agent",
+      "handoffTitle": "The bot handed you this customer",
+      "handoffSub": "Wants to book for Saturday · 5s ago",
+      "taken": "You took over",
+      "agentReply": "Perfect! I'll book you for this Saturday. Under what name?"
     }
   },
   "metrics": {
-    "label": "Results",
-    "title": "The impact on your agency's numbers",
-    "sub": "Projections based on industry benchmarks and WhatsApp Business data.",
+    "label": "By the numbers",
+    "title": "Built so you never miss an inquiry",
+    "sub": "What Tourfy does for your agency from day one.",
     "items": {
       "0": {
-        "label": "After-hours leads captured that are lost today",
-        "unit": "more leads"
+        "label": "The bot replies in seconds, day or night.",
+        "unit": "first reply"
       },
       "1": {
-        "label": "Inquiries the bot turns into a qualified lead",
-        "unit": "conversion rate"
+        "label": "Weekends, holidays and late nights included.",
+        "unit": "no days off"
       },
       "2": {
-        "label": "First reply, daytime or middle of the night",
-        "unit": "response time"
+        "label": "Meta gives you the first 1,000 service messages each month, per number.",
+        "unit": "free messages a month"
       },
       "3": {
-        "label": "Estimated extra revenue per month in the first 90 days",
-        "unit": "monthly revenue"
+        "label": "Invite your whole team at no extra cost, each with their own account.",
+        "unit": "agents"
       }
     },
-    "note": "* Illustrative projections, not guaranteed results."
+    "note": "Meta bills templates and messages above the free tier separately, directly to your agency.",
+    "freeMessages": "1,000"
   },
   "ctaSection": {
     "title1": "Your next customer",
     "title2": "is texting you right now",
     "sub": "Every unanswered inquiry is a booking that goes to another agency. Put your bot to work today.",
-    "button": "Log in",
-    "note": "Setup in 10 minutes · Cancel anytime"
+    "button": "Book a demo",
+    "note": "We set it up with you on a call · Cancel anytime"
   },
   "pricing": {
     "label": "Pricing",
     "title": "One simple price, no surprises",
-    "sub": "Everything you need to never lose a lead again. Unlimited replies, no hidden costs.",
+    "sub": "Unlimited replies and no hidden costs. Meta bills templates and messages above the free tier separately, directly to your agency.",
     "month": "mo",
     "popular": "All included",
     "tiers": {
       "0": {
         "badge": "Available now",
         "name": "Tourfy",
-        "desc": "Your 24/7 salesperson on WhatsApp. Replies, qualifies leads, never sleeps.",
-        "cta": "Log in",
+        "desc": "Your 24/7 salesperson on WhatsApp. We set it up with you on a call.",
+        "cta": "Book a demo",
         "f0": "24/7 bot with unlimited replies",
-        "f1": "Tour catalog with automatic import (web or PDF)",
-        "f2": "Live chat with agent takeover — unlimited agents",
-        "f3": "Lead qualification & ROI metrics",
-        "f4": "Your WhatsApp number, connected in one click"
+        "f1": "Tour catalog imported from your website or PDF",
+        "f2": "Live chat with takeover and unlimited agents",
+        "f3": "WhatsApp templates to re-engage customers",
+        "f4": "Monthly metrics with CSV export"
       },
       "1": {
         "badge": "Coming soon",
@@ -160,8 +173,8 @@
         "f0": "Everything in Tourfy",
         "f1": "Automatic lead follow-ups",
         "f2": "Payments & deposits via payment link in chat",
-        "f3": "Advanced reports & export",
-        "f4": "Onboarding done by us + priority support"
+        "f3": "Automatic customer qualification (dates, group, budget)",
+        "f4": "Multiple WhatsApp numbers and priority support"
       }
     }
   },
@@ -179,10 +192,9 @@
   "auth": {
     "panel": {
       "badge": "Built for LATAM",
-      "quote": "“60% of traveler inquiries arrive after hours. Your bot answers every one — you just close the sale.”",
+      "quote": "“Many traveler inquiries arrive after hours. Your bot answers all of them; you just close the sale.”",
       "quoteName": "Tourfy",
       "quoteRole": "Your 24/7 salesperson on WhatsApp",
-      "statMoreLeads": "more leads",
       "statReplyTime": "reply time",
       "statAvailability": "availability"
     },
@@ -1006,7 +1018,7 @@
   },
   "meta": {
     "title": "Tourfy — WhatsApp AI for Tour Agencies",
-    "description": "Your tours sell themselves at 2 AM. WhatsApp bots that answer, qualify, and book — trained on your tours, your prices, your voice."
+    "description": "Your tours sell themselves at 2 AM. A WhatsApp bot trained on your tours, prices and tone that replies in seconds and hands you customers ready to book."
   },
   "apiErrors": {
     "unauthorized": "Your session has expired. Please log in again.",

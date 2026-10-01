@@ -1,11 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { FadeUp } from "./Motion";
+import { demoLink } from "@/lib/marketing/demoLink";
 
 export function CTA() {
   const t = useTranslations("ctaSection");
+  const tHero = useTranslations("hero");
+  const demo = demoLink(tHero("demoMessage"));
 
   return (
     <section className="py-16 sm:py-24 lg:py-32 bg-white relative overflow-hidden">
@@ -24,8 +26,9 @@ export function CTA() {
                 {t("sub")}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  href="/login"
+                <a
+                  href={demo.href}
+                  {...(demo.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                   className="inline-flex h-12 items-center justify-center rounded-xl bg-navy-900 px-7 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2"
                 >
                   {t("button")}
@@ -43,7 +46,7 @@ export function CTA() {
                       d="M13 7l5 5m0 0l-5 5m5-5H6"
                     />
                   </svg>
-                </Link>
+                </a>
                 <span className="text-sm text-slate-500">
                   {t("note")}
                 </span>

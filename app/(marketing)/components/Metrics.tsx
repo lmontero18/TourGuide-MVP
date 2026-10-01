@@ -6,7 +6,7 @@ import { FadeUp, StaggerContainer, StaggerItem } from "./Motion";
 export function Metrics() {
   const t = useTranslations("metrics");
 
-  const metricValues = ["3×", "68%", "<2s", "$4.2k"];
+  const metricValues = ["<1 min", "24/7", t("freeMessages"), "∞"];
 
   return (
     <section id="metrics" className="py-16 sm:py-24 lg:py-32 bg-white">
@@ -49,7 +49,7 @@ export function Metrics() {
           ))}
         </StaggerContainer>
 
-        {/* Caveat honesto — los numeros son proyecciones, no resultados verificados */}
+        {/* Aclaracion de costos de Meta (se cobran aparte, directo a la agencia) */}
         <FadeUp delay={0.2}>
           <p className="mt-10 text-center text-xs text-slate-500">
             {t("note")}
