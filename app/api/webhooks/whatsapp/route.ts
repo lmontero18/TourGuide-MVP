@@ -559,10 +559,19 @@ async function processWebhook(body: WebhookPayload) {
             // responda como una persona; transferir solo si hace falta.
             (mediaNote
               ? `\nEl ultimo mensaje del cliente no es texto: es ${mediaNote} (lo ves como una nota entre corchetes). ` +
-                `Responde con naturalidad, como una persona del equipo: reacciona brevemente a lo que haya ` +
+                `Responde como una persona del equipo de la agencia de tours: reacciona en UNA frase corta a lo que haya ` +
                 `(a un sticker, con calidez; a una ubicacion, confirmando que la recibiste y relacionandola con los tours si aplica; ` +
                 `si es un video o un documento que no puedes abrir, dilo con sencillez y pidele que te cuente por escrito que necesita) ` +
-                `y pregunta en que mas puedes ayudar. No transfieras a un agente solo por esto: usa transfer_to_human ` +
+                `y vuelve enseguida a su viaje: pregunta que planes tiene o como lo ayudas con los tours. ` +
+                // Visto en prod: ante la foto de un libro respondio "¿Que queres que haga con la imagen?".
+                // Pedido de producto: si no tiene que ver con los tours ni con la
+                // conversacion, no comentar el contenido; ofrecer ayuda con los
+                // tours o pasarlo con alguien del equipo.
+                `Si no tiene nada que ver con los tours ni con la conversacion, NO comentes ni describas lo que hay: ` +
+                `pregunta si lo puedes ayudar con algo de los tours y ofrece pasarlo con alguien del equipo si es otra cosa ` +
+                `(por ejemplo: "¿Te puedo ayudar con algo de los tours? Si es otra cosa, te paso con alguien del equipo para que te ayude."). ` +
+                `Si responde que es otra cosa o insiste, usa transfer_to_human. ` +
+                `No transfieras a un agente solo por esto: usa transfer_to_human ` +
                 `si el cliente insiste en que alguien revise ese contenido o si lo que necesita requiere a una persona. ` +
                 `Si es una imagen sin descripcion, di que no la ves bien y pregunta que te quiere mostrar. ` +
                 // Pagos: una foto de un comprobante se falsifica facil. Solo el
