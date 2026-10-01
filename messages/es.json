@@ -360,6 +360,7 @@
       "conversations": "Conversaciones",
       "tours": "Tours y FAQs",
       "metrics": "Métricas",
+      "templates": "Plantillas",
       "agents": "Agentes",
       "settings": "Configuración"
     },
@@ -451,7 +452,22 @@
       "windowClosedBody": "WhatsApp no permite responder con texto libre hasta que el cliente vuelva a escribir.",
       "windowClosedPlaceholder": "La ventana de 24 h se cerró: espera a que el cliente escriba",
       "windowClosing": "Quedan {left} para responder: después WhatsApp cierra la ventana de 24 h.",
-      "windowClosedToast": "Pasaron más de 24 h desde el último mensaje del cliente: WhatsApp no deja responder hasta que vuelva a escribir."
+      "windowClosedToast": "Pasaron más de 24 h desde el último mensaje del cliente: WhatsApp no deja responder hasta que vuelva a escribir.",
+      "windowClosedTemplateBody": "WhatsApp solo permite escribirle con una plantilla aprobada hasta que vuelva a escribir.",
+      "sendTemplate": "Enviar plantilla",
+      "templates": {
+        "choose": "Elige una plantilla aprobada",
+        "back": "← Volver",
+        "close": "Cerrar",
+        "loading": "Cargando…",
+        "error": "No pudimos cargar las plantillas.",
+        "none": "No hay plantillas aprobadas todavía.",
+        "create": "Crear una",
+        "noVariables": "Esta plantilla no tiene variables.",
+        "costNote": "Meta cobra cada plantilla enviada. Al enviarla tomas la conversación.",
+        "send": "Enviar plantilla",
+        "sent": "Plantilla enviada"
+      }
     },
     "metrics": {
       "title": "Métricas",
@@ -607,6 +623,71 @@
       "denied": "Bloqueaste las notificaciones en este navegador. Actívalas desde el candado de la barra de direcciones.",
       "unsupported": "Este navegador no soporta notificaciones del escritorio.",
       "events": "Te avisamos cuando el bot pide una persona, cuando un cliente te escribe en una conversación tuya y cuando otro agente toma una conversación que tenías."
+    },
+    "templates": {
+      "title": "Plantillas de WhatsApp",
+      "intro": "Las plantillas son mensajes aprobados por Meta que te permiten escribirle a un cliente después de las 24 horas desde su último mensaje. Meta revisa cada plantilla (puede tardar hasta 24 h) y cobra por cada envío.",
+      "new": "Nueva plantilla",
+      "startersTitle": "Empezá con una de estas",
+      "useStarter": "Usar como base →",
+      "loading": "Cargando plantillas…",
+      "loadError": "No pudimos cargar las plantillas desde Meta. Recarga la página.",
+      "empty": "Todavía no hay plantillas. Crea la primera o empieza con una de las sugeridas.",
+      "notConnected": "Conecta tu número de WhatsApp para crear plantillas.",
+      "connect": "Conectar WhatsApp",
+      "sentToReview": "Plantilla enviada a revisión de Meta",
+      "deleted": "Plantilla eliminada",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Eliminar esta plantilla en todos sus idiomas?",
+      "deleteYes": "Sí, eliminar",
+      "variables": "Variables",
+      "pendingNote": "Meta la está revisando. Suele tardar minutos, puede llegar a 24 h.",
+      "rejectedReason": "Meta la rechazó: {reason}. Corrígela y créala de nuevo con otro nombre.",
+      "status": {
+        "APPROVED": "Aprobada",
+        "PENDING": "En revisión",
+        "REJECTED": "Rechazada",
+        "PAUSED": "Pausada",
+        "DISABLED": "Desactivada"
+      },
+      "category": {
+        "UTILITY": "Utilidad",
+        "MARKETING": "Marketing",
+        "AUTHENTICATION": "Autenticación"
+      },
+      "categoryHint": {
+        "UTILITY": "Recordatorios, confirmaciones, seguimiento de una consulta.",
+        "MARKETING": "Promociones y ofertas. Más caras y Meta limita cuántas recibe cada cliente."
+      },
+      "form": {
+        "title": "Nombre",
+        "titlePlaceholder": "Recordatorio de tour",
+        "internalName": "Nombre interno",
+        "category": "Categoría",
+        "language": "Idioma",
+        "header": "Encabezado",
+        "headerPlaceholder": "Recordatorio de tu tour",
+        "body": "Mensaje",
+        "bodyPlaceholder": "Hola {{nombre}}, te recordamos tu tour {{tour}} el {{fecha}}.",
+        "insertVariable": "Insertar variable:",
+        "examples": "Ejemplos de cada variable",
+        "examplesHint": "Meta los pide para revisar la plantilla. No se envían al cliente.",
+        "footer": "Pie",
+        "footerPlaceholder": "Tu agencia",
+        "buttons": "Botones",
+        "quickReply": "Respuesta rápida",
+        "quickReplyPlaceholder": "Confirmar",
+        "addQuickReply": "Respuesta rápida",
+        "urlText": "Texto del botón",
+        "urlTextPlaceholder": "Ver tour",
+        "addUrl": "Botón con link",
+        "remove": "Quitar",
+        "optional": "opcional",
+        "preview": "Vista previa",
+        "reviewNote": "Al crearla se envía a revisión de Meta. Cuando la aprueben, tu equipo la puede usar en el chat.",
+        "cancel": "Cancelar",
+        "submit": "Enviar a revisión"
+      }
     }
   },
   "blog": {
