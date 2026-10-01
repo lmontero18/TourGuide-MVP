@@ -1,28 +1,50 @@
 // Avisos del dashboard en el navegador (CODE-175): sonido + notificacion del
-// sistema. Sin assets: el sonido se genera con Web Audio.
+// sistema. Sin assets: el sonido (marca sonora de Tourfy) se genera con Web Audio.
 
 let audioCtx: AudioContext | null = null
 
-// Dos notas cortas ascendentes. Los navegadores solo dejan sonar audio despues
-// de que el usuario interactuo con la pagina; si todavia no, falla en silencio.
-export function playChime() {
+// Marca sonora "Brujula": tres notas que suben (G5-B5-D6) con timbre de
+// campana (sintesis FM). La urgente repite la firma y remata una octava arriba,
+// asi se distingue sin mirar. Elegida entre 4 propuestas el 2026-09-30.
+export type ChimeKind = 'urgent' | 'message'
+
+const BRUJULA: Record<ChimeKind, [freq: number, at: number][]> = {
+  message: [[784, 0], [988, 0.11], [1175, 0.22]],
+  urgent: [[784, 0], [988, 0.09], [1175, 0.18], [784, 0.42], [988, 0.51], [1568, 0.6]],
+}
+
+const PEAK = 0.28
+
+function bell(ctx: AudioContext, freq: number, at: number) {
+  // FM: modulador inarmonico (3.5x) que se apaga rapido = brillo de campana.
+  const carrier = ctx.createOscillator()
+  const modulator = ctx.createOscillator()
+  const modGain = ctx.createGain()
+  const out = ctx.createGain()
+  carrier.frequency.value = freq
+  modulator.frequency.value = freq * 3.5
+  modGain.gain.setValueAtTime(freq * 2.2, at)
+  modGain.gain.exponentialRampToValueAtTime(1, at + 0.5)
+  out.gain.setValueAtTime(0.0001, at)
+  out.gain.exponentialRampToValueAtTime(PEAK, at + 0.005)
+  out.gain.exponentialRampToValueAtTime(0.0001, at + 0.7)
+  modulator.connect(modGain).connect(carrier.frequency)
+  carrier.connect(out).connect(ctx.destination)
+  for (const osc of [carrier, modulator]) {
+    osc.start(at)
+    osc.stop(at + 0.8)
+  }
+}
+
+// Los navegadores solo dejan sonar audio despues de que el usuario
+// interactuo con la pagina; si todavia no, falla en silencio.
+export function playChime(kind: ChimeKind = 'message') {
   try {
     audioCtx ??= new AudioContext()
     const ctx = audioCtx
-    const now = ctx.currentTime
-    for (const [i, freq] of [880, 1320].entries()) {
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.type = 'sine'
-      osc.frequency.value = freq
-      const start = now + i * 0.12
-      gain.gain.setValueAtTime(0.0001, start)
-      gain.gain.exponentialRampToValueAtTime(0.25, start + 0.02)
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.25)
-      osc.connect(gain).connect(ctx.destination)
-      osc.start(start)
-      osc.stop(start + 0.3)
-    }
+    if (ctx.state === 'suspended') void ctx.resume()
+    const t0 = ctx.currentTime + 0.03
+    for (const [freq, at] of BRUJULA[kind]) bell(ctx, freq, t0 + at)
   } catch {
     // Sin soporte o bloqueado por autoplay: el aviso visual alcanza.
   }

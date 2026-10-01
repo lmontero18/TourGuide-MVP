@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversations, type ConversationEvents, type ConversationListItem } from "@/hooks/useConversations";
 import { useNotificationPrefs } from "@/hooks/useNotificationPrefs";
-import { isLastFocusedTab, markTabFocused, playChime, showDesktopNotification } from "@/lib/notifications/alert";
+import { isLastFocusedTab, markTabFocused, playChime, showDesktopNotification, type ChimeKind } from "@/lib/notifications/alert";
 
 interface ConversationsState {
   conversations: ConversationListItem[];
@@ -35,7 +35,7 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
   // Avisos (CODE-175). Pestaña visible -> toast; en segundo plano ->
   // notificacion del sistema. Nunca de la conversacion que ya estas mirando.
   // El sonido solo en la ultima pestaña usada (varias pestañas = un sonido).
-  const deliver = (item: ConversationListItem, title: string, body: string) => {
+  const deliver = (item: ConversationListItem, title: string, body: string, kind: ChimeKind = "message") => {
     const visible = document.visibilityState === "visible";
     if (visible && item.id === activeId) return;
     const open = () => router.push(`/conversations/${item.id}`);
@@ -44,7 +44,7 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
     } else if (prefs.desktop) {
       showDesktopNotification({ title, body, tag: `conversation:${item.id}`, onClick: open });
     }
-    if (prefs.sound && isLastFocusedTab()) playChime();
+    if (prefs.sound && isLastFocusedTab()) playChime(kind);
   };
 
   const nameOf = (item: ConversationListItem) => item.contactName || item.contactPhone;
@@ -52,7 +52,7 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
 
   const events: ConversationEvents = {
     // Todo el equipo: alguien tiene que tomarla.
-    onHandoff: (item) => deliver(item, t("handoffTitle", { name: nameOf(item) }), item.lastMessage || t("handoffBody")),
+    onHandoff: (item) => deliver(item, t("handoffTitle", { name: nameOf(item) }), item.lastMessage || t("handoffBody"), "urgent"),
     // Solo quien la atiende.
     onCustomerMessage: (item, content) => {
       if (!me || item.assignee?.id !== me || item.status === "resolved") return;
