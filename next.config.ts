@@ -11,6 +11,16 @@ const nextConfig: NextConfig = {
   // Permite servir assets de dev (_next/*, HMR) cuando se accede via tunel (ngrok)
   // y no solo desde localhost. Necesario para probar el Embedded Signup por HTTPS.
   allowedDevOrigins: ["*.ngrok-free.dev", "*.ngrok-free.app", "*.ngrok.io"],
+  // sharp 0.35 carga la libreria nativa (libvips-cpp.so.8.x) desde el paquete
+  // @img/sharp-libvips-<plataforma>, y el file tracing de Next no la incluye en
+  // la funcion: en Vercel fallaba con "libvips-cpp.so.8.18.3: cannot open
+  // shared object file" y ninguna imagen de WhatsApp se procesaba. Con pnpm el
+  // paquete vive en node_modules/.pnpm/, de ahi el glob. Solo el webhook usa sharp.
+  outputFileTracingIncludes: {
+    "/api/webhooks/whatsapp": [
+      "./node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/lib/**/*",
+    ],
+  },
   async redirects() {
     return [
       // BETA CERRADA — no hay registro publico. Las altas se hacen invitando
