@@ -6,12 +6,15 @@ import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
 import { createClient } from "@/lib/supabase/client";
 import ConnectWhatsAppButton from "@/components/whatsapp/ConnectWhatsAppButton";
+import BillingCard from "@/components/whatsapp/BillingCard";
 
 interface ConnectedAccount {
   id: string;
+  waba_id: string;
   phone_number: string;
   status: string;
   connected_at: string | null;
+  payment_failed_at: string | null;
 }
 
 export default function WhatsAppSettingsPage() {
@@ -48,7 +51,7 @@ export default function WhatsAppSettingsPage() {
 
     const { data: wa } = await supabase
       .from("whatsapp_accounts")
-      .select("id, phone_number, status, connected_at")
+      .select("id, waba_id, phone_number, status, connected_at, payment_failed_at")
       .eq("org_id", profile.org_id)
       .maybeSingle();
 
@@ -79,7 +82,7 @@ export default function WhatsAppSettingsPage() {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error ?? t("errors.connect"));
-      setAccount(result.account);
+      await loadAccount();
       toast.success(t("connectedToast"));
       setWabaId("");
       setPhoneNumberId("");
@@ -142,7 +145,13 @@ export default function WhatsAppSettingsPage() {
                 </button>
               </div>
             </section>
-          ) : (
+          ) : null}
+
+          {!loading && account?.waba_id && (
+            <BillingCard wabaId={account.waba_id} paymentFailedAt={account.payment_failed_at} />
+          )}
+
+          {!loading && !account && (
             <>
             {/* Acción primaria: conectar con un clic vía Embedded Signup */}
             <section className="rounded-2xl border border-slate-200 bg-white p-5">

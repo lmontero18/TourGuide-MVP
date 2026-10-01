@@ -5,6 +5,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getMessagingToken } from '@/lib/whatsapp/token'
 import { getOrgWhatsApp } from '@/lib/whatsapp/orgAccount'
 import { GraphError, listTemplates, renderTemplate, sendTemplate } from '@/lib/whatsapp/templates'
+import { clearPaymentFailed, isPaymentError, markPaymentFailed } from '@/lib/whatsapp/billing'
 import { createLogger } from '@/lib/logger'
 
 const log = createLogger({ route: 'conversations/[id]/template' })
@@ -69,11 +70,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     await sendTemplate(wa.phone_number_id, token, conv.contact.phone, template, parsed.data.values)
   } catch (error) {
     log.error('failed to send template', { error, org_id: profile.org_id })
+    if (isPaymentError(error)) {
+      await markPaymentFailed(await createServiceClient(), { orgId: profile.org_id }, log.child({ org_id: profile.org_id }))
+      return NextResponse.json({ error: t('paymentRequired'), code: 'payment_required' }, { status: 402 })
+    }
     const message = error instanceof GraphError
       ? t('templateSendFailedReason', { reason: error.message })
       : t('templateSendFailed')
     return NextResponse.json({ error: message }, { status: 502 })
   }
+  await clearPaymentFailed(await createServiceClient(), profile.org_id)
 
   // Tomar la conversacion (atomico: solo si nadie la tiene o ya es mia).
   await supabase

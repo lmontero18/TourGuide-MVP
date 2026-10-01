@@ -504,6 +504,7 @@ export type Database = {
           created_at: string | null
           id: string
           org_id: string
+          payment_failed_at: string | null
           phone_number: string
           phone_number_id: string
           status: Database["public"]["Enums"]["status_type"] | null
@@ -515,6 +516,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           org_id: string
+          payment_failed_at?: string | null
           phone_number: string
           phone_number_id: string
           status?: Database["public"]["Enums"]["status_type"] | null
@@ -526,6 +528,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           org_id?: string
+          payment_failed_at?: string | null
           phone_number?: string
           phone_number_id?: string
           status?: Database["public"]["Enums"]["status_type"] | null

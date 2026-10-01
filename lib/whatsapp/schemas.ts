@@ -76,6 +76,18 @@ export const webhookPayloadSchema = z.looseObject({
                   // Mensajes quedan como unknown acá — validación por mensaje
                   // con webhookMessageSchema en processWebhook.
                   messages: z.array(z.unknown()).optional(),
+                  // Estados de entrega de lo que enviamos (bot o agentes). Solo
+                  // interesan los 'failed' con codigo de error (ej. 131042).
+                  statuses: z
+                    .array(
+                      z.looseObject({
+                        status: z.string().max(32).optional(),
+                        errors: z
+                          .array(z.looseObject({ code: z.number().optional() }))
+                          .optional(),
+                      })
+                    )
+                    .optional(),
                   contacts: z
                     .array(
                       z.looseObject({
