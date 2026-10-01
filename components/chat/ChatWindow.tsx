@@ -8,6 +8,7 @@ import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
 import TakeControlButton from "./TakeControlButton";
 import TemplatePicker from "./TemplatePicker";
+import ConversationLeadButton from "@/components/leads/ConversationLeadButton";
 import { ChatMessagesSkeleton } from "./ChatSkeleton";
 import { useMessages } from "@/hooks/useMessages";
 import { useConversationControl } from "@/hooks/useConversationControl";
@@ -312,6 +313,7 @@ export default function ChatWindow({
               </button>
             </>
           )}
+          <ConversationLeadButton conversationId={conversationId} />
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen((v) => !v)}

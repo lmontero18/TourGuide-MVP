@@ -425,7 +425,8 @@
       "agents": "Agents",
       "settings": "Settings",
       "expand": "Expand menu",
-      "collapse": "Collapse menu"
+      "collapse": "Collapse menu",
+      "leads": "Leads"
     },
     "tours": {
       "title": "What your bot knows",
@@ -998,6 +999,75 @@
       "popupOpen": "A Facebook window opened. If you don't see it, allow pop-ups for this site and try again.",
       "popupHint": "A Facebook window will open. If your browser blocks pop-ups, allow them for this site.",
       "connectErrorWithReason": "We couldn't connect WhatsApp: {reason}. If it keeps failing, use the manual connection."
+    },
+    "leads": {
+      "title": "Leads",
+      "intro": "Every conversation becomes a lead. AI fills in the card and moves it through the pipeline; your team marks bookings with their amount.",
+      "search": "Search by name, phone or tour…",
+      "loading": "Loading leads…",
+      "loadError": "We couldn't load your leads.",
+      "emptyTitle": "No leads yet",
+      "emptySub": "They show up on their own when a customer messages you on WhatsApp.",
+      "stages": {
+        "new": "New",
+        "contacted": "Quoting",
+        "qualified": "Ready to close",
+        "converted": "Booked",
+        "lost": "Lost"
+      },
+      "emptyStage": {
+        "new": "No new leads",
+        "contacted": "No one quoting",
+        "qualified": "No one waiting to close",
+        "converted": "No bookings yet",
+        "lost": "No lost leads"
+      },
+      "temperature": {
+        "cold": "Cold",
+        "warm": "Warm",
+        "hot": "Hot"
+      },
+      "kpi": {
+        "created": "Leads this month",
+        "createdHint": "conversations that became a lead",
+        "ready": "Ready to close",
+        "readyHint": "waiting for your team",
+        "won": "Bookings this month",
+        "wonHint": "marked by your team",
+        "revenue": "Booked revenue",
+        "revenueHint": "sum of this month's amounts"
+      },
+      "fichaTitle": "Customer card",
+      "fichaButton": "Card",
+      "fichaHint": "AI updates the card with every message. If you correct a field, AI stops changing it.",
+      "close": "Close",
+      "unknownContact": "Unnamed customer",
+      "noTourYet": "Tour not defined yet",
+      "noLeadYet": "This conversation has no card yet. It appears with the customer's next message.",
+      "updated": "Updated {when}",
+      "refresh": "Update with AI",
+      "refreshing": "Reading the chat…",
+      "refreshError": "We couldn't update the card.",
+      "saveError": "We couldn't save the change.",
+      "stage": "Stage",
+      "amount": "Booking amount",
+      "amountHint": "With the amount, revenue metrics are real.",
+      "amountInvalid": "Enter a valid amount.",
+      "currency": "Currency",
+      "summary": "Summary",
+      "edited": "Edited",
+      "byAi": "AI",
+      "openConversation": "Open conversation",
+      "fields": {
+        "tour_interest": "Tour of interest",
+        "travel_date": "Tour date",
+        "group_size": "Group",
+        "quote": "Quoted price",
+        "pickup": "Pickup",
+        "needs": "Special needs",
+        "language": "Language",
+        "next_step": "Next step"
+      }
     }
   },
   "blog": {
@@ -1089,6 +1159,8 @@
     "whatsappManualTokenInvalid": "Meta couldn't validate the details. Check the Phone Number ID and the Access Token.",
     "whatsappManualSubscribeFailed": "We couldn't link Tourfy to your WhatsApp Business account. Check the WABA ID and the Access Token permissions.",
     "whatsappDisconnectFailed": "We couldn't disconnect the number. Please try again.",
-    "paymentRequired": "Meta rejected the message because your WhatsApp account has no payment method. An admin can add one in Settings → WhatsApp."
+    "paymentRequired": "Meta rejected the message because your WhatsApp account has no payment method. An admin can add one in Settings → WhatsApp.",
+    "leadNotFound": "We couldn't find that lead.",
+    "leadUpdateFailed": "We couldn't save the lead."
   }
 }

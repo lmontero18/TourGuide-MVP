@@ -2,6 +2,7 @@ import { NextRequest, NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
 import { PAYMENT_ERROR_CODE, markPaymentFailed } from '@/lib/whatsapp/billing'
+import { ensureOpenLead, refreshLead } from '@/lib/leads/sync'
 import { verifyWebhookSignature } from '@/lib/whatsapp/verify'
 import {
   webhookPayloadSchema,
@@ -502,6 +503,16 @@ async function processWebhook(body: WebhookPayload) {
             })
           }
           continue
+        }
+
+        // Panel de leads: la tarjeta aparece con el primer mensaje. Con el bot
+        // activo la ficha se llena al guardar su respuesta (save-bot-reply);
+        // con un agente a cargo, se actualiza aca (con throttle).
+        try {
+          await ensureOpenLead(supabase, { id: conversation.id, org_id: waAccount.org_id, contact_id: contact.id })
+          if (!conversation.bot_active) await refreshLead(supabase, conversation.id)
+        } catch (error) {
+          log.warn('lead sync failed', { error, conversation_id: conversation.id })
         }
 
         // Call N8N bot if active and we have processable content.

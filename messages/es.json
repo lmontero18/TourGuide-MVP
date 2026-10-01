@@ -425,7 +425,8 @@
       "agents": "Agentes",
       "settings": "Configuración",
       "expand": "Expandir menú",
-      "collapse": "Contraer menú"
+      "collapse": "Contraer menú",
+      "leads": "Leads"
     },
     "tours": {
       "title": "Lo que sabe tu bot",
@@ -998,6 +999,75 @@
       "popupOpen": "Se abrió una ventana de Facebook. Si no la ves, permite las ventanas emergentes para este sitio y vuelve a intentarlo.",
       "popupHint": "Se abrirá una ventana de Facebook. Si tu navegador bloquea las ventanas emergentes, permítelas para este sitio.",
       "connectErrorWithReason": "No se pudo conectar WhatsApp: {reason}. Si sigue fallando, usa la conexión manual."
+    },
+    "leads": {
+      "title": "Leads",
+      "intro": "Cada conversación se vuelve un lead. La IA llena la ficha y lo mueve por el embudo; tu equipo marca las reservas con su monto.",
+      "search": "Buscar por nombre, teléfono o tour…",
+      "loading": "Cargando leads…",
+      "loadError": "No pudimos cargar los leads.",
+      "emptyTitle": "Todavía no hay leads",
+      "emptySub": "Aparecen solos cuando un cliente escribe por WhatsApp.",
+      "stages": {
+        "new": "Nuevo",
+        "contacted": "Cotizando",
+        "qualified": "Listo para cerrar",
+        "converted": "Reservado",
+        "lost": "Perdido"
+      },
+      "emptyStage": {
+        "new": "Sin leads nuevos",
+        "contacted": "Nadie cotizando",
+        "qualified": "Nadie esperando cierre",
+        "converted": "Sin reservas aún",
+        "lost": "Sin perdidos"
+      },
+      "temperature": {
+        "cold": "Frío",
+        "warm": "Tibio",
+        "hot": "Caliente"
+      },
+      "kpi": {
+        "created": "Leads este mes",
+        "createdHint": "conversaciones que se volvieron lead",
+        "ready": "Listos para cerrar",
+        "readyHint": "esperando a tu equipo",
+        "won": "Reservas este mes",
+        "wonHint": "marcadas por tu equipo",
+        "revenue": "Ingresos reservados",
+        "revenueHint": "suma de los montos de este mes"
+      },
+      "fichaTitle": "Ficha del cliente",
+      "fichaButton": "Ficha",
+      "fichaHint": "La IA actualiza la ficha con cada mensaje. Si corriges un campo, la IA ya no lo cambia.",
+      "close": "Cerrar",
+      "unknownContact": "Cliente sin nombre",
+      "noTourYet": "Tour sin definir",
+      "noLeadYet": "Esta conversación todavía no tiene ficha. Aparece con el próximo mensaje del cliente.",
+      "updated": "Actualizado {when}",
+      "refresh": "Actualizar con IA",
+      "refreshing": "Leyendo el chat…",
+      "refreshError": "No pudimos actualizar la ficha.",
+      "saveError": "No pudimos guardar el cambio.",
+      "stage": "Etapa",
+      "amount": "Monto de la reserva",
+      "amountHint": "Con el monto, las métricas de ingresos son reales.",
+      "amountInvalid": "Escribe un monto válido.",
+      "currency": "Moneda",
+      "summary": "Resumen",
+      "edited": "Editado",
+      "byAi": "IA",
+      "openConversation": "Abrir conversación",
+      "fields": {
+        "tour_interest": "Tour de interés",
+        "travel_date": "Fecha del tour",
+        "group_size": "Grupo",
+        "quote": "Precio cotizado",
+        "pickup": "Recogida",
+        "needs": "Necesidades",
+        "language": "Idioma",
+        "next_step": "Próximo paso"
+      }
     }
   },
   "blog": {
@@ -1089,6 +1159,8 @@
     "whatsappManualTokenInvalid": "Meta no validó los datos. Revisa el identificador del número de teléfono y el token de acceso.",
     "whatsappManualSubscribeFailed": "No pudimos vincular Tourfy con tu cuenta de WhatsApp Business. Revisa el identificador de la cuenta y los permisos del token de acceso.",
     "whatsappDisconnectFailed": "No pudimos desconectar el número. Intenta de nuevo.",
-    "paymentRequired": "Meta rechazó el envío porque tu cuenta de WhatsApp no tiene un método de pago. Un administrador puede agregarlo en Configuración → WhatsApp."
+    "paymentRequired": "Meta rechazó el envío porque tu cuenta de WhatsApp no tiene un método de pago. Un administrador puede agregarlo en Configuración → WhatsApp.",
+    "leadNotFound": "No encontramos ese lead.",
+    "leadUpdateFailed": "No pudimos guardar el lead."
   }
 }

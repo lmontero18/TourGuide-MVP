@@ -133,6 +133,21 @@ export interface Message {
   created_at: string
 }
 
+export type LeadIntent = 'browsing' | 'quoting' | 'ready'
+
+// Campos de la ficha que llena la IA (en leads.metadata, salvo el tour que va
+// en tour_interest). Un campo editado por un agente entra a locked_fields.
+export interface LeadDetails {
+  travel_date?: string | null
+  group_size?: string | null
+  quote?: string | null
+  pickup?: string | null
+  needs?: string | null
+  language?: string | null
+}
+
+export type LeadField = 'tour_interest' | keyof LeadDetails | 'summary' | 'next_step'
+
 export interface Lead {
   id: string
   org_id: string
@@ -140,7 +155,15 @@ export interface Lead {
   conversation_id: string | null
   tour_interest: string | null
   status: LeadStatus
-  metadata: Record<string, unknown>
+  metadata: LeadDetails
+  summary: string | null
+  next_step: string | null
+  intent: LeadIntent | null
+  locked_fields: LeadField[]
+  amount: number | null
+  currency: string | null
+  extracted_at: string | null
+  closed_at: string | null
   created_at: string
   updated_at: string
 }

@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
 import { createLogger } from '@/lib/logger'
 import { safeEqual } from '@/lib/security'
 import { checkRateLimit } from '@/lib/ratelimit'
+import { refreshLead } from '@/lib/leads/sync'
 
 function getServiceClient() {
   return createClient(
@@ -105,6 +106,9 @@ export async function POST(request: NextRequest) {
       // pero dejar rastro (afecta el orden de la lista de conversaciones).
       orgLog.warn('last_message_at update failed', { error: updateError })
     }
+
+    // Ficha del lead: se actualiza despues de responder a N8N.
+    after(() => refreshLead(supabase, conversation_id))
 
     return NextResponse.json({ ok: true })
   } catch (error) {

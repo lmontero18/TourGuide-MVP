@@ -18,6 +18,15 @@ const NAV_ITEMS = [
     ),
   },
   {
+    key: "leads",
+    href: "/leads",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="5" height="16" rx="1.5" /><rect x="10" y="4" width="5" height="11" rx="1.5" /><rect x="17" y="4" width="4" height="7" rx="1.5" />
+      </svg>
+    ),
+  },
+  {
     key: "tours",
     adminOnly: true,
     href: "/tours",
