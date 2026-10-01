@@ -94,7 +94,7 @@ export async function describeImage(webp: Buffer): Promise<string | null> {
           content: [
             {
               type: 'text',
-              text: 'Describe en una frase corta (máx 30 palabras, en español) esta imagen que un cliente envió a una agencia de turismo por WhatsApp. Si contiene texto legible relevante (fechas, montos, nombres), inclúyelo.',
+              text: 'Describe en una frase corta (máx 40 palabras, en español) esta imagen que un cliente envió a una agencia de turismo por WhatsApp. Si contiene texto legible relevante (fechas, montos, nombres), inclúyelo. Copia los montos con su símbolo de moneda EXACTO como aparece (₡, C$, $, S/, etc.), sin convertirlo a dólares. Si es un comprobante o movimiento de pago, indica a quién se le pagó (comercio o destinatario).',
             },
             {
               type: 'image_url',
