@@ -576,9 +576,12 @@ async function processWebhook(body: WebhookPayload) {
                 `Si es una imagen sin descripcion, di que no la ves bien y pregunta que te quiere mostrar. ` +
                 // Pagos: una foto de un comprobante se falsifica facil. Solo el
                 // equipo, mirando la cuenta, puede confirmar que el dinero llego.
-                `IMPORTANTE: si parece un comprobante de pago, transferencia o deposito, NUNCA confirmes que el pago llego ` +
-                `ni des la reserva por confirmada. Agradece, di que el equipo va a verificar el pago y te confirma, ` +
-                `y usa transfer_to_human.`
+                `IMPORTANTE: si parece un comprobante de pago, transferencia o deposito A LA AGENCIA (para una reserva o un tour), ` +
+                `NUNCA confirmes que el pago llego ni des la reserva por confirmada. Agradece, di que el equipo va a verificar el pago ` +
+                `y te confirma, y usa transfer_to_human. ` +
+                // Visto en prod: un cobro de Uber se trato como pago a la agencia.
+                `Si es un comprobante de otro comercio (Uber, un supermercado, un restaurante...), NO es un pago a la agencia: ` +
+                `tratalo como algo que no tiene que ver con los tours. Nunca cambies la moneda de un monto (₡ no es $).`
               : '')
 
           await callN8nBot(
