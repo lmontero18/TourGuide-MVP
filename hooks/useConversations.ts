@@ -30,6 +30,18 @@ interface ConversationRow {
   messages: { content: string }[]
 }
 
+// Eventos para avisos (CODE-175). El hook solo los detecta; quien decide si
+// suena / notifica (segun usuario, conversacion abierta, preferencias) es el
+// ConversationsProvider.
+export interface ConversationEvents {
+  // La conversacion paso a "esperando agente" (el bot pidio un humano).
+  onHandoff?: (item: ConversationListItem) => void
+  // Llego un mensaje del cliente.
+  onCustomerMessage?: (item: ConversationListItem, content: string) => void
+  // Cambio el agente asignado (incluye "otro agente me la tomo").
+  onAssigneeChanged?: (previous: Assignee | null, item: ConversationListItem) => void
+}
+
 const LIST_SELECT = `id, status, bot_active, last_message_at,
   contact:contacts(name, phone),
   ${ASSIGNED_AGENT_EMBED},
@@ -77,16 +89,23 @@ function sortByRecent(list: ConversationListItem[]): ConversationListItem[] {
 // (antes cada mensaje de cualquier conversacion volvia a pedir la lista entera
 // con un sub-select de mensajes por fila). Solo va a la red cuando falta un
 // dato: conversacion nueva o agente recien asignado (hace falta su nombre).
-export function useConversations(orgId: string | null, activeId: string | null = null) {
+export function useConversations(
+  orgId: string | null,
+  activeId: string | null = null,
+  events: ConversationEvents = {}
+) {
   const [conversations, setConversations] = useState<ConversationListItem[]>([])
   const [loading, setLoading] = useState(true)
   // No leidos por conversacion para el usuario actual (conversation_reads).
   const [unread, setUnread] = useState<Record<string, number>>({})
   // activeId leido desde los handlers de realtime sin re-suscribir el canal.
   const activeRef = useRef<string | null>(activeId)
+  // Callbacks frescos sin re-suscribir el canal.
+  const eventsRef = useRef<ConversationEvents>(events)
   useEffect(() => {
     activeRef.current = activeId
-  }, [activeId])
+    eventsRef.current = events
+  })
   // Espejo sincronico del estado: los handlers de realtime deciden si hace
   // falta ir a la red sin meter side effects dentro de setState.
   const listRef = useRef<ConversationListItem[]>([])
@@ -105,7 +124,7 @@ export function useConversations(orgId: string | null, activeId: string | null =
   )
 
   const fetchOne = useCallback(
-    async (id: string) => {
+    async (id: string): Promise<ConversationListItem | null> => {
       const { data } = await createClient()
         .from('conversations')
         .select(LIST_SELECT)
@@ -114,7 +133,10 @@ export function useConversations(orgId: string | null, activeId: string | null =
         .order('created_at', { ascending: false, foreignTable: 'messages' })
         .limit(1, { foreignTable: 'messages' })
         .maybeSingle()
-      if (data) upsert(toItem(data as unknown as ConversationRow))
+      if (!data) return null
+      const item = toItem(data as unknown as ConversationRow)
+      upsert(item)
+      return item
     },
     [upsert]
   )
@@ -192,18 +214,28 @@ export function useConversations(orgId: string | null, activeId: string | null =
             return
           }
           const current = listRef.current.find((c) => c.id === row.id)
+          const becameHandoff = current?.status !== 'pending' && row.status === 'pending' && !row.assigned_agent_id
           // Agente nuevo: el payload trae el id pero no el nombre.
           if (!current || (row.assigned_agent_id ?? null) !== (current.assignee?.id ?? null)) {
-            fetchOne(row.id)
+            const previous = current?.assignee ?? null
+            fetchOne(row.id).then((item) => {
+              if (!item) return
+              if (becameHandoff) eventsRef.current.onHandoff?.(item)
+              if (current && (previous?.id ?? null) !== (item.assignee?.id ?? null)) {
+                eventsRef.current.onAssigneeChanged?.(previous, item)
+              }
+            })
             return
           }
-          upsert({
+          const updated = {
             ...current,
             status: row.status,
             botActive: row.bot_active,
             lastMessageIso: row.last_message_at,
             lastMessageAt: formatRelative(row.last_message_at),
-          })
+          }
+          upsert(updated)
+          if (becameHandoff) eventsRef.current.onHandoff?.(updated)
         }
       )
       .on(
@@ -231,15 +263,19 @@ export function useConversations(orgId: string | null, activeId: string | null =
           }
           const current = listRef.current.find((c) => c.id === msg.conversation_id)
           if (!current) {
-            fetchOne(msg.conversation_id)
+            fetchOne(msg.conversation_id).then((item) => {
+              if (item && msg.role === 'user') eventsRef.current.onCustomerMessage?.(item, msg.content)
+            })
             return
           }
-          upsert({
+          const updated = {
             ...current,
             lastMessage: msg.content,
             lastMessageIso: msg.created_at,
             lastMessageAt: formatRelative(msg.created_at),
-          })
+          }
+          upsert(updated)
+          if (msg.role === 'user') eventsRef.current.onCustomerMessage?.(updated, msg.content)
         }
       )
       .subscribe()

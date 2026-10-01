@@ -579,6 +579,21 @@
         "resend": "We couldn't resend the invitation.",
         "remove": "We couldn't remove this member."
       }
+    },
+    "notifications": {
+      "open": "Open",
+      "handoffTitle": "{name} wants to talk to a person",
+      "handoffBody": "The bot asked for someone on the team to handle this conversation.",
+      "messageTitle": "New message from {name}",
+      "takenTitle": "{agent} took your conversation",
+      "takenBody": "They're now handling {name}.",
+      "bell": "Alerts",
+      "desktop": "Desktop notifications",
+      "desktopHint": "Alerts you even when you're in another tab or app.",
+      "sound": "Sound",
+      "denied": "You blocked notifications in this browser. Enable them from the lock icon in the address bar.",
+      "unsupported": "This browser doesn't support desktop notifications.",
+      "events": "We alert you when the bot asks for a person, when a customer writes in one of your conversations, and when another agent takes a conversation you had."
     }
   },
   "blog": {
