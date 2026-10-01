@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { MonthlyUsage } from "@/types";
+import { useLocale } from "next-intl";
+import type { MonthlyUsage, MonthlyUsagePoint } from "@/types";
 
 // Meta: desde 2026-10-01, 1.000 mensajes de servicio gratis por mes por
 // número; el excedente se cobra al método de pago de la agencia (CODE-173).
@@ -11,9 +12,11 @@ const WHATSAPP_MANAGER_URL = "https://business.facebook.com/wa/manage/home/";
 
 interface UsageCardProps {
   usage: MonthlyUsage;
+  history?: MonthlyUsagePoint[] | null;
 }
 
-export default function UsageCard({ usage }: UsageCardProps) {
+export default function UsageCard({ usage, history }: UsageCardProps) {
+  const locale = useLocale();
   const t = useTranslations("dashboard.metrics.usage");
   const ratio = usage.sent / FREE_TIER;
   const over = usage.sent - FREE_TIER;
@@ -48,6 +51,32 @@ export default function UsageCard({ usage }: UsageCardProps) {
           <a href={WHATSAPP_MANAGER_URL} target="_blank" rel="noopener noreferrer" className="underline font-semibold">
             {t("checkPayment")}
           </a>
+        </div>
+      )}
+
+      {history && history.length > 0 && (
+        <div className="mt-4">
+          <p className="text-[11px] font-semibold text-slate-500 mb-2">{t("history")}</p>
+          <div className="flex items-end gap-2 h-20">
+            {history.map((h) => {
+              const max = Math.max(FREE_TIER, ...history.map((x) => x.sent));
+              const over = h.sent > FREE_TIER;
+              return (
+                <div key={h.month} className="flex-1 min-w-0 flex flex-col items-center gap-1 h-full" title={`${h.month}: ${h.sent}`}>
+                  <span className="text-[10px] font-bold text-navy-900 tabular-nums">{h.sent.toLocaleString()}</span>
+                  <div className="w-full flex-1 rounded-t bg-slate-100 relative overflow-hidden">
+                    <div
+                      className={`absolute bottom-0 inset-x-0 rounded-t ${over ? "bg-red-500" : "bg-navy-900/80"}`}
+                      style={{ height: `${(h.sent / max) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-slate-400 capitalize">
+                    {new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" }).format(new Date(`${h.month}-15T12:00:00Z`))}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

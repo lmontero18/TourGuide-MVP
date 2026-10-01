@@ -173,7 +173,8 @@ export interface Subscription {
 
 // Respuesta de la RPC get_org_metrics (supabase/migrations/20260930010000_org_metrics.sql).
 // Capa 1 de metricas: actividad del bot. Leads y revenue van en CODE-171/172.
-export type MetricsPeriod = '7d' | '30d' | '90d'
+// Ventanas moviles o un mes calendario ('month:2026-09', en la zona de la agencia).
+export type MetricsPeriod = '7d' | '30d' | '90d' | `month:${string}`
 
 export interface OrgMetrics {
   timezone: string
@@ -202,6 +203,12 @@ export interface OrgMetrics {
 // enviados este mes, para el tier gratis de Meta.
 export interface MonthlyUsage {
   period_start: string
+  sent: number
+}
+
+// Historial de mensajes enviados por mes (get_org_monthly_usage_history).
+export interface MonthlyUsagePoint {
+  month: string // 'YYYY-MM'
   sent: number
 }
 

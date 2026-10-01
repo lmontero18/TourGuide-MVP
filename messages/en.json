@@ -474,7 +474,9 @@
       "period": {
         "7d": "Last 7 days",
         "30d": "Last 30 days",
-        "90d": "Last 90 days"
+        "90d": "Last 90 days",
+        "thisMonth": "This month",
+        "lastMonth": "Last month"
       },
       "change": "vs previous period",
       "noChange": "No data for the previous period",
@@ -538,7 +540,25 @@
         "warn": "You're close to the free limit. Make sure you have a payment method in Meta so your bot doesn't stop.",
         "over": "You passed the free limit: Meta charges {count} extra messages to your payment method. Without a card, the bot stops replying.",
         "checkPayment": "Check payment method",
-        "note": "Estimate. Resets on the 1st of each month, in your agency's time zone."
+        "note": "Estimate. Resets on the 1st of each month, in your agency's time zone.",
+        "history": "Last 6 months (red = over the 1,000 free)"
+      },
+      "periodLabel": "Period",
+      "periodGroups": {
+        "months": "Months",
+        "rolling": "Last days"
+      },
+      "export": "Export CSV",
+      "csv": {
+        "period": "Period",
+        "clientMessages": "Customer messages",
+        "botMessages": "Bot replies",
+        "agentMessages": "Agent replies",
+        "botResponseSeconds": "Bot response (seconds, median)",
+        "teamPickupSeconds": "Team pickup time (seconds, median)",
+        "afterHoursConversations": "After-hours conversations",
+        "date": "Date",
+        "conversations": "Active conversations"
       }
     },
     "settings": {

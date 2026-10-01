@@ -550,7 +550,12 @@ export type Database = {
       auth_org_id: { Args: never; Returns: string }
       auth_role: { Args: never; Returns: string }
       get_org_metrics: { Args: { p_from: string; p_to: string }; Returns: Json }
+      get_org_metrics_month: { Args: { p_month: string }; Returns: Json }
       get_org_monthly_usage: { Args: never; Returns: Json }
+      get_org_monthly_usage_history: {
+        Args: { p_months?: number }
+        Returns: Json
+      }
       get_unread_counts: {
         Args: never
         Returns: {

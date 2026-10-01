@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import TopBar from "@/components/layout/TopBar";
 import MetricCard from "@/components/metrics/MetricCard";
 import ActivityChart from "@/components/metrics/ActivityChart";
@@ -12,7 +12,21 @@ import { useMetrics } from "@/hooks/useMetrics";
 import { useMonthlyUsage } from "@/hooks/useMonthlyUsage";
 import type { MetricsPeriod } from "@/types";
 
-const PERIODS: MetricsPeriod[] = ["7d", "30d", "90d"];
+const ROLLING: MetricsPeriod[] = ["7d", "30d", "90d"];
+
+// Este mes + los 5 anteriores como meses calendario ("month:YYYY-MM").
+function recentMonths(): string[] {
+  const now = new Date();
+  return Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  });
+}
+
+// CSV para abrir en Excel: resumen del periodo + conversaciones por dia.
+function toCsv(rows: (string | number)[][]) {
+  return rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+}
 
 // % vs período anterior. Sin base (prev = 0) no hay % que mostrar.
 function delta(cur: number, prev: number): { change?: string; positive?: boolean } {
@@ -31,9 +45,13 @@ function formatSeconds(seconds: number | null): string {
 
 export default function MetricsPage() {
   const t = useTranslations("dashboard.metrics");
+  const locale = useLocale();
+  const months = recentMonths();
   const [period, setPeriod] = useState<MetricsPeriod>("7d");
+  const monthLabel = (m: string) =>
+    new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${m}-15T12:00:00Z`));
   const { data, loading, error } = useMetrics(period);
-  const usage = useMonthlyUsage();
+  const { usage, history } = useMonthlyUsage();
 
   const active = data?.active_conversations ?? 0;
   // En el modelo de Tourfy el bot prepara al cliente y el agente cierra: la
@@ -45,18 +63,62 @@ export default function MetricsPage() {
   const isEmpty = !!data && active === 0 && data.new_contacts === 0;
   const placeholder = loading && !data;
 
+  function exportCsv() {
+    if (!data) return;
+    const label = period.startsWith("month:") ? monthLabel(period.slice(6)) : t(`period.${period}`);
+    const csv = toCsv([
+      [t("csv.period"), label],
+      [t("cards.activeConversations"), data.active_conversations],
+      [t("cards.newContacts"), data.new_contacts],
+      [t("csv.clientMessages"), data.messages.client],
+      [t("csv.botMessages"), data.messages.bot],
+      [t("csv.agentMessages"), data.messages.agent],
+      [t("cards.readyToClose"), data.handoff_events],
+      [t("csv.botResponseSeconds"), Math.round(data.response_time.median_seconds ?? 0)],
+      [t("csv.teamPickupSeconds"), Math.round(data.pickup.median_seconds ?? 0)],
+      [t("csv.afterHoursConversations"), data.after_hours.conversations],
+      [],
+      [t("csv.date"), t("csv.conversations")],
+      ...data.daily.map((d) => [d.date, d.conversations]),
+    ]);
+    // BOM para que Excel abra bien los acentos.
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `tourfy-metricas-${period.replace("month:", "")}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   return (
     <div className="flex h-full flex-col">
       <TopBar title={t("title")}>
         <select
           value={period}
           onChange={(e) => setPeriod(e.target.value as MetricsPeriod)}
+          aria-label={t("periodLabel")}
           className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-navy-900 outline-none"
         >
-          {PERIODS.map((p) => (
-            <option key={p} value={p}>{t(`period.${p}`)}</option>
-          ))}
+          <optgroup label={t("periodGroups.months")}>
+            {months.map((m, i) => (
+              <option key={m} value={`month:${m}`}>
+                {i === 0 ? t("period.thisMonth") : i === 1 ? t("period.lastMonth") : monthLabel(m)}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label={t("periodGroups.rolling")}>
+            {ROLLING.map((p) => (
+              <option key={p} value={p}>{t(`period.${p}`)}</option>
+            ))}
+          </optgroup>
         </select>
+        <button
+          onClick={exportCsv}
+          disabled={!data}
+          className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-navy-900 hover:bg-slate-50 disabled:opacity-40"
+        >
+          {t("export")}
+        </button>
       </TopBar>
 
       <div className={`flex-1 overflow-y-auto p-5 space-y-5 transition-opacity ${loading ? "opacity-60" : ""}`}>
@@ -128,7 +190,7 @@ export default function MetricsPage() {
 
         {(data || usage) && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {usage && <UsageCard usage={usage} />}
+            {usage && <UsageCard usage={usage} history={history} />}
             {data && <MessagesCard messages={data.messages} />}
           </div>
         )}
