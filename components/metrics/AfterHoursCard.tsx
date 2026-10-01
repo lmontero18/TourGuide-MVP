@@ -25,7 +25,7 @@ export default function AfterHoursCard({ afterHours }: AfterHoursCardProps) {
 
       <div className="flex items-baseline gap-2 mb-4">
         <span className="font-display text-3xl font-extrabold tracking-tight text-navy-900">{afterHours.conversations}</span>
-        <span className="text-sm text-slate-500">{t("conversations")}</span>
+        <span className="text-sm text-slate-500">{t("conversations", { count: afterHours.conversations })}</span>
       </div>
 
       {afterHours.messages > 0 && (

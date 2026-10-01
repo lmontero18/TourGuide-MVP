@@ -163,6 +163,9 @@ export default function OnboardingPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          // Zona horaria del navegador: define horario de atencion, la hora
+          // que ve el bot y las metricas. Se puede cambiar en Configuracion.
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           tours: data.tours
             .filter((tour) => tour.name.trim())
             .map((tour) => ({
