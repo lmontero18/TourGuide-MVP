@@ -183,6 +183,10 @@ export interface OrgMetrics {
   new_contacts_prev: number
   messages: { client: number; bot: number; agent: number }
   handoffs: number
+  // Clientes que el bot paso a un humano (conversation_events, desde 2026-09-30).
+  handoff_events: number
+  // Mediana de cuanto tardo el equipo en tomar un cliente que paso el bot.
+  pickup: { median_seconds: number | null; samples: number }
   after_hours: {
     conversations: number
     messages: number

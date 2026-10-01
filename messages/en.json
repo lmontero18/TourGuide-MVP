@@ -470,7 +470,15 @@
         "totalConversations": "Total conversations",
         "qualifiedLeads": "Qualified leads",
         "conversionRate": "Conversion rate",
-        "revenue": "Revenue captured"
+        "revenue": "Revenue captured",
+        "botReplies": "Bot replies",
+        "botRepliesHint": "Share of the replies your customers got that came from the bot. Your team wrote the rest.",
+        "botRepliesNote": "{bot} of {total} replies",
+        "readyToClose": "Customers ready to close",
+        "readyToCloseHint": "Times the bot handled a customer and handed them to your team to close the sale.",
+        "teamPickup": "Team pickup time",
+        "teamPickupHint": "Median time your team takes to pick up a customer the bot handed over.",
+        "eventsSince": "Measured since September 30"
       },
       "afterHours": {
         "title": "After hours",

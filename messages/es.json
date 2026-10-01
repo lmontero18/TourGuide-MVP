@@ -470,7 +470,15 @@
         "totalConversations": "Total de conversaciones",
         "qualifiedLeads": "Leads calificados",
         "conversionRate": "Tasa de conversión",
-        "revenue": "Ingresos capturados"
+        "revenue": "Ingresos capturados",
+        "botReplies": "Respuestas del bot",
+        "botRepliesHint": "Qué parte de las respuestas a tus clientes dio el bot. El resto las escribió tu equipo.",
+        "botRepliesNote": "{bot} de {total} respuestas",
+        "readyToClose": "Clientes listos para cerrar",
+        "readyToCloseHint": "Veces que el bot atendió a un cliente y se lo pasó a tu equipo para cerrar la venta.",
+        "teamPickup": "Tiempo de respuesta del equipo",
+        "teamPickupHint": "Mediana de cuánto tarda tu equipo en tomar un cliente que le pasó el bot.",
+        "eventsSince": "Se mide desde el 30 de septiembre"
       },
       "afterHours": {
         "title": "Fuera de horario",

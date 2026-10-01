@@ -36,7 +36,12 @@ export default function MetricsPage() {
   const usage = useMonthlyUsage();
 
   const active = data?.active_conversations ?? 0;
-  const botHandled = active > 0 ? `${Math.round(((active - (data?.handoffs ?? 0)) / active) * 100)}%` : "—";
+  // En el modelo de Tourfy el bot prepara al cliente y el agente cierra: la
+  // metrica es que parte de las respuestas dio el bot, no "conversaciones sin
+  // agente" (que da ~0% aunque el bot haga casi todo).
+  const botReplies = data?.messages.bot ?? 0;
+  const allReplies = botReplies + (data?.messages.agent ?? 0);
+  const botShare = allReplies > 0 ? `${Math.round((botReplies / allReplies) * 100)}%` : "—";
   const isEmpty = !!data && active === 0 && data.new_contacts === 0;
   const placeholder = loading && !data;
 
@@ -67,7 +72,7 @@ export default function MetricsPage() {
         )}
 
         {/* Top metric cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard
             label={t("cards.activeConversations")}
             hint={t("cards.activeConversationsHint")}
@@ -91,10 +96,25 @@ export default function MetricsPage() {
             icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>}
           />
           <MetricCard
-            label={t("cards.botHandled")}
-            hint={t("cards.botHandledHint")}
-            value={placeholder ? "—" : botHandled}
+            label={t("cards.botReplies")}
+            hint={t("cards.botRepliesHint")}
+            value={placeholder ? "—" : botShare}
+            note={data && allReplies > 0 ? t("cards.botRepliesNote", { bot: botReplies, total: allReplies }) : undefined}
             icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
+          />
+          <MetricCard
+            label={t("cards.readyToClose")}
+            hint={t("cards.readyToCloseHint")}
+            value={placeholder ? "—" : data?.handoff_events ?? 0}
+            note={data && data.handoff_events === 0 ? t("cards.eventsSince") : undefined}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><path d="M17 11l2 2 4-4" /></svg>}
+          />
+          <MetricCard
+            label={t("cards.teamPickup")}
+            hint={t("cards.teamPickupHint")}
+            value={formatSeconds(data?.pickup.median_seconds ?? null)}
+            note={data && data.pickup.samples === 0 ? t("cards.eventsSince") : undefined}
+            icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>}
           />
         </div>
 
