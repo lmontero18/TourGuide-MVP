@@ -754,7 +754,20 @@
         "accessTokenHint": "Used only to verify the connection — it is never stored. Messages are sent with Tourfy's central token.",
         "displayPhone": "Display phone number",
         "optional": "optional",
-        "connecting": "Connecting…"
+        "connecting": "Connecting…",
+        "billing": {
+          "title": "WhatsApp billing",
+          "sub": "Meta bills your agency directly: the first 1,000 service messages each month are free and templates are always charged. Tourfy never stores or sees your card details.",
+          "okTitle": "No payment rejections",
+          "okSub": "We can't see your card in Meta, but if Meta rejects a message for missing payment we'll flag it here.",
+          "failedTitle": "Meta rejected a message for missing payment method",
+          "failedSub": "Last rejection: {date}. Add or update your card in Meta; this warning clears once a template sends successfully.",
+          "stepsTitle": "How to add your card",
+          "step1": "In Meta, open Billing & payments → Payment methods and add your card (Visa, Mastercard or Amex enabled for international purchases).",
+          "step2": "In WhatsApp Manager, open your account's payment settings and assign that card.",
+          "openManager": "Open WhatsApp Manager",
+          "openBilling": "Payment methods in Meta"
+        }
       },
       "save": "Save changes",
       "errors": {
@@ -1063,6 +1076,7 @@
     "whatsappManualMissingFields": "Fill in all the fields to connect the number.",
     "whatsappManualTokenInvalid": "Meta couldn't validate the details. Check the Phone Number ID and the Access Token.",
     "whatsappManualSubscribeFailed": "We couldn't link Tourfy to your WhatsApp Business account. Check the WABA ID and the Access Token permissions.",
-    "whatsappDisconnectFailed": "We couldn't disconnect the number. Please try again."
+    "whatsappDisconnectFailed": "We couldn't disconnect the number. Please try again.",
+    "paymentRequired": "Meta rejected the message because your WhatsApp account has no payment method. An admin can add one in Settings → WhatsApp."
   }
 }

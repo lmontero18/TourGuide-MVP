@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
+import { PAYMENT_ERROR_CODE, markPaymentFailed } from '@/lib/whatsapp/billing'
 import { verifyWebhookSignature } from '@/lib/whatsapp/verify'
 import {
   webhookPayloadSchema,
@@ -202,6 +203,15 @@ async function processWebhook(body: WebhookPayload) {
       const metadata = value.metadata
       const messages = value.messages
       const contactsPayload = value.contacts
+
+      // El bot envia desde n8n directo a Meta: un rechazo por falta de pago
+      // solo nos llega como status 'failed' 131042 en este webhook.
+      const paymentFailed = value.statuses?.some(
+        (s) => s.status === 'failed' && s.errors?.some((e) => e.code === PAYMENT_ERROR_CODE)
+      )
+      if (metadata?.phone_number_id && paymentFailed) {
+        await markPaymentFailed(supabase, { phoneNumberId: metadata.phone_number_id }, baseLog)
+      }
 
       if (!metadata?.phone_number_id || !messages) continue
 

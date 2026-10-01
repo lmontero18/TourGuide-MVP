@@ -754,7 +754,20 @@
         "accessTokenHint": "Solo se usa para verificar la conexión: nunca se guarda. Los mensajes se envían con el token central de Tourfy.",
         "displayPhone": "Número visible",
         "optional": "opcional",
-        "connecting": "Conectando…"
+        "connecting": "Conectando…",
+        "billing": {
+          "title": "Facturación de WhatsApp",
+          "sub": "Meta le cobra directo a tu agencia: los primeros 1.000 mensajes de servicio del mes son gratis y las plantillas siempre se cobran. Tourfy no guarda ni ve los datos de tu tarjeta.",
+          "okTitle": "Sin rechazos de pago",
+          "okSub": "No podemos ver tu tarjeta en Meta, pero si Meta rechaza un envío por falta de pago te avisamos aquí.",
+          "failedTitle": "Meta rechazó un envío por falta de método de pago",
+          "failedSub": "Último rechazo: {date}. Agrega o actualiza tu tarjeta en Meta; el aviso se quita cuando una plantilla se envíe bien.",
+          "stepsTitle": "Cómo agregar tu tarjeta",
+          "step1": "En Meta, abre Facturación y pagos → Métodos de pago y agrega tu tarjeta (Visa, Mastercard o Amex habilitada para compras internacionales).",
+          "step2": "En WhatsApp Manager, abre la configuración de pago de tu cuenta y asigna esa tarjeta.",
+          "openManager": "Abrir WhatsApp Manager",
+          "openBilling": "Métodos de pago en Meta"
+        }
       },
       "save": "Guardar cambios",
       "errors": {
@@ -1063,6 +1076,7 @@
     "whatsappManualMissingFields": "Completa todos los campos para conectar el número.",
     "whatsappManualTokenInvalid": "Meta no validó los datos. Revisa el identificador del número de teléfono y el token de acceso.",
     "whatsappManualSubscribeFailed": "No pudimos vincular Tourfy con tu cuenta de WhatsApp Business. Revisa el identificador de la cuenta y los permisos del token de acceso.",
-    "whatsappDisconnectFailed": "No pudimos desconectar el número. Intenta de nuevo."
+    "whatsappDisconnectFailed": "No pudimos desconectar el número. Intenta de nuevo.",
+    "paymentRequired": "Meta rechazó el envío porque tu cuenta de WhatsApp no tiene un método de pago. Un administrador puede agregarlo en Configuración → WhatsApp."
   }
 }

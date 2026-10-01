@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendTextMessage } from '@/lib/whatsapp/client'
 import { getMessagingToken } from '@/lib/whatsapp/token'
+import { isPaymentError, markPaymentFailed } from '@/lib/whatsapp/billing'
+import { createLogger } from '@/lib/logger'
+
+const log = createLogger({ route: 'conversations/[id]/messages' })
 
 // Ventana de atencion de WhatsApp: 24h desde el ultimo mensaje del cliente.
 const WINDOW_MS = 24 * 60 * 60 * 1000
@@ -141,6 +145,13 @@ export async function POST(
       return NextResponse.json(
         { error: t('windowClosed'), code: 'window_closed' },
         { status: 409 }
+      )
+    }
+    if (isPaymentError(err)) {
+      await markPaymentFailed(await createServiceClient(), { orgId: profile.org_id }, log.child({ org_id: profile.org_id }))
+      return NextResponse.json(
+        { error: t('paymentRequired'), code: 'payment_required' },
+        { status: 402 }
       )
     }
     // El detalle de Meta (en ingles) queda en el log; al usuario, texto propio.

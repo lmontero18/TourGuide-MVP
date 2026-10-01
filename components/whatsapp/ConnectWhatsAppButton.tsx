@@ -134,7 +134,7 @@ export default function ConnectWhatsAppButton({ onConnected }: Props) {
 
         const result = await res.json();
         if (!res.ok) {
-          toast.error(result.error ? t("connectErrorWithReason", { reason: result.error }) : t("connectError"));
+          toast.error(result.error ? t("connectErrorWithReason", { reason: String(result.error).replace(/\.\s*$/, "") }) : t("connectError"));
           return;
         }
 
