@@ -475,7 +475,7 @@
       "afterHours": {
         "title": "After hours",
         "sub": "Conversations that reached out while your office was closed",
-        "conversations": "conversations",
+        "conversations": "{count, plural, one {conversation} other {conversations}}",
         "messages": "{count, plural, one {# customer message arrived} other {# customer messages arrived}} after hours",
         "slotEvening": "After closing",
         "slotNight": "Before opening",
@@ -509,7 +509,7 @@
         "warn": "You're close to the free limit. Make sure you have a payment method in Meta so your bot doesn't stop.",
         "over": "You passed the free limit: Meta charges {count} extra messages to your payment method. Without a card, the bot stops replying.",
         "checkPayment": "Check payment method",
-        "note": "Estimate. Resets on the 1st of each month."
+        "note": "Estimate. Resets on the 1st of each month, in your agency's time zone."
       }
     },
     "settings": {

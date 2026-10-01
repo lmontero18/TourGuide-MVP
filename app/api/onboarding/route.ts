@@ -4,12 +4,16 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { compilePrompt } from '@/lib/bot/compilePrompt'
 import { dedupeBusiness, dedupeFaqs, dedupeTours } from '@/lib/knowledge/dedupe'
 import type { BotConfig, BotTone, BusinessSection, FAQ, Tour } from '@/types'
+import { isValidTimeZone } from '@/lib/timezones'
 
 // Payload del paso final del wizard. Tolera body vacio (clientes viejos).
 const finishSchema = z.object({
   tone: z.enum(['formal', 'friendly', 'casual']).optional(),
   greeting: z.string().trim().max(500).optional(),
   default_lang: z.string().trim().min(2).max(10).optional(),
+  // Zona del navegador de quien hace el onboarding. Solo se usa si la org
+  // todavia no tiene una (antes todas quedaban en America/Lima por defecto).
+  timezone: z.string().trim().max(64).optional(),
   faqs: z
     .array(z.object({
       question: z.string().trim().min(1).max(500),
@@ -176,6 +180,9 @@ export async function PATCH(request: NextRequest) {
   if (parsed.data.tone !== undefined) nextBotConfig.tone = parsed.data.tone
   if (parsed.data.greeting !== undefined) nextBotConfig.greeting = parsed.data.greeting
   if (parsed.data.default_lang !== undefined) nextBotConfig.default_lang = parsed.data.default_lang
+  if (!nextBotConfig.timezone && parsed.data.timezone && isValidTimeZone(parsed.data.timezone)) {
+    nextBotConfig.timezone = parsed.data.timezone
+  }
 
   const tours = dedupeTours((parsed.data.tours ?? (current?.tours as Tour[] | null) ?? []) as Tour[])
   const faqs = dedupeFaqs((parsed.data.faqs ?? (current?.faqs as FAQ[] | null) ?? []) as FAQ[])

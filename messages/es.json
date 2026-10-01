@@ -475,7 +475,7 @@
       "afterHours": {
         "title": "Fuera de horario",
         "sub": "Conversaciones que escribieron con la oficina cerrada",
-        "conversations": "conversaciones",
+        "conversations": "{count, plural, one {conversación} other {conversaciones}}",
         "messages": "{count, plural, one {# mensaje de cliente llegó} other {# mensajes de clientes llegaron}} fuera de horario",
         "slotEvening": "Después del cierre",
         "slotNight": "Antes de abrir",
@@ -509,7 +509,7 @@
         "warn": "Estás cerca del límite gratis. Revisa que tengas un método de pago en Meta para que el bot no se detenga.",
         "over": "Pasaste el límite gratis: Meta cobra {count} mensajes extra a tu método de pago. Sin tarjeta, el bot deja de responder.",
         "checkPayment": "Revisar método de pago",
-        "note": "Estimado. Se reinicia el 1 de cada mes."
+        "note": "Estimado. Se reinicia el 1 de cada mes, según la zona horaria de tu agencia."
       }
     },
     "settings": {

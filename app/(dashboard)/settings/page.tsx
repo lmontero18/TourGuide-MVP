@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TIMEZONES, utcOffsetLabel } from "@/lib/timezones";
 import Link from "next/link";
 import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
@@ -116,11 +117,12 @@ export default function SettingsPage() {
                       onChange={(e) => setTimezone(e.target.value)}
                       className="w-full h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none"
                     >
-                      <option value="America/Lima">America/Lima (UTC-5)</option>
-                      <option value="America/Mexico_City">America/Mexico_City (UTC-6)</option>
-                      <option value="America/Bogota">America/Bogota (UTC-5)</option>
-                      <option value="America/Argentina/Buenos_Aires">America/Buenos_Aires (UTC-3)</option>
-                      <option value="America/Costa_Rica">America/Costa_Rica (UTC-6)</option>
+                      {/* Si la org tiene una zona fuera de la lista, se muestra igual */}
+                      {(TIMEZONES.some((tz) => tz.id === timezone) ? TIMEZONES : [{ id: timezone, label: timezone }, ...TIMEZONES]).map((tz) => (
+                        <option key={tz.id} value={tz.id}>
+                          {tz.label} ({utcOffsetLabel(tz.id)})
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
