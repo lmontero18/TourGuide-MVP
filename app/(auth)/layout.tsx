@@ -102,8 +102,7 @@ export default function AuthLayout({
             className="flex gap-8"
           >
             {[
-              { value: "3×", label: t("statMoreLeads") },
-              { value: "<2s", label: t("statReplyTime") },
+              { value: "<1 min", label: t("statReplyTime") },
               { value: "24/7", label: t("statAvailability") },
             ].map((stat) => (
               <div key={stat.label}>
