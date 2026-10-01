@@ -360,6 +360,7 @@
       "conversations": "Conversations",
       "tours": "Tours & FAQs",
       "metrics": "Metrics",
+      "templates": "Templates",
       "agents": "Agents",
       "settings": "Settings"
     },
@@ -451,7 +452,22 @@
       "windowClosedBody": "WhatsApp doesn't allow free-text replies until the customer writes again.",
       "windowClosedPlaceholder": "The 24-hour window closed: wait for the customer to write",
       "windowClosing": "{left} left to reply: after that WhatsApp closes the 24-hour window.",
-      "windowClosedToast": "More than 24 h have passed since the customer's last message: WhatsApp won't allow a reply until they write again."
+      "windowClosedToast": "More than 24 h have passed since the customer's last message: WhatsApp won't allow a reply until they write again.",
+      "windowClosedTemplateBody": "WhatsApp only allows an approved template until the customer writes again.",
+      "sendTemplate": "Send template",
+      "templates": {
+        "choose": "Choose an approved template",
+        "back": "← Back",
+        "close": "Close",
+        "loading": "Loading…",
+        "error": "We couldn't load templates.",
+        "none": "No approved templates yet.",
+        "create": "Create one",
+        "noVariables": "This template has no variables.",
+        "costNote": "Meta charges for each template sent. Sending it takes over the conversation.",
+        "send": "Send template",
+        "sent": "Template sent"
+      }
     },
     "metrics": {
       "title": "Metrics",
@@ -607,6 +623,71 @@
       "denied": "You blocked notifications in this browser. Enable them from the lock icon in the address bar.",
       "unsupported": "This browser doesn't support desktop notifications.",
       "events": "We alert you when the bot asks for a person, when a customer writes in one of your conversations, and when another agent takes a conversation you had."
+    },
+    "templates": {
+      "title": "WhatsApp templates",
+      "intro": "Templates are Meta-approved messages that let you write to a customer more than 24 hours after their last message. Meta reviews each template (up to 24 h) and charges per send.",
+      "new": "New template",
+      "startersTitle": "Start from one of these",
+      "useStarter": "Use as a base →",
+      "loading": "Loading templates…",
+      "loadError": "We couldn't load templates from Meta. Reload the page.",
+      "empty": "No templates yet. Create the first one or start from a suggestion.",
+      "notConnected": "Connect your WhatsApp number to create templates.",
+      "connect": "Connect WhatsApp",
+      "sentToReview": "Template sent to Meta for review",
+      "deleted": "Template deleted",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this template in all its languages?",
+      "deleteYes": "Yes, delete",
+      "variables": "Variables",
+      "pendingNote": "Meta is reviewing it. It usually takes minutes, up to 24 h.",
+      "rejectedReason": "Meta rejected it: {reason}. Fix it and create it again with a new name.",
+      "status": {
+        "APPROVED": "Approved",
+        "PENDING": "In review",
+        "REJECTED": "Rejected",
+        "PAUSED": "Paused",
+        "DISABLED": "Disabled"
+      },
+      "category": {
+        "UTILITY": "Utility",
+        "MARKETING": "Marketing",
+        "AUTHENTICATION": "Authentication"
+      },
+      "categoryHint": {
+        "UTILITY": "Reminders, confirmations, follow-up on an inquiry.",
+        "MARKETING": "Promotions and offers. Pricier, and Meta limits how many each customer receives."
+      },
+      "form": {
+        "title": "Name",
+        "titlePlaceholder": "Tour reminder",
+        "internalName": "Internal name",
+        "category": "Category",
+        "language": "Language",
+        "header": "Header",
+        "headerPlaceholder": "Your tour reminder",
+        "body": "Message",
+        "bodyPlaceholder": "Hi {{nombre}}, a reminder of your {{tour}} tour on {{fecha}}.",
+        "insertVariable": "Insert variable:",
+        "examples": "Example for each variable",
+        "examplesHint": "Meta needs them to review the template. They're not sent to the customer.",
+        "footer": "Footer",
+        "footerPlaceholder": "Your agency",
+        "buttons": "Buttons",
+        "quickReply": "Quick reply",
+        "quickReplyPlaceholder": "Confirm",
+        "addQuickReply": "Quick reply",
+        "urlText": "Button text",
+        "urlTextPlaceholder": "See tour",
+        "addUrl": "Link button",
+        "remove": "Remove",
+        "optional": "optional",
+        "preview": "Preview",
+        "reviewNote": "When you create it, it goes to Meta for review. Once approved, your team can use it in the chat.",
+        "cancel": "Cancel",
+        "submit": "Send for review"
+      }
     }
   },
   "blog": {

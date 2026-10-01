@@ -222,3 +222,24 @@ export interface Assignee {
   id: string
   name: string
 }
+
+// Plantillas de WhatsApp (CODE-174). Fuente de verdad: Meta (Graph API).
+export interface TemplateButton {
+  type: 'QUICK_REPLY' | 'URL'
+  text: string
+  url?: string
+}
+
+export interface WhatsAppTemplate {
+  id: string
+  name: string
+  status: 'APPROVED' | 'PENDING' | 'REJECTED' | 'PAUSED' | 'DISABLED' | string
+  category: string
+  language: string
+  rejected_reason?: string
+  header: string | null
+  body: string
+  footer: string | null
+  buttons: TemplateButton[]
+  variables: string[]
+}

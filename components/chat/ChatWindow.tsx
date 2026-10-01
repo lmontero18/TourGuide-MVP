@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
 import TakeControlButton from "./TakeControlButton";
+import TemplatePicker from "./TemplatePicker";
 import { ChatMessagesSkeleton } from "./ChatSkeleton";
 import { useMessages } from "@/hooks/useMessages";
 import { useConversationControl } from "@/hooks/useConversationControl";
@@ -65,6 +66,7 @@ export default function ChatWindow({
   // (user null) no se asume nada: evita mostrar "otro agente" a uno mismo.
   const heldByOther = !botActive && !!assignee && !!user && assignee.id !== user.id;
   const [confirmTakeover, setConfirmTakeover] = useState<string | null>(null);
+  const [pickingTemplate, setPickingTemplate] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -400,9 +402,21 @@ export default function ChatWindow({
       </div>
 
       {/* Input — only enabled when agent has control */}
-      {windowClosed ? (
-        <div className="border-t border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
-          <strong className="font-semibold">{t("windowClosedTitle")}</strong> {t("windowClosedBody")}
+      {windowClosed && pickingTemplate ? (
+        <TemplatePicker conversationId={conversationId} contactName={contactName} onClose={() => setPickingTemplate(false)} />
+      ) : windowClosed ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
+          <span>
+            <strong className="font-semibold">{t("windowClosedTitle")}</strong> {t("windowClosedTemplateBody")}
+          </span>
+          {!heldByOther && (
+            <button
+              onClick={() => setPickingTemplate(true)}
+              className="shrink-0 rounded-lg bg-navy-900 px-3 py-1.5 text-xs font-bold text-white hover:bg-navy-800"
+            >
+              {t("sendTemplate")}
+            </button>
+          )}
         </div>
       ) : windowClosing && !botActive && !heldByOther ? (
         <div className="border-t border-amber-100 bg-amber-50/60 px-4 py-2 text-xs text-amber-700">
@@ -410,19 +424,21 @@ export default function ChatWindow({
         </div>
       ) : null}
 
-      <ChatInput
-        onSend={handleSend}
-        disabled={botActive || heldByOther || windowClosed}
-        placeholder={
-          windowClosed
-            ? t("windowClosedPlaceholder")
-            : botActive
-            ? t("takeControlPlaceholder")
-            : heldByOther && assignee
-              ? t("heldByOtherPlaceholder", { name: assignee.name })
-              : t("typePlaceholder")
-        }
-      />
+      {!(windowClosed && pickingTemplate) && (
+        <ChatInput
+          onSend={handleSend}
+          disabled={botActive || heldByOther || windowClosed}
+          placeholder={
+            windowClosed
+              ? t("windowClosedPlaceholder")
+              : botActive
+              ? t("takeControlPlaceholder")
+              : heldByOther && assignee
+                ? t("heldByOtherPlaceholder", { name: assignee.name })
+                : t("typePlaceholder")
+          }
+        />
+      )}
     </div>
   );
 }
