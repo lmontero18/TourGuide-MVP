@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
 import { createLogger } from '@/lib/logger'
 import { safeEqual } from '@/lib/security'
 import { checkRateLimit } from '@/lib/ratelimit'
+import { refreshLead } from '@/lib/leads/sync'
 
 function getServiceClient() {
   return createClient(
@@ -94,6 +95,10 @@ export async function POST(request: NextRequest) {
       })
       return NextResponse.json({ error: 'Update failed' }, { status: 500 })
     }
+
+    // Traspaso a un agente: la ficha se actualiza ya (sin throttle) para que
+    // el agente reciba el resumen y el proximo paso.
+    after(() => refreshLead(supabase, conversation_id, { force: true }))
 
     return NextResponse.json({ ok: true })
   } catch (error) {

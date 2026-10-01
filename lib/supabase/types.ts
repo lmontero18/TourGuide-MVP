@@ -244,35 +244,59 @@ export type Database = {
       }
       leads: {
         Row: {
+          amount: number | null
+          closed_at: string | null
           contact_id: string
           conversation_id: string | null
           created_at: string
+          currency: string | null
+          extracted_at: string | null
           id: string
+          intent: string | null
+          locked_fields: string[]
           metadata: Json | null
+          next_step: string | null
           org_id: string
           status: Database["public"]["Enums"]["lead_status"]
+          summary: string | null
           tour_interest: string | null
           updated_at: string
         }
         Insert: {
+          amount?: number | null
+          closed_at?: string | null
           contact_id: string
           conversation_id?: string | null
           created_at?: string
+          currency?: string | null
+          extracted_at?: string | null
           id?: string
+          intent?: string | null
+          locked_fields?: string[]
           metadata?: Json | null
+          next_step?: string | null
           org_id: string
           status?: Database["public"]["Enums"]["lead_status"]
+          summary?: string | null
           tour_interest?: string | null
           updated_at?: string
         }
         Update: {
+          amount?: number | null
+          closed_at?: string | null
           contact_id?: string
           conversation_id?: string | null
           created_at?: string
+          currency?: string | null
+          extracted_at?: string | null
           id?: string
+          intent?: string | null
+          locked_fields?: string[]
           metadata?: Json | null
+          next_step?: string | null
           org_id?: string
           status?: Database["public"]["Enums"]["lead_status"]
+          summary?: string | null
           tour_interest?: string | null
           updated_at?: string
         }

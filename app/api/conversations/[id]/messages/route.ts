@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
@@ -6,6 +6,7 @@ import { sendTextMessage } from '@/lib/whatsapp/client'
 import { getMessagingToken } from '@/lib/whatsapp/token'
 import { isPaymentError, markPaymentFailed } from '@/lib/whatsapp/billing'
 import { createLogger } from '@/lib/logger'
+import { refreshLead } from '@/lib/leads/sync'
 
 const log = createLogger({ route: 'conversations/[id]/messages' })
 
@@ -183,6 +184,9 @@ export async function POST(
     .from('conversations')
     .update({ last_message_at: nowIso })
     .eq('id', id)
+
+  // Lo que el agente acuerda (montos, fechas) tambien va a la ficha del lead.
+  after(async () => refreshLead(await createServiceClient(), id))
 
   return NextResponse.json({ success: true, message: msg })
 }
