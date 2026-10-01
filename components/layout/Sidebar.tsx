@@ -162,6 +162,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <div className="border-t border-slate-100 p-2">
         <button
           onClick={onToggle}
+          aria-label={collapsed ? t("expand") : t("collapse")}
+          title={collapsed ? t("expand") : t("collapse")}
           className="flex h-9 w-full items-center justify-center rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-colors"
         >
           <motion.svg

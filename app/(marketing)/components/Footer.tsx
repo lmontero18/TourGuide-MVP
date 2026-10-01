@@ -70,8 +70,8 @@ export function Footer() {
               </p>
               <ul className="space-y-2">
                 {[
-                  { label: "Privacy", href: "/privacy" },
-                  { label: "Data deletion", href: "/data-deletion" },
+                  { label: t("privacy"), href: "/privacy" },
+                  { label: t("dataDeletion"), href: "/data-deletion" },
                 ].map((item) => (
                   <li key={item.label}>
                     <Link href={item.href} className="text-xs sm:text-sm text-slate-500 hover:text-navy-900 transition-colors">

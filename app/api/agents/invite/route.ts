@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createLogger } from '@/lib/logger'
@@ -12,12 +13,13 @@ const inviteSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  const t = await getTranslations('apiErrors')
   const supabase = await createClient()
 
   // Verify authenticated admin
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
   const { data: adminProfile } = await supabase
@@ -27,20 +29,20 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (!adminProfile || adminProfile.role !== 'admin' || !adminProfile.org_id) {
-    return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
+    return NextResponse.json({ error: t('adminOnly') }, { status: 403 })
   }
 
   let body: unknown
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    return NextResponse.json({ error: t('invalidInput') }, { status: 400 })
   }
 
   const parsed = inviteSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json(
-      { error: 'Invalid fields', issues: parsed.error.issues },
+      { error: t('inviteInvalidFields'), issues: parsed.error.issues },
       { status: 400 }
     )
   }
@@ -60,7 +62,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle()
   if (existing) {
     const code = existing.org_id === adminProfile.org_id ? 'already_in_team' : 'email_taken'
-    return NextResponse.json({ error: 'Email already registered', code }, { status: 409 })
+    return NextResponse.json({ error: t(code === 'already_in_team' ? 'alreadyInTeam' : 'emailTaken'), code }, { status: 409 })
   }
 
   // role y org_id NO viajan en la metadata del usuario. handle_new_user() dejo de
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
 
   if (inviteError) {
     log.error('failed to invite agent', { error: inviteError, org_id: adminProfile.org_id })
-    return NextResponse.json({ error: 'Failed to send invitation' }, { status: 400 })
+    return NextResponse.json({ error: t('inviteFailed') }, { status: 400 })
   }
 
   // El trigger ya creo la fila con role='admin' y org_id=null. Asignarle la org y
@@ -105,7 +107,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ error: 'Failed to send invitation' }, { status: 500 })
+    return NextResponse.json({ error: t('inviteFailed') }, { status: 500 })
   }
 
   return NextResponse.json({

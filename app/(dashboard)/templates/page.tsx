@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
 import TemplateForm, { EMPTY_DRAFT, type TemplateDraft } from "@/components/templates/TemplateForm";
@@ -10,37 +10,22 @@ import TemplatePreview from "@/components/templates/TemplatePreview";
 import { useTemplates } from "@/hooks/useTemplates";
 import type { WhatsAppTemplate } from "@/types";
 
-// Plantillas de arranque para agencias de turismo (se pueden editar antes de enviar).
-const STARTERS: (TemplateDraft & { key: string })[] = [
-  {
-    key: "reminder",
-    ...EMPTY_DRAFT,
-    title: "Recordatorio de tour",
-    category: "UTILITY",
-    header: "Recordatorio de tu tour",
-    body: "Hola {{nombre}}, te recordamos tu tour {{tour}} el {{fecha}}. Si tienes alguna pregunta, responde este mensaje.",
-    quickReplies: ["Confirmar", "Tengo una pregunta"],
-    examples: { nombre: "Ana", tour: "Isletas de Granada", fecha: "15 de diciembre" },
-  },
-  {
-    key: "followup",
-    ...EMPTY_DRAFT,
-    title: "Retomar consulta",
-    category: "UTILITY",
-    body: "Hola {{nombre}}, te escribimos para continuar con tu consulta sobre el tour {{tour}}. ¿Seguimos con tu reserva?",
-    quickReplies: ["Sí, sigamos", "Más tarde"],
-    examples: { nombre: "Ana", tour: "Volcán Masaya" },
-  },
-  {
-    key: "promo",
-    ...EMPTY_DRAFT,
-    title: "Seguimiento de cotización",
-    category: "MARKETING",
-    body: "Hola {{nombre}}, ¿pudiste revisar la información del tour {{tour}}? Si quieres, te ayudo a reservar tu fecha.",
-    quickReplies: ["Quiero reservar", "Más información"],
-    examples: { nombre: "Ana", tour: "Volcán Masaya" },
-  },
-];
+// Plantillas de arranque para agencias de turismo (se pueden editar antes de
+// enviar). El contenido sale de los mensajes segun el idioma del panel; se lee
+// con t.raw porque las variables {{x}} no son ICU.
+const STARTER_KEYS = [
+  { key: "reminder", category: "UTILITY" },
+  { key: "followup", category: "UTILITY" },
+  { key: "promo", category: "MARKETING" },
+] as const;
+
+interface StarterContent {
+  title: string;
+  header?: string;
+  body: string;
+  quickReplies: string[];
+  examples: Record<string, string>;
+}
 
 const STATUS_STYLE: Record<string, string> = {
   APPROVED: "border-green-200 bg-green-50 text-green-700",
@@ -103,15 +88,27 @@ function TemplateCard({ tpl, onDelete }: { tpl: WhatsAppTemplate; onDelete: () =
 
 export default function TemplatesPage() {
   const t = useTranslations("dashboard.templates");
+  const locale = useLocale();
   const { templates, connected, error, create, remove } = useTemplates();
   const [draft, setDraft] = useState<TemplateDraft | null>(null);
+  // Idioma de la plantilla por defecto = idioma del panel.
+  const language = locale === "en" ? "en_US" : "es";
+  const emptyDraft = useMemo<TemplateDraft>(() => ({ ...EMPTY_DRAFT, language }), [language]);
+  const starters = useMemo(
+    () =>
+      STARTER_KEYS.map(({ key, category }) => {
+        const c = t.raw(`starters.${key}`) as StarterContent;
+        return { key, ...emptyDraft, category, title: c.title, header: c.header ?? "", body: c.body, quickReplies: c.quickReplies, examples: c.examples };
+      }),
+    [t, emptyDraft]
+  );
 
   return (
     <div className="flex h-full flex-col">
       <TopBar title={t("title")}>
         {!draft && connected && (
           <button
-            onClick={() => setDraft(EMPTY_DRAFT)}
+            onClick={() => setDraft(emptyDraft)}
             className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-navy-900 px-3 text-xs font-bold text-white hover:bg-navy-800"
           >
             + {t("new")}
@@ -153,7 +150,7 @@ export default function TemplatesPage() {
             <section>
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">{t("startersTitle")}</p>
               <div className="grid gap-3 sm:grid-cols-3">
-                {STARTERS.map((s) => (
+                {starters.map((s) => (
                   <button
                     key={s.key}
                     onClick={() => setDraft(s)}
@@ -181,7 +178,7 @@ export default function TemplatesPage() {
                 onDelete={async () => {
                   const res = await remove(tpl.name);
                   if (res.ok) toast.success(t("deleted"));
-                  else toast.error(res.error);
+                  else toast.error(res.error || t("errors.delete"));
                 }}
               />
             ))}

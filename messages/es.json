@@ -5,11 +5,12 @@
     "results": "Resultados",
     "login": "Iniciar sesión",
     "account": "Cuenta",
-    "dashboard": "Ir al dashboard",
-    "finishOnboarding": "Terminar onboarding",
+    "dashboard": "Ir al panel",
+    "finishOnboarding": "Terminar configuración",
     "signOut": "Cerrar sesión",
     "pricing": "Precios",
-    "blog": "Blog"
+    "blog": "Blog",
+    "menu": "Menú"
   },
   "hero": {
     "headline1": "Tus tours se venden",
@@ -18,7 +19,7 @@
     "sub": "Un bot de WhatsApp entrenado con tus tours, tus precios y tu tono. Responde en segundos a cualquier hora, califica al viajero y te deja la venta lista para cerrar.",
     "ctaPrimary": "Iniciar sesión",
     "ctaSecondary": "Ver cómo funciona",
-    "trust": "Sin costos de setup · Cancela cuando quieras · En vivo en 10 minutos",
+    "trust": "Sin costo de instalación · Cancela cuando quieras · En vivo en 10 minutos",
     "mock": {
       "c1": "¿Hacen tours privados para empresas?",
       "c2": "¡Gracias! Nos vemos el sábado 🙌",
@@ -34,35 +35,35 @@
   },
   "features": {
     "label": "Funciones",
-    "title": "Todo lo que tu agencia necesita para no perder un solo lead",
-    "sub": "Un bot que conoce tus tours a fondo, un dashboard en vivo para tu equipo, y las métricas que prueban que la inversión rinde.",
+    "title": "Todo lo que tu agencia necesita para no perder ni un cliente potencial",
+    "sub": "Un bot que conoce tus tours a fondo, un panel en vivo para tu equipo y las métricas que demuestran que la inversión rinde.",
     "items": {
       "0": {
         "title": "Habla como tu mejor vendedor",
-        "desc": "Entrénalo con tus tours, precios, FAQs y tono de voz. Responde en español, inglés o portugués, las 24 horas — y nunca inventa un precio."
+        "desc": "Entrénalo con tus tours, precios, preguntas frecuentes y tono de voz. Responde en español, inglés o portugués, las 24 horas, y nunca inventa un precio."
       },
       "1": {
-        "title": "Toma de control en un clic",
+        "title": "Toma el control en un clic",
         "desc": "Entra a cualquier conversación cuando quieras. El bot se pausa al instante, hablas tú, y se lo devuelves al terminar."
       },
       "2": {
         "title": "Captura fuera de horario",
-        "desc": "El 60% de las consultas por WhatsApp llegan cuando la oficina está cerrada. El bot responde todas — a las 2 de la tarde o de la madrugada."
+        "desc": "El 60% de las consultas por WhatsApp llegan cuando la oficina está cerrada. El bot las responde todas, a las 2 de la tarde o a las 2 de la madrugada."
       },
       "3": {
-        "title": "Leads calificados, no solo chats",
-        "desc": "De cada conversación extrae fechas, tamaño del grupo, presupuesto e interés. Abres el dashboard y sabes a quién cerrar primero."
+        "title": "Clientes potenciales calificados, no solo chats",
+        "desc": "De cada conversación extrae fechas, tamaño del grupo, presupuesto e interés. Abres el panel y sabes con quién cerrar primero."
       },
       "4": {
-        "title": "Métricas que prueban el ROI",
-        "desc": "Leads capturados, reservas atribuidas, ingresos generados. Los números para decidir con datos, no con sensaciones."
+        "title": "Métricas que demuestran el ROI",
+        "desc": "Clientes potenciales captados, reservas atribuidas, ingresos generados. Los números para decidir con datos, no por intuición."
       }
     },
     "demo": {
       "botName": "Tourfy Bot",
-      "msg0": "Hola! Cuánto cuesta el tour a Machu Picchu para 4 personas?",
+      "msg0": "¡Hola! ¿Cuánto cuesta el tour a Machu Picchu para 4 personas?",
       "msg1": "¡Hola! 🏔️ El tour a Machu Picchu para 4 personas es $320 USD por persona. Incluye transporte, guía bilingüe y almuerzo. ¿Te gustaría reservar una fecha?",
-      "msg2": "Si, el próximo sábado tienen disponible?"
+      "msg2": "Sí, ¿tienen disponibilidad el próximo sábado?"
     }
   },
   "how": {
@@ -73,7 +74,7 @@
       "0": {
         "step": "PASO 1",
         "title": "Importa tus tours",
-        "desc": "Pega la URL de tu sitio o sube tu tarifario en PDF. Leemos tus tours, precios y FAQs — tú solo revisas y apruebas."
+        "desc": "Pega la URL de tu sitio o sube tu tarifario en PDF. Leemos tus tours, precios y preguntas frecuentes; tú solo revisas y apruebas."
       },
       "1": {
         "step": "PASO 2",
@@ -82,7 +83,7 @@
       },
       "2": {
         "step": "PASO 3",
-        "title": "Recibe leads calificados",
+        "title": "Recibe clientes potenciales calificados",
         "desc": "El bot responde a cada viajero al instante. Tú ves todas las conversaciones en vivo y entras cuando quieras."
       }
     },
@@ -92,7 +93,7 @@
       "2": "Cancela cuando quieras"
     },
     "preview": {
-      "leadTitle": "Lead calificado",
+      "leadTitle": "Cliente potencial calificado",
       "leadStatus": "Nuevo",
       "leadInterest": "Interés",
       "leadDates": "Fechas",
@@ -105,14 +106,14 @@
   "metrics": {
     "label": "Resultados",
     "title": "El impacto en los números de tu agencia",
-    "sub": "Proyecciones basadas en benchmarks del sector y datos de WhatsApp Business.",
+    "sub": "Proyecciones basadas en referencias del sector y datos de WhatsApp Business.",
     "items": {
       "0": {
-        "label": "Leads capturados fuera de horario que hoy se pierden",
-        "unit": "más leads"
+        "label": "Clientes potenciales que llegan fuera de horario y hoy se pierden",
+        "unit": "más clientes potenciales"
       },
       "1": {
-        "label": "Consultas que el bot convierte en lead calificado",
+        "label": "Consultas que el bot convierte en cliente potencial calificado",
         "unit": "tasa de conversión"
       },
       "2": {
@@ -136,20 +137,20 @@
   "pricing": {
     "label": "Precios",
     "title": "Un precio simple, sin sorpresas",
-    "sub": "Todo lo que necesitas para no perder un lead más. Respuestas ilimitadas, sin costos ocultos.",
+    "sub": "Todo lo que necesitas para no perder ni un cliente más. Respuestas ilimitadas, sin costos ocultos.",
     "month": "mes",
     "popular": "Todo incluido",
     "tiers": {
       "0": {
         "badge": "Disponible ahora",
         "name": "Tourfy",
-        "desc": "Tu vendedor 24/7 en WhatsApp. Responde, califica leads y nunca duerme.",
+        "desc": "Tu vendedor 24/7 en WhatsApp. Responde, califica a los interesados y nunca duerme.",
         "cta": "Iniciar sesión",
         "f0": "Bot 24/7 con respuestas ilimitadas",
         "f1": "Catálogo de tours con importación automática (web o PDF)",
         "f2": "Chat en vivo con toma de control — agentes ilimitados",
-        "f3": "Calificación de leads y métricas de ROI",
-        "f4": "Tu número de WhatsApp, conectado en un click"
+        "f3": "Calificación de clientes potenciales y métricas de ROI",
+        "f4": "Tu número de WhatsApp, conectado en un clic"
       },
       "1": {
         "badge": "Próximamente",
@@ -157,10 +158,10 @@
         "desc": "Para operadoras que quieren que el bot además les cierre ventas.",
         "cta": "Próximamente",
         "f0": "Todo lo de Tourfy",
-        "f1": "Follow-ups automáticos a leads",
-        "f2": "Cobros y anticipos por link de pago en el chat",
+        "f1": "Seguimientos automáticos a interesados",
+        "f2": "Cobros y anticipos con enlace de pago en el chat",
         "f3": "Reportes avanzados y exportación",
-        "f4": "Onboarding hecho por nosotros + soporte prioritario"
+        "f4": "Configuración inicial hecha por nosotros + soporte prioritario"
       }
     }
   },
@@ -171,70 +172,93 @@
     "company": "Empresa",
     "legal": "Legal",
     "rights": "Tourfy Inc. Todos los derechos reservados.",
-    "status": "Todos los sistemas operativos"
+    "status": "Todos los sistemas funcionando",
+    "privacy": "Privacidad",
+    "dataDeletion": "Eliminación de datos"
   },
   "auth": {
     "panel": {
       "badge": "Hecho para LATAM",
-      "quote": "“El 60% de las consultas de viajeros llegan fuera de horario. Tu bot las responde todas — tú solo cierras la venta.”",
+      "quote": "“El 60% de las consultas de viajeros llegan fuera de horario. Tu bot las responde todas; tú solo cierras la venta.”",
       "quoteName": "Tourfy",
       "quoteRole": "Tu vendedor 24/7 en WhatsApp",
-      "statMoreLeads": "más leads",
-      "statReplyTime": "tiempo respuesta",
+      "statMoreLeads": "más interesados",
+      "statReplyTime": "tiempo de respuesta",
       "statAvailability": "disponibilidad"
     },
     "login": {
-      "title": "Bienvenido de vuelta",
-      "sub": "Ingresa a tu dashboard de Tourfy",
-      "email": "Email",
+      "title": "Te damos la bienvenida",
+      "sub": "Entra a tu panel de Tourfy",
+      "email": "Correo electrónico",
       "emailPlaceholder": "tu@agencia.com",
       "password": "Contraseña",
       "passwordPlaceholder": "••••••••",
       "forgot": "¿Olvidaste tu contraseña?",
       "submit": "Iniciar sesión",
-      "noAccount": "Beta cerrada — el acceso es por invitación.",
+      "noAccount": "Beta cerrada: el acceso es solo por invitación.",
       "signUp": "Regístrate"
     },
     "register": {
       "title": "Crea tu cuenta",
-      "sub": "Crea tu cuenta — tu bot puede estar respondiendo hoy mismo.",
+      "sub": "Crea tu cuenta: tu bot puede estar respondiendo hoy mismo.",
       "name": "Nombre completo",
       "namePlaceholder": "María Rodríguez",
-      "email": "Email de trabajo",
+      "email": "Correo de trabajo",
       "emailPlaceholder": "tu@agencia.com",
       "company": "Nombre de la agencia",
       "companyPlaceholder": "Cusco Expeditions",
       "password": "Contraseña",
-      "passwordPlaceholder": "8+ caracteres",
+      "passwordPlaceholder": "Mínimo 8 caracteres",
       "passwordHint": "Mínimo 8 caracteres, con mayúscula, minúscula y número",
       "submit": "Crear cuenta",
       "terms": "Al registrarte aceptas nuestros",
       "termsLink": "Términos",
       "and": "y",
-      "privacyLink": "Política de Privacidad",
+      "privacyLink": "Política de privacidad",
       "hasAccount": "¿Ya tienes cuenta?",
       "logIn": "Iniciar sesión"
     },
     "forgot": {
       "back": "Volver al inicio de sesión",
       "title": "Recupera tu contraseña",
-      "sub": "Ingresa tu email y te enviaremos un link para restablecerla.",
-      "email": "Email",
+      "sub": "Escribe tu correo y te enviaremos un enlace para restablecerla.",
+      "email": "Correo electrónico",
       "emailPlaceholder": "tu@agencia.com",
-      "submit": "Enviar link",
-      "sentTitle": "Revisa tu email",
-      "sentSub": "Te enviamos un link para restablecer tu contraseña. Puede tardar un minuto — revisa también la carpeta de spam.",
-      "resend": "¿No llega? Reenviar",
-      "tooMany": "Demasiados intentos. Prueba de nuevo en {minutes} min."
+      "submit": "Enviar enlace",
+      "sentTitle": "Revisa tu correo",
+      "sentSub": "Te enviamos un enlace para restablecer tu contraseña. Puede tardar un minuto; revisa también la carpeta de spam.",
+      "resend": "¿No te llegó? Reenviar",
+      "tooMany": "Demasiados intentos. Inténtalo de nuevo en {minutes} min."
     },
     "setPassword": {
       "title": "Crea tu contraseña",
-      "sub": "La vas a usar para entrar a Tourfy de ahora en adelante.",
+      "sub": "La usarás para entrar a Tourfy de ahora en adelante.",
       "password": "Contraseña",
       "confirm": "Repite la contraseña",
       "rules": "Mínimo 8 caracteres, con una mayúscula, una minúscula y un número.",
       "toggle": "Mostrar contraseña",
       "submit": "Guardar y entrar"
+    },
+    "confirmed": {
+      "title": "Correo verificado",
+      "sub1": "Tu cuenta quedó confirmada.",
+      "sub2": "Ya puedes iniciar sesión y empezar a configurar tu agencia.",
+      "cta": "Iniciar sesión"
+    },
+    "errors": {
+      "invalidEmail": "El correo no es válido.",
+      "passwordRequired": "Ingresa tu contraseña.",
+      "fullNameRequired": "Ingresa tu nombre completo.",
+      "invalidInput": "Algunos datos no son válidos. Revísalos e intenta de nuevo.",
+      "passwordRules": "La contraseña debe tener mínimo 8 caracteres, con una mayúscula, una minúscula y un número.",
+      "passwordMismatch": "Las contraseñas no coinciden.",
+      "samePassword": "La nueva contraseña debe ser distinta de la anterior.",
+      "passwordSaveFailed": "No pudimos guardar tu contraseña. Intenta de nuevo.",
+      "tooMany": "Demasiados intentos. Prueba de nuevo en {minutes} min.",
+      "invalidCredentials": "Correo o contraseña incorrectos.",
+      "signupFailed": "No pudimos crear tu cuenta. Intenta de nuevo.",
+      "linkExpired": "Tu enlace venció o ya se usó. Pide uno nuevo.",
+      "callbackFailed": "No pudimos iniciar tu sesión. Intenta de nuevo."
     }
   },
   "onboarding": {
@@ -252,7 +276,7 @@
       "agency": {
         "number": "01",
         "title": "Cuéntanos sobre tu agencia",
-        "description": "Esto nos ayuda a personalizar tu bot y dashboard para tu región e idioma.",
+        "description": "Esto nos ayuda a adaptar tu bot y tu panel a tu región e idioma.",
         "name": "Nombre de la agencia",
         "namePlaceholder": "Cusco Expeditions",
         "country": "País",
@@ -271,24 +295,24 @@
         "disconnect": "Desconectar y usar otro número",
         "howItWorks": "Cómo funciona",
         "step1Title": "Inicia sesión con Facebook",
-        "step1Desc": "Usamos Embedded Signup oficial de Meta — tus credenciales las maneja Facebook directamente, nunca nosotros.",
+        "step1Desc": "Usamos el registro integrado oficial de Meta: tus credenciales las maneja Facebook directamente, nunca nosotros.",
         "step2Title": "Autoriza el acceso a WhatsApp",
-        "step2Desc": "Concede permiso a Tourfy para enviar y recibir mensajes en tu nombre mediante la API de Meta Cloud.",
+        "step2Desc": "Da permiso a Tourfy para enviar y recibir mensajes en tu nombre a través de la API de WhatsApp de Meta.",
         "step3Title": "Verifica tu número",
         "step3Desc": "Meta envía un código a tu teléfono para confirmar la propiedad. Una vez verificado, tu bot empieza a funcionar al instante.",
         "trustEncrypted": "Cifrado de extremo a extremo",
-        "trustPartner": "Partner oficial de Meta",
+        "trustPartner": "Socio oficial de Meta",
         "trustNoFees": "Sin cargos extra"
       },
       "tours": {
         "number": "03",
-        "title": "Agrega tus tours y FAQs",
+        "title": "Agrega tus tours y preguntas frecuentes",
         "description": "Esto es lo que tu bot usará para responder preguntas. Siempre podrás editarlo después.",
         "toursTitle": "Tours",
         "addTour": "Agregar tour",
         "tourLabel": "Tour",
         "tourNameLabel": "Nombre del tour",
-        "tourNamePlaceholder": "Nombre del tour (ej. Machu Picchu Full Day)",
+        "tourNamePlaceholder": "Nombre del tour (ej. Machu Picchu día completo)",
         "pricesLabel": "Precios",
         "addPrice": "Agregar precio",
         "priceLabelPlaceholder": "Etiqueta (ej. Local)",
@@ -299,7 +323,7 @@
         "faqQuestionLabel": "Pregunta",
         "faqAnswerLabel": "Respuesta",
         "reviewFlag": "Revisar",
-        "missingFlag": "Falta completar — no se va a guardar así",
+        "missingFlag": "Falta completar: así no se guardará",
         "cancelLabel": "Cancelar",
         "deleteLabel": "Eliminar",
         "confirmDeleteTourTitle": "Eliminar tour",
@@ -309,64 +333,91 @@
         "confirmDeleteFaqTitle": "Eliminar pregunta frecuente",
         "confirmDeleteFaq": "¿Eliminar esta pregunta frecuente? Esta acción no se puede deshacer.",
         "faqsTitle": "Preguntas frecuentes",
-        "addFaq": "Agregar FAQ",
-        "faqLabel": "FAQ",
-        "faqQuestionPlaceholder": "Pregunta que hacen los clientes (ej. ¿Ofrecen recogida del hotel?)",
-        "faqAnswerPlaceholder": "Tu respuesta...",
-        "tip": "No te preocupes por dejarlo perfecto — puedes editar tours y FAQs en cualquier momento desde tu dashboard.",
+        "addFaq": "Agregar pregunta",
+        "faqLabel": "Pregunta frecuente",
+        "faqQuestionPlaceholder": "Pregunta que hacen los clientes (ej. ¿Recogen en el hotel?)",
+        "faqAnswerPlaceholder": "Tu respuesta…",
+        "tip": "No te preocupes por dejarlo perfecto: puedes editar tus tours y preguntas frecuentes en cualquier momento desde tu panel.",
         "sourceWebTitle": "Importar desde mi sitio web",
-        "sourceWebDesc": "Pegá la URL de tu web y la leemos para sacar tus tours, precios y preguntas frecuentes. Vos solo revisás.",
+        "sourceWebDesc": "Pega la URL de tu sitio y lo leemos para sacar tus tours, precios y preguntas frecuentes. Tú solo revisas.",
         "urlPlaceholder": "https://tuagencia.com",
         "importCta": "Importar",
         "importing": "Leyendo tu sitio…",
         "sourcePdfTitle": "Subir mi tarifario (PDF o foto)",
-        "sourcePdfDesc": "Subí el archivo que ya usás y extraemos los precios tal cual.",
+        "sourcePdfDesc": "Sube el archivo que ya usas y extraemos los precios tal cual.",
         "uploadCta": "Subir archivo",
         "uploading": "Leyendo tu tarifario…",
-        "uploadHint": "Aceptamos PDF y fotos (JPG, PNG, WEBP). Podés subir varias páginas a la vez.",
+        "uploadHint": "Aceptamos PDF y fotos (JPG, PNG, WEBP). Puedes subir varias páginas a la vez.",
         "uploadingHint": "Leyendo tu tarifario y armando tu catálogo… esto tarda un momento, no recargues la página.",
-        "uploadEmpty": "No pudimos leer tours en ese archivo. Probá con una foto más nítida o subí el PDF.",
-        "uploadError": "No pudimos procesar ese archivo. Intentá de nuevo.",
-        "uploadTooLarge": "Archivo no soportado o muy grande (máx. 8 archivos, 10MB c/u; PDF/JPG/PNG/WEBP).",
+        "uploadEmpty": "No pudimos leer tours en ese archivo. Prueba con una foto más nítida o sube el PDF.",
+        "uploadError": "No pudimos procesar ese archivo. Inténtalo de nuevo.",
+        "uploadTooLarge": "Archivo no compatible o demasiado grande (máx. 8 archivos de 10 MB c/u; PDF, JPG, PNG o WEBP).",
         "sourceManual": "Agregar manualmente",
-        "sourceManualDesc": "Cargá tus tours y FAQs a mano, uno por uno.",
+        "sourceManualDesc": "Carga tus tours y preguntas frecuentes a mano, uno por uno.",
         "changeSource": "Cambiar fuente",
         "businessTitle": "Información del negocio",
         "addBusiness": "Agregar sección",
         "businessTitlePlaceholder": "Título (ej. Políticas de cancelación)",
-        "businessContentPlaceholder": "Contenido — ej. Reembolso total hasta 48h antes · pagos por Yape/Visa · recojo en el centro…",
-        "importDone": "Encontramos {tours} tours, {sections} secciones del negocio y {faqs} preguntas. Revisalos.",
-        "importEmpty": "No encontramos tours en ese sitio. Probá con otra página o agregalos a mano.",
-        "importThin": "Esa página casi no tiene texto que podamos leer. Probá con otra URL o subí tu tarifario.",
-        "importError": "No pudimos importar desde esa URL. Revisá la dirección e intentá de nuevo.",
-        "importHint": "Leemos varias páginas de tu sitio para armar tu catálogo — puede tardar hasta ~30s. No recargues la página al importar.",
+        "businessContentPlaceholder": "Contenido. Ej.: reembolso total hasta 48 h antes · pagos con tarjeta o transferencia · recogida en el centro…",
+        "importDone": "Encontramos {tours} tours, {sections} secciones del negocio y {faqs} preguntas. Revísalos.",
+        "importEmpty": "No encontramos tours en ese sitio. Prueba con otra página o agrégalos a mano.",
+        "importThin": "Esa página casi no tiene texto que podamos leer. Prueba con otra URL o sube tu tarifario.",
+        "importError": "No pudimos importar desde esa URL. Revisa la dirección e inténtalo de nuevo.",
+        "importHint": "Leemos varias páginas de tu sitio para armar tu catálogo; puede tardar hasta ~30 s. No recargues la página mientras importamos.",
         "importingHint": "Leyendo tu sitio y armando tu catálogo… esto tarda un momento, no recargues la página.",
-        "editLaterHint": "Todo lo que importes se puede editar y agregar después — esto es solo para arrancar rápido.",
-        "toursEmpty": "Todavía no hay tours. Agregá uno o importá desde tu web.",
-        "businessEmpty": "Todavía no hay info del negocio. Agregá una sección (sobre nosotros, pagos, contacto…).",
-        "faqsEmpty": "Todavía no hay preguntas frecuentes. Agregá una."
+        "editLaterHint": "Todo lo que importes se puede editar y ampliar después; esto es solo para empezar rápido.",
+        "toursEmpty": "Todavía no hay tours. Agrega uno o importa desde tu sitio web.",
+        "businessEmpty": "Todavía no hay información del negocio. Agrega una sección (sobre nosotros, pagos, contacto…).",
+        "faqsEmpty": "Todavía no hay preguntas frecuentes. Agrega una.",
+        "removePriceLabel": "Quitar precio"
       }
     },
-    "saving": "Guardando...",
-    "launching": "Lanzando...",
+    "saving": "Guardando…",
+    "launching": "Lanzando…",
     "validation": {
       "0": "Completa el nombre de tu agencia y el país para continuar",
       "1": "Conecta tu número de WhatsApp para continuar",
       "2": "Agrega al menos un tour con nombre para continuar"
+    },
+    "errors": {
+      "agencyNameRequired": "Ingresa el nombre de tu agencia para continuar.",
+      "createOrgFailed": "No pudimos crear tu agencia. Intenta de nuevo.",
+      "slugUnavailable": "Ya existe una agencia con un nombre muy parecido. Prueba con otro nombre.",
+      "finishFailed": "No pudimos terminar la configuración. Intenta de nuevo.",
+      "generic": "Algo salió mal. Intenta de nuevo."
+    },
+    "countries": {
+      "mx": "México",
+      "co": "Colombia",
+      "pe": "Perú",
+      "ar": "Argentina",
+      "cl": "Chile",
+      "br": "Brasil",
+      "cr": "Costa Rica",
+      "ec": "Ecuador",
+      "gt": "Guatemala",
+      "pa": "Panamá",
+      "do": "República Dominicana",
+      "uy": "Uruguay",
+      "bo": "Bolivia",
+      "hn": "Honduras",
+      "other": "Otro"
     }
   },
   "dashboard": {
     "sidebar": {
       "conversations": "Conversaciones",
-      "tours": "Tours y FAQs",
+      "tours": "Tours y preguntas",
       "metrics": "Métricas",
       "templates": "Plantillas",
       "agents": "Agentes",
-      "settings": "Configuración"
+      "settings": "Configuración",
+      "expand": "Expandir menú",
+      "collapse": "Contraer menú"
     },
     "tours": {
       "title": "Lo que sabe tu bot",
-      "subtitle": "Tus tours, la info de tu agencia y las preguntas frecuentes. El bot responde con esto. Los cambios se guardan solos.",
+      "subtitle": "Tus tours, la información de tu agencia y las preguntas frecuentes. El bot responde con esto. Los cambios se guardan solos.",
       "tabTours": "Tours",
       "tabBusiness": "Tu agencia",
       "tabFaqs": "Preguntas frecuentes",
@@ -382,11 +433,11 @@
       "colTour": "Tour",
       "colType": "Tipo",
       "colPrice": "Precio",
-      "emptyTours": "Todavía no hay tours. Agregá el primero.",
+      "emptyTours": "Todavía no hay tours. Agrega el primero.",
       "noMatch": "Ningún tour coincide con la búsqueda.",
       "untitled": "Tour sin nombre",
       "review": "Revisar",
-      "listHint": "Tocá un tour para editarlo. Los marcados \"Revisar\" los leímos de tu web o tarifario con poca seguridad.",
+      "listHint": "Toca un tour para editarlo. Los marcados con \"Revisar\" los leímos de tu sitio o tarifario con poca certeza.",
       "editTour": "Editar tour",
       "tourName": "Nombre del tour",
       "tourNamePlaceholder": "Nombre del tour",
@@ -398,9 +449,9 @@
       "amount": "Monto",
       "currency": "Moneda",
       "removePrice": "Quitar precio",
-      "pricesHint": "Podés poner varios precios. El bot elige el precio según lo que pregunte el cliente.",
+      "pricesHint": "Puedes poner varios precios. El bot elige el que corresponde según lo que pregunte el cliente.",
       "details": "Qué incluye y detalles",
-      "detailsHint": "Duración, hora de salida, qué incluye, qué llevar, condiciones. Escribilo como se lo contarías a un cliente.",
+      "detailsHint": "Duración, hora de salida, qué incluye, qué llevar, condiciones. Escríbelo como se lo contarías a un cliente.",
       "botView": "Así lo lee el bot",
       "deleteTour": "Eliminar tour",
       "sectionTitle": "Título de la sección",
@@ -411,7 +462,7 @@
       "addSection": "Agregar sección",
       "businessHint": "Políticas, formas de pago, horarios, ubicación: todo lo que no es de un tour en particular.",
       "emptyFaqs": "Todavía no hay preguntas frecuentes.",
-      "untitledFaq": "Pregunta sin escribir",
+      "untitledFaq": "Pregunta sin texto",
       "incomplete": "Incompleta",
       "faqQuestion": "Pregunta",
       "faqQuestionPlaceholder": "Ej. ¿Recogen en el hotel?",
@@ -421,26 +472,47 @@
       "addFaq": "Agregar pregunta",
       "faqHint": "Las incompletas no se guardan hasta que tengan pregunta y respuesta.",
       "importTitle": "Importar desde tu web",
-      "importSubtitle": "Pegá la URL de tu sitio y agregamos los tours y FAQs que encontremos.",
+      "importSubtitle": "Pega la URL de tu sitio y agregamos los tours y preguntas frecuentes que encontremos.",
       "urlPlaceholder": "https://tuagencia.com",
       "importCta": "Importar",
       "importing": "Leyendo tu sitio…",
-      "importDone": "Agregamos {tours} tours, {sections} secciones y {faqs} preguntas. Revisalos y guardá.",
-      "importEmpty": "No encontramos tours en ese sitio. Probá con otra página.",
-      "importThin": "Esa página casi no tiene texto que podamos leer. Probá con otra URL.",
-      "importError": "No pudimos importar desde esa URL. Revisá la dirección e intentá de nuevo.",
-      "importHint": "Leemos varias páginas de tu sitio — puede tardar hasta ~30s. No recargues la página al importar.",
+      "importDone": "Agregamos {tours} tours, {sections} secciones y {faqs} preguntas. Revísalos y guarda.",
+      "importEmpty": "No encontramos tours en ese sitio. Prueba con otra página.",
+      "importThin": "Esa página casi no tiene texto que podamos leer. Prueba con otra URL.",
+      "importError": "No pudimos importar desde esa URL. Revisa la dirección e inténtalo de nuevo.",
+      "importHint": "Leemos varias páginas de tu sitio; puede tardar hasta ~30 s. No recargues la página mientras importamos.",
       "importingHint": "Leyendo tu sitio y armando tu catálogo… esto tarda un momento, no recargues la página.",
       "loadError": "No pudimos cargar tus tours",
       "brainTag": "Base de conocimiento del bot",
-      "save": "Guardar cambios"
+      "save": "Guardar cambios",
+      "categoryPlaceholder": "Ej. Tour de un día",
+      "categories": {
+        "dayTour": "Tour de un día",
+        "trek": "Caminata",
+        "adventure": "Aventura",
+        "multiDay": "Varios días",
+        "transfer": "Traslado"
+      },
+      "presets": {
+        "adult": "Adulto",
+        "child": "Niño",
+        "group": "Grupo (4+)",
+        "private": "Privado",
+        "local": "Nacional",
+        "foreigner": "Extranjero"
+      }
     },
     "topbar": {
-      "search": "Buscar..."
+      "search": "Buscar…",
+      "account": "Cuenta",
+      "userFallback": "Usuario",
+      "language": "Idioma",
+      "signOut": "Cerrar sesión",
+      "signingOut": "Cerrando sesión…"
     },
     "conversations": {
       "title": "Conversaciones",
-      "searchPlaceholder": "Buscar conversaciones...",
+      "searchPlaceholder": "Buscar conversaciones…",
       "tabs": {
         "all": "Todas",
         "waiting": "Esperando agente",
@@ -451,7 +523,7 @@
       },
       "noResults": {
         "title": "No hay conversaciones",
-        "sub": "Prueba ajustar los filtros"
+        "sub": "Prueba a ajustar los filtros"
       },
       "empty": {
         "title": "Elige una conversación",
@@ -463,21 +535,31 @@
         "resolved": "Resuelta",
         "bot": "BOT",
         "you": "Tú"
+      },
+      "emptyInbox": {
+        "title": "Todavía no hay conversaciones",
+        "sub": "Cuando tus clientes le escriban a tu WhatsApp, aparecerán aquí."
+      },
+      "time": {
+        "now": "ahora",
+        "minutes": "hace {count} min",
+        "hours": "hace {count} h",
+        "days": "hace {count} d"
       }
     },
     "chat": {
-      "typePlaceholder": "Escribe un mensaje...",
-      "takeControlPlaceholder": "Toma el control para enviar un mensaje...",
+      "typePlaceholder": "Escribe un mensaje…",
+      "takeControlPlaceholder": "Toma el control para enviar un mensaje…",
       "send": "Enviar",
-      "takeControl": "Tomar control",
+      "takeControl": "Tomar el control",
       "returnToBot": "Devolver al bot",
-      "botBanner": "El bot está manejando esta conversación",
+      "botBanner": "El bot está atendiendo esta conversación",
       "agentBanner": "Estás atendiendo esta conversación. El bot está en pausa.",
       "roleClient": "Cliente",
       "roleBot": "Bot de Tourfy",
       "roleYou": "Tú",
       "otherAgentBanner": "{name} está atendiendo esta conversación",
-      "heldByOtherPlaceholder": "{name} está atendiendo. Toma la conversación para escribir...",
+      "heldByOtherPlaceholder": "{name} está atendiendo. Toma la conversación para escribir…",
       "takeOver": "Tomar conversación",
       "takeOverConfirm": "{name} está atendiendo esta conversación. ¿Quieres tomarla tú?",
       "takeOverYes": "Sí, tomarla",
@@ -496,7 +578,7 @@
       "windowClosedBody": "WhatsApp no permite responder con texto libre hasta que el cliente vuelva a escribir.",
       "windowClosedPlaceholder": "La ventana de 24 h se cerró: espera a que el cliente escriba",
       "windowClosing": "Quedan {left} para responder: después WhatsApp cierra la ventana de 24 h.",
-      "windowClosedToast": "Pasaron más de 24 h desde el último mensaje del cliente: WhatsApp no deja responder hasta que vuelva a escribir.",
+      "windowClosedToast": "Pasaron más de 24 h desde el último mensaje del cliente: WhatsApp no permite responder hasta que vuelva a escribir.",
       "windowClosedTemplateBody": "WhatsApp solo permite escribirle con una plantilla aprobada hasta que vuelva a escribir.",
       "sendTemplate": "Enviar plantilla",
       "templates": {
@@ -511,7 +593,23 @@
         "costNote": "Meta cobra cada plantilla enviada. Al enviarla tomas la conversación.",
         "send": "Enviar plantilla",
         "sent": "Plantilla enviada"
-      }
+      },
+      "imageAlt": "Imagen enviada por el cliente",
+      "failed": "No se envió",
+      "errors": {
+        "send": "No pudimos enviar el mensaje. Intenta de nuevo.",
+        "delete": "No pudimos eliminar la conversación.",
+        "update": "No pudimos actualizar la conversación.",
+        "load": "No pudimos cargar la conversación."
+      },
+      "deleteConfirm": "¿Eliminar esta conversación? Se ocultará de la bandeja. Si el cliente vuelve a escribir, reaparece.",
+      "deleted": "Conversación eliminada",
+      "moreOptions": "Más opciones",
+      "deleting": "Eliminando…",
+      "deleteConversation": "Eliminar conversación",
+      "noMessages": "Todavía no hay mensajes",
+      "notFound": "No encontramos esta conversación",
+      "timeLeft": "{h, plural, =0 {{m} min} other {# h {m} min}}"
     },
     "metrics": {
       "title": "Métricas",
@@ -522,7 +620,7 @@
         "thisMonth": "Este mes",
         "lastMonth": "Mes pasado"
       },
-      "change": "vs período anterior",
+      "change": "frente al período anterior",
       "noChange": "Sin datos del período anterior",
       "loadError": "No pudimos cargar las métricas. Intenta de nuevo en un momento.",
       "cards": {
@@ -535,7 +633,7 @@
         "botHandled": "Atendidas solo por el bot",
         "botHandledHint": "Conversaciones activas en las que ningún agente escribió ni tomó el control.",
         "totalConversations": "Total de conversaciones",
-        "qualifiedLeads": "Leads calificados",
+        "qualifiedLeads": "Clientes potenciales calificados",
         "conversionRate": "Tasa de conversión",
         "revenue": "Ingresos capturados",
         "botReplies": "Respuestas del bot",
@@ -576,16 +674,16 @@
           "sun": "Dom"
         }
       },
-      "empty": "Todavía no hay actividad en este período. Cuando tus clientes escriban al WhatsApp, vas a verla acá.",
+      "empty": "Todavía no hay actividad en este período. Cuando tus clientes escriban a tu WhatsApp, la verás aquí.",
       "usage": {
         "title": "Mensajes de WhatsApp este mes",
-        "sub": "Respuestas del bot y de agentes. Meta regala 1.000 por mes; desde la 1.001 cobra por mensaje a tu método de pago en Meta.",
+        "sub": "Respuestas del bot y de los agentes. Meta regala 1.000 al mes; a partir de la 1.001 cobra cada mensaje a tu método de pago en Meta.",
         "ofFree": "de {free} gratis",
-        "warn": "Estás cerca del límite gratis. Revisa que tengas un método de pago en Meta para que el bot no se detenga.",
-        "over": "Pasaste el límite gratis: Meta cobra {count} mensajes extra a tu método de pago. Sin tarjeta, el bot deja de responder.",
+        "warn": "Estás cerca del límite gratuito. Revisa que tengas un método de pago en Meta para que el bot no se detenga.",
+        "over": "Superaste el límite gratuito: Meta cobra {count} mensajes extra a tu método de pago. Sin tarjeta, el bot deja de responder.",
         "checkPayment": "Revisar método de pago",
         "note": "Estimado. Se reinicia el 1 de cada mes, según la zona horaria de tu agencia.",
-        "history": "Últimos 6 meses (en rojo, los que pasaron las 1.000 gratis)"
+        "history": "Últimos 6 meses (en rojo, los que superaron los 1.000 gratis)"
       },
       "periodLabel": "Período",
       "periodGroups": {
@@ -602,7 +700,8 @@
         "teamPickupSeconds": "Tiempo de respuesta del equipo (segundos, mediana)",
         "afterHoursConversations": "Conversaciones fuera de horario",
         "date": "Fecha",
-        "conversations": "Conversaciones activas"
+        "conversations": "Conversaciones activas",
+        "filename": "tourfy-metricas"
       }
     },
     "settings": {
@@ -614,38 +713,96 @@
       },
       "hours": {
         "title": "Horario de atención",
-        "sub": "Los mensajes fuera de estas horas se marcan como after-hours en tus métricas.",
+        "sub": "Los mensajes fuera de este horario se marcan como \"fuera de horario\" en tus métricas.",
         "opens": "Abre a las",
-        "closes": "Cierra a las"
+        "closes": "Cierra a las",
+        "weekdays": "Lunes a viernes",
+        "weekend": "Fin de semana (sáb–dom)",
+        "closedWeekends": "Cerrado los fines de semana"
       },
       "bot": {
         "title": "Personalidad del bot",
-        "sub": "Este prompt define cómo responde tu bot a los clientes.",
+        "sub": "Estas instrucciones definen cómo responde tu bot a los clientes.",
         "tone": "Tono",
         "formal": "Formal",
         "friendly": "Amigable",
         "casual": "Casual",
-        "prompt": "Prompt del sistema"
+        "prompt": "Instrucciones del bot"
       },
       "whatsapp": {
         "title": "Conexión de WhatsApp",
         "connected": "Conectado",
-        "disconnect": "Desconectar"
+        "disconnect": "Desconectar",
+        "errors": {
+          "missingFields": "Completa el WABA ID, el Phone Number ID y el token de acceso",
+          "connect": "No pudimos conectar el número. Revisa los datos e intenta de nuevo.",
+          "disconnect": "No pudimos desconectar el número."
+        },
+        "connectedToast": "WhatsApp conectado",
+        "disconnectConfirm": "¿Desconectar este número de WhatsApp? Dejarás de recibir los mensajes entrantes.",
+        "disconnectedToast": "WhatsApp desconectado",
+        "loading": "Cargando…",
+        "connectedNumber": "Número conectado",
+        "disconnecting": "Desconectando…",
+        "connectTitle": "Conectar WhatsApp",
+        "connectSub": "Conecta tu número con un clic: inicia sesión con Facebook y elige tu número de WhatsApp Business.",
+        "manualTitle": "Conectar manualmente (avanzado)",
+        "manualSub": "Copia estos datos desde la consola de desarrolladores de Meta → WhatsApp → Configuración de la API.",
+        "wabaId": "ID de la cuenta de WhatsApp Business (WABA ID)",
+        "phoneNumberId": "ID del número de teléfono (Phone Number ID)",
+        "accessToken": "Token de acceso",
+        "accessTokenHint": "Solo se usa para verificar la conexión: nunca se guarda. Los mensajes se envían con el token central de Tourfy.",
+        "displayPhone": "Número visible",
+        "optional": "opcional",
+        "connecting": "Conectando…"
       },
-      "save": "Guardar cambios"
+      "save": "Guardar cambios",
+      "errors": {
+        "load": "No pudimos cargar la configuración. Recarga la página.",
+        "save": "No pudimos guardar los cambios. Intenta de nuevo.",
+        "nameRequired": "El nombre de la agencia es obligatorio"
+      },
+      "saved": "Configuración guardada",
+      "saving": "Guardando…",
+      "timezones": {
+        "America_Mexico_City": "México (Ciudad de México)",
+        "America_Cancun": "México (Cancún)",
+        "America_Guatemala": "Guatemala",
+        "America_El_Salvador": "El Salvador",
+        "America_Tegucigalpa": "Honduras",
+        "America_Managua": "Nicaragua",
+        "America_Costa_Rica": "Costa Rica",
+        "America_Panama": "Panamá",
+        "America_Havana": "Cuba",
+        "America_Santo_Domingo": "República Dominicana",
+        "America_Puerto_Rico": "Puerto Rico",
+        "America_Bogota": "Colombia",
+        "America_Guayaquil": "Ecuador",
+        "America_Lima": "Perú",
+        "America_Caracas": "Venezuela",
+        "America_La_Paz": "Bolivia",
+        "America_Santiago": "Chile",
+        "America_Asuncion": "Paraguay",
+        "America_Argentina_Buenos_Aires": "Argentina",
+        "America_Montevideo": "Uruguay",
+        "America_Sao_Paulo": "Brasil (São Paulo)",
+        "America_New_York": "EE. UU. (Este)",
+        "America_Los_Angeles": "EE. UU. (Pacífico)",
+        "Europe_Madrid": "España"
+      }
     },
     "agents": {
       "title": "Agentes",
       "invite": "Invitar agente",
       "inviteTitle": "Invitar a un nuevo miembro",
-      "email": "Email",
+      "email": "Correo electrónico",
       "emailPlaceholder": "agente@tuempresa.com",
       "name": "Nombre (opcional)",
       "namePlaceholder": "Ana Martínez",
       "role": "Rol",
-      "admin": "admin",
+      "admin": "administrador",
       "agent": "agente",
-      "roleHelp": "Los agentes pueden ver y responder conversaciones. Los admins también pueden acceder a métricas, configuración y gestionar el equipo.",
+      "roleHelp": "Los agentes pueden ver y responder conversaciones. Los administradores además pueden ver métricas, cambiar la configuración y gestionar el equipo.",
       "cancel": "Cancelar",
       "send": "Enviar invitación",
       "teamTitle": "Miembros del equipo",
@@ -654,7 +811,7 @@
       "you": "TÚ",
       "pending": "INVITACIÓN PENDIENTE",
       "actions": "Acciones",
-      "makeAdmin": "Hacer admin",
+      "makeAdmin": "Hacer administrador",
       "makeAgent": "Cambiar a agente",
       "resend": "Reenviar invitación",
       "remove": "Quitar del equipo",
@@ -667,7 +824,7 @@
         "load": "No pudimos cargar el equipo. Recarga la página.",
         "invite": "No pudimos enviar la invitación. Intenta de nuevo.",
         "alreadyInTeam": "Esa persona ya está en tu equipo. Si no aceptó, reenvíale la invitación desde la lista.",
-        "emailTaken": "Ese email ya tiene una cuenta en Tourfy con otra agencia.",
+        "emailTaken": "Ese correo ya tiene una cuenta de Tourfy con otra agencia.",
         "role": "No pudimos cambiar el rol.",
         "resend": "No pudimos reenviar la invitación.",
         "remove": "No pudimos quitar a este miembro."
@@ -681,18 +838,18 @@
       "takenTitle": "{agent} tomó tu conversación",
       "takenBody": "Ahora atiende a {name}.",
       "bell": "Avisos",
-      "desktop": "Notificaciones del escritorio",
+      "desktop": "Notificaciones de escritorio",
       "desktopHint": "Te avisa aunque estés en otra pestaña o aplicación.",
       "sound": "Sonido",
       "denied": "Bloqueaste las notificaciones en este navegador. Actívalas desde el candado de la barra de direcciones.",
-      "unsupported": "Este navegador no soporta notificaciones del escritorio.",
+      "unsupported": "Este navegador no admite notificaciones de escritorio.",
       "events": "Te avisamos cuando el bot pide una persona, cuando un cliente te escribe en una conversación tuya y cuando otro agente toma una conversación que tenías."
     },
     "templates": {
       "title": "Plantillas de WhatsApp",
       "intro": "Las plantillas son mensajes aprobados por Meta que te permiten escribirle a un cliente después de las 24 horas desde su último mensaje. Meta revisa cada plantilla (puede tardar hasta 24 h) y cobra por cada envío.",
       "new": "Nueva plantilla",
-      "startersTitle": "Empezá con una de estas",
+      "startersTitle": "Empieza con una de estas",
       "useStarter": "Usar como base →",
       "loading": "Cargando plantillas…",
       "loadError": "No pudimos cargar las plantillas desde Meta. Recarga la página.",
@@ -744,14 +901,78 @@
         "addQuickReply": "Respuesta rápida",
         "urlText": "Texto del botón",
         "urlTextPlaceholder": "Ver tour",
-        "addUrl": "Botón con link",
+        "addUrl": "Botón con enlace",
         "remove": "Quitar",
         "optional": "opcional",
         "preview": "Vista previa",
         "reviewNote": "Al crearla se envía a revisión de Meta. Cuando la aprueben, tu equipo la puede usar en el chat.",
         "cancel": "Cancelar",
-        "submit": "Enviar a revisión"
+        "submit": "Enviar a revisión",
+        "suggestedVars": [
+          "nombre",
+          "tour",
+          "fecha",
+          "hora",
+          "precio"
+        ]
+      },
+      "errors": {
+        "create": "No pudimos crear la plantilla. Intenta de nuevo.",
+        "metaRejected": "Meta no aceptó la plantilla: {reason}",
+        "delete": "No pudimos eliminar la plantilla."
+      },
+      "starters": {
+        "reminder": {
+          "title": "Recordatorio de tour",
+          "header": "Recordatorio de tu tour",
+          "body": "Hola {{nombre}}, te recordamos tu tour {{tour}} el {{fecha}}. Si tienes alguna pregunta, responde este mensaje.",
+          "quickReplies": [
+            "Confirmar",
+            "Tengo una pregunta"
+          ],
+          "examples": {
+            "nombre": "Ana",
+            "tour": "Isletas de Granada",
+            "fecha": "15 de diciembre"
+          }
+        },
+        "followup": {
+          "title": "Retomar consulta",
+          "body": "Hola {{nombre}}, te escribimos para continuar con tu consulta sobre el tour {{tour}}. ¿Seguimos con tu reserva?",
+          "quickReplies": [
+            "Sí, sigamos",
+            "Más tarde"
+          ],
+          "examples": {
+            "nombre": "Ana",
+            "tour": "Volcán Masaya"
+          }
+        },
+        "promo": {
+          "title": "Seguimiento de cotización",
+          "body": "Hola {{nombre}}, ¿pudiste revisar la información del tour {{tour}}? Si quieres, te ayudo a reservar tu fecha.",
+          "quickReplies": [
+            "Quiero reservar",
+            "Más información"
+          ],
+          "examples": {
+            "nombre": "Ana",
+            "tour": "Volcán Masaya"
+          }
+        }
       }
+    },
+    "connectWhatsApp": {
+      "notConfigured": "La conexión con WhatsApp todavía no está configurada.",
+      "cancelled": "Conexión cancelada.",
+      "metaError": "No se pudo completar la conexión con Meta. Intenta de nuevo o usa la conexión manual.",
+      "connectError": "No se pudo conectar WhatsApp. Intenta de nuevo o usa la conexión manual.",
+      "connected": "WhatsApp conectado: {phone}",
+      "connecting": "Conectando…",
+      "cta": "Conectar con Facebook",
+      "popupOpen": "Se abrió una ventana de Facebook. Si no la ves, permite las ventanas emergentes para este sitio y vuelve a intentarlo.",
+      "popupHint": "Se abrirá una ventana de Facebook. Si tu navegador bloquea las ventanas emergentes, permítelas para este sitio.",
+      "connectErrorWithReason": "No se pudo conectar WhatsApp: {reason}. Si sigue fallando, usa la conexión manual."
     }
   },
   "blog": {
@@ -762,5 +983,86 @@
     "sub": "Automatización de WhatsApp, CRM y gestión de reservas — sin humo, para operadores de LATAM.",
     "readMore": "Leer más",
     "back": "Blog"
+  },
+  "localeToggle": {
+    "switchTo": "Cambiar a {lang}",
+    "names": {
+      "es": "español",
+      "en": "inglés"
+    }
+  },
+  "meta": {
+    "title": "Tourfy — IA de WhatsApp para agencias de turismo",
+    "description": "Tus tours se venden solos a las 2 a. m. Bots de WhatsApp que responden, califican y reservan, entrenados con tus tours, tus precios y tu estilo."
+  },
+  "apiErrors": {
+    "unauthorized": "Tu sesión expiró. Vuelve a iniciar sesión.",
+    "forbidden": "No tienes permiso para hacer esto.",
+    "adminOnly": "Solo un administrador puede hacer esto.",
+    "invalidInput": "Algunos datos no son válidos. Revísalos e intenta de nuevo.",
+    "serverMisconfigured": "El servidor no está bien configurado. Contacta a soporte.",
+    "noOrganization": "Tu cuenta todavía no tiene una agencia.",
+    "orgNotFound": "No encontramos tu agencia.",
+    "orgUpdateFailed": "No pudimos guardar los cambios. Intenta de nuevo.",
+    "invalidTime": "Formato de hora inválido (HH:MM).",
+    "startBeforeEnd": "La hora de apertura debe ser anterior a la de cierre.",
+    "noFieldsToUpdate": "No hay cambios para guardar.",
+    "teamLoadFailed": "No pudimos cargar tu equipo. Intenta de nuevo.",
+    "inviteInvalidFields": "Revisa el correo y el nombre: algún dato no es válido.",
+    "emailTaken": "Ese correo ya está registrado en Tourfy.",
+    "alreadyInTeam": "Esa persona ya es parte de tu equipo.",
+    "inviteFailed": "No pudimos enviar la invitación. Intenta de nuevo.",
+    "cannotChangeOwnAccess": "No puedes cambiar tu propio acceso.",
+    "agentNotFound": "No encontramos a ese miembro del equipo.",
+    "roleUpdateFailed": "No pudimos cambiar el rol. Intenta de nuevo.",
+    "agentRemoveFailed": "No pudimos quitar a este miembro del equipo. Intenta de nuevo.",
+    "invitationAlreadyAccepted": "Esta persona ya aceptó la invitación.",
+    "resendFailed": "No pudimos reenviar la invitación. Intenta de nuevo.",
+    "conversationNotFound": "No encontramos esta conversación.",
+    "conversationUpdateFailed": "No pudimos actualizar la conversación. Intenta de nuevo.",
+    "notAssigneeReturn": "Solo el agente asignado o un administrador puede devolver esta conversación al bot.",
+    "takenByOther": "Otro agente está atendiendo esta conversación.",
+    "deleteAdminOnly": "Solo los administradores pueden eliminar conversaciones.",
+    "conversationDeleteFailed": "No pudimos eliminar la conversación. Intenta de nuevo.",
+    "takeControlFirst": "Toma el control de la conversación antes de enviar un mensaje.",
+    "windowClosed": "Pasaron más de 24 horas desde el último mensaje del cliente. Para retomar la conversación, envía una plantilla.",
+    "contactPhoneMissing": "Este contacto no tiene número de teléfono.",
+    "whatsappNotConnected": "Tu número de WhatsApp no está conectado.",
+    "messagingTokenMissing": "El envío de mensajes por WhatsApp no está configurado. Contacta a soporte.",
+    "sendFailed": "No pudimos enviar el mensaje por WhatsApp. Intenta de nuevo.",
+    "messageNotSaved": "El mensaje se envió, pero no pudimos guardarlo en el historial.",
+    "templatesLoadFailed": "No pudimos cargar las plantillas. Intenta de nuevo.",
+    "templateNotApproved": "Esta plantilla todavía no está aprobada por Meta.",
+    "templateMissingVariables": "Completa todas las variables de la plantilla.",
+    "templateSendFailed": "No pudimos enviar la plantilla. Intenta de nuevo.",
+    "templateSendFailedReason": "No pudimos enviar la plantilla. Respuesta de Meta: {reason}",
+    "templateNotSaved": "La plantilla se envió, pero no pudimos guardarla en el historial.",
+    "templateNameFormat": "El nombre solo puede tener minúsculas, números y guiones bajos.",
+    "templateVariableExample": "Cada variable necesita un ejemplo.",
+    "templateRejected": "Meta rechazó la plantilla: {reason}",
+    "templateCreateFailed": "No pudimos crear la plantilla. Intenta de nuevo.",
+    "invalidTemplateName": "El nombre de la plantilla no es válido.",
+    "templateDeleteFailed": "No pudimos eliminar la plantilla. Intenta de nuevo.",
+    "templateDeleteFailedReason": "No pudimos eliminar la plantilla. Respuesta de Meta: {reason}",
+    "importInvalidUrl": "Ingresa una URL válida.",
+    "importUrlFailed": "No pudimos importar desde esa URL.",
+    "importReadFilesFailed": "No pudimos leer los archivos.",
+    "importNoFiles": "No subiste ningún archivo.",
+    "importTooManyFiles": "Puedes subir máximo {max} archivos a la vez.",
+    "importUnsupportedType": "Tipo de archivo no compatible (PDF, JPG, PNG o WEBP).",
+    "importFileTooLarge": "Cada archivo puede pesar máximo {mb} MB.",
+    "importTotalTooLarge": "Los archivos juntos superan los {mb} MB.",
+    "importFileFailed": "No pudimos procesar el archivo.",
+    "slugTaken": "Ese identificador de agencia ya está en uso.",
+    "orgCreateFailed": "No pudimos crear tu agencia. Intenta de nuevo.",
+    "onboardingFinishFailed": "No pudimos terminar la configuración. Intenta de nuevo.",
+    "whatsappTokenExchangeFailed": "Meta no confirmó la conexión. Intenta de nuevo.",
+    "whatsappSubscribeFailed": "No pudimos vincular Tourfy con tu cuenta de WhatsApp Business.",
+    "whatsappNumberInUse": "Este número de WhatsApp ya está conectado a otra cuenta. Desconéctalo primero o contacta a soporte.",
+    "whatsappConnectFailed": "No pudimos conectar tu número de WhatsApp. Intenta de nuevo.",
+    "whatsappManualMissingFields": "Completa todos los campos para conectar el número.",
+    "whatsappManualTokenInvalid": "Meta no validó los datos. Revisa el identificador del número de teléfono y el token de acceso.",
+    "whatsappManualSubscribeFailed": "No pudimos vincular Tourfy con tu cuenta de WhatsApp Business. Revisa el identificador de la cuenta y los permisos del token de acceso.",
+    "whatsappDisconnectFailed": "No pudimos desconectar el número. Intenta de nuevo."
   }
 }

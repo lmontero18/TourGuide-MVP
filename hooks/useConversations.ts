@@ -10,8 +10,7 @@ export interface ConversationListItem {
   contactName: string | null
   contactPhone: string
   lastMessage: string
-  lastMessageAt: string
-  // ISO crudo para ordenar y recalcular el "hace X" al parchear en vivo.
+  // ISO crudo para ordenar; el "hace X" lo formatea ConversationItem segun el idioma.
   lastMessageIso: string | null
   status: ConversationStatus
   botActive: boolean
@@ -47,27 +46,12 @@ const LIST_SELECT = `id, status, bot_active, last_message_at,
   ${ASSIGNED_AGENT_EMBED},
   messages(content, created_at)`
 
-function formatRelative(iso: string | null): string {
-  if (!iso) return ''
-  const diff = Date.now() - new Date(iso).getTime()
-  const sec = Math.floor(diff / 1000)
-  if (sec < 60) return 'now'
-  const min = Math.floor(sec / 60)
-  if (min < 60) return `${min}m ago`
-  const hr = Math.floor(min / 60)
-  if (hr < 24) return `${hr}h ago`
-  const day = Math.floor(hr / 24)
-  if (day < 7) return `${day}d ago`
-  return new Date(iso).toLocaleDateString()
-}
-
 function toItem(c: ConversationRow): ConversationListItem {
   return {
     id: c.id,
     contactName: c.contact?.name ?? null,
     contactPhone: c.contact?.phone ?? '',
     lastMessage: c.messages?.[0]?.content ?? '',
-    lastMessageAt: formatRelative(c.last_message_at),
     lastMessageIso: c.last_message_at,
     status: c.status,
     botActive: c.bot_active,
@@ -232,7 +216,6 @@ export function useConversations(
             status: row.status,
             botActive: row.bot_active,
             lastMessageIso: row.last_message_at,
-            lastMessageAt: formatRelative(row.last_message_at),
           }
           upsert(updated)
           if (becameHandoff) eventsRef.current.onHandoff?.(updated)
@@ -272,7 +255,6 @@ export function useConversations(
             ...current,
             lastMessage: msg.content,
             lastMessageIso: msg.created_at,
-            lastMessageAt: formatRelative(msg.created_at),
           }
           upsert(updated)
           if (msg.role === 'user') eventsRef.current.onCustomerMessage?.(updated, msg.content)

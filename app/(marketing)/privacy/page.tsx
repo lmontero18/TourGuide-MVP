@@ -9,10 +9,18 @@ const CONTACT_EMAIL = "naia@naiaautomate.com";
 const UPDATED_EN = "June 2, 2026";
 const UPDATED_ES = "2 de junio de 2026";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy — Tourfy",
-  description: "How Tourfy collects, uses and protects data.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const isEs = (await getLocale()) === "es";
+  return isEs
+    ? {
+        title: "Política de privacidad — Tourfy",
+        description: "Cómo Tourfy recopila, usa y protege los datos.",
+      }
+    : {
+        title: "Privacy Policy — Tourfy",
+        description: "How Tourfy collects, uses and protects data.",
+      };
+}
 
 const H1 = "font-display text-3xl sm:text-4xl font-bold tracking-tight text-navy-900";
 const H2 = "font-display text-xl font-bold text-navy-900 mt-10 mb-3";
@@ -135,7 +143,7 @@ function PrivacyEs() {
         {LEGAL_NAME} (&ldquo;Tourfy&rdquo;, &ldquo;nosotros&rdquo;) ofrece una plataforma
         multiempresa que permite a agencias de turismo operar bots de WhatsApp, gestionar
         conversaciones y medir resultados. Esta política explica qué datos recopilamos, cómo los
-        usamos y qué derechos tenés. Aplica a nuestro sitio web, panel y APIs.
+        usamos y qué derechos tienes. Aplica a nuestro sitio web, panel y APIs.
       </p>
 
       <h2 className={H2}>1. Quién es responsable</h2>
@@ -149,8 +157,8 @@ function PrivacyEs() {
       <ul className={UL}>
         <li><strong>Datos de cuenta:</strong> nombre, email, organización, rol.</li>
         <li><strong>Contenido del negocio:</strong> tours, precios, FAQs y configuración del bot que
-          cargás o importás (desde tu sitio web o tarifarios).</li>
-        <li><strong>Datos de WhatsApp:</strong> cuando conectás un número de WhatsApp Business,
+          cargas o importas (desde tu sitio web o tarifarios).</li>
+        <li><strong>Datos de WhatsApp:</strong> cuando conectas un número de WhatsApp Business,
           procesamos los mensajes, números de teléfono, nombres de perfil de WhatsApp y metadatos de
           los mensajes de las personas que escriben a ese número, para poder brindar la conversación
           y las funciones del bot.</li>
@@ -164,7 +172,7 @@ function PrivacyEs() {
       <ul className={UL}>
         <li>Para brindar el bot, el chat en vivo, el panel y las métricas.</li>
         <li>Para enviar y recibir mensajes de WhatsApp mediante la API de WhatsApp Cloud de Meta.</li>
-        <li>Para generar el conocimiento de tu bot a partir del contenido que importás.</li>
+        <li>Para generar el conocimiento de tu bot a partir del contenido que importas.</li>
         <li>Para asegurar, mantener, depurar y mejorar el servicio.</li>
         <li>Para cumplir obligaciones legales.</li>
       </ul>
@@ -174,7 +182,7 @@ function PrivacyEs() {
       <ul className={UL}>
         <li><strong>Meta Platforms</strong> — mensajería de WhatsApp Business / Cloud API.</li>
         <li><strong>Supabase</strong> — base de datos, autenticación y almacenamiento.</li>
-        <li><strong>OpenAI</strong> — extracción de tours/FAQs del contenido que importás.</li>
+        <li><strong>OpenAI</strong> — extracción de tours/FAQs del contenido que importas.</li>
         <li><strong>Vercel</strong> — hosting de la aplicación.</li>
         <li><strong>Stripe</strong> — facturación de suscripciones.</li>
       </ul>
@@ -183,15 +191,15 @@ function PrivacyEs() {
       <h2 className={H2}>5. Conservación de datos</h2>
       <p className={P}>
         Conservamos los datos mientras tu cuenta esté activa y lo necesario para brindar el servicio.
-        Cuando vos o tu agencia eliminan contenido, o cierran la cuenta, eliminamos o anonimizamos los
+        Cuando tú o tu agencia eliminan contenido, o cierran la cuenta, eliminamos o anonimizamos los
         datos asociados en un plazo razonable, salvo que debamos conservarlos por obligaciones legales.
       </p>
 
       <h2 className={H2}>6. Tus derechos y eliminación de datos</h2>
       <p className={P}>
-        Podés acceder, corregir o eliminar tus datos. Para solicitar la eliminación, seguí las
+        Puedes acceder, corregir o eliminar tus datos. Para solicitar la eliminación, seguí las
         instrucciones de nuestra página de{" "}
-        <a className={A} href="/data-deletion">Eliminación de datos</a>, o escribinos a{" "}
+        <a className={A} href="/data-deletion">Eliminación de datos</a>, o escríbenos a{" "}
         <a className={A} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
       </p>
 
@@ -204,7 +212,7 @@ function PrivacyEs() {
 
       <h2 className={H2}>8. Cambios</h2>
       <p className={P}>
-        Podemos actualizar esta política. Publicaremos la nueva versión acá y actualizaremos la fecha
+        Podemos actualizar esta política. Publicaremos la nueva versión aquí y actualizaremos la fecha
         de arriba.
       </p>
 

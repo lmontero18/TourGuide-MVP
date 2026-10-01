@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import ChatWindow from "@/components/chat/ChatWindow";
 import ChatSkeleton from "@/components/chat/ChatSkeleton";
@@ -19,6 +20,7 @@ interface ConversationDetail {
 
 export default function ConversationDetailPage() {
   const params = useParams();
+  const t = useTranslations("dashboard.chat");
   const id = params.id as string;
   const [conv, setConv] = useState<ConversationDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ export default function ConversationDetailPage() {
       if (cancelled) return;
 
       if (error) {
-        toast.error("Failed to load conversation");
+        toast.error(t("errors.load"));
         setConv(null);
         setLoading(false);
         return;
@@ -50,7 +52,7 @@ export default function ConversationDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, t]);
 
   // La lista y el TopBar viven en conversations/layout.tsx: aca solo el chat.
   // La pagina no se re-monta al cambiar de conversacion: mientras llega la
@@ -59,7 +61,7 @@ export default function ConversationDetailPage() {
   if (!conv) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-slate-400">
-        Conversation not found
+        {t("notFound")}
       </div>
     );
   }

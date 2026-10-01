@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 
@@ -24,5 +25,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=confirmation_failed`)
+  // /login muestra ?error= tal cual en un toast: va el texto ya traducido.
+  const t = await getTranslations('auth.errors')
+  return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(t('linkExpired'))}`)
 }

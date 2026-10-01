@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { createLogger } from '@/lib/logger'
@@ -21,7 +22,7 @@ export async function GET() {
 
   if (error) {
     log.error('failed to list agents', { error, org_id: ctx.orgId })
-    return NextResponse.json({ error: 'Failed to load team' }, { status: 500 })
+    return NextResponse.json({ error: (await getTranslations('apiErrors'))('teamLoadFailed') }, { status: 500 })
   }
 
   // Equipos chicos (decenas): un getUserById por miembro. listUsers pagina

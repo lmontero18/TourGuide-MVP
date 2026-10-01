@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { compilePrompt } from '@/lib/bot/compilePrompt'
@@ -64,11 +65,12 @@ const createSchema = z.object({
 
 // POST — create the org for the current user (idempotent: returns existing org if already assigned)
 export async function POST(request: NextRequest) {
+  const t = await getTranslations('apiErrors')
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
   const { data: profile } = await supabase
@@ -89,7 +91,7 @@ export async function POST(request: NextRequest) {
 
   const parsed = createSchema.safeParse(await request.json())
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 })
+    return NextResponse.json({ error: t('invalidInput') }, { status: 400 })
   }
 
   const { org_name, slug } = parsed.data
@@ -102,7 +104,7 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (existingOrg) {
-    return NextResponse.json({ error: 'Slug already taken' }, { status: 409 })
+    return NextResponse.json({ error: t('slugTaken') }, { status: 409 })
   }
 
   // Org is created without onboarded_at — the final Launch step sets it via PATCH
@@ -114,7 +116,7 @@ export async function POST(request: NextRequest) {
 
   if (orgError || !org) {
     console.error('Failed to create organization:', orgError)
-    return NextResponse.json({ error: 'Failed to create organization' }, { status: 500 })
+    return NextResponse.json({ error: t('orgCreateFailed') }, { status: 500 })
   }
 
   const { error: userError } = await serviceClient
@@ -124,7 +126,7 @@ export async function POST(request: NextRequest) {
 
   if (userError) {
     console.error('Failed to assign user to org:', userError)
-    return NextResponse.json({ error: 'Failed to assign user' }, { status: 500 })
+    return NextResponse.json({ error: t('orgCreateFailed') }, { status: 500 })
   }
 
   const { error: subError } = await serviceClient
@@ -141,11 +143,12 @@ export async function POST(request: NextRequest) {
 // PATCH — finalize onboarding: persist the wizard knowledge (tours, faqs, tone,
 // greeting), compile the bot prompt, and set onboarded_at.
 export async function PATCH(request: NextRequest) {
+  const t = await getTranslations('apiErrors')
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
   const { data: profile } = await supabase
@@ -155,15 +158,15 @@ export async function PATCH(request: NextRequest) {
     .single()
 
   if (!profile?.org_id) {
-    return NextResponse.json({ error: 'User has no organization' }, { status: 400 })
+    return NextResponse.json({ error: t('noOrganization') }, { status: 400 })
   }
   if (profile.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
+    return NextResponse.json({ error: t('adminOnly') }, { status: 403 })
   }
 
   const parsed = finishSchema.safeParse(await request.json().catch(() => ({})))
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 })
+    return NextResponse.json({ error: t('invalidInput') }, { status: 400 })
   }
 
   const serviceClient = await createServiceClient()
@@ -218,7 +221,7 @@ export async function PATCH(request: NextRequest) {
 
   if (error || !org) {
     console.error('Failed to finalize onboarding:', error)
-    return NextResponse.json({ error: 'Failed to finalize onboarding' }, { status: 500 })
+    return NextResponse.json({ error: t('onboardingFinishFailed') }, { status: 500 })
   }
 
   return NextResponse.json({ success: true, organization: org })

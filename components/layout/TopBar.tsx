@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { logout } from "@/app/(auth)/login/actions";
@@ -29,6 +29,8 @@ function getInitials(name: string | null, email: string | null): string {
 export default function TopBar({ title, children }: TopBarProps) {
   const { profile } = useAuth();
   const locale = useLocale() as Locale;
+  const t = useTranslations("dashboard.topbar");
+  const tAgents = useTranslations("dashboard.agents");
   const [menuOpen, setMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -46,7 +48,7 @@ export default function TopBar({ title, children }: TopBarProps) {
   }, [menuOpen]);
 
   const initials = getInitials(profile?.full_name ?? null, profile?.email ?? null);
-  const displayName = profile?.full_name ?? profile?.email ?? "User";
+  const displayName = profile?.full_name ?? profile?.email ?? t("userFallback");
 
   const handleLocaleChange = (next: Locale) => {
     if (next === locale) return;
@@ -64,7 +66,8 @@ export default function TopBar({ title, children }: TopBarProps) {
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            title="Account"
+            title={t("account")}
+            aria-label={t("account")}
             className="h-8 w-8 rounded-full bg-navy-900/10 flex items-center justify-center transition-colors hover:bg-navy-900/15"
           >
             <span className="text-xs font-bold text-navy-700">{initials}</span>
@@ -77,12 +80,14 @@ export default function TopBar({ title, children }: TopBarProps) {
                   <p className="text-[10px] text-slate-500 truncate mt-0.5">{profile.email}</p>
                 )}
                 {profile?.role && (
-                  <p className="text-[10px] text-slate-400 mt-0.5 capitalize">{profile.role}</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5 capitalize">
+                    {profile.role === "admin" ? tAgents("admin") : tAgents("agent")}
+                  </p>
                 )}
               </div>
               <div className="px-3 py-2 border-b border-slate-100">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                  Language
+                  {t("language")}
                 </p>
                 <div className="flex gap-1">
                   {LOCALES.map((l) => {
@@ -121,7 +126,7 @@ export default function TopBar({ title, children }: TopBarProps) {
                     <polyline points="16 17 21 12 16 7" />
                     <line x1="21" y1="12" x2="9" y2="12" />
                   </svg>
-                  {loggingOut ? "Signing out..." : "Sign out"}
+                  {loggingOut ? t("signingOut") : t("signOut")}
                 </button>
               </form>
             </div>

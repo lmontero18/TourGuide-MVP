@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { TIMEZONES, utcOffsetLabel } from "@/lib/timezones";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ import { DEFAULT_RANGE, normalizeBusinessHours } from "@/lib/bot/businessHours";
 import type { Organization } from "@/types";
 
 export default function SettingsPage() {
+  const t = useTranslations("dashboard.settings");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -26,7 +28,7 @@ export default function SettingsPage() {
       try {
         const res = await fetch("/api/organizations");
         const result = await res.json();
-        if (!res.ok) throw new Error(result.error ?? "Failed to load");
+        if (!res.ok) throw new Error(result.error ?? t("errors.load"));
         const org = result.organization as Organization;
         setOrgName(org.name);
         setTimezone(org.bot_config?.timezone ?? "America/Lima");
@@ -37,17 +39,23 @@ export default function SettingsPage() {
         setWeekendStart(hours.weekend?.start ?? DEFAULT_RANGE.start);
         setWeekendEnd(hours.weekend?.end ?? DEFAULT_RANGE.end);
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to load settings");
+        toast.error(err instanceof Error ? err.message : t("errors.load"));
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, []);
+  }, [t]);
+
+  // Nombre del pais/ciudad segun el idioma; zonas fuera de la lista muestran el id.
+  const tzLabel = (tz: { id: string; label: string }) => {
+    const key = `timezones.${tz.id.replaceAll("/", "_")}`;
+    return t.has(key) ? t(key) : tz.label;
+  };
 
   const handleSave = async () => {
     if (!orgName.trim()) {
-      toast.error("Agency name is required");
+      toast.error(t("errors.nameRequired"));
       return;
     }
     setSaving(true);
@@ -67,10 +75,10 @@ export default function SettingsPage() {
         }),
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error ?? "Failed to save");
-      toast.success("Settings saved");
+      if (!res.ok) throw new Error(result.error ?? t("errors.save"));
+      toast.success(t("saved"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to save");
+      toast.error(err instanceof Error ? err.message : t("errors.save"));
     } finally {
       setSaving(false);
     }
@@ -78,7 +86,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <TopBar title="Settings">
+      <TopBar title={t("title")}>
         <Link
           href="/settings/whatsapp"
           className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
@@ -97,10 +105,10 @@ export default function SettingsPage() {
           <div className="max-w-2xl space-y-6">
             {/* Organization */}
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h2 className="text-sm font-bold text-navy-900 mb-4">Organization</h2>
+              <h2 className="text-sm font-bold text-navy-900 mb-4">{t("org.title")}</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-medium text-navy-900 mb-1.5">Agency name</label>
+                  <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("org.name")}</label>
                   <input
                     type="text"
                     value={orgName}
@@ -111,7 +119,7 @@ export default function SettingsPage() {
 
                 <div>
                   <div>
-                    <label className="block text-xs font-medium text-navy-900 mb-1.5">Timezone</label>
+                    <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("org.timezone")}</label>
                     <select
                       value={timezone}
                       onChange={(e) => setTimezone(e.target.value)}
@@ -120,7 +128,7 @@ export default function SettingsPage() {
                       {/* Si la org tiene una zona fuera de la lista, se muestra igual */}
                       {(TIMEZONES.some((tz) => tz.id === timezone) ? TIMEZONES : [{ id: timezone, label: timezone }, ...TIMEZONES]).map((tz) => (
                         <option key={tz.id} value={tz.id}>
-                          {tz.label} ({utcOffsetLabel(tz.id)})
+                          {tzLabel(tz)} ({utcOffsetLabel(tz.id)})
                         </option>
                       ))}
                     </select>
@@ -131,15 +139,15 @@ export default function SettingsPage() {
 
             {/* Business hours */}
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h2 className="text-sm font-bold text-navy-900 mb-1">Business hours</h2>
-              <p className="text-xs text-slate-400 mb-4">Messages outside these hours are marked as after-hours in your metrics.</p>
+              <h2 className="text-sm font-bold text-navy-900 mb-1">{t("hours.title")}</h2>
+              <p className="text-xs text-slate-400 mb-4">{t("hours.sub")}</p>
 
               <div className="space-y-5">
                 <div>
-                  <p className="text-xs font-semibold text-navy-900 mb-2">Weekdays (Mon–Fri)</p>
+                  <p className="text-xs font-semibold text-navy-900 mb-2">{t("hours.weekdays")}</p>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-navy-900 mb-1.5">Opens at</label>
+                      <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("hours.opens")}</label>
                       <input
                         type="time"
                         value={weekdaysStart}
@@ -148,7 +156,7 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-navy-900 mb-1.5">Closes at</label>
+                      <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("hours.closes")}</label>
                       <input
                         type="time"
                         value={weekdaysEnd}
@@ -161,7 +169,7 @@ export default function SettingsPage() {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-semibold text-navy-900">Weekend (Sat–Sun)</p>
+                    <p className="text-xs font-semibold text-navy-900">{t("hours.weekend")}</p>
                     <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer">
                       <input
                         type="checkbox"
@@ -169,13 +177,13 @@ export default function SettingsPage() {
                         onChange={(e) => setWeekendClosed(e.target.checked)}
                         className="h-3.5 w-3.5 rounded border-slate-300"
                       />
-                      Closed on weekends
+                      {t("hours.closedWeekends")}
                     </label>
                   </div>
                   {!weekendClosed && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-navy-900 mb-1.5">Opens at</label>
+                        <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("hours.opens")}</label>
                         <input
                           type="time"
                           value={weekendStart}
@@ -184,7 +192,7 @@ export default function SettingsPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-navy-900 mb-1.5">Closes at</label>
+                        <label className="block text-xs font-medium text-navy-900 mb-1.5">{t("hours.closes")}</label>
                         <input
                           type="time"
                           value={weekendEnd}
@@ -205,7 +213,7 @@ export default function SettingsPage() {
                 disabled={saving}
                 className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
-                {saving ? "Saving..." : "Save changes"}
+                {saving ? t("saving") : t("save")}
               </button>
             </div>
           </div>

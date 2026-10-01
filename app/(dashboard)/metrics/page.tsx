@@ -85,7 +85,7 @@ export default function MetricsPage() {
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `tourfy-metricas-${period.replace("month:", "")}.csv`;
+    a.download = `${t("csv.filename")}-${period.replace("month:", "")}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
   }

@@ -74,7 +74,7 @@ export default function ConversationList({ activeId }: ConversationListProps) {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search conversations..."
+            placeholder={t("searchPlaceholder")}
             className="w-full h-9 rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm text-navy-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
           />
         </div>
@@ -117,8 +117,8 @@ export default function ConversationList({ activeId }: ConversationListProps) {
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-slate-500">No conversations yet</p>
-            <p className="text-xs text-slate-400 mt-0.5">When customers message your WhatsApp, they will show up here.</p>
+            <p className="text-sm font-medium text-slate-500">{t("emptyInbox.title")}</p>
+            <p className="text-xs text-slate-400 mt-0.5">{t("emptyInbox.sub")}</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -127,8 +127,8 @@ export default function ConversationList({ activeId }: ConversationListProps) {
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-slate-500">No conversations found</p>
-            <p className="text-xs text-slate-400 mt-0.5">Try adjusting your filters</p>
+            <p className="text-sm font-medium text-slate-500">{t("noResults.title")}</p>
+            <p className="text-xs text-slate-400 mt-0.5">{t("noResults.sub")}</p>
           </div>
         ) : (
           filtered.map((conv) => (

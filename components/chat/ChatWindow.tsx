@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
@@ -35,15 +35,13 @@ const WINDOW_MS = 24 * 60 * 60 * 1000;
 // Desde cuando avisar que la ventana esta por cerrarse.
 const WINDOW_WARN_MS = 2 * 60 * 60 * 1000;
 
-function formatLeft(ms: number) {
+function splitLeft(ms: number) {
   const min = Math.max(1, Math.round(ms / 60_000));
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return h > 0 ? `${h} h ${m} min` : `${m} min`;
+  return { h: Math.floor(min / 60), m: min % 60 };
 }
 
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+function formatTime(iso: string, locale: string) {
+  return new Date(iso).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
 }
 
 export default function ChatWindow({
@@ -56,6 +54,7 @@ export default function ChatWindow({
 }: ChatWindowProps) {
   const router = useRouter();
   const t = useTranslations("dashboard.chat");
+  const locale = useLocale();
   const { user } = useAuth();
   const { messages, loading } = useMessages(conversationId);
   const { botActive, assignee, status, setState: setControl, refresh: refreshControl } = useConversationControl(
@@ -108,7 +107,7 @@ export default function ChatWindow({
       key: m.id,
       content: m.content,
       role: m.role,
-      createdAt: formatTime(m.created_at),
+      createdAt: formatTime(m.created_at, locale),
       sortAt: new Date(m.created_at).getTime(),
       mediaPath: m.media_url,
       pending: false,
@@ -118,14 +117,14 @@ export default function ChatWindow({
       key: o.id,
       content: o.content,
       role: o.role,
-      createdAt: formatTime(new Date(o.sentAt).toISOString()),
+      createdAt: formatTime(new Date(o.sentAt).toISOString(), locale),
       sortAt: o.sentAt,
       mediaPath: null as string | null,
       pending: o.status === "pending",
       failed: o.status === "failed",
     }));
     return [...real, ...opt].sort((a, b) => a.sortAt - b.sortAt);
-  }, [messages, optimistic]);
+  }, [messages, optimistic, locale]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -159,29 +158,29 @@ export default function ChatWindow({
       });
       const result = await res.json();
       if (res.status === 409 && result.code === "window_closed") throw new Error(t("windowClosedToast"));
-      if (!res.ok) throw new Error(result.error ?? "Failed to send message");
+      if (!res.ok) throw new Error(result.error ?? t("errors.send"));
       // success: realtime will deliver the persisted message and dedupe removes the optimistic one
     } catch (err) {
       setOptimistic((prev) =>
         prev.map((o) => (o.id === tempId ? { ...o, status: "failed" } : o))
       );
-      toast.error(err instanceof Error ? err.message : "Failed to send message");
+      toast.error(err instanceof Error ? err.message : t("errors.send"));
     }
   };
 
   const handleDelete = async () => {
     if (deleting) return;
-    if (!confirm("Delete this conversation? It will be hidden from the inbox. If the customer writes again, it comes back.")) return;
+    if (!confirm(t("deleteConfirm"))) return;
     setDeleting(true);
     try {
       const res = await fetch(`/api/conversations/${conversationId}`, { method: "DELETE" });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error ?? "Failed to delete");
-      toast.success("Conversation deleted");
+      if (!res.ok) throw new Error(result.error ?? t("errors.delete"));
+      toast.success(t("deleted"));
       router.push("/conversations");
     } catch (err) {
       setDeleting(false);
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
+      toast.error(err instanceof Error ? err.message : t("errors.delete"));
     }
   };
 
@@ -202,7 +201,7 @@ export default function ChatWindow({
         await refreshControl();
         return;
       }
-      if (!res.ok) throw new Error(result.error ?? "Failed to update");
+      if (!res.ok) throw new Error(result.error ?? t("errors.update"));
       setControl({
         botActive: next,
         status: "open",
@@ -212,7 +211,7 @@ export default function ChatWindow({
       await refreshControl();
       toast.success(next ? t("returnedToBot") : t("nowInControl"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update");
+      toast.error(err instanceof Error ? err.message : t("errors.update"));
     } finally {
       setToggling(false);
     }
@@ -230,11 +229,11 @@ export default function ChatWindow({
         body: JSON.stringify({ status: next }),
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error ?? "Failed to update");
+      if (!res.ok) throw new Error(result.error ?? t("errors.update"));
       await refreshControl();
       toast.success(next === "resolved" ? t("resolvedToast") : t("reopenedToast"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update");
+      toast.error(err instanceof Error ? err.message : t("errors.update"));
     } finally {
       setToggling(false);
     }
@@ -316,7 +315,8 @@ export default function ChatWindow({
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              title="More options"
+              title={t("moreOptions")}
+              aria-label={t("moreOptions")}
               className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-navy-900"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -338,7 +338,7 @@ export default function ChatWindow({
                     <path d="M10 11v6" /><path d="M14 11v6" />
                     <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
                   </svg>
-                  {deleting ? "Deleting..." : "Delete conversation"}
+                  {deleting ? t("deleting") : t("deleteConversation")}
                 </button>
               </div>
             )}
@@ -385,7 +385,7 @@ export default function ChatWindow({
         {loading ? (
           <ChatMessagesSkeleton />
         ) : combined.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-xs text-slate-400">No messages yet</div>
+          <div className="flex h-full items-center justify-center text-xs text-slate-400">{t("noMessages")}</div>
         ) : (
           combined.map((msg) => (
             <MessageBubble
@@ -420,7 +420,7 @@ export default function ChatWindow({
         </div>
       ) : windowClosing && !botActive && !heldByOther ? (
         <div className="border-t border-amber-100 bg-amber-50/60 px-4 py-2 text-xs text-amber-700">
-          {t("windowClosing", { left: formatLeft(windowLeftMs) })}
+          {t("windowClosing", { left: t("timeLeft", splitLeft(windowLeftMs)) })}
         </div>
       ) : null}
 

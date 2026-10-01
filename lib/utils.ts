@@ -4,8 +4,9 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs)
 }
 
-export function formatDate(date: string | Date) {
-  return new Intl.DateTimeFormat('es-MX', {
+// Pasar el idioma actual (useLocale / getLocale) para no mezclar formatos.
+export function formatDate(date: string | Date, locale: string = 'es') {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(date))

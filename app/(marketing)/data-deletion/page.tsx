@@ -8,10 +8,18 @@ const CONTACT_EMAIL = "naia@naiaautomate.com";
 const UPDATED_EN = "June 2, 2026";
 const UPDATED_ES = "2 de junio de 2026";
 
-export const metadata: Metadata = {
-  title: "Data Deletion — Tourfy",
-  description: "How to request deletion of your data from Tourfy.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const isEs = (await getLocale()) === "es";
+  return isEs
+    ? {
+        title: "Eliminación de datos — Tourfy",
+        description: "Cómo solicitar la eliminación de tus datos en Tourfy.",
+      }
+    : {
+        title: "Data Deletion — Tourfy",
+        description: "How to request deletion of your data from Tourfy.",
+      };
+}
 
 const H1 = "font-display text-3xl sm:text-4xl font-bold tracking-tight text-navy-900";
 const H2 = "font-display text-xl font-bold text-navy-900 mt-10 mb-3";
@@ -97,7 +105,7 @@ function DeletionEs() {
       <p className="mt-2 text-sm text-slate-400">Última actualización: {UPDATED_ES}</p>
 
       <p className={`${P} mt-6`}>
-        Esta página explica cómo eliminar los datos que Tourfy tiene sobre vos o tu organización,
+        Esta página explica cómo eliminar los datos que Tourfy tiene sobre ti o tu organización,
         incluidos los datos procesados a través de la API de WhatsApp Business / Cloud.
       </p>
 
@@ -112,7 +120,7 @@ function DeletionEs() {
       <p className={P}>Para solicitar la eliminación de tu cuenta y los datos asociados:</p>
       <ol className={OL}>
         <li>
-          Escribinos a{" "}
+          Escríbenos a{" "}
           <a className={A} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> desde el email
           asociado a tu cuenta.
         </li>

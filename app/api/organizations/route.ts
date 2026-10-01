@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { compilePrompt } from '@/lib/bot/compilePrompt'
@@ -6,11 +7,12 @@ import { dedupeBusiness, dedupeFaqs, dedupeTours } from '@/lib/knowledge/dedupe'
 import type { BotConfig, BotTone, BusinessSection, FAQ, Tour } from '@/types'
 
 export async function GET() {
+  const t = await getTranslations('apiErrors')
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
   const { data: profile } = await supabase
@@ -20,7 +22,7 @@ export async function GET() {
     .single()
 
   if (!profile?.org_id) {
-    return NextResponse.json({ error: 'No organization' }, { status: 404 })
+    return NextResponse.json({ error: t('noOrganization') }, { status: 404 })
   }
 
   const { data: org, error } = await supabase
@@ -30,17 +32,18 @@ export async function GET() {
     .single()
 
   if (error || !org) {
-    return NextResponse.json({ error: 'Organization not found' }, { status: 404 })
+    return NextResponse.json({ error: t('orgNotFound') }, { status: 404 })
   }
 
   return NextResponse.json({ organization: org })
 }
 
 const businessHoursRangeSchema = z.object({
-  start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Invalid time format (HH:MM)'),
-  end: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Invalid time format (HH:MM)'),
+  // Mensajes = claves de apiErrors (se traducen al responder).
+  start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'invalidTime'),
+  end: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'invalidTime'),
 }).refine((data) => data.start < data.end, {
-  message: 'start must be before end',
+  message: 'startBeforeEnd',
   path: ['end'],
 })
 
@@ -97,14 +100,15 @@ const patchSchema = z.object({
   faqs: z.array(faqSchema).max(200).optional(),
   tours: z.array(tourSchema).max(100).optional(),
   business_info: z.array(businessSectionSchema).max(100).optional(),
-}).refine((v) => Object.keys(v).length > 0, { message: 'No fields to update' })
+}).refine((v) => Object.keys(v).length > 0, { message: 'noFieldsToUpdate' })
 
 export async function PATCH(request: NextRequest) {
+  const t = await getTranslations('apiErrors')
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
   const { data: profile } = await supabase
@@ -114,12 +118,13 @@ export async function PATCH(request: NextRequest) {
     .single()
 
   if (!profile?.org_id || profile.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
+    return NextResponse.json({ error: t('adminOnly') }, { status: 403 })
   }
 
   const parsed = patchSchema.safeParse(await request.json())
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 })
+    const key = parsed.error.issues[0]?.message
+    return NextResponse.json({ error: key && t.has(key) ? t(key) : t('invalidInput') }, { status: 400 })
   }
 
   // Estado actual: necesario para mergear bot_config y para recompilar el prompt
@@ -188,7 +193,7 @@ export async function PATCH(request: NextRequest) {
 
   if (error || !org) {
     console.error('Failed to update organization:', error)
-    return NextResponse.json({ error: 'Failed to update organization' }, { status: 500 })
+    return NextResponse.json({ error: t('orgUpdateFailed') }, { status: 500 })
   }
 
   return NextResponse.json({ success: true, organization: org })

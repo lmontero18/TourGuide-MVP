@@ -34,23 +34,24 @@ const INITIAL_DATA: OnboardingData = {
 
 const STEP_COUNT = 3;
 
+// Codigos estables; la etiqueta visible sale de onboarding.countries.<codigo>.
 const COUNTRIES = [
-  "Mexico",
-  "Colombia",
-  "Peru",
-  "Argentina",
-  "Chile",
-  "Brazil",
-  "Costa Rica",
-  "Ecuador",
-  "Guatemala",
-  "Panama",
-  "Dominican Republic",
-  "Uruguay",
-  "Bolivia",
-  "Honduras",
-  "Other",
-];
+  "mx",
+  "co",
+  "pe",
+  "ar",
+  "cl",
+  "br",
+  "cr",
+  "ec",
+  "gt",
+  "pa",
+  "do",
+  "uy",
+  "bo",
+  "hn",
+  "other",
+] as const;
 
 /* ─── Main component ─── */
 export default function OnboardingPage() {
@@ -87,7 +88,7 @@ export default function OnboardingPage() {
   const ensureOrg = async (): Promise<boolean> => {
     if (orgCreated) return true;
     if (!data.agencyName.trim()) {
-      toast.error("Agency name is required to continue");
+      toast.error(t("errors.agencyNameRequired"));
       return false;
     }
 
@@ -109,11 +110,11 @@ export default function OnboardingPage() {
         return true;
       }
       if (res.status !== 409) {
-        toast.error(result.error ?? "Failed to create organization");
+        toast.error(result.error ?? t("errors.createOrgFailed"));
         return false;
       }
     }
-    toast.error("Could not find an available slug. Try a different agency name.");
+    toast.error(t("errors.slugUnavailable"));
     return false;
   };
 
@@ -191,12 +192,12 @@ export default function OnboardingPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || "Failed to finalize onboarding");
+        throw new Error(result.error || t("errors.finishFailed"));
       }
 
       router.push("/conversations");
     } catch (err) {
-      setLaunchError(err instanceof Error ? err.message : "Something went wrong");
+      setLaunchError(err instanceof Error ? err.message : t("errors.generic"));
       setLaunching(false);
     }
   };
@@ -425,6 +426,7 @@ function StepAgency({
   update: (p: Partial<OnboardingData>) => void;
 }) {
   const t = useTranslations("onboarding.steps.agency");
+  const tCountries = useTranslations("onboarding.countries");
   return (
     <div>
       <StepHeader
@@ -460,7 +462,7 @@ function StepAgency({
               </option>
               {COUNTRIES.map((c) => (
                 <option key={c} value={c}>
-                  {c}
+                  {tCountries(c)}
                 </option>
               ))}
             </select>

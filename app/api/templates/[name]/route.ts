@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { getMessagingToken } from '@/lib/whatsapp/token'
@@ -13,17 +14,20 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
   const ctx = await requireAdmin()
   if (!ctx.ok) return ctx.response
   const { name } = await params
-  if (!/^[a-z0-9_]{1,512}$/.test(name)) return NextResponse.json({ error: 'Invalid name' }, { status: 400 })
+  const t = await getTranslations('apiErrors')
+  if (!/^[a-z0-9_]{1,512}$/.test(name)) return NextResponse.json({ error: t('invalidTemplateName') }, { status: 400 })
 
   const wa = await getOrgWhatsApp(await createServiceClient(), ctx.orgId)
-  if (!wa) return NextResponse.json({ error: 'WhatsApp not connected' }, { status: 400 })
+  if (!wa) return NextResponse.json({ error: t('whatsappNotConnected') }, { status: 400 })
 
   try {
     await deleteTemplate(wa.waba_id, getMessagingToken(), name)
     return NextResponse.json({ success: true })
   } catch (error) {
     log.error('failed to delete template', { error, org_id: ctx.orgId, name })
-    const message = error instanceof GraphError ? error.message : 'Failed to delete template'
+    const message = error instanceof GraphError
+      ? t('templateDeleteFailedReason', { reason: error.message })
+      : t('templateDeleteFailed')
     return NextResponse.json({ error: message }, { status: 400 })
   }
 }

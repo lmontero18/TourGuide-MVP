@@ -68,12 +68,13 @@ function CardShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function DeleteButton({ onClick }: { onClick: () => void }) {
+function DeleteButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button
       onClick={onClick}
       className="shrink-0 grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
-      aria-label="remove"
+      aria-label={label}
+      title={label}
     >
       <TrashIcon />
     </button>
@@ -149,7 +150,7 @@ export function ToursEditor({
                   <CardShell>
                     <div className="flex items-start justify-between gap-2 mb-3">
                       {needsReview ? <ReviewBadge label={t("reviewFlag")} /> : <span />}
-                      <DeleteButton onClick={() => remove(tour.id)} />
+                      <DeleteButton onClick={() => remove(tour.id)} label={t("deleteLabel")} />
                     </div>
 
                     <div>
@@ -195,7 +196,7 @@ export function ToursEditor({
                             <button
                               onClick={() => removePrice(tour, pi)}
                               className="shrink-0 grid h-10 w-8 place-items-center rounded-lg text-slate-300 hover:text-red-500 transition-colors cursor-pointer"
-                              aria-label="remove price"
+                              aria-label={t("removePriceLabel")}
                             >
                               <CloseIcon />
                             </button>
@@ -263,7 +264,7 @@ export function BusinessEditor({
                   <CardShell>
                     <div className="flex items-start justify-between gap-2 mb-3">
                       {needsReview ? <ReviewBadge label={t("reviewFlag")} /> : <span />}
-                      <DeleteButton onClick={() => remove(section.id)} />
+                      <DeleteButton onClick={() => remove(section.id)} label={t("deleteLabel")} />
                     </div>
                     <div>
                       <label className={FIELD_LABEL}>{t("businessTitleLabel")}</label>
@@ -326,7 +327,7 @@ export function FaqsEditor({
                 <CardShell>
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <label className={`${FIELD_LABEL} mb-0 pt-1.5`}>{t("faqQuestionLabel")}</label>
-                    <DeleteButton onClick={() => remove(faq.id)} />
+                    <DeleteButton onClick={() => remove(faq.id)} label={t("deleteLabel")} />
                   </div>
                   <input
                     type="text"

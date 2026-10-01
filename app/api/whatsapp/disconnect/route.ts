@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { getMessagingToken } from '@/lib/whatsapp/token'
 import { createLogger } from '@/lib/logger'
@@ -8,12 +9,13 @@ const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
 const baseLog = createLogger({ route: 'whatsapp/disconnect' })
 
 export async function POST() {
+  const t = await getTranslations('apiErrors')
   const supabase = await createClient()
 
   // Verify authenticated user
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
   // Verify admin role
@@ -24,7 +26,7 @@ export async function POST() {
     .single()
 
   if (!userData || userData.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
+    return NextResponse.json({ error: t('adminOnly') }, { status: 403 })
   }
 
   const log = baseLog.child({ org_id: userData.org_id })
@@ -68,7 +70,7 @@ export async function POST() {
 
   if (error) {
     log.error('WhatsApp disconnect failed', { error })
-    return NextResponse.json({ error: 'Failed to disconnect' }, { status: 500 })
+    return NextResponse.json({ error: t('whatsappDisconnectFailed') }, { status: 500 })
   }
 
   // Cero filas borradas puede ser RLS bloqueando, o dos disconnects concurrentes
@@ -84,12 +86,12 @@ export async function POST() {
     // Si la relectura falla no sabemos si se borro: no se puede reportar exito.
     if (recheckError) {
       log.error('no se pudo verificar el disconnect', { error: recheckError })
-      return NextResponse.json({ error: 'Failed to disconnect' }, { status: 500 })
+      return NextResponse.json({ error: t('whatsappDisconnectFailed') }, { status: 500 })
     }
 
     if (sigueAhi) {
       log.error('disconnect borro 0 filas y la cuenta sigue existiendo (RLS?)')
-      return NextResponse.json({ error: 'Failed to disconnect' }, { status: 500 })
+      return NextResponse.json({ error: t('whatsappDisconnectFailed') }, { status: 500 })
     }
   }
 

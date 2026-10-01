@@ -32,9 +32,9 @@ export default function UsageCard({ usage, history }: UsageCardProps) {
 
       <div className="flex items-baseline gap-2 mb-3">
         <span className="font-display text-3xl font-extrabold tracking-tight text-navy-900">
-          {usage.sent.toLocaleString()}
+          {usage.sent.toLocaleString(locale)}
         </span>
-        <span className="text-sm text-slate-500">{t("ofFree", { free: FREE_TIER.toLocaleString() })}</span>
+        <span className="text-sm text-slate-500">{t("ofFree", { free: FREE_TIER.toLocaleString(locale) })}</span>
       </div>
 
       <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
@@ -47,7 +47,7 @@ export default function UsageCard({ usage, history }: UsageCardProps) {
             state === "over" ? "border-red-200 bg-red-50 text-red-800" : "border-amber-200 bg-amber-50 text-amber-800"
           }`}
         >
-          {state === "over" ? t("over", { count: over.toLocaleString() }) : t("warn")}{" "}
+          {state === "over" ? t("over", { count: over.toLocaleString(locale) }) : t("warn")}{" "}
           <a href={WHATSAPP_MANAGER_URL} target="_blank" rel="noopener noreferrer" className="underline font-semibold">
             {t("checkPayment")}
           </a>
@@ -63,7 +63,7 @@ export default function UsageCard({ usage, history }: UsageCardProps) {
               const over = h.sent > FREE_TIER;
               return (
                 <div key={h.month} className="flex-1 min-w-0 flex flex-col items-center gap-1 h-full" title={`${h.month}: ${h.sent}`}>
-                  <span className="text-[10px] font-bold text-navy-900 tabular-nums">{h.sent.toLocaleString()}</span>
+                  <span className="text-[10px] font-bold text-navy-900 tabular-nums">{h.sent.toLocaleString(locale)}</span>
                   <div className="w-full flex-1 rounded-t bg-slate-100 relative overflow-hidden">
                     <div
                       className={`absolute bottom-0 inset-x-0 rounded-t ${over ? "bg-red-500" : "bg-navy-900/80"}`}
