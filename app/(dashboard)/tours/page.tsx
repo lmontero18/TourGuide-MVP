@@ -1,38 +1,105 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
 import type { FaqDraft } from "@/components/tours/TourCards";
-import { ToursSplit, BusinessSplit, FaqsSplit } from "@/components/tours/SplitEditors";
+import ToursTable from "@/components/tours/ToursTable";
+import TourDrawer from "@/components/tours/TourDrawer";
+import BusinessGrid from "@/components/tours/BusinessGrid";
+import FaqAccordion from "@/components/tours/FaqAccordion";
+import SaveStatus, { type SaveState } from "@/components/tours/SaveStatus";
 import ToursSkeleton from "@/components/tours/ToursSkeleton";
 import type { BusinessSection, Organization, Tour } from "@/types";
 
 type Tab = "tours" | "business" | "faqs";
 
-const TabIcon = ({ tab }: { tab: Tab }) => {
-  const common = { width: 15, height: 15, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-  if (tab === "tours") return <svg {...common}><path d="M9 11H3v10h6V11z" /><path d="M21 3h-6v18h6V3z" /><path d="M15 7H9v14h6V7z" /></svg>;
-  if (tab === "business") return <svg {...common}><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3" /></svg>;
-  return <svg {...common}><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><path d="M12 17h.01" /></svg>;
-};
+interface Knowledge {
+  tours: Tour[];
+  faqs: FaqDraft[];
+  business: BusinessSection[];
+}
+
+const AUTOSAVE_MS = 1000;
+
+// Lo incompleto no se manda (el API lo rechazaria): tours sin nombre, precios
+// sin monto, FAQs sin pregunta o respuesta, secciones sin titulo o contenido.
+function toPayload({ tours, faqs, business }: Knowledge) {
+  return {
+    tours: tours
+      .filter((tour) => tour.name.trim())
+      .map((tour) => ({
+        ...tour,
+        name: tour.name.trim(),
+        category: tour.category?.trim() || undefined,
+        info: tour.info.trim(),
+        prices: (tour.prices ?? [])
+          .filter((p) => Number.isFinite(p.amount) && p.currency?.trim())
+          .map((p) => ({ ...p, label: p.label?.trim() || undefined })),
+      })),
+    faqs: faqs
+      .filter((faq) => faq.question.trim() && faq.answer.trim())
+      .map((faq) => ({ question: faq.question.trim(), answer: faq.answer.trim() })),
+    business_info: business
+      .filter((section) => section.title.trim() && section.content.trim())
+      .map((section) => ({ ...section, title: section.title.trim(), content: section.content.trim() })),
+  };
+}
 
 export default function ToursSettingsPage() {
   const t = useTranslations("dashboard.tours");
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [dirty, setDirty] = useState(false);
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [faqs, setFaqs] = useState<FaqDraft[]>([]);
-  const [business, setBusiness] = useState<BusinessSection[]>([]);
+  const [data, setData] = useState<Knowledge>({ tours: [], faqs: [], business: [] });
   const [tab, setTab] = useState<Tab>("tours");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>("idle");
 
-  // Setters que marcan cambios sin guardar (la carga inicial usa los setters crudos).
-  const editTours = (v: Tour[]) => { setTours(v); setDirty(true); };
-  const editBusiness = (v: BusinessSection[]) => { setBusiness(v); setDirty(true); };
-  const editFaqs = (v: FaqDraft[]) => { setFaqs(v); setDirty(true); };
+  // Autoguardado: debounce + un solo PATCH en vuelo a la vez. Si hay cambios
+  // mientras se guarda, se encola otro guardado con lo ultimo.
+  const latest = useRef(data);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inflight = useRef(false);
+  const queued = useRef(false);
+
+  const flush = useCallback(async (keepalive = false) => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    if (inflight.current) {
+      queued.current = true;
+      return;
+    }
+    inflight.current = true;
+    setSaveState("saving");
+    let ok = true;
+    do {
+      queued.current = false;
+      try {
+        const res = await fetch("/api/organizations", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(toPayload(latest.current)),
+          keepalive,
+        });
+        ok = res.ok;
+      } catch {
+        ok = false;
+      }
+    } while (queued.current);
+    inflight.current = false;
+    setSaveState(ok ? "saved" : "error");
+  }, []);
+
+  const edit = useCallback((patch: Partial<Knowledge>) => {
+    setData((prev) => {
+      const next = { ...prev, ...patch };
+      latest.current = next;
+      return next;
+    });
+    setSaveState("pending");
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => void flush(), AUTOSAVE_MS);
+  }, [flush]);
 
   useEffect(() => {
     const load = async () => {
@@ -41,15 +108,13 @@ export default function ToursSettingsPage() {
         const result = await res.json();
         if (!res.ok) throw new Error(result.error ?? "Failed to load");
         const org = result.organization as Organization;
-        setTours(org.tours ?? []);
-        setFaqs(
-          (org.faqs ?? []).map((faq) => ({
-            id: crypto.randomUUID(),
-            question: faq.question,
-            answer: faq.answer,
-          })),
-        );
-        setBusiness(org.business_info ?? []);
+        const loaded: Knowledge = {
+          tours: org.tours ?? [],
+          faqs: (org.faqs ?? []).map((faq) => ({ id: crypto.randomUUID(), question: faq.question, answer: faq.answer })),
+          business: org.business_info ?? [],
+        };
+        latest.current = loaded;
+        setData(loaded);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : t("loadError"));
       } finally {
@@ -59,44 +124,53 @@ export default function ToursSettingsPage() {
     load();
   }, [t]);
 
+  // Avisar antes de cerrar la pestaña si queda algo sin guardar.
+  const unsaved = saveState === "pending" || saveState === "saving" || saveState === "error";
   useEffect(() => {
-    if (!dirty) return;
+    if (!unsaved) return;
     const handler = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       e.returnValue = "";
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
-  }, [dirty]);
+  }, [unsaved]);
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const res = await fetch("/api/organizations", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tours: tours
-            .filter((tour) => tour.name.trim())
-            .map((tour) => ({ ...tour, name: tour.name.trim(), info: tour.info.trim() })),
-          faqs: faqs
-            .filter((faq) => faq.question.trim() && faq.answer.trim())
-            .map((faq) => ({ question: faq.question.trim(), answer: faq.answer.trim() })),
-          business_info: business
-            .filter((section) => section.title.trim() && section.content.trim())
-            .map((section) => ({ ...section, title: section.title.trim(), content: section.content.trim() })),
-        }),
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error ?? "Failed to save");
-      setDirty(false);
-      toast.success(t("saved"));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("saveError"));
-    } finally {
-      setSaving(false);
-    }
+  // Navegar a otra pagina del dashboard dentro del debounce: guardar ya.
+  useEffect(() => () => {
+    if (timer.current) void flush(true);
+  }, [flush]);
+
+  const { tours, faqs, business } = data;
+  const selected = tours.find((tour) => tour.id === selectedId) ?? null;
+
+  // Editar un tour lo da por revisado: se limpia el aviso de baja confianza.
+  const updateTour = useCallback(
+    (tour: Tour) => edit({ tours: latest.current.tours.map((x) => (x.id === tour.id ? { ...tour, confidence: undefined } : x)) }),
+    [edit],
+  );
+
+  const addTour = () => {
+    const tour: Tour = { id: crypto.randomUUID(), name: "", info: "", prices: [], source: "manual" };
+    edit({ tours: [...tours, tour] });
+    setSelectedId(tour.id);
   };
+
+  const deleteTour = (id: string) => {
+    edit({ tours: latest.current.tours.filter((x) => x.id !== id) });
+    setSelectedId(null);
+  };
+
+  // Un tour nuevo que se cierra sin escribir nada no queda como fila vacia.
+  const closeDrawer = useCallback(() => {
+    const current = latest.current.tours.find((x) => x.id === selectedId);
+    if (current && !current.name.trim() && !current.info.trim() && !(current.prices ?? []).length) {
+      const rest = latest.current.tours.filter((x) => x.id !== current.id);
+      latest.current = { ...latest.current, tours: rest };
+      setData(latest.current);
+    }
+    setSelectedId(null);
+  }, [selectedId]);
 
   const TABS: { key: Tab; label: string; count: number }[] = [
     { key: "tours", label: t("tabTours"), count: tours.length },
@@ -106,15 +180,18 @@ export default function ToursSettingsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <TopBar title={t("title")} />
+      <TopBar title={t("title")}>
+        <SaveStatus state={saveState} onRetry={() => void flush()} />
+      </TopBar>
 
       <div className="flex-1 overflow-y-auto p-5">
         {loading ? (
           <ToursSkeleton />
         ) : (
-          <div className="max-w-3xl space-y-5">
-            {/* Pestañas con indicador deslizante */}
-            <div role="tablist" className="flex gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+          <div className="mx-auto max-w-5xl space-y-5">
+            <p className="max-w-2xl text-sm text-slate-500">{t("subtitle")}</p>
+
+            <div role="tablist" className="flex gap-6 border-b border-slate-200">
               {TABS.map((item) => {
                 const active = tab === item.key;
                 return (
@@ -123,86 +200,27 @@ export default function ToursSettingsPage() {
                     role="tab"
                     aria-selected={active}
                     onClick={() => setTab(item.key)}
-                    className={`relative flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-300 ${
-                      active ? "text-white" : "text-slate-500 hover:text-navy-900"
+                    className={`-mb-px inline-flex items-center gap-2 border-b-2 pb-2.5 text-sm font-bold transition-colors ${
+                      active ? "border-navy-900 text-navy-900" : "border-transparent text-slate-400 hover:text-navy-900"
                     }`}
                   >
-                    {active && (
-                      <motion.div
-                        layoutId="toursTabPill"
-                        className="absolute inset-0 rounded-xl bg-navy-900 shadow-sm"
-                        transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                      />
-                    )}
-                    <span className="relative z-10 flex items-center gap-1.5">
-                      <TabIcon tab={item.key} />
-                      {item.label}
-                      <span
-                        className={`rounded-full px-1.5 text-[11px] font-bold tabular-nums ${
-                          active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-400"
-                        }`}
-                      >
-                        {item.count}
-                      </span>
+                    {item.label}
+                    <span className={`rounded-full px-1.5 text-[11px] tabular-nums ${active ? "bg-navy-900 text-white" : "bg-slate-100 text-slate-400"}`}>
+                      {item.count}
                     </span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Contenido de la pestaña activa */}
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={tab}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-              >
-                {tab === "tours" && <ToursSplit tours={tours} onChange={editTours} />}
-                {tab === "business" && <BusinessSplit business={business} onChange={editBusiness} />}
-                {tab === "faqs" && <FaqsSplit faqs={faqs} onChange={editFaqs} />}
-              </motion.div>
-            </AnimatePresence>
+            {tab === "tours" && <ToursTable tours={tours} selectedId={selectedId} onSelect={setSelectedId} onAdd={addTour} />}
+            {tab === "business" && <BusinessGrid sections={business} onChange={(v) => edit({ business: v })} />}
+            {tab === "faqs" && <FaqAccordion faqs={faqs} onChange={(v) => edit({ faqs: v })} />}
           </div>
         )}
       </div>
 
-      {/* Barra de guardar fija — glass */}
-      {!loading && (
-        <div className="border-t border-slate-200/70 bg-white/80 px-5 py-3 backdrop-blur-md">
-          <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2">
-              {/* Chips de conteo (ocultos en móvil) */}
-              <div className="hidden items-center gap-1.5 sm:flex">
-                {TABS.map((item) => (
-                  <span
-                    key={item.key}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500"
-                  >
-                    <b className="font-display tabular-nums text-navy-900">{item.count}</b>
-                    {item.label}
-                  </span>
-                ))}
-              </div>
-              {/* Indicador de cambios */}
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium">
-                <span className={`h-1.5 w-1.5 rounded-full ${dirty ? "animate-pulse bg-amber-500" : "bg-green-500"}`} />
-                <span className={dirty ? "text-amber-600" : "text-slate-400"}>
-                  {dirty ? t("unsaved") : t("allSaved")}
-                </span>
-              </span>
-            </div>
-            <button
-              onClick={handleSave}
-              disabled={saving || !dirty}
-              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
-            >
-              {saving ? t("saving") : t("save")}
-            </button>
-          </div>
-        </div>
-      )}
+      <TourDrawer tour={selected} saveState={saveState} onChange={updateTour} onDelete={deleteTour} onClose={closeDrawer} />
     </div>
   );
 }
