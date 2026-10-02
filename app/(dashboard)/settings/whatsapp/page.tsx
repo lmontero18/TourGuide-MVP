@@ -7,6 +7,7 @@ import TopBar from "@/components/layout/TopBar";
 import { createClient } from "@/lib/supabase/client";
 import ConnectWhatsAppButton from "@/components/whatsapp/ConnectWhatsAppButton";
 import BillingCard from "@/components/whatsapp/BillingCard";
+import WhatsAppSettingsSkeleton from "@/components/skeletons/WhatsAppSettingsSkeleton";
 
 interface ConnectedAccount {
   id: string;
@@ -116,12 +117,9 @@ export default function WhatsAppSettingsPage() {
       <TopBar title={t("title")} />
 
       <div className="flex-1 overflow-y-auto p-5">
+        {loading ? <WhatsAppSettingsSkeleton /> : (
         <div className="max-w-2xl space-y-6">
-          {loading ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500">
-              {t("loading")}
-            </div>
-          ) : account ? (
+          {account ? (
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
               <h2 className="text-sm font-bold text-navy-900 mb-4">{t("connectedNumber")}</h2>
               <div className="flex items-center justify-between rounded-xl bg-green-50 border border-green-200 p-4">
@@ -251,6 +249,7 @@ export default function WhatsAppSettingsPage() {
             </>
           )}
         </div>
+        )}
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Lead, LeadDetails, LeadStatus } from '@/types'
+import { readCache, writeCache } from '@/lib/clientCache'
 
 export interface LeadWithContact extends Lead {
   contact: { name: string | null; phone: string } | null
@@ -40,7 +41,7 @@ async function requestRefresh(id: string): Promise<boolean> {
 // Tablero de leads de la org, en vivo: cualquier cambio (la IA llenando una
 // ficha, otro agente moviendo una tarjeta) recarga la lista.
 export function useLeads(orgId: string | null) {
-  const [leads, setLeads] = useState<LeadWithContact[] | null>(null)
+  const [leads, setLeads] = useState<LeadWithContact[] | null>(() => (orgId ? readCache<LeadWithContact[]>(`leads:${orgId}`) ?? null : null))
   const [error, setError] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -58,6 +59,7 @@ export function useLeads(orgId: string | null) {
       .then(({ data, error: err }) => {
         if (err) return setError(true)
         setError(false)
+        writeCache(`leads:${orgId}`, data ?? [])
         setLeads((data ?? []) as unknown as LeadWithContact[])
       })
   }, [orgId])

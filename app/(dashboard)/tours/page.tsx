@@ -12,6 +12,7 @@ import FaqAccordion from "@/components/tours/FaqAccordion";
 import SaveStatus, { type SaveState } from "@/components/tours/SaveStatus";
 import ToursSkeleton from "@/components/tours/ToursSkeleton";
 import type { BusinessSection, Organization, Tour } from "@/types";
+import { readCache, writeCache } from "@/lib/clientCache";
 
 type Tab = "tours" | "business" | "faqs";
 
@@ -22,6 +23,14 @@ interface Knowledge {
 }
 
 const AUTOSAVE_MS = 1000;
+
+function toKnowledge(org: Organization): Knowledge {
+  return {
+    tours: org.tours ?? [],
+    faqs: (org.faqs ?? []).map((faq) => ({ id: crypto.randomUUID(), question: faq.question, answer: faq.answer })),
+    business: org.business_info ?? [],
+  };
+}
 
 // Lo incompleto no se manda (el API lo rechazaria): tours sin nombre, precios
 // sin monto, FAQs sin pregunta o respuesta, secciones sin titulo o contenido.
@@ -49,8 +58,10 @@ function toPayload({ tours, faqs, business }: Knowledge) {
 
 export default function ToursSettingsPage() {
   const t = useTranslations("dashboard.tours");
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<Knowledge>({ tours: [], faqs: [], business: [] });
+  // Con la org en cache la pagina abre al instante; igual se refresca abajo.
+  const [cachedOrg] = useState(() => readCache<Organization>("organization"));
+  const [loading, setLoading] = useState(!cachedOrg);
+  const [data, setData] = useState<Knowledge>(() => (cachedOrg ? toKnowledge(cachedOrg) : { tours: [], faqs: [], business: [] }));
   const [tab, setTab] = useState<Tab>("tours");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -60,6 +71,7 @@ export default function ToursSettingsPage() {
   const latest = useRef(data);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inflight = useRef(false);
+  const edited = useRef(false);
   const queued = useRef(false);
 
   const flush = useCallback(async (keepalive = false) => {
@@ -75,13 +87,16 @@ export default function ToursSettingsPage() {
     do {
       queued.current = false;
       try {
+        const payload = toPayload(latest.current);
         const res = await fetch("/api/organizations", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(toPayload(latest.current)),
+          body: JSON.stringify(payload),
           keepalive,
         });
         ok = res.ok;
+        const cached = readCache<Organization>("organization");
+        if (ok && cached) writeCache("organization", { ...cached, ...payload });
       } catch {
         ok = false;
       }
@@ -91,6 +106,7 @@ export default function ToursSettingsPage() {
   }, []);
 
   const edit = useCallback((patch: Partial<Knowledge>) => {
+    edited.current = true;
     setData((prev) => {
       const next = { ...prev, ...patch };
       latest.current = next;
@@ -108,11 +124,10 @@ export default function ToursSettingsPage() {
         const result = await res.json();
         if (!res.ok) throw new Error(result.error ?? t("loadError"));
         const org = result.organization as Organization;
-        const loaded: Knowledge = {
-          tours: org.tours ?? [],
-          faqs: (org.faqs ?? []).map((faq) => ({ id: crypto.randomUUID(), question: faq.question, answer: faq.answer })),
-          business: org.business_info ?? [],
-        };
+        writeCache("organization", org);
+        // Si ya empezo a editar sobre la version en cache, no se la pisamos.
+        if (edited.current) return;
+        const loaded = toKnowledge(org);
         latest.current = loaded;
         setData(loaded);
       } catch (err) {

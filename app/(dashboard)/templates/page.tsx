@@ -9,6 +9,7 @@ import TemplateForm, { EMPTY_DRAFT, type TemplateDraft } from "@/components/temp
 import TemplatePreview from "@/components/templates/TemplatePreview";
 import { useTemplates } from "@/hooks/useTemplates";
 import type { WhatsAppTemplate } from "@/types";
+import { TemplateCardSkeleton } from "@/components/skeletons/TemplatesSkeleton";
 
 // Plantillas de arranque para agencias de turismo (se pueden editar antes de
 // enviar). El contenido sale de los mensajes segun el idioma del panel; se lee
@@ -166,7 +167,12 @@ export default function TemplatesPage() {
           )}
 
           {error && <p className="text-sm text-red-600">{t("loadError")}</p>}
-          {!templates && !error && connected && <p className="text-sm text-slate-400">{t("loading")}</p>}
+          {!templates && !error && connected && (
+            <div className="space-y-3">
+              <TemplateCardSkeleton />
+              <TemplateCardSkeleton nameWidth="w-28" />
+            </div>
+          )}
           {templates && templates.length === 0 && connected && !draft && (
             <p className="rounded-2xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">{t("empty")}</p>
           )}

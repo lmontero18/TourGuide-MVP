@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { readCache, writeCache } from "@/lib/clientCache";
 import { useTranslations } from "next-intl";
 import { TIMEZONES, utcOffsetLabel } from "@/lib/timezones";
 import Link from "next/link";
@@ -12,16 +13,19 @@ import type { Organization } from "@/types";
 
 export default function SettingsPage() {
   const t = useTranslations("dashboard.settings");
-  const [loading, setLoading] = useState(true);
+  // Con la org en cache el formulario abre lleno al instante (se refresca abajo).
+  const [cachedOrg] = useState(() => readCache<Organization>("organization"));
+  const cachedHours = cachedOrg ? normalizeBusinessHours(cachedOrg.bot_config?.business_hours) : null;
+  const [loading, setLoading] = useState(!cachedOrg);
   const [saving, setSaving] = useState(false);
 
-  const [orgName, setOrgName] = useState("");
-  const [timezone, setTimezone] = useState("America/Lima");
-  const [weekdaysStart, setWeekdaysStart] = useState(DEFAULT_RANGE.start);
-  const [weekdaysEnd, setWeekdaysEnd] = useState(DEFAULT_RANGE.end);
-  const [weekendClosed, setWeekendClosed] = useState(false);
-  const [weekendStart, setWeekendStart] = useState(DEFAULT_RANGE.start);
-  const [weekendEnd, setWeekendEnd] = useState(DEFAULT_RANGE.end);
+  const [orgName, setOrgName] = useState(cachedOrg?.name ?? "");
+  const [timezone, setTimezone] = useState(cachedOrg?.bot_config?.timezone ?? "America/Lima");
+  const [weekdaysStart, setWeekdaysStart] = useState(cachedHours?.weekdays.start ?? DEFAULT_RANGE.start);
+  const [weekdaysEnd, setWeekdaysEnd] = useState(cachedHours?.weekdays.end ?? DEFAULT_RANGE.end);
+  const [weekendClosed, setWeekendClosed] = useState(cachedHours ? cachedHours.weekend === null : false);
+  const [weekendStart, setWeekendStart] = useState(cachedHours?.weekend?.start ?? DEFAULT_RANGE.start);
+  const [weekendEnd, setWeekendEnd] = useState(cachedHours?.weekend?.end ?? DEFAULT_RANGE.end);
 
   useEffect(() => {
     const load = async () => {
@@ -30,6 +34,9 @@ export default function SettingsPage() {
         const result = await res.json();
         if (!res.ok) throw new Error(result.error ?? t("errors.load"));
         const org = result.organization as Organization;
+        writeCache("organization", org);
+        // Con datos en cache ya se mostraron; no pisar lo que el usuario edite.
+        if (cachedOrg) return;
         setOrgName(org.name);
         setTimezone(org.bot_config?.timezone ?? "America/Lima");
         const hours = normalizeBusinessHours(org.bot_config?.business_hours);
@@ -45,7 +52,7 @@ export default function SettingsPage() {
       }
     };
     load();
-  }, [t]);
+  }, [t, cachedOrg]);
 
   // Nombre del pais/ciudad segun el idioma; zonas fuera de la lista muestran el id.
   const tzLabel = (tz: { id: string; label: string }) => {
@@ -76,6 +83,21 @@ export default function SettingsPage() {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error ?? t("errors.save"));
+      const cached = readCache<Organization>("organization");
+      if (cached) {
+        writeCache("organization", {
+          ...cached,
+          name: orgName.trim(),
+          bot_config: {
+            ...cached.bot_config,
+            timezone,
+            business_hours: {
+              weekdays: { start: weekdaysStart, end: weekdaysEnd },
+              weekend: weekendClosed ? null : { start: weekendStart, end: weekendEnd },
+            },
+          },
+        });
+      }
       toast.success(t("saved"));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("errors.save"));

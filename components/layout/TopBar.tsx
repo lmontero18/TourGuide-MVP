@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { logout } from "@/app/(auth)/login/actions";
+import { clearClientCache } from "@/lib/clientCache";
 import { setLocale } from "@/app/actions/locale";
 import { LOCALES, type Locale } from "@/i18n/config";
 
@@ -113,6 +114,7 @@ export default function TopBar({ title, children }: TopBarProps) {
               <form
                 action={async () => {
                   setLoggingOut(true);
+                  clearClientCache();
                   await logout();
                 }}
               >

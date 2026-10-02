@@ -7,6 +7,7 @@ import TopBar from "@/components/layout/TopBar";
 import AgentRow from "@/components/agents/AgentRow";
 import { useAgents } from "@/hooks/useAgents";
 import type { Role } from "@/types";
+import { AgentRowsSkeleton } from "@/components/skeletons/AgentsSkeleton";
 
 export default function AgentsPage() {
   const t = useTranslations("dashboard.agents");
@@ -131,11 +132,11 @@ export default function AgentsPage() {
           <div className="rounded-2xl border border-slate-200 bg-white">
             <div className="px-5 py-3 border-b border-slate-100">
               <h2 className="text-sm font-bold text-navy-900">{t("teamTitle")}</h2>
-              {agents && <p className="text-xs text-slate-400 mt-0.5">{t("teamCount", { count: agents.length })}</p>}
+              <p className="text-xs text-slate-400 mt-0.5">{agents ? t("teamCount", { count: agents.length }) : "\u00a0"}</p>
             </div>
 
             {error && <p className="px-5 py-4 text-xs text-red-600">{t("errors.load")}</p>}
-            {!agents && !error && <p className="px-5 py-4 text-xs text-slate-400">{t("loading")}</p>}
+            {!agents && !error && <AgentRowsSkeleton />}
 
             <div className="divide-y divide-slate-100">
               {agents?.map((agent) => (

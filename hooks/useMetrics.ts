@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { MetricsPeriod, OrgMetrics } from '@/types'
+import { readCache, writeCache } from '@/lib/clientCache'
 
 const PERIOD_DAYS = { '7d': 7, '30d': 30, '90d': 90 } as const
 
@@ -17,7 +18,10 @@ interface MetricsResult {
 export function useMetrics(period: MetricsPeriod) {
   // loading se deriva: el resultado guardado es de otro periodo mientras llega
   // el nuevo. Se conserva `data` anterior para no parpadear a vacio.
-  const [result, setResult] = useState<MetricsResult>({ period: null, data: null, error: false })
+  const [result, setResult] = useState<MetricsResult>(() => {
+    const cached = readCache<OrgMetrics>(`metrics:${period}`)
+    return cached ? { period, data: cached, error: false } : { period: null, data: null, error: false }
+  })
 
   useEffect(() => {
     let cancelled = false
@@ -38,6 +42,7 @@ export function useMetrics(period: MetricsPeriod) {
           setResult({ period, data: null, error: true })
           return
         }
+        writeCache(`metrics:${period}`, data)
         setResult({ period, data: data as unknown as OrgMetrics, error: false })
       })
 

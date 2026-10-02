@@ -11,6 +11,7 @@ import UsageCard from "@/components/metrics/UsageCard";
 import { useMetrics } from "@/hooks/useMetrics";
 import { useMonthlyUsage } from "@/hooks/useMonthlyUsage";
 import type { MetricsPeriod } from "@/types";
+import MetricsSkeleton from "@/components/skeletons/MetricsSkeleton";
 
 const ROLLING: MetricsPeriod[] = ["7d", "30d", "90d"];
 
@@ -121,7 +122,8 @@ export default function MetricsPage() {
         </button>
       </TopBar>
 
-      <div className={`flex-1 overflow-y-auto p-5 space-y-5 transition-opacity ${loading ? "opacity-60" : ""}`}>
+      <div className={`flex-1 overflow-y-auto p-5 space-y-5 transition-opacity ${loading && !placeholder ? "opacity-60" : ""}`}>
+        {placeholder ? <MetricsSkeleton /> : (<>
         {error && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-medium text-red-700">
             {t("loadError")}
@@ -194,6 +196,7 @@ export default function MetricsPage() {
             {data && <MessagesCard messages={data.messages} />}
           </div>
         )}
+        </>)}
       </div>
     </div>
   );

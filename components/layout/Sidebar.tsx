@@ -138,9 +138,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              // Las paginas del dashboard son dinamicas: el prefetch se
-              // repetia en cada navegacion sin cachearse.
-              prefetch={false}
+              // Prefetch parcial: con loading.tsx en cada ruta solo se trae el
+              // shell y el skeleton (barato), y el clic muestra la pantalla al
+              // instante en vez de esperar al servidor.
               className={`group relative flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors ${
                 active
                   ? "bg-navy-900/5 text-navy-900"

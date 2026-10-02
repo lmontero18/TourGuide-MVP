@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import type { Role, TeamMember } from '@/types'
+import { readCache, writeCache } from '@/lib/clientCache'
 
 type ActionResult = { ok: true } | { ok: false; error: string; code?: string }
 
@@ -14,7 +15,7 @@ async function call(url: string, init?: RequestInit): Promise<ActionResult> {
 
 // Gestion del equipo via /api/agents (auth.users solo se lee con service role).
 export function useAgents() {
-  const [agents, setAgents] = useState<TeamMember[] | null>(null)
+  const [agents, setAgents] = useState<TeamMember[] | null>(() => readCache<TeamMember[]>('agents') ?? null)
   const [error, setError] = useState(false)
   const [version, setVersion] = useState(0)
   const reload = useCallback(() => setVersion((v) => v + 1), [])
@@ -24,6 +25,7 @@ export function useAgents() {
     fetch('/api/agents')
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
       .then((body: { agents: TeamMember[] }) => {
+        writeCache('agents', body.agents)
         if (cancelled) return
         setAgents(body.agents)
         setError(false)

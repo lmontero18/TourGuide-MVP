@@ -17,8 +17,11 @@ function redirectWithCookies(url: URL, response: NextResponse) {
 }
 
 export async function proxy(request: NextRequest) {
-  const { supabase, response } = createMiddlewareClient(request)
+  const ctx = createMiddlewareClient(request)
+  const { supabase } = ctx
 
+  // Si el token vencio, getUser lo refresca y deja las cookies nuevas en
+  // ctx.response (por eso se lee ctx.response despues, no antes).
   const { data: { user } } = await supabase.auth.getUser()
 
   const protectedPaths = ['/conversations', '/leads', '/metrics', '/settings', '/tours', '/templates', '/dashboard', '/onboarding']
@@ -26,7 +29,13 @@ export async function proxy(request: NextRequest) {
 
   // Redirect unauthenticated users from protected routes to login
   if (!user && isProtected) {
-    return redirectWithCookies(new URL('/login', request.url), response)
+    return redirectWithCookies(new URL('/login', request.url), ctx.response)
+  }
+
+  // Prefetch del <Link>: solo trae el shell y el loading.tsx de la ruta. La
+  // navegacion real vuelve a pasar por aca y hace los chequeos de abajo.
+  if (user && request.headers.get('next-router-prefetch')) {
+    return ctx.response
   }
 
   if (user) {
@@ -43,25 +52,25 @@ export async function proxy(request: NextRequest) {
 
     // Not onboarded → force onboarding (sin redirigir si ya está ahí — loop)
     if (!isOnboarded && isProtected && request.nextUrl.pathname !== '/onboarding') {
-      return redirectWithCookies(new URL('/onboarding', request.url), response)
+      return redirectWithCookies(new URL('/onboarding', request.url), ctx.response)
     }
 
     // Onboarded → keep out of auth / onboarding pages
     if (isOnboarded && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
-      return redirectWithCookies(new URL('/conversations', request.url), response)
+      return redirectWithCookies(new URL('/conversations', request.url), ctx.response)
     }
 
     if (isOnboarded && request.nextUrl.pathname === '/onboarding') {
-      return redirectWithCookies(new URL('/conversations', request.url), response)
+      return redirectWithCookies(new URL('/conversations', request.url), ctx.response)
     }
 
     const isAdminOnly = ADMIN_ONLY_PATHS.some(p => request.nextUrl.pathname.startsWith(p))
     if (isOnboarded && isAdminOnly && profile?.role !== 'admin') {
-      return redirectWithCookies(new URL('/conversations', request.url), response)
+      return redirectWithCookies(new URL('/conversations', request.url), ctx.response)
     }
   }
 
-  return response
+  return ctx.response
 }
 
 export const config = {

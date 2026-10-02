@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import type { WhatsAppTemplate } from '@/types'
+import { readCache, writeCache } from '@/lib/clientCache'
 
 export interface NewTemplate {
   name: string
@@ -19,8 +20,9 @@ type Result = { ok: true } | { ok: false; error: string; code?: string }
 
 // Plantillas del WABA de la org via /api/templates (Meta es la fuente de verdad).
 export function useTemplates() {
-  const [templates, setTemplates] = useState<WhatsAppTemplate[] | null>(null)
-  const [connected, setConnected] = useState(true)
+  const cached = readCache<{ templates: WhatsAppTemplate[]; connected: boolean }>('templates')
+  const [templates, setTemplates] = useState<WhatsAppTemplate[] | null>(cached?.templates ?? null)
+  const [connected, setConnected] = useState(cached?.connected ?? true)
   const [error, setError] = useState(false)
   const [version, setVersion] = useState(0)
   const reload = useCallback(() => setVersion((v) => v + 1), [])
@@ -30,6 +32,7 @@ export function useTemplates() {
     fetch('/api/templates')
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
       .then((body: { templates: WhatsAppTemplate[]; connected: boolean }) => {
+        writeCache('templates', body)
         if (cancelled) return
         setTemplates(body.templates)
         setConnected(body.connected)

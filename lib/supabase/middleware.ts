@@ -25,5 +25,12 @@ export function createMiddlewareClient(request: NextRequest) {
     }
   )
 
-  return { supabase, response }
+  // Getter: setAll reemplaza `response` cuando refresca la sesion. Devolver el
+  // valor directo entregaba la respuesta vieja y las cookies nuevas se perdian.
+  return {
+    supabase,
+    get response() {
+      return response
+    },
+  }
 }

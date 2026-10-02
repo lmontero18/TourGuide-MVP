@@ -180,6 +180,14 @@ body {
   }
 }
 
+/* Brillo de los skeletons (components/ui/skeleton.tsx). Anima `translate`
+   (no `transform`) porque las utilidades translate-* de Tailwind v4 usan esa
+   propiedad y las dos se sumarian. */
+@keyframes skeleton-shimmer {
+  from { translate: -100% 0; }
+  to { translate: 100% 0; }
+}
+
 @keyframes pulse-dot {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }

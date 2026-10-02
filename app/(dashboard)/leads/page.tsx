@@ -10,6 +10,7 @@ import { formatMoney } from "@/components/leads/leadMeta";
 import { useAuth } from "@/hooks/useAuth";
 import { useLeads } from "@/hooks/useLeads";
 import type { LeadStatus } from "@/types";
+import { LeadBoardSkeleton } from "@/components/skeletons/LeadsSkeleton";
 
 export default function LeadsPage() {
   const t = useTranslations("dashboard.leads");
@@ -105,7 +106,7 @@ export default function LeadsPage() {
           </label>
 
           {error && <p className="text-sm text-red-600">{t("loadError")}</p>}
-          {!leads && !error && <p className="text-sm text-slate-400">{t("loading")}</p>}
+          {!leads && !error && <LeadBoardSkeleton />}
           {leads && leads.length === 0 && (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
               <p className="text-sm font-semibold text-navy-900">{t("emptyTitle")}</p>

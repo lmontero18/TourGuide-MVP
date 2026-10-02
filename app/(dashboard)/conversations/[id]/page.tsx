@@ -9,6 +9,7 @@ import ChatSkeleton from "@/components/chat/ChatSkeleton";
 import { createClient } from "@/lib/supabase/client";
 import { ASSIGNED_AGENT_EMBED, toAssignee } from "@/lib/assignee";
 import type { ConversationStatus } from "@/types";
+import { readCache, writeCache } from "@/lib/clientCache";
 
 interface ConversationDetail {
   id: string;
@@ -22,8 +23,8 @@ export default function ConversationDetailPage() {
   const params = useParams();
   const t = useTranslations("dashboard.chat");
   const id = params.id as string;
-  const [conv, setConv] = useState<ConversationDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [conv, setConv] = useState<ConversationDetail | null>(() => readCache<ConversationDetail>(`conv:${id}`) ?? null);
+  const [loading, setLoading] = useState(() => !readCache<ConversationDetail>(`conv:${id}`));
 
   useEffect(() => {
     // Clicks rapidos entre conversaciones: una respuesta vieja que llega tarde
@@ -45,6 +46,7 @@ export default function ConversationDetailPage() {
         setLoading(false);
         return;
       }
+      writeCache(`conv:${id}`, data);
       setConv(data as unknown as ConversationDetail);
       setLoading(false);
     };
@@ -57,8 +59,11 @@ export default function ConversationDetailPage() {
   // La lista y el TopBar viven en conversations/layout.tsx: aca solo el chat.
   // La pagina no se re-monta al cambiar de conversacion: mientras llega la
   // nueva, `conv` todavia es la anterior. Id distinto = cargando.
-  if (loading || (conv && conv.id !== id)) return <ChatSkeleton />;
-  if (!conv) {
+  // Si esta conversacion ya se abrio antes, se muestra al instante desde la
+  // cache mientras llega la version fresca.
+  const current = conv && conv.id === id ? conv : readCache<ConversationDetail>(`conv:${id}`) ?? null;
+  if (!current && (loading || (conv && conv.id !== id))) return <ChatSkeleton />;
+  if (!current) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-slate-400">
         {t("notFound")}
@@ -67,13 +72,13 @@ export default function ConversationDetailPage() {
   }
   return (
     <ChatWindow
-      key={conv.id}
-      conversationId={conv.id}
-      contactName={conv.contact?.name ?? null}
-      contactPhone={conv.contact?.phone ?? ""}
-      initialBotActive={conv.bot_active}
-      initialStatus={conv.status}
-      initialAssignee={toAssignee(conv.assigned_agent)}
+      key={current.id}
+      conversationId={current.id}
+      contactName={current.contact?.name ?? null}
+      contactPhone={current.contact?.phone ?? ""}
+      initialBotActive={current.bot_active}
+      initialStatus={current.status}
+      initialAssignee={toAssignee(current.assigned_agent)}
     />
   );
 }

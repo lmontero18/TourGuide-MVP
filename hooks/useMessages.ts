@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Message } from '@/types'
+import { readCache, writeCache } from '@/lib/clientCache'
 
 export function useMessages(conversationId: string) {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [loading, setLoading] = useState(true)
+  // Volver a una conversacion ya abierta muestra sus mensajes al instante.
+  const [messages, setMessages] = useState<Message[]>(() => readCache<Message[]>(`messages:${conversationId}`) ?? [])
+  const [loading, setLoading] = useState(() => !readCache<Message[]>(`messages:${conversationId}`))
   const supabase = createClient()
 
   useEffect(() => {
@@ -43,6 +45,10 @@ export function useMessages(conversationId: string) {
       supabase.removeChannel(channel)
     }
   }, [conversationId, supabase])
+
+  useEffect(() => {
+    if (!loading) writeCache(`messages:${conversationId}`, messages)
+  }, [conversationId, messages, loading])
 
   return { messages, loading }
 }
