@@ -33,7 +33,14 @@
       "colPrice": "Precio",
       "morePrices": "+2 precios",
       "typeDay": "Tour de día",
-      "typeAdventure": "Aventura"
+      "typeAdventure": "Aventura",
+      "fichaButton": "Ficha",
+      "handoffNext": "Próximo paso: enviar datos de pago y confirmar cupos",
+      "tourApoyo": "Laguna de Apoyo",
+      "tourSomoto": "Cañón de Somoto · 6 pers.",
+      "tourMasaya": "Volcán Masaya · 4 pers.",
+      "tourIsletas": "Isletas de Granada",
+      "now": "ahora"
     },
     "demoMessage": "Hola, quiero una demo de Tourfy para mi agencia."
   },
