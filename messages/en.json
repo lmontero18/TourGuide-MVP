@@ -33,7 +33,14 @@
       "colPrice": "Price",
       "morePrices": "+2 prices",
       "typeDay": "Day tour",
-      "typeAdventure": "Adventure"
+      "typeAdventure": "Adventure",
+      "fichaButton": "Card",
+      "handoffNext": "Next step: send payment details and confirm spots",
+      "tourApoyo": "Apoyo Lagoon",
+      "tourSomoto": "Somoto Canyon · 6 people",
+      "tourMasaya": "Masaya Volcano · 4 people",
+      "tourIsletas": "Granada Islets",
+      "now": "now"
     },
     "demoMessage": "Hi, I'd like a Tourfy demo for my agency."
   },
