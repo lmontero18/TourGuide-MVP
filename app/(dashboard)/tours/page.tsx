@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
 import type { FaqDraft } from "@/components/tours/TourCards";
 import ToursTable from "@/components/tours/ToursTable";
@@ -12,7 +11,9 @@ import FaqAccordion from "@/components/tours/FaqAccordion";
 import SaveStatus, { type SaveState } from "@/components/tours/SaveStatus";
 import ToursSkeleton from "@/components/tours/ToursSkeleton";
 import type { BusinessSection, Organization, Tour } from "@/types";
-import { readCache, writeCache } from "@/lib/clientCache";
+import { useQueryClient } from "@tanstack/react-query";
+import { useOrganization } from "@/hooks/useOrganization";
+import { queryKeys } from "@/lib/query/keys";
 
 type Tab = "tours" | "business" | "faqs";
 
@@ -56,12 +57,31 @@ function toPayload({ tours, faqs, business }: Knowledge) {
   };
 }
 
+// La org viene de TanStack Query (compartida con Configuracion): con cache
+// la pagina abre al instante. El editor se monta una vez con esos datos y
+// desde ahi es dueño de su estado (un refetch en segundo plano no pisa lo que
+// se esta editando).
 export default function ToursSettingsPage() {
   const t = useTranslations("dashboard.tours");
-  // Con la org en cache la pagina abre al instante; igual se refresca abajo.
-  const [cachedOrg] = useState(() => readCache<Organization>("organization"));
-  const [loading, setLoading] = useState(!cachedOrg);
-  const [data, setData] = useState<Knowledge>(() => (cachedOrg ? toKnowledge(cachedOrg) : { tours: [], faqs: [], business: [] }));
+  const { data: org, isError } = useOrganization();
+
+  if (!org) {
+    return (
+      <div className="flex h-full flex-col">
+        <TopBar title={t("title")} />
+        <div className="flex-1 overflow-y-auto p-5">
+          {isError ? <p className="text-sm text-red-600">{t("loadError")}</p> : <ToursSkeleton />}
+        </div>
+      </div>
+    );
+  }
+  return <ToursEditor initialOrg={org} />;
+}
+
+function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
+  const t = useTranslations("dashboard.tours");
+  const queryClient = useQueryClient();
+  const [data, setData] = useState<Knowledge>(() => toKnowledge(initialOrg));
   const [tab, setTab] = useState<Tab>("tours");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -71,7 +91,6 @@ export default function ToursSettingsPage() {
   const latest = useRef(data);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inflight = useRef(false);
-  const edited = useRef(false);
   const queued = useRef(false);
 
   const flush = useCallback(async (keepalive = false) => {
@@ -95,18 +114,18 @@ export default function ToursSettingsPage() {
           keepalive,
         });
         ok = res.ok;
-        const cached = readCache<Organization>("organization");
-        if (ok && cached) writeCache("organization", { ...cached, ...payload });
+        // La cache queda igual a lo guardado: volver a la pagina no muestra
+        // la version vieja.
+        if (ok) queryClient.setQueryData<Organization>(queryKeys.organization, (prev) => (prev ? { ...prev, ...payload } : prev));
       } catch {
         ok = false;
       }
     } while (queued.current);
     inflight.current = false;
     setSaveState(ok ? "saved" : "error");
-  }, []);
+  }, [queryClient]);
 
   const edit = useCallback((patch: Partial<Knowledge>) => {
-    edited.current = true;
     setData((prev) => {
       const next = { ...prev, ...patch };
       latest.current = next;
@@ -116,28 +135,6 @@ export default function ToursSettingsPage() {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => void flush(), AUTOSAVE_MS);
   }, [flush]);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch("/api/organizations");
-        const result = await res.json();
-        if (!res.ok) throw new Error(result.error ?? t("loadError"));
-        const org = result.organization as Organization;
-        writeCache("organization", org);
-        // Si ya empezo a editar sobre la version en cache, no se la pisamos.
-        if (edited.current) return;
-        const loaded = toKnowledge(org);
-        latest.current = loaded;
-        setData(loaded);
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("loadError"));
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [t]);
 
   // Avisar antes de cerrar la pestaña si queda algo sin guardar.
   const unsaved = saveState === "pending" || saveState === "saving" || saveState === "error";
@@ -200,9 +197,6 @@ export default function ToursSettingsPage() {
       </TopBar>
 
       <div className="flex-1 overflow-y-auto p-5">
-        {loading ? (
-          <ToursSkeleton />
-        ) : (
           <div className="mx-auto max-w-5xl space-y-5">
             <p className="max-w-2xl text-sm text-slate-500">{t("subtitle")}</p>
 
@@ -232,7 +226,6 @@ export default function ToursSettingsPage() {
             {tab === "business" && <BusinessGrid sections={business} onChange={(v) => edit({ business: v })} />}
             {tab === "faqs" && <FaqAccordion faqs={faqs} onChange={(v) => edit({ faqs: v })} />}
           </div>
-        )}
       </div>
 
       <TourDrawer tour={selected} saveState={saveState} onChange={updateTour} onDelete={deleteTour} onClose={closeDrawer} />

@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
+import { queryKeys } from '@/lib/query/keys'
 import type { Lead, LeadDetails, LeadStatus } from '@/types'
-import { readCache, writeCache } from '@/lib/clientCache'
 
 export interface LeadWithContact extends Lead {
   contact: { name: string | null; phone: string } | null
@@ -16,13 +17,15 @@ export interface LeadPatch {
   fields?: Partial<Record<'tour_interest' | 'summary' | 'next_step' | keyof LeadDetails, string | null>>
 }
 
+type PatchResult = { ok: true } | { ok: false; error: string }
+
 const LEAD_SELECT =
   'id, org_id, contact_id, conversation_id, tour_interest, status, metadata, summary, next_step, intent, locked_fields, amount, currency, extracted_at, closed_at, created_at, updated_at, contact:contacts(name, phone)'
 
 // Los cerrados (reservado/perdido) se muestran hasta 60 dias; los abiertos, todos.
 const CLOSED_WINDOW_DAYS = 60
 
-async function patchLead(id: string, patch: LeadPatch): Promise<{ ok: true } | { ok: false; error: string }> {
+async function patchLead(id: string, patch: LeadPatch): Promise<PatchResult> {
   const res = await fetch(`/api/leads/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -38,117 +41,115 @@ async function requestRefresh(id: string): Promise<boolean> {
   return res.ok
 }
 
+function applyPatch(lead: LeadWithContact, patch: LeadPatch): LeadWithContact {
+  return {
+    ...lead,
+    ...(patch.status ? { status: patch.status } : {}),
+    ...(patch.amount !== undefined ? { amount: patch.amount } : {}),
+    ...(patch.currency !== undefined ? { currency: patch.currency } : {}),
+  }
+}
+
 // Tablero de leads de la org, en vivo: cualquier cambio (la IA llenando una
-// ficha, otro agente moviendo una tarjeta) recarga la lista.
+// ficha, otro agente moviendo una tarjeta) invalida la consulta.
 export function useLeads(orgId: string | null) {
-  const [leads, setLeads] = useState<LeadWithContact[] | null>(() => (orgId ? readCache<LeadWithContact[]>(`leads:${orgId}`) ?? null : null))
-  const [error, setError] = useState(false)
+  const queryClient = useQueryClient()
+  const key = useMemo(() => queryKeys.leads(orgId), [orgId])
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Trae la lista; el estado se aplica en el callback (nunca sincrono en el efecto).
-  const load = useCallback(async () => {
-    if (!orgId) return
-    const supabase = createClient()
-    const since = new Date(Date.now() - CLOSED_WINDOW_DAYS * 86_400_000).toISOString()
-    return supabase
-      .from('leads')
-      .select(LEAD_SELECT)
-      .or(`status.in.(new,contacted,qualified),closed_at.gte.${since}`)
-      .order('updated_at', { ascending: false })
-      .limit(500)
-      .then(({ data, error: err }) => {
-        if (err) return setError(true)
-        setError(false)
-        writeCache(`leads:${orgId}`, data ?? [])
-        setLeads((data ?? []) as unknown as LeadWithContact[])
-      })
-  }, [orgId])
+  const { data, isError } = useQuery({
+    queryKey: key,
+    enabled: !!orgId,
+    queryFn: async () => {
+      const since = new Date(Date.now() - CLOSED_WINDOW_DAYS * 86_400_000).toISOString()
+      const { data, error } = await createClient()
+        .from('leads')
+        .select(LEAD_SELECT)
+        .or(`status.in.(new,contacted,qualified),closed_at.gte.${since}`)
+        .order('updated_at', { ascending: false })
+        .limit(500)
+      if (error) throw error
+      return (data ?? []) as unknown as LeadWithContact[]
+    },
+  })
 
   useEffect(() => {
     if (!orgId) return
     const supabase = createClient()
-    const initial = setTimeout(() => void load(), 0)
+    // Rafagas (la IA actualiza varias fichas seguidas) = una sola recarga.
     const schedule = () => {
       if (timer.current) clearTimeout(timer.current)
-      timer.current = setTimeout(() => void load(), 400)
+      timer.current = setTimeout(() => void queryClient.invalidateQueries({ queryKey: ['leads'] }), 400)
     }
     const channel = supabase
       .channel(`leads:${orgId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'leads', filter: `org_id=eq.${orgId}` }, schedule)
       .subscribe()
     return () => {
-      clearTimeout(initial)
       if (timer.current) clearTimeout(timer.current)
       supabase.removeChannel(channel)
     }
-  }, [orgId, load])
+  }, [orgId, queryClient])
 
   const update = useCallback(
     async (id: string, patch: LeadPatch) => {
-      // Optimista para que la tarjeta se mueva al instante; el realtime confirma.
-      setLeads((prev) =>
-        prev?.map((l) =>
-          l.id === id
-            ? {
-                ...l,
-                ...(patch.status ? { status: patch.status } : {}),
-                ...(patch.amount !== undefined ? { amount: patch.amount } : {}),
-                ...(patch.currency !== undefined ? { currency: patch.currency } : {}),
-              }
-            : l
-        ) ?? prev
-      )
+      // Optimista: la tarjeta se mueve al instante; si falla, se recarga.
+      await queryClient.cancelQueries({ queryKey: key })
+      queryClient.setQueryData<LeadWithContact[]>(key, (prev) => prev?.map((l) => (l.id === id ? applyPatch(l, patch) : l)))
       const res = await patchLead(id, patch)
-      if (!res.ok) void load()
+      if (!res.ok) void queryClient.invalidateQueries({ queryKey: key })
       return res
     },
-    [load]
+    [queryClient, key]
   )
 
-  return { leads, error, update, refresh: requestRefresh, reload: load }
+  return { leads: data ?? null, error: isError, update, refresh: requestRefresh }
 }
 
 // Lead mas reciente de una conversacion (panel "Ficha" del chat), en vivo.
 export function useConversationLead(conversationId: string) {
-  const [lead, setLead] = useState<LeadWithContact | null | undefined>(undefined)
+  const queryClient = useQueryClient()
+  const key = queryKeys.conversationLead(conversationId)
 
-  const load = useCallback(async () => {
-    const supabase = createClient()
-    const { data } = await supabase
-      .from('leads')
-      .select(LEAD_SELECT)
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    setLead((data as unknown as LeadWithContact) ?? null)
-  }, [conversationId])
+  const { data, isPending } = useQuery({
+    queryKey: key,
+    queryFn: async () => {
+      const { data, error } = await createClient()
+        .from('leads')
+        .select(LEAD_SELECT)
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (error) throw error
+      return (data as unknown as LeadWithContact) ?? null
+    },
+  })
 
   useEffect(() => {
     const supabase = createClient()
-    const initial = setTimeout(() => void load(), 0)
     const channel = supabase
       .channel(`lead-conv:${conversationId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'leads', filter: `conversation_id=eq.${conversationId}` },
-        () => void load()
+        () => void queryClient.invalidateQueries({ queryKey: queryKeys.conversationLead(conversationId) })
       )
       .subscribe()
     return () => {
-      clearTimeout(initial)
       supabase.removeChannel(channel)
     }
-  }, [conversationId, load])
+  }, [conversationId, queryClient])
 
   const update = useCallback(
     async (id: string, patch: LeadPatch) => {
       const res = await patchLead(id, patch)
-      void load()
+      // La ficha del chat y el tablero comparten datos: refrescar ambos.
+      void queryClient.invalidateQueries({ queryKey: ['leads'] })
       return res
     },
-    [load]
+    [queryClient]
   )
 
-  return { lead, update, refresh: requestRefresh }
+  return { lead: isPending ? undefined : (data ?? null), update, refresh: requestRefresh }
 }
