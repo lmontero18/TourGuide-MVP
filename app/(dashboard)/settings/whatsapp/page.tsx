@@ -1,28 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
-import { createClient } from "@/lib/supabase/client";
+import { useWhatsAppAccount } from "@/hooks/useWhatsAppAccount";
+import { queryKeys } from "@/lib/query/keys";
 import ConnectWhatsAppButton from "@/components/whatsapp/ConnectWhatsAppButton";
 import BillingCard from "@/components/whatsapp/BillingCard";
-
-interface ConnectedAccount {
-  id: string;
-  waba_id: string;
-  phone_number: string;
-  status: string;
-  connected_at: string | null;
-  payment_failed_at: string | null;
-}
+import WhatsAppSettingsSkeleton from "@/components/skeletons/WhatsAppSettingsSkeleton";
 
 export default function WhatsAppSettingsPage() {
   const t = useTranslations("dashboard.settings.whatsapp");
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: account = null, isPending: loading, refetch } = useWhatsAppAccount();
   const [submitting, setSubmitting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
-  const [account, setAccount] = useState<ConnectedAccount | null>(null);
   const [showManual, setShowManual] = useState(false);
 
   const [wabaId, setWabaId] = useState("");
@@ -30,38 +24,7 @@ export default function WhatsAppSettingsPage() {
   const [accessToken, setAccessToken] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
-  const loadAccount = useCallback(async () => {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    const { data: profile } = await supabase
-      .from("users")
-      .select("org_id")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile?.org_id) {
-      setLoading(false);
-      return;
-    }
-
-    const { data: wa } = await supabase
-      .from("whatsapp_accounts")
-      .select("id, waba_id, phone_number, status, connected_at, payment_failed_at")
-      .eq("org_id", profile.org_id)
-      .maybeSingle();
-
-    setAccount(wa ? (wa as ConnectedAccount) : null);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    loadAccount();
-  }, [loadAccount]);
+  const loadAccount = () => refetch();
 
   const handleConnect = async () => {
     if (!wabaId.trim() || !phoneNumberId.trim() || !accessToken.trim()) {
@@ -102,7 +65,7 @@ export default function WhatsAppSettingsPage() {
       const res = await fetch("/api/whatsapp/disconnect", { method: "POST" });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error ?? t("errors.disconnect"));
-      setAccount(null);
+      queryClient.setQueryData(queryKeys.whatsappAccount, null);
       toast.success(t("disconnectedToast"));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("errors.disconnect"));
@@ -116,12 +79,9 @@ export default function WhatsAppSettingsPage() {
       <TopBar title={t("title")} />
 
       <div className="flex-1 overflow-y-auto p-5">
+        {loading ? <WhatsAppSettingsSkeleton /> : (
         <div className="max-w-2xl space-y-6">
-          {loading ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500">
-              {t("loading")}
-            </div>
-          ) : account ? (
+          {account ? (
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
               <h2 className="text-sm font-bold text-navy-900 mb-4">{t("connectedNumber")}</h2>
               <div className="flex items-center justify-between rounded-xl bg-green-50 border border-green-200 p-4">
@@ -251,6 +211,7 @@ export default function WhatsAppSettingsPage() {
             </>
           )}
         </div>
+        )}
       </div>
     </div>
   );

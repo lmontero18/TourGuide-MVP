@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useOrganization } from "@/hooks/useOrganization";
+import { queryKeys } from "@/lib/query/keys";
 import { useTranslations } from "next-intl";
 import { TIMEZONES, utcOffsetLabel } from "@/lib/timezones";
 import Link from "next/link";
@@ -10,42 +13,53 @@ import SettingsSkeleton from "@/components/settings/SettingsSkeleton";
 import { DEFAULT_RANGE, normalizeBusinessHours } from "@/lib/bot/businessHours";
 import type { Organization } from "@/types";
 
+// La org viene de TanStack Query (compartida con Tours): con cache abre al
+// instante. El formulario se monta una vez con esos datos y es dueño de su
+// estado, asi un refetch en segundo plano no pisa lo que se esta editando.
 export default function SettingsPage() {
   const t = useTranslations("dashboard.settings");
-  const [loading, setLoading] = useState(true);
+  const { data: org, isError } = useOrganization();
+
+  return (
+    <div className="flex h-full flex-col">
+      <TopBar title={t("title")}>
+        <Link
+          href="/settings/whatsapp"
+          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+          </svg>
+          WhatsApp
+        </Link>
+      </TopBar>
+
+      <div className="flex-1 overflow-y-auto p-5">
+        {org ? (
+          <SettingsForm initialOrg={org} />
+        ) : isError ? (
+          <p className="text-sm text-red-600">{t("errors.load")}</p>
+        ) : (
+          <SettingsSkeleton />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SettingsForm({ initialOrg }: { initialOrg: Organization }) {
+  const t = useTranslations("dashboard.settings");
+  const queryClient = useQueryClient();
+  const initialHours = normalizeBusinessHours(initialOrg.bot_config?.business_hours);
   const [saving, setSaving] = useState(false);
 
-  const [orgName, setOrgName] = useState("");
-  const [timezone, setTimezone] = useState("America/Lima");
-  const [weekdaysStart, setWeekdaysStart] = useState(DEFAULT_RANGE.start);
-  const [weekdaysEnd, setWeekdaysEnd] = useState(DEFAULT_RANGE.end);
-  const [weekendClosed, setWeekendClosed] = useState(false);
-  const [weekendStart, setWeekendStart] = useState(DEFAULT_RANGE.start);
-  const [weekendEnd, setWeekendEnd] = useState(DEFAULT_RANGE.end);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch("/api/organizations");
-        const result = await res.json();
-        if (!res.ok) throw new Error(result.error ?? t("errors.load"));
-        const org = result.organization as Organization;
-        setOrgName(org.name);
-        setTimezone(org.bot_config?.timezone ?? "America/Lima");
-        const hours = normalizeBusinessHours(org.bot_config?.business_hours);
-        setWeekdaysStart(hours.weekdays.start);
-        setWeekdaysEnd(hours.weekdays.end);
-        setWeekendClosed(hours.weekend === null);
-        setWeekendStart(hours.weekend?.start ?? DEFAULT_RANGE.start);
-        setWeekendEnd(hours.weekend?.end ?? DEFAULT_RANGE.end);
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t("errors.load"));
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [t]);
+  const [orgName, setOrgName] = useState(initialOrg.name);
+  const [timezone, setTimezone] = useState(initialOrg.bot_config?.timezone ?? "America/Lima");
+  const [weekdaysStart, setWeekdaysStart] = useState(initialHours.weekdays.start);
+  const [weekdaysEnd, setWeekdaysEnd] = useState(initialHours.weekdays.end);
+  const [weekendClosed, setWeekendClosed] = useState(initialHours.weekend === null);
+  const [weekendStart, setWeekendStart] = useState(initialHours.weekend?.start ?? DEFAULT_RANGE.start);
+  const [weekendEnd, setWeekendEnd] = useState(initialHours.weekend?.end ?? DEFAULT_RANGE.end);
 
   // Nombre del pais/ciudad segun el idioma; zonas fuera de la lista muestran el id.
   const tzLabel = (tz: { id: string; label: string }) => {
@@ -76,6 +90,23 @@ export default function SettingsPage() {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error ?? t("errors.save"));
+      // La cache de TanStack Query queda igual a lo guardado.
+      queryClient.setQueryData<Organization>(queryKeys.organization, (prev) =>
+        prev
+          ? {
+              ...prev,
+              name: orgName.trim(),
+              bot_config: {
+                ...prev.bot_config,
+                timezone,
+                business_hours: {
+                  weekdays: { start: weekdaysStart, end: weekdaysEnd },
+                  weekend: weekendClosed ? null : { start: weekendStart, end: weekendEnd },
+                },
+              },
+            }
+          : prev
+      );
       toast.success(t("saved"));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("errors.save"));
@@ -85,23 +116,6 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex h-full flex-col">
-      <TopBar title={t("title")}>
-        <Link
-          href="/settings/whatsapp"
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-          </svg>
-          WhatsApp
-        </Link>
-      </TopBar>
-
-      <div className="flex-1 overflow-y-auto p-5">
-        {loading ? (
-          <SettingsSkeleton />
-        ) : (
           <div className="max-w-2xl space-y-6">
             {/* Organization */}
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
@@ -217,8 +231,5 @@ export default function SettingsPage() {
               </button>
             </div>
           </div>
-        )}
-      </div>
-    </div>
   );
 }

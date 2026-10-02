@@ -15,24 +15,18 @@ export async function GET() {
     return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   }
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('org_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile?.org_id) {
-    return NextResponse.json({ error: t('noOrganization') }, { status: 404 })
-  }
-
+  // RLS (org_select_own) solo deja ver la org del usuario: no hace falta
+  // buscar antes su org_id en users (una ida y vuelta menos).
   const { data: org, error } = await supabase
     .from('organizations')
     .select('id, name, slug, prompt, faqs, tours, business_info, bot_config, plan, status, onboarded_at')
-    .eq('id', profile.org_id)
-    .single()
+    .maybeSingle()
 
-  if (error || !org) {
+  if (error) {
     return NextResponse.json({ error: t('orgNotFound') }, { status: 404 })
+  }
+  if (!org) {
+    return NextResponse.json({ error: t('noOrganization') }, { status: 404 })
   }
 
   return NextResponse.json({ organization: org })

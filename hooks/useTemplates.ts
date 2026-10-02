@@ -1,6 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryKeys } from '@/lib/query/keys'
 import type { WhatsAppTemplate } from '@/types'
 
 export interface NewTemplate {
@@ -17,31 +19,22 @@ export interface NewTemplate {
 // `error` vacio = la API no dio motivo: la UI muestra su mensaje traducido.
 type Result = { ok: true } | { ok: false; error: string; code?: string }
 
+interface TemplatesResponse {
+  templates: WhatsAppTemplate[]
+  connected: boolean
+}
+
+async function fetchTemplates(): Promise<TemplatesResponse> {
+  const res = await fetch('/api/templates')
+  if (!res.ok) throw new Error(String(res.status))
+  return res.json()
+}
+
 // Plantillas del WABA de la org via /api/templates (Meta es la fuente de verdad).
 export function useTemplates() {
-  const [templates, setTemplates] = useState<WhatsAppTemplate[] | null>(null)
-  const [connected, setConnected] = useState(true)
-  const [error, setError] = useState(false)
-  const [version, setVersion] = useState(0)
-  const reload = useCallback(() => setVersion((v) => v + 1), [])
-
-  useEffect(() => {
-    let cancelled = false
-    fetch('/api/templates')
-      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then((body: { templates: WhatsAppTemplate[]; connected: boolean }) => {
-        if (cancelled) return
-        setTemplates(body.templates)
-        setConnected(body.connected)
-        setError(false)
-      })
-      .catch(() => {
-        if (!cancelled) setError(true)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [version])
+  const queryClient = useQueryClient()
+  const { data, isError } = useQuery({ queryKey: queryKeys.templates, queryFn: fetchTemplates })
+  const reload = useCallback(() => queryClient.invalidateQueries({ queryKey: queryKeys.templates }), [queryClient])
 
   const create = useCallback(
     async (input: NewTemplate): Promise<Result> => {
@@ -52,7 +45,7 @@ export function useTemplates() {
       })
       const body = await res.json().catch(() => ({}))
       if (!res.ok) return { ok: false, error: body.error ?? '', code: body.code }
-      reload()
+      void reload()
       return { ok: true }
     },
     [reload]
@@ -63,11 +56,18 @@ export function useTemplates() {
       const res = await fetch(`/api/templates/${name}`, { method: 'DELETE' })
       const body = await res.json().catch(() => ({}))
       if (!res.ok) return { ok: false, error: body.error ?? '', code: body.code }
-      reload()
+      void reload()
       return { ok: true }
     },
     [reload]
   )
 
-  return { templates, connected, error, create, remove, reload }
+  return {
+    templates: data?.templates ?? null,
+    connected: data?.connected ?? true,
+    error: isError,
+    create,
+    remove,
+    reload,
+  }
 }

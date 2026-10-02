@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { logout } from "@/app/(auth)/login/actions";
+import { useQueryClient } from "@tanstack/react-query";
 import { setLocale } from "@/app/actions/locale";
 import { LOCALES, type Locale } from "@/i18n/config";
 
@@ -28,6 +29,7 @@ function getInitials(name: string | null, email: string | null): string {
 
 export default function TopBar({ title, children }: TopBarProps) {
   const { profile } = useAuth();
+  const queryClient = useQueryClient();
   const locale = useLocale() as Locale;
   const t = useTranslations("dashboard.topbar");
   const tAgents = useTranslations("dashboard.agents");
@@ -113,6 +115,8 @@ export default function TopBar({ title, children }: TopBarProps) {
               <form
                 action={async () => {
                   setLoggingOut(true);
+                  // Otro usuario en esta pestaña no debe ver datos de la cache.
+                  queryClient.clear();
                   await logout();
                 }}
               >
