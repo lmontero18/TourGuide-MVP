@@ -1026,6 +1026,28 @@
             "tour": "Masaya Volcano"
           }
         }
+      },
+      "history": {
+        "title": "Send history",
+        "sub": "Templates sent, who sent them and whether they arrived.",
+        "month": "Month",
+        "sent": "Sent",
+        "delivered": "Delivered",
+        "read": "Read",
+        "failed": "Failed",
+        "byAgent": "By agent",
+        "byTemplate": "By template",
+        "colDate": "Date",
+        "colTemplate": "Template",
+        "colCustomer": "Customer",
+        "colSender": "Sent by",
+        "colStatus": "Status",
+        "unknownAgent": "Not recorded",
+        "empty": "No templates were sent this month.",
+        "loadError": "We couldn't load the history.",
+        "cardTitle": "Templates sent this month",
+        "cardSub": "Meta charges for every template; marketing ones cost more than utility ones.",
+        "seeHistory": "See history"
       }
     },
     "connectWhatsApp": {

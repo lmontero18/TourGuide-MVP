@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import TemplatePreview from "@/components/templates/TemplatePreview";
 import { useTemplates } from "@/hooks/useTemplates";
 import type { WhatsAppTemplate } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TemplatePickerProps {
   conversationId: string;
@@ -18,6 +19,7 @@ interface TemplatePickerProps {
 export default function TemplatePicker({ conversationId, contactName, onClose }: TemplatePickerProps) {
   const t = useTranslations("dashboard.chat.templates");
   const { templates, error } = useTemplates();
+  const queryClient = useQueryClient();
   const [selected, setSelected] = useState<WhatsAppTemplate | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
@@ -41,6 +43,8 @@ export default function TemplatePicker({ conversationId, contactName, onClose }:
     const body = await res.json().catch(() => ({}));
     setSending(false);
     if (res.ok) {
+      // El historial de plantillas ya tiene un envio nuevo.
+      void queryClient.invalidateQueries({ queryKey: ["templates", "history"] });
       toast.success(t("sent"));
       onClose();
     } else {

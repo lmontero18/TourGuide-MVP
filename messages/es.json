@@ -1026,6 +1026,28 @@
             "tour": "Volcán Masaya"
           }
         }
+      },
+      "history": {
+        "title": "Historial de envíos",
+        "sub": "Plantillas enviadas, quién las mandó y si llegaron.",
+        "month": "Mes",
+        "sent": "Enviadas",
+        "delivered": "Entregadas",
+        "read": "Leídas",
+        "failed": "Fallidas",
+        "byAgent": "Por agente",
+        "byTemplate": "Por plantilla",
+        "colDate": "Fecha",
+        "colTemplate": "Plantilla",
+        "colCustomer": "Cliente",
+        "colSender": "Enviada por",
+        "colStatus": "Estado",
+        "unknownAgent": "Sin registrar",
+        "empty": "No se enviaron plantillas este mes.",
+        "loadError": "No pudimos cargar el historial.",
+        "cardTitle": "Plantillas enviadas este mes",
+        "cardSub": "Meta cobra cada plantilla; las de marketing cuestan más que las de utilidad.",
+        "seeHistory": "Ver historial"
       }
     },
     "connectWhatsApp": {

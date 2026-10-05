@@ -176,6 +176,7 @@ export async function POST(
       from_bot: false,
       wa_message_id: wamid,
       delivery_status: wamid ? 'sent' : null,
+      sender_id: user.id,
     })
     .select('id, conversation_id, role, content, from_bot, channel, created_at, delivery_status')
     .single()

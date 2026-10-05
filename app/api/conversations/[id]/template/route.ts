@@ -99,6 +99,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     from_bot: false,
     wa_message_id: wamid,
     delivery_status: wamid ? 'sent' : null,
+    // Historial de plantillas: cual se mando y quien la mando.
+    sender_id: user.id,
+    template_name: template.name,
+    template_language: template.language,
+    template_category: ['UTILITY', 'MARKETING', 'AUTHENTICATION'].includes(template.category) ? template.category : null,
   })
   if (insertError) {
     log.error('template sent but not saved', { error: insertError, org_id: profile.org_id })
