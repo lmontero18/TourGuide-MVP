@@ -85,11 +85,11 @@ export default function ChatWindow({
     return () => document.removeEventListener("mousedown", handler);
   }, [menuOpen]);
 
-  // Dedupe optimistic when realtime delivers the persisted message
-  useEffect(() => {
-    if (optimistic.length === 0) return;
-    setOptimistic((prev) =>
-      prev.filter((opt) => {
+  // Los optimistas que ya llegaron por realtime se ocultan (derivado en el
+  // render; antes un efecto los borraba del estado y disparaba otro render).
+  const pendingOptimistic = useMemo(
+    () =>
+      optimistic.filter((opt) => {
         if (opt.status === "failed") return true;
         return !messages.some(
           (m) =>
@@ -97,11 +97,9 @@ export default function ChatWindow({
             m.content === opt.content &&
             Math.abs(new Date(m.created_at).getTime() - opt.sentAt) < 30_000
         );
-      })
-    );
-    // intentionally exclude `optimistic` from deps to avoid feedback loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages]);
+      }),
+    [optimistic, messages]
+  );
 
   const combined = useMemo(() => {
     const real = messages.map((m) => ({
@@ -115,8 +113,11 @@ export default function ChatWindow({
       failed: false,
       delivery: m.delivery_status ?? null,
       errorCode: m.delivery_error_code ?? null,
+      senderId: m.sender_id ?? null,
+      senderName: m.sender?.full_name || m.sender?.email || null,
+      templateName: m.template_name ?? null,
     }));
-    const opt = optimistic.map((o) => ({
+    const opt = pendingOptimistic.map((o) => ({
       key: o.id,
       content: o.content,
       role: o.role,
@@ -127,9 +128,12 @@ export default function ChatWindow({
       failed: o.status === "failed",
       delivery: null,
       errorCode: null,
+      senderId: null as string | null,
+      senderName: null as string | null,
+      templateName: null as string | null,
     }));
     return [...real, ...opt].sort((a, b) => a.sortAt - b.sortAt);
-  }, [messages, optimistic, locale]);
+  }, [messages, pendingOptimistic, locale]);
 
   // Al abrir, salto directo al ultimo mensaje (con los mensajes en cache el
   // scroll suave arrancaba antes del layout y quedaba arriba). Despues, los
@@ -413,6 +417,9 @@ export default function ChatWindow({
               failed={msg.failed}
               delivery={msg.delivery}
               errorCode={msg.errorCode}
+              senderId={msg.senderId}
+              senderName={msg.senderName}
+              templateName={msg.templateName}
             />
           ))
         )}

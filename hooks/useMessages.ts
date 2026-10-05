@@ -17,11 +17,11 @@ export function useMessages(conversationId: string) {
     queryFn: async () => {
       const { data, error } = await createClient()
         .from('messages')
-        .select('id, conversation_id, role, content, from_bot, channel, media_url, media_type, created_at, delivery_status, delivery_error_code')
+        .select('id, conversation_id, role, content, from_bot, channel, media_url, media_type, created_at, delivery_status, delivery_error_code, sender_id, template_name, sender:users!messages_sender_id_fkey(full_name, email)')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true })
       if (error) throw error
-      return (data ?? []) as Message[]
+      return (data ?? []) as unknown as Message[]
     },
     // Realtime ya trae los nuevos: no refetch al volver a la pestaña.
     refetchOnWindowFocus: false,
@@ -39,6 +39,9 @@ export function useMessages(conversationId: string) {
           queryClient.setQueryData<Message[]>(queryKeys.messages(conversationId), (prev) =>
             prev?.some((m) => m.id === msg.id) ? prev : [...(prev ?? []), msg]
           )
+          // Realtime no trae el join del remitente: si lo escribio un agente,
+          // se recarga para mostrar su nombre en la burbuja.
+          if (msg.sender_id) void queryClient.invalidateQueries({ queryKey: queryKeys.messages(conversationId) })
         }
       )
       // Estado de entrega (enviado → entregado → leido, o fallido) que marca

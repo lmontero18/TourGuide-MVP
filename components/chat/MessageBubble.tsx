@@ -18,6 +18,9 @@ interface MessageBubbleProps {
   failed?: boolean;
   delivery?: DeliveryStatus | null;
   errorCode?: number | null;
+  senderId?: string | null;
+  senderName?: string | null;
+  templateName?: string | null;
 }
 
 // ✓ enviado · ✓✓ entregado · ✓✓ celeste leido (como WhatsApp).
@@ -52,13 +55,21 @@ const ROLE_STYLES: Record<MessageRole, { wrapper: string; bubble: string; label:
   },
 };
 
-export default function MessageBubble({ content, role, createdAt, mediaPath, pending, failed, delivery, errorCode }: MessageBubbleProps) {
+export default function MessageBubble({ content, role, createdAt, mediaPath, pending, failed, delivery, errorCode, senderId, senderName, templateName }: MessageBubbleProps) {
   const t = useTranslations("dashboard.chat");
   const tD = useTranslations("dashboard.chat.delivery");
-  const { role: userRole } = useAuth();
+  const { role: userRole, user } = useAuth();
   const undelivered = delivery === "failed";
   const reason = deliveryReason(errorCode);
   const style = ROLE_STYLES[role];
+  // Burbuja de agente: quien la escribio ("Tú" o el nombre) y si fue plantilla.
+  // Mensajes viejos sin sender_id y los optimistas propios no llevan etiqueta.
+  const agentLabel =
+    role === "agent" && senderId
+      ? [senderId === user?.id ? t(style.label) : senderName ?? "", templateName ? t("templateTag", { name: templateName }) : ""]
+          .filter(Boolean)
+          .join(" · ")
+      : null;
   const mediaUrl = useChatMediaUrl(mediaPath);
   const [imgFailed, setImgFailed] = useState(false);
   const isMediaPlaceholder = /^\[[a-z_]+\]$/.test(content);
@@ -78,6 +89,11 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
             role === "assistant" ? "text-blue-500" : "text-slate-400"
           }`}>
             {t(style.label)}
+          </span>
+        )}
+        {agentLabel && (
+          <span className={`block text-[10px] font-bold mb-0.5 ${undelivered ? "text-slate-500" : "text-white/60"}`}>
+            {agentLabel}
           </span>
         )}
         {mediaUrl && (
