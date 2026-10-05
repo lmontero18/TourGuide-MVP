@@ -77,6 +77,8 @@ export async function extractLead(input: {
   tourNames: string[]
   today: string
   timezone: string
+  // Contexto extra para el modelo (ej. cliente que vuelve tras una reserva).
+  note?: string
 }): Promise<ExtractedLead> {
   const catalog = input.tourNames.length ? input.tourNames.slice(0, 100).join('\n') : '(sin catálogo)'
   const chat = input.transcript.map((m) => `${ROLE_LABEL[m.role]}: ${m.content}`).join('\n')
@@ -89,7 +91,7 @@ export async function extractLead(input: {
       { role: 'system', content: SYSTEM_PROMPT },
       {
         role: 'user',
-        content: `Hoy es ${input.today} (zona horaria ${input.timezone}).\n\nCatálogo de tours:\n${catalog}\n\nConversación:\n${chat}`,
+        content: `Hoy es ${input.today} (zona horaria ${input.timezone}).\n\nCatálogo de tours:\n${catalog}\n\n${input.note ? `${input.note}\n\n` : ''}Conversación:\n${chat}`,
       },
     ],
     response_format: { type: 'json_schema', json_schema: { name: 'lead_card', strict: true, schema: SCHEMA } },

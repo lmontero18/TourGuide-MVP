@@ -1131,7 +1131,10 @@
         "needs": "Special needs",
         "language": "Language",
         "next_step": "Next step"
-      }
+      },
+      "history": "{count, plural, one {Previous opportunity} other {# previous opportunities}} with this customer",
+      "refreshClosed": "Check for a new opportunity",
+      "refreshClosedHint": "Reads the messages since it was closed and, if the customer asks for something new, opens another lead."
     },
     "common": {
       "loading": "Loading…"

@@ -153,3 +153,31 @@ export function useConversationLead(conversationId: string) {
 
   return { lead: isPending ? undefined : (data ?? null), update, refresh: requestRefresh }
 }
+
+export interface PastLead {
+  id: string
+  status: LeadStatus
+  tour_interest: string | null
+  amount: number | null
+  currency: string | null
+  created_at: string
+  closed_at: string | null
+}
+
+// Oportunidades del mismo cliente (para ver en la ficha si ya compro antes).
+export function useContactLeads(contactId: string | null) {
+  return useQuery({
+    queryKey: queryKeys.contactLeads(contactId ?? ''),
+    enabled: !!contactId,
+    queryFn: async () => {
+      const { data, error } = await createClient()
+        .from('leads')
+        .select('id, status, tour_interest, amount, currency, created_at, closed_at')
+        .eq('contact_id', contactId as string)
+        .order('created_at', { ascending: false })
+        .limit(10)
+      if (error) throw error
+      return (data ?? []) as PastLead[]
+    },
+  })
+}
