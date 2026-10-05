@@ -16,6 +16,11 @@ Sentry.init({
     // ImportUserError = error operacional esperado (se muestra al usuario),
     // no es un bug — no reportar.
     if (hint.originalException instanceof ImportUserError) return null
+    // Header de estado del router malformado (ej. "?_rsc=test1"): lo mandan
+    // scanners automaticos, el cliente de Next nunca lo genera. Next responde
+    // el error y no hay nada que arreglar de nuestro lado.
+    const message = hint.originalException instanceof Error ? hint.originalException.message : ''
+    if (message.includes('router state header was sent but could not be parsed')) return null
     return event
   },
 })
