@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
-import { compilePrompt } from '@/lib/bot/compilePrompt'
+import { compilePrompt, type CompilePromptInput } from '@/lib/bot/compilePrompt'
+import { checkPromptBudget } from '@/lib/bot/promptBudget'
+import { createLogger } from '@/lib/logger'
 import { dedupeBusiness, dedupeFaqs, dedupeTours } from '@/lib/knowledge/dedupe'
 import type { BotConfig, BotTone, BusinessSection, FAQ, Tour } from '@/types'
 
@@ -163,7 +165,7 @@ export async function PATCH(request: NextRequest) {
   if (parsed.data.prompt !== undefined) {
     update.prompt = parsed.data.prompt
   } else if (touchesKnowledge) {
-    update.prompt = compilePrompt({
+    const promptInput: CompilePromptInput = {
       agencyName: parsed.data.name ?? current?.name ?? '',
       tone: (nextBotConfig.tone ?? 'friendly') as BotTone,
       greeting: nextBotConfig.greeting ?? null,
@@ -175,7 +177,9 @@ export async function PATCH(request: NextRequest) {
       tours: dedupeTours((effTours ?? (current?.tours as Tour[] | null) ?? [])),
       faqs: dedupeFaqs((effFaqs ?? (current?.faqs as FAQ[] | null) ?? [])),
       businessInfo: dedupeBusiness((effBusiness ?? (current?.business_info as BusinessSection[] | null) ?? [])),
-    })
+    }
+    update.prompt = compilePrompt(promptInput)
+    checkPromptBudget(promptInput, profile.org_id, createLogger({ route: 'organizations', org_id: profile.org_id }))
   }
 
   const { data: org, error } = await supabase

@@ -25,7 +25,8 @@ const TONE_DESCRIPTION: Record<BotTone, string> = {
 // Tope suave para que el prompt no crezca sin control. Holgado para que entren
 // decenas de tours + secciones del negocio. Las columnas jsonb guardan todo a
 // full-fidelity; esto solo acota el texto compilado que lee el bot.
-const MAX_CHARS = 24000
+export const PROMPT_MAX_CHARS = 24000
+const MAX_CHARS = PROMPT_MAX_CHARS
 
 function renderTour(tour: Tour): string {
   const name = tour.name.trim()
@@ -62,6 +63,22 @@ function renderSection(section: BusinessSection): string {
  * nunca se desincronice de `tours` + `faqs` + personalidad.
  */
 export function compilePrompt(input: CompilePromptInput): string {
+  const compiled = compilePromptFull(input)
+  if (compiled.length <= MAX_CHARS) return compiled
+
+  return `${compiled.slice(0, MAX_CHARS - 1).trimEnd()}…`
+}
+
+// Cuanto ocupa el conocimiento de la agencia del tope del prompt. Arriba de
+// 100% el final se recorta y el bot pierde informacion: ahi toca reintroducir
+// RAG por agencia (ver n8n/workflows/README.md).
+export function promptUsage(input: CompilePromptInput): { chars: number; max: number; ratio: number } {
+  const chars = compilePromptFull(input).length
+  return { chars, max: MAX_CHARS, ratio: chars / MAX_CHARS }
+}
+
+// El prompt completo, sin recortar.
+export function compilePromptFull(input: CompilePromptInput): string {
   const agency = input.agencyName.trim() || 'la agencia'
   const tone = TONE_DESCRIPTION[input.tone] ?? TONE_DESCRIPTION.friendly
   const defaultLang = input.defaultLang?.trim() || 'es'
@@ -152,8 +169,5 @@ export function compilePrompt(input: CompilePromptInput): string {
     sections.push(`## PREGUNTAS FRECUENTES\n${faqLines.join('\n\n')}`)
   }
 
-  const compiled = sections.join('\n\n')
-  if (compiled.length <= MAX_CHARS) return compiled
-
-  return `${compiled.slice(0, MAX_CHARS - 1).trimEnd()}…`
+  return sections.join('\n\n')
 }

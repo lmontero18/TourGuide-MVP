@@ -514,6 +514,13 @@
         "private": "Private",
         "local": "Local",
         "foreigner": "Foreigner"
+      },
+      "capacity": {
+        "label": "Bot capacity",
+        "percent": "{pct}% used",
+        "hint": "How much of the bot's space your agency's knowledge uses.",
+        "near": "You're getting close to the limit. If you keep adding, let us know to expand capacity.",
+        "over": "You're over the limit: the bot isn't reading the last part. Contact us to expand capacity."
       }
     },
     "topbar": {
