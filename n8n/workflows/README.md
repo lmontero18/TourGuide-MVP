@@ -44,7 +44,13 @@ ahora, a criterio del que edita.
    mensaje cuando el cliente escribe varios seguidos.
 3. **AI Agent** (OpenAI `gpt-5-mini` vía Langchain):
    - **Postgres Chat Memory** — historial de conversación, keyed por `conversation_id`.
-   - **Supabase Vector Store** (tabla `embeddings`) — RAG sobre tours/precios/itinerarios.
+   - ~~Supabase Vector Store~~ — **quitado (CODE-168, oct 2026)**. La tabla
+     `embeddings` estaba vacía (nada la llena) y buscaba sin filtrar por agencia:
+     cada uso costaba una llamada de embeddings + una vuelta extra del LLM para
+     nada. El conocimiento del bot (tours, precios, FAQs, info de la agencia) va
+     completo en `system_prompt`, compilado por `lib/bot/compilePrompt.ts`
+     (tope de 24k caracteres). Si algún catálogo no entra, el RAG vuelve con
+     `org_id` en `embeddings` y filtro obligatorio en `match_documents`.
    - **Tool `transfer_to_human`** — `POST {callback_base_url}/api/internal/bot-control`
      con `Authorization: Bearer {n8n_secret}` → desactiva el bot (`bot_active = false`)
      cuando el cliente pide hablar con un humano. Body: `{ conversation_id }` (requerido;

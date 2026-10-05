@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import TopBar from "@/components/layout/TopBar";
 import type { FaqDraft } from "@/components/tours/TourCards";
@@ -10,7 +10,9 @@ import BusinessGrid from "@/components/tours/BusinessGrid";
 import FaqAccordion from "@/components/tours/FaqAccordion";
 import SaveStatus, { type SaveState } from "@/components/tours/SaveStatus";
 import ToursSkeleton from "@/components/tours/ToursSkeleton";
-import type { BusinessSection, Organization, Tour } from "@/types";
+import type { BotConfig, BusinessSection, Organization, Tour } from "@/types";
+import { promptUsage } from "@/lib/bot/compilePrompt";
+import KnowledgeCapacity from "@/components/tours/KnowledgeCapacity";
 import { useQueryClient } from "@tanstack/react-query";
 import { useOrganization } from "@/hooks/useOrganization";
 import { queryKeys } from "@/lib/query/keys";
@@ -154,6 +156,23 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
   }, [flush]);
 
   const { tours, faqs, business } = data;
+
+  // Espacio que ocupa el conocimiento en el prompt del bot (mismo calculo que
+  // el server; arriba de 100% se recortaria).
+  const capacity = useMemo(() => {
+    const cfg = (initialOrg.bot_config ?? {}) as BotConfig;
+    return promptUsage({
+      agencyName: initialOrg.name,
+      tone: cfg.tone ?? "friendly",
+      greeting: cfg.greeting ?? null,
+      defaultLang: cfg.default_lang,
+      businessHours: cfg.business_hours ?? null,
+      timezone: cfg.timezone,
+      tours: toPayload(data).tours,
+      faqs: toPayload(data).faqs,
+      businessInfo: toPayload(data).business_info,
+    }).ratio;
+  }, [data, initialOrg]);
   const selected = tours.find((tour) => tour.id === selectedId) ?? null;
 
   // Editar un tour lo da por revisado: se limpia el aviso de baja confianza.
@@ -198,7 +217,10 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
 
       <div className="flex-1 overflow-y-auto p-5">
           <div className="mx-auto max-w-5xl space-y-5">
-            <p className="max-w-2xl text-sm text-slate-500">{t("subtitle")}</p>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <p className="max-w-2xl text-sm text-slate-500">{t("subtitle")}</p>
+              <KnowledgeCapacity ratio={capacity} />
+            </div>
 
             <div role="tablist" className="flex gap-6 border-b border-slate-200">
               {TABS.map((item) => {
