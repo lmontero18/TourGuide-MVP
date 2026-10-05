@@ -13,6 +13,7 @@ export const queryKeys = {
   usageHistory: ['usage', 'history'] as const,
   leads: (orgId: string | null) => ['leads', orgId] as const,
   conversationLead: (conversationId: string) => ['leads', 'by-conversation', conversationId] as const,
+  contactLeads: (contactId: string) => ['leads', 'by-contact', contactId] as const,
   conversation: (id: string) => ['conversation', id] as const,
   messages: (conversationId: string) => ['messages', conversationId] as const,
 }

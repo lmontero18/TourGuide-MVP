@@ -4,9 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
-import type { LeadPatch, LeadWithContact } from "@/hooks/useLeads";
+import { useContactLeads, type LeadPatch, type LeadWithContact } from "@/hooks/useLeads";
 import type { LeadField, LeadStatus } from "@/types";
-import { FICHA_FIELDS, STAGES, STAGE_DOT, TEMPERATURE, timeAgo } from "./leadMeta";
+import { FICHA_FIELDS, STAGES, STAGE_DOT, TEMPERATURE, formatMoney, timeAgo } from "./leadMeta";
 
 interface LeadFichaProps {
   lead: LeadWithContact;
@@ -92,6 +92,9 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
   const t = useTranslations("dashboard.leads");
   const locale = useLocale();
   const [refreshing, setRefreshing] = useState(false);
+  const { data: contactLeads } = useContactLeads(lead.contact_id);
+  const past = (contactLeads ?? []).filter((l) => l.id !== lead.id);
+  const closed = lead.status === "converted" || lead.status === "lost";
   const [amount, setAmount] = useState(lead.amount != null ? String(lead.amount) : "");
   const temp = lead.intent ? TEMPERATURE[lead.intent] : null;
 
@@ -121,10 +124,11 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
             setRefreshing(false);
             if (!ok) toast.error(t("refreshError"));
           }}
-          disabled={refreshing || lead.status === "converted" || lead.status === "lost"}
+          disabled={refreshing}
+          title={closed ? t("refreshClosedHint") : undefined}
           className="ml-auto rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-slate-300 disabled:opacity-40"
         >
-          {refreshing ? t("refreshing") : t("refresh")}
+          {refreshing ? t("refreshing") : closed ? t("refreshClosed") : t("refresh")}
         </button>
       </div>
 
@@ -184,6 +188,28 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
           <EditableField key={`${f}-${fieldValue(lead, f)}`} lead={lead} field={f} label={t(`fields.${f}`)} multiline={f === "next_step"} onSave={saveField} />
         ))}
       </div>
+
+      {past.length > 0 && (
+        <div className="rounded-xl border border-slate-200 p-3">
+          <p className="text-xs font-bold text-navy-900">{t("history", { count: past.length })}</p>
+          <ul className="mt-2 space-y-1.5">
+            {past.map((p) => (
+              <li key={p.id} className="flex items-center justify-between gap-3 text-xs">
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STAGE_DOT[p.status]}`} />
+                  <span className="truncate text-slate-700">{p.tour_interest || t("noTourYet")}</span>
+                </span>
+                <span className="shrink-0 tabular-nums text-slate-400">
+                  {t(`stages.${p.status}`)}
+                  {p.status === "converted" && p.amount != null && ` · ${formatMoney(p.amount, p.currency, locale)}`}
+                  {" · "}
+                  {new Date(p.closed_at ?? p.created_at).toLocaleDateString(locale, { day: "numeric", month: "short" })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {showConversationLink && lead.conversation_id && (
         <Link

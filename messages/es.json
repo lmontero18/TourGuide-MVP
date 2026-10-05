@@ -1131,7 +1131,10 @@
         "needs": "Necesidades",
         "language": "Idioma",
         "next_step": "Próximo paso"
-      }
+      },
+      "history": "{count, plural, one {Oportunidad anterior} other {# oportunidades anteriores}} de este cliente",
+      "refreshClosed": "Buscar oportunidad nueva",
+      "refreshClosedHint": "Lee los mensajes desde que se cerró y, si el cliente pide algo nuevo, abre otro lead."
     },
     "common": {
       "loading": "Cargando…"
