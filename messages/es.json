@@ -655,7 +655,8 @@
         "copied": "Mensaje copiado",
         "copyFailed": "No se pudo copiar",
         "code": "Código {code}"
-      }
+      },
+      "templateTag": "plantilla {name}"
     },
     "metrics": {
       "title": "Métricas",

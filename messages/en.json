@@ -655,7 +655,8 @@
         "copied": "Message copied",
         "copyFailed": "Couldn't copy",
         "code": "Code {code}"
-      }
+      },
+      "templateTag": "template {name}"
     },
     "metrics": {
       "title": "Metrics",

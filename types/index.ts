@@ -133,6 +133,10 @@ export interface Message {
   // Solo en mensajes que enviamos (agente/plantilla): lo actualiza el webhook.
   delivery_status?: DeliveryStatus | null
   delivery_error_code?: number | null
+  // Quien lo envio (agente) y si fue plantilla; sin dato en mensajes viejos.
+  sender_id?: string | null
+  sender?: { full_name: string | null; email: string } | null
+  template_name?: string | null
   created_at: string
 }
 
