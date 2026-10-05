@@ -10,6 +10,7 @@ import TemplatePreview from "@/components/templates/TemplatePreview";
 import { useTemplates } from "@/hooks/useTemplates";
 import type { WhatsAppTemplate } from "@/types";
 import { TemplateCardSkeleton } from "@/components/skeletons/TemplatesSkeleton";
+import TemplateHistory from "@/components/templates/TemplateHistory";
 
 // Plantillas de arranque para agencias de turismo (se pueden editar antes de
 // enviar). El contenido sale de los mensajes segun el idioma del panel; se lee
@@ -189,6 +190,8 @@ export default function TemplatesPage() {
               />
             ))}
           </div>
+
+          {connected && <TemplateHistory />}
         </div>
       </div>
     </div>

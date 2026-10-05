@@ -6,6 +6,7 @@ export const queryKeys = {
   organization: ['organization'] as const,
   whatsappAccount: ['whatsapp-account'] as const,
   templates: ['templates'] as const,
+  templateHistory: (month: string) => ['templates', 'history', month] as const,
   agents: ['agents'] as const,
   metrics: (period: MetricsPeriod) => ['metrics', period] as const,
   usage: ['usage', 'current'] as const,

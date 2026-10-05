@@ -359,6 +359,10 @@ export type Database = {
           media_type: string | null
           media_url: string | null
           role: string
+          sender_id: string | null
+          template_category: string | null
+          template_language: string | null
+          template_name: string | null
           wa_message_id: string | null
         }
         Insert: {
@@ -374,6 +378,10 @@ export type Database = {
           media_type?: string | null
           media_url?: string | null
           role: string
+          sender_id?: string | null
+          template_category?: string | null
+          template_language?: string | null
+          template_name?: string | null
           wa_message_id?: string | null
         }
         Update: {
@@ -389,6 +397,10 @@ export type Database = {
           media_type?: string | null
           media_url?: string | null
           role?: string
+          sender_id?: string | null
+          template_category?: string | null
+          template_language?: string | null
+          template_name?: string | null
           wa_message_id?: string | null
         }
         Relationships: [
@@ -397,6 +409,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]

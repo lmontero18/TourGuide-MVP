@@ -131,9 +131,18 @@ export default function ChatWindow({
     return [...real, ...opt].sort((a, b) => a.sortAt - b.sortAt);
   }, [messages, optimistic, locale]);
 
+  // Al abrir, salto directo al ultimo mensaje (con los mensajes en cache el
+  // scroll suave arrancaba antes del layout y quedaba arriba). Despues, los
+  // mensajes nuevos bajan con scroll suave.
+  const firstScroll = useRef(true);
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [combined.length]);
+    const el = scrollRef.current;
+    if (!el || loading) return;
+    const behavior = firstScroll.current ? "auto" : "smooth";
+    firstScroll.current = false;
+    const frame = requestAnimationFrame(() => el.scrollTo({ top: el.scrollHeight, behavior }));
+    return () => cancelAnimationFrame(frame);
+  }, [combined.length, loading]);
 
   // Ventana de 24h de WhatsApp (CODE-176): texto libre solo hasta 24h despues
   // del ultimo mensaje del cliente. El reloj se actualiza cada minuto.

@@ -12,6 +12,7 @@ import { useMetrics } from "@/hooks/useMetrics";
 import { useMonthlyUsage } from "@/hooks/useMonthlyUsage";
 import type { MetricsPeriod } from "@/types";
 import MetricsSkeleton from "@/components/skeletons/MetricsSkeleton";
+import TemplatesCard from "@/components/metrics/TemplatesCard";
 
 const ROLLING: MetricsPeriod[] = ["7d", "30d", "90d"];
 
@@ -196,6 +197,8 @@ export default function MetricsPage() {
             {data && <MessagesCard messages={data.messages} />}
           </div>
         )}
+
+        <TemplatesCard />
         </>)}
       </div>
     </div>
