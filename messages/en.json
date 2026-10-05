@@ -77,8 +77,8 @@
         "desc": "With Meta-approved templates you can message people who stopped replying: reminders, follow-ups and confirmations."
       },
       "5": {
-        "title": "Month-by-month metrics",
-        "desc": "Conversations, how much the bot answered, how many customers it handed over and how fast your team picked them up. With history and CSV export."
+        "title": "Every customer, with their card",
+        "desc": "AI reads each conversation and notes the tour, date, group and quote. Your team sees the full pipeline and marks bookings with their amount."
       }
     },
     "demo": {
@@ -166,24 +166,18 @@
         "name": "Tourfy",
         "desc": "Your 24/7 salesperson on WhatsApp. We set it up with you on a call.",
         "cta": "Book a demo",
-        "f0": "24/7 bot with unlimited replies",
-        "f1": "Tour catalog imported from your website or PDF",
-        "f2": "Live chat with takeover and unlimited agents",
-        "f3": "WhatsApp templates to re-engage customers",
-        "f4": "Monthly metrics with CSV export"
-      },
-      "1": {
-        "badge": "Coming soon",
-        "name": "Tourfy Plus",
-        "desc": "For operators who want the bot to close sales for them too.",
-        "cta": "Coming soon",
-        "f0": "Everything in Tourfy",
-        "f1": "Automatic lead follow-ups",
-        "f2": "Payments & deposits via payment link in chat",
-        "f3": "Automatic customer qualification (dates, group, budget)",
-        "f4": "Multiple WhatsApp numbers and priority support"
+        "f0": "24/7 bot with unlimited replies, in the customer's language",
+        "f1": "Understands photos, voice notes and locations",
+        "f2": "Tour catalog imported from your website or PDF",
+        "f3": "Leads board: AI fills in each customer's card",
+        "f4": "Live chat with takeover and unlimited agents",
+        "f5": "Sound alerts when a customer wants to book",
+        "f6": "WhatsApp templates with delivery status",
+        "f7": "Monthly metrics with CSV export"
       }
-    }
+    },
+    "soon": "Coming soon:",
+    "soonList": "automatic follow-ups, payments and deposits via chat links, segment campaigns and post-tour review requests."
   },
   "footer": {
     "tagline1": "WhatsApp AI for tour agencies.",
