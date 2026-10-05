@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversations, type ConversationEvents, type ConversationListItem } from "@/hooks/useConversations";
 import { useNotificationPrefs } from "@/hooks/useNotificationPrefs";
+import { useDeliveryFailures } from "@/hooks/useDeliveryFailures";
+import { deliveryReason } from "@/lib/whatsapp/deliveryReasons";
 import { isLastFocusedTab, markTabFocused, playChime, showDesktopNotification, type ChimeKind } from "@/lib/notifications/alert";
 
 interface ConversationsState {
@@ -28,6 +30,7 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("dashboard.notifications");
+  const tD = useTranslations("dashboard.chat.delivery");
   const prefs = useNotificationPrefs();
   const match = pathname.match(/^\/conversations\/([^/]+)/);
   const activeId = match ? match[1] : null;
@@ -35,9 +38,9 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
   // Avisos (CODE-175). Pestaña visible -> toast; en segundo plano ->
   // notificacion del sistema. Nunca de la conversacion que ya estas mirando.
   // El sonido solo en la ultima pestaña usada (varias pestañas = un sonido).
-  const deliver = (item: ConversationListItem, title: string, body: string, kind: ChimeKind = "message") => {
+  const deliver = (item: ConversationListItem, title: string, body: string, kind: ChimeKind = "message", force = false) => {
     const visible = document.visibilityState === "visible";
-    if (visible && item.id === activeId) return;
+    if (visible && item.id === activeId && !force) return;
     const open = () => router.push(`/conversations/${item.id}`);
     if (visible) {
       toast(title, { description: body, action: { label: t("open"), onClick: open } });
@@ -66,6 +69,17 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
   };
 
   const { conversations, loading, unreadTotal } = useConversations(orgId, activeId, events);
+
+  // Meta no entrego un mensaje (ej. plantilla sin metodo de pago): avisar a
+  // quien atiende la conversacion, aunque la este mirando (la burbuja cambia
+  // pero el aviso es lo que se nota). Si nadie la tiene asignada, a todos.
+  useDeliveryFailures(orgId, (failure) => {
+    const item = conversations.find((c) => c.id === failure.conversationId);
+    if (!item) return;
+    if (item.assignee && item.assignee.id !== me) return;
+    const reason = deliveryReason(failure.errorCode);
+    deliver(item, t("failedTitle", { name: nameOf(item) }), tD(`titles.${reason}`), "urgent", true);
+  });
 
   useEffect(() => {
     markTabFocused();

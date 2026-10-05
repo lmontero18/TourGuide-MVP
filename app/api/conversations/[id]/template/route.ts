@@ -5,7 +5,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getMessagingToken } from '@/lib/whatsapp/token'
 import { getOrgWhatsApp } from '@/lib/whatsapp/orgAccount'
 import { GraphError, listTemplates, renderTemplate, sendTemplate } from '@/lib/whatsapp/templates'
-import { clearPaymentFailed, isPaymentError, markPaymentFailed } from '@/lib/whatsapp/billing'
+import { isPaymentError, markPaymentFailed } from '@/lib/whatsapp/billing'
 import { createLogger } from '@/lib/logger'
 
 const log = createLogger({ route: 'conversations/[id]/template' })
@@ -66,8 +66,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: t('templateMissingVariables'), code: 'missing_variables', missing }, { status: 400 })
   }
 
+  // wamid de Meta: el cobro de la plantilla se resuelve despues y el webhook
+  // marca el mensaje como fallido (ej. 131042) o entregado.
+  let wamid: string | null = null
   try {
-    await sendTemplate(wa.phone_number_id, token, conv.contact.phone, template, parsed.data.values)
+    const sent = await sendTemplate(wa.phone_number_id, token, conv.contact.phone, template, parsed.data.values)
+    wamid = sent.messages?.[0]?.id ?? null
   } catch (error) {
     log.error('failed to send template', { error, org_id: profile.org_id })
     if (isPaymentError(error)) {
@@ -79,7 +83,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       : t('templateSendFailed')
     return NextResponse.json({ error: message }, { status: 502 })
   }
-  await clearPaymentFailed(await createServiceClient(), profile.org_id)
 
   // Tomar la conversacion (atomico: solo si nadie la tiene o ya es mia).
   await supabase
@@ -94,6 +97,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     role: 'agent',
     content: renderTemplate(template, parsed.data.values),
     from_bot: false,
+    wa_message_id: wamid,
+    delivery_status: wamid ? 'sent' : null,
   })
   if (insertError) {
     log.error('template sent but not saved', { error: insertError, org_id: profile.org_id })

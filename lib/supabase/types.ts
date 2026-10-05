@@ -351,6 +351,9 @@ export type Database = {
           content: string
           conversation_id: string
           created_at: string
+          delivery_error_code: number | null
+          delivery_status: string | null
+          delivery_updated_at: string | null
           from_bot: boolean
           id: string
           media_type: string | null
@@ -363,6 +366,9 @@ export type Database = {
           content: string
           conversation_id: string
           created_at?: string
+          delivery_error_code?: number | null
+          delivery_status?: string | null
+          delivery_updated_at?: string | null
           from_bot?: boolean
           id?: string
           media_type?: string | null
@@ -375,6 +381,9 @@ export type Database = {
           content?: string
           conversation_id?: string
           created_at?: string
+          delivery_error_code?: number | null
+          delivery_status?: string | null
+          delivery_updated_at?: string | null
           from_bot?: boolean
           id?: string
           media_type?: string | null

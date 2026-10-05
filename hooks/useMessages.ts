@@ -17,7 +17,7 @@ export function useMessages(conversationId: string) {
     queryFn: async () => {
       const { data, error } = await createClient()
         .from('messages')
-        .select('id, conversation_id, role, content, from_bot, channel, media_url, media_type, created_at')
+        .select('id, conversation_id, role, content, from_bot, channel, media_url, media_type, created_at, delivery_status, delivery_error_code')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true })
       if (error) throw error
@@ -38,6 +38,18 @@ export function useMessages(conversationId: string) {
           const msg = payload.new as Message
           queryClient.setQueryData<Message[]>(queryKeys.messages(conversationId), (prev) =>
             prev?.some((m) => m.id === msg.id) ? prev : [...(prev ?? []), msg]
+          )
+        }
+      )
+      // Estado de entrega (enviado → entregado → leido, o fallido) que marca
+      // el webhook de Meta sobre un mensaje ya mostrado.
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` },
+        (payload) => {
+          const msg = payload.new as Message
+          queryClient.setQueryData<Message[]>(queryKeys.messages(conversationId), (prev) =>
+            prev?.map((m) => (m.id === msg.id ? { ...m, ...msg } : m))
           )
         }
       )

@@ -36,11 +36,13 @@ export async function markPaymentFailed(service: SupabaseClient, target: Target,
   })
 }
 
-// Un envio pagado (plantilla) que sale bien prueba que el pago ya funciona.
-export async function clearPaymentFailed(service: SupabaseClient, orgId: string) {
+// Un mensaje cobrable (billable) que Meta entrega prueba que el pago ya
+// funciona. Se llama desde el webhook: aceptar el envio no alcanza, el cobro
+// se resuelve despues.
+export async function clearPaymentFailed(service: SupabaseClient, phoneNumberId: string) {
   await service
     .from('whatsapp_accounts')
     .update({ payment_failed_at: null })
-    .eq('org_id', orgId)
+    .eq('phone_number_id', phoneNumberId)
     .not('payment_failed_at', 'is', null)
 }

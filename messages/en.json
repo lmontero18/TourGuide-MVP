@@ -629,7 +629,39 @@
       "deleteConversation": "Delete conversation",
       "noMessages": "No messages yet",
       "notFound": "Conversation not found",
-      "timeLeft": "{h, plural, =0 {{m} min} other {# h {m} min}}"
+      "timeLeft": "{h, plural, =0 {{m} min} other {# h {m} min}}",
+      "delivery": {
+        "sent": "Sent",
+        "delivered": "Delivered",
+        "read": "Read",
+        "failed": "Not delivered",
+        "titles": {
+          "payment": "Meta didn't deliver it: no payment method",
+          "window": "Not delivered: the 24h window is closed",
+          "marketingLimit": "Meta held back this marketing message",
+          "notOnWhatsApp": "This number can't receive the message",
+          "unsupported": "WhatsApp doesn't support this message type",
+          "experiment": "Meta didn't deliver this marketing message",
+          "unavailable": "WhatsApp was unavailable",
+          "generic": "Meta couldn't deliver the message"
+        },
+        "reasons": {
+          "payment": "Templates are charged and your WhatsApp account has no valid payment method in Meta. Add one and send the template again.",
+          "window": "It's been more than 24h since the customer's last message. Send them an approved template.",
+          "marketingLimit": "Meta limits how many marketing messages each person receives. Try later or use a utility template.",
+          "notOnWhatsApp": "The number doesn't have WhatsApp, changed, or blocked your business. Confirm the number with the customer.",
+          "unsupported": "Check the message content and try again with text.",
+          "experiment": "Meta is running a test and doesn't deliver some marketing templates to this user. Use a utility template.",
+          "unavailable": "It was a temporary WhatsApp issue. Try again in a few minutes.",
+          "generic": "Try again. If it keeps happening, check your account status in WhatsApp Manager."
+        },
+        "addPayment": "Add payment method",
+        "askAdmin": "Ask an admin to add a payment method in Meta.",
+        "copy": "Copy message",
+        "copied": "Message copied",
+        "copyFailed": "Couldn't copy",
+        "code": "Code {code}"
+      }
     },
     "metrics": {
       "title": "Metrics",
@@ -781,7 +813,7 @@
           "okTitle": "No payment rejections",
           "okSub": "We can't see your card in Meta, but if Meta rejects a message for missing payment we'll flag it here.",
           "failedTitle": "Meta rejected a message for missing payment method",
-          "failedSub": "Last rejection: {date}. Add or update your card in Meta; this warning clears once a template sends successfully.",
+          "failedSub": "Last rejection: {date}. Add or update your card in Meta; this warning clears once Meta delivers a template.",
           "stepsTitle": "How to add your card",
           "step1": "In Meta, open Billing & payments → Payment methods and add your card (Visa, Mastercard or Amex enabled for international purchases).",
           "step2": "In WhatsApp Manager, open your account's payment settings and assign that card.",
@@ -876,7 +908,8 @@
       "sound": "Sound",
       "denied": "You blocked notifications in this browser. Enable them from the lock icon in the address bar.",
       "unsupported": "This browser doesn't support desktop notifications.",
-      "events": "We alert you when the bot asks for a person, when a customer writes in one of your conversations, and when another agent takes a conversation you had."
+      "events": "We notify you when the bot asks for a person, when a customer writes in one of your conversations, when another agent takes a conversation you had, and when Meta doesn't deliver a message you sent.",
+      "failedTitle": "Your message to {name} wasn't delivered"
     },
     "templates": {
       "title": "WhatsApp templates",

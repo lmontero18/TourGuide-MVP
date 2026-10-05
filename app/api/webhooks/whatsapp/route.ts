@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
-import { PAYMENT_ERROR_CODE, markPaymentFailed } from '@/lib/whatsapp/billing'
+import { PAYMENT_ERROR_CODE, clearPaymentFailed, markPaymentFailed } from '@/lib/whatsapp/billing'
 import { ensureOpenLead, refreshLead } from '@/lib/leads/sync'
+import { applyDeliveryStatus } from '@/lib/whatsapp/delivery'
 import { verifyWebhookSignature } from '@/lib/whatsapp/verify'
 import {
   webhookPayloadSchema,
@@ -212,6 +213,17 @@ async function processWebhook(body: WebhookPayload) {
       )
       if (metadata?.phone_number_id && paymentFailed) {
         await markPaymentFailed(supabase, { phoneNumberId: metadata.phone_number_id }, baseLog)
+      }
+      // Estado de entrega de cada mensaje que enviamos (enviado, entregado,
+      // leido o fallido con su codigo): se ve en la burbuja del chat.
+      for (const status of value.statuses ?? []) {
+        await applyDeliveryStatus(supabase, status, baseLog)
+      }
+      const billableDelivered = value.statuses?.some(
+        (s) => (s.status === 'delivered' || s.status === 'read') && s.pricing?.billable === true
+      )
+      if (metadata?.phone_number_id && billableDelivered && !paymentFailed) {
+        await clearPaymentFailed(supabase, metadata.phone_number_id)
       }
 
       if (!metadata?.phone_number_id || !messages) continue

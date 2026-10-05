@@ -136,8 +136,11 @@ export async function POST(
     return NextResponse.json({ error: t('messagingTokenMissing') }, { status: 500 })
   }
 
+  // wamid de Meta: el webhook lo usa para marcar entregado / leido / fallido.
+  let wamid: string | null = null
   try {
-    await sendTextMessage(wa.phone_number_id, token, conv.contact.phone, parsed.data.content)
+    const sent = await sendTextMessage(wa.phone_number_id, token, conv.contact.phone, parsed.data.content)
+    wamid = sent.messages?.[0]?.id ?? null
   } catch (err) {
     console.error('WhatsApp send failed:', err)
     const message = err instanceof Error ? err.message : ''
@@ -171,8 +174,10 @@ export async function POST(
       role: 'agent',
       content: parsed.data.content,
       from_bot: false,
+      wa_message_id: wamid,
+      delivery_status: wamid ? 'sent' : null,
     })
-    .select('id, conversation_id, role, content, from_bot, channel, created_at')
+    .select('id, conversation_id, role, content, from_bot, channel, created_at, delivery_status')
     .single()
 
   if (insertError || !msg) {

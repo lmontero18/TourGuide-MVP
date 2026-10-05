@@ -629,7 +629,39 @@
       "deleteConversation": "Eliminar conversación",
       "noMessages": "Todavía no hay mensajes",
       "notFound": "No encontramos esta conversación",
-      "timeLeft": "{h, plural, =0 {{m} min} other {# h {m} min}}"
+      "timeLeft": "{h, plural, =0 {{m} min} other {# h {m} min}}",
+      "delivery": {
+        "sent": "Enviado",
+        "delivered": "Entregado",
+        "read": "Leído",
+        "failed": "No entregado",
+        "titles": {
+          "payment": "Meta no entregó el mensaje: falta método de pago",
+          "window": "No se entregó: la ventana de 24 h está cerrada",
+          "marketingLimit": "Meta frenó este mensaje de marketing",
+          "notOnWhatsApp": "Este número no puede recibir el mensaje",
+          "unsupported": "WhatsApp no admite este tipo de mensaje",
+          "experiment": "Meta no entregó este mensaje de marketing",
+          "unavailable": "WhatsApp no estaba disponible",
+          "generic": "Meta no pudo entregar el mensaje"
+        },
+        "reasons": {
+          "payment": "Las plantillas se cobran y tu cuenta de WhatsApp no tiene un método de pago válido en Meta. Agrégalo y vuelve a enviar la plantilla.",
+          "window": "Pasaron más de 24 h desde el último mensaje del cliente. Envíale una plantilla aprobada.",
+          "marketingLimit": "Meta limita cuántos mensajes de marketing recibe cada persona para cuidar la experiencia. Prueba más tarde o usa una plantilla de utilidad.",
+          "notOnWhatsApp": "El número no tiene WhatsApp, cambió o bloqueó a tu negocio. Confirma el número con el cliente.",
+          "unsupported": "Revisa el contenido del mensaje e intenta de nuevo con texto.",
+          "experiment": "Meta está haciendo una prueba y no entrega algunas plantillas de marketing a este usuario. Usa una plantilla de utilidad.",
+          "unavailable": "Fue un problema temporal de WhatsApp. Intenta de nuevo en unos minutos.",
+          "generic": "Intenta de nuevo. Si vuelve a pasar, revisa el estado de tu cuenta en WhatsApp Manager."
+        },
+        "addPayment": "Agregar método de pago",
+        "askAdmin": "Pídele a un administrador que agregue un método de pago en Meta.",
+        "copy": "Copiar mensaje",
+        "copied": "Mensaje copiado",
+        "copyFailed": "No se pudo copiar",
+        "code": "Código {code}"
+      }
     },
     "metrics": {
       "title": "Métricas",
@@ -781,7 +813,7 @@
           "okTitle": "Sin rechazos de pago",
           "okSub": "No podemos ver tu tarjeta en Meta, pero si Meta rechaza un envío por falta de pago te avisamos aquí.",
           "failedTitle": "Meta rechazó un envío por falta de método de pago",
-          "failedSub": "Último rechazo: {date}. Agrega o actualiza tu tarjeta en Meta; el aviso se quita cuando una plantilla se envíe bien.",
+          "failedSub": "Último rechazo: {date}. Agrega o actualiza tu tarjeta en Meta; el aviso se quita cuando Meta entregue una plantilla.",
           "stepsTitle": "Cómo agregar tu tarjeta",
           "step1": "En Meta, abre Facturación y pagos → Métodos de pago y agrega tu tarjeta (Visa, Mastercard o Amex habilitada para compras internacionales).",
           "step2": "En WhatsApp Manager, abre la configuración de pago de tu cuenta y asigna esa tarjeta.",
@@ -876,7 +908,8 @@
       "sound": "Sonido",
       "denied": "Bloqueaste las notificaciones en este navegador. Actívalas desde el candado de la barra de direcciones.",
       "unsupported": "Este navegador no admite notificaciones de escritorio.",
-      "events": "Te avisamos cuando el bot pide una persona, cuando un cliente te escribe en una conversación tuya y cuando otro agente toma una conversación que tenías."
+      "events": "Te avisamos cuando el bot pide una persona, cuando un cliente te escribe en una conversación tuya, cuando otro agente toma una conversación que tenías y cuando Meta no entrega un mensaje que enviaste.",
+      "failedTitle": "No se entregó tu mensaje a {name}"
     },
     "templates": {
       "title": "Plantillas de WhatsApp",
