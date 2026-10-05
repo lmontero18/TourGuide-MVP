@@ -2,10 +2,15 @@
 
 import { useTranslations } from "next-intl";
 
+// Solo se muestra cuando ya hay que actuar: por debajo, un "48% usado" sin
+// contexto confunde a la agencia ("¿se me acaba algo? ¿pago mas?").
+const SHOW_FROM = 0.7;
+
 // Cuanto del espacio del bot ocupa lo que sabe de la agencia. Cerca del tope
 // (o pasado) avisa: el final se recortaria y el bot perderia informacion.
 export default function KnowledgeCapacity({ ratio }: { ratio: number }) {
   const t = useTranslations("dashboard.tours.capacity");
+  if (ratio < SHOW_FROM) return null;
   const pct = Math.round(ratio * 100);
   const tone = ratio > 1 ? "over" : ratio >= 0.8 ? "near" : "ok";
   const bar = { ok: "bg-navy-900", near: "bg-amber-500", over: "bg-red-500" }[tone];
