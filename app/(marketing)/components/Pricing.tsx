@@ -4,6 +4,10 @@ import { useTranslations } from "next-intl";
 import { FadeUp, StaggerContainer, StaggerItem } from "./Motion";
 import { demoLink } from "@/lib/marketing/demoLink";
 
+// Cantidad de features por plan (claves f0..fN en pricing.tiers.N).
+const BASE_FEATURES = [0, 1, 2, 3, 4, 5, 6, 7];
+const PLUS_FEATURES = [0, 1, 2, 3, 4];
+
 export function Pricing() {
   const t = useTranslations("pricing");
   const tHero = useTranslations("hero");
@@ -68,7 +72,7 @@ export function Pricing() {
 
               {/* Features */}
               <ul className="mt-6 space-y-3 flex-1">
-                {[0, 1, 2, 3, 4].map((i) => (
+                {BASE_FEATURES.map((i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <CheckIcon className="text-blue-500" />
                     <span className="text-sm text-slate-600">
@@ -131,7 +135,7 @@ export function Pricing() {
 
               {/* Features */}
               <ul className="mt-6 space-y-3 flex-1">
-                {[0, 1, 2, 3, 4].map((i) => (
+                {PLUS_FEATURES.map((i) => (
                   <li key={i} className="flex items-start gap-2.5">
                     <CheckIcon className="text-slate-400" />
                     <span className="text-sm text-slate-600">

@@ -77,8 +77,8 @@
         "desc": "Con plantillas aprobadas por Meta le vuelves a escribir a quien dejó de responder: recordatorios, seguimientos y confirmaciones."
       },
       "5": {
-        "title": "Métricas mes a mes",
-        "desc": "Conversaciones, qué parte respondió el bot, cuántos clientes te pasó y qué tan rápido los tomó tu equipo. Con historial y exportación a CSV."
+        "title": "Cada cliente, con su ficha",
+        "desc": "La IA lee cada conversación y anota el tour, la fecha, el grupo y lo cotizado. Tu equipo ve el embudo completo y marca las reservas con su monto."
       }
     },
     "demo": {
@@ -166,11 +166,14 @@
         "name": "Tourfy",
         "desc": "Tu vendedor 24/7 en WhatsApp. Te lo dejamos funcionando en una llamada.",
         "cta": "Agenda una demo",
-        "f0": "Bot 24/7 con respuestas ilimitadas",
-        "f1": "Catálogo de tours con importación desde tu web o PDF",
-        "f2": "Chat en vivo con toma de control y agentes ilimitados",
-        "f3": "Plantillas de WhatsApp para retomar clientes",
-        "f4": "Métricas mensuales con exportación a CSV"
+        "f0": "Bot 24/7 con respuestas ilimitadas, en el idioma del cliente",
+        "f1": "Entiende fotos, notas de voz y ubicaciones",
+        "f2": "Catálogo de tours con importación desde tu web o PDF",
+        "f3": "Panel de leads: la IA llena la ficha de cada cliente",
+        "f4": "Chat en vivo con toma de control y agentes ilimitados",
+        "f5": "Avisos con sonido cuando un cliente quiere reservar",
+        "f6": "Plantillas de WhatsApp con estado de entrega",
+        "f7": "Métricas mensuales con exportación a CSV"
       },
       "1": {
         "badge": "Próximamente",
@@ -180,7 +183,7 @@
         "f0": "Todo lo de Tourfy",
         "f1": "Seguimientos automáticos a interesados",
         "f2": "Cobros y anticipos con enlace de pago en el chat",
-        "f3": "Calificación automática de clientes (fechas, grupo, presupuesto)",
+        "f3": "Campañas a segmentos y pedido de reseñas después del tour",
         "f4": "Varios números de WhatsApp y soporte prioritario"
       }
     }
