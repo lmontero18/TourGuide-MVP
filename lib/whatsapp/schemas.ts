@@ -81,10 +81,12 @@ export const webhookPayloadSchema = z.looseObject({
                   statuses: z
                     .array(
                       z.looseObject({
+                        id: z.string().max(256).optional(),
                         status: z.string().max(32).optional(),
                         errors: z
                           .array(z.looseObject({ code: z.number().optional() }))
                           .optional(),
+                        pricing: z.looseObject({ billable: z.boolean().optional() }).optional(),
                       })
                     )
                     .optional(),

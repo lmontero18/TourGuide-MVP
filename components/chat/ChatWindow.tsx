@@ -113,6 +113,8 @@ export default function ChatWindow({
       mediaPath: m.media_url,
       pending: false,
       failed: false,
+      delivery: m.delivery_status ?? null,
+      errorCode: m.delivery_error_code ?? null,
     }));
     const opt = optimistic.map((o) => ({
       key: o.id,
@@ -123,6 +125,8 @@ export default function ChatWindow({
       mediaPath: null as string | null,
       pending: o.status === "pending",
       failed: o.status === "failed",
+      delivery: null,
+      errorCode: null,
     }));
     return [...real, ...opt].sort((a, b) => a.sortAt - b.sortAt);
   }, [messages, optimistic, locale]);
@@ -398,6 +402,8 @@ export default function ChatWindow({
               mediaPath={msg.mediaPath}
               pending={msg.pending}
               failed={msg.failed}
+              delivery={msg.delivery}
+              errorCode={msg.errorCode}
             />
           ))
         )}

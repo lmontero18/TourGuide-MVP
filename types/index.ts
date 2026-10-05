@@ -130,8 +130,13 @@ export interface Message {
   media_url: string | null   // path en bucket chat-media, null si no hay media o expiró
   media_type: MediaType | null
   wa_message_id: string | null  // id de Meta (wamid) — dedupe de reintentos del webhook
+  // Solo en mensajes que enviamos (agente/plantilla): lo actualiza el webhook.
+  delivery_status?: DeliveryStatus | null
+  delivery_error_code?: number | null
   created_at: string
 }
+
+export type DeliveryStatus = 'sent' | 'delivered' | 'read' | 'failed'
 
 export type LeadIntent = 'browsing' | 'quoting' | 'ready'
 
