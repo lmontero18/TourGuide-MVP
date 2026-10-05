@@ -1134,7 +1134,9 @@
       },
       "history": "{count, plural, one {Previous opportunity} other {# previous opportunities}} with this customer",
       "refreshClosed": "Check for a new opportunity",
-      "refreshClosedHint": "Reads the messages since it was closed and, if the customer asks for something new, opens another lead."
+      "refreshClosedHint": "Reads the messages since it was closed and, if the customer asks for something new, opens another lead.",
+      "recurrent": "Returning",
+      "recurrentHint": "Returning customer: {previous, plural, one {# previous opportunity} other {# previous opportunities}}, {booked, plural, one {# booking} other {# bookings}}"
     },
     "common": {
       "loading": "Loading…"

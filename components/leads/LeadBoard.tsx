@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { LeadWithContact } from "@/hooks/useLeads";
 import type { LeadStatus } from "@/types";
@@ -13,7 +13,13 @@ interface LeadBoardProps {
   onMove: (id: string, status: LeadStatus) => void;
 }
 
-function LeadCard({ lead, selected, onSelect }: { lead: LeadWithContact; selected: boolean; onSelect: () => void }) {
+// Oportunidades anteriores del mismo cliente: reservas y total.
+interface History {
+  previous: number;
+  booked: number;
+}
+
+function LeadCard({ lead, selected, onSelect, history }: { lead: LeadWithContact; selected: boolean; onSelect: () => void; history?: History }) {
   const t = useTranslations("dashboard.leads");
   const locale = useLocale();
   const temp = lead.intent ? TEMPERATURE[lead.intent] : null;
@@ -27,7 +33,17 @@ function LeadCard({ lead, selected, onSelect }: { lead: LeadWithContact; selecte
         selected ? "border-blue-500 ring-2 ring-blue-500/20" : "border-slate-200"
       }`}
     >
-      <span className="block truncate text-sm font-bold text-navy-900">{lead.contact?.name || lead.contact?.phone || t("unknownContact")}</span>
+      <span className="flex min-w-0 items-center gap-1.5">
+        <span className="min-w-0 truncate text-sm font-bold text-navy-900">{lead.contact?.name || lead.contact?.phone || t("unknownContact")}</span>
+        {history && history.previous > 0 && (
+          <span
+            title={t("recurrentHint", { booked: history.booked, previous: history.previous })}
+            className="shrink-0 rounded-full bg-violet-50 px-1.5 py-px text-[10px] font-bold text-violet-700"
+          >
+            ↻ {t("recurrent")}
+          </span>
+        )}
+      </span>
       <span className="mt-0.5 block truncate text-xs text-slate-600">{lead.tour_interest || t("noTourYet")}</span>
       {detail && <span className="block truncate text-[11px] text-slate-400">{detail}</span>}
       <span className="mt-2 flex items-center justify-between gap-2 text-[11px] text-slate-400">
@@ -45,6 +61,18 @@ function LeadCard({ lead, selected, onSelect }: { lead: LeadWithContact; selecte
 export default function LeadBoard({ leads, selectedId, onSelect, onMove }: LeadBoardProps) {
   const t = useTranslations("dashboard.leads");
   const [over, setOver] = useState<LeadStatus | null>(null);
+
+  // Cliente que vuelve: para cada lead abierto, cuantas oportunidades
+  // anteriores (y reservas) tiene el mismo contacto.
+  const history = useMemo(() => {
+    const map = new Map<string, History>();
+    for (const lead of leads) {
+      if (lead.status === "converted" || lead.status === "lost") continue;
+      const prior = leads.filter((o) => o.contact_id === lead.contact_id && o.id !== lead.id && o.created_at < lead.created_at);
+      if (prior.length) map.set(lead.id, { previous: prior.length, booked: prior.filter((o) => o.status === "converted").length });
+    }
+    return map;
+  }, [leads]);
 
   return (
     <div className="grid grid-cols-[repeat(5,minmax(220px,1fr))] gap-3 overflow-x-auto pb-2">
@@ -77,7 +105,7 @@ export default function LeadBoard({ leads, selectedId, onSelect, onMove }: LeadB
               <span className="text-xs tabular-nums text-slate-400">{cards.length}</span>
             </header>
             {cards.map((lead) => (
-              <LeadCard key={lead.id} lead={lead} selected={lead.id === selectedId} onSelect={() => onSelect(lead.id)} />
+              <LeadCard key={lead.id} lead={lead} selected={lead.id === selectedId} onSelect={() => onSelect(lead.id)} history={history.get(lead.id)} />
             ))}
             {cards.length === 0 && <p className="px-1 py-4 text-center text-[11px] text-slate-400">{t(`emptyStage.${stage}`)}</p>}
           </section>

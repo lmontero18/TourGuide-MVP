@@ -1134,7 +1134,9 @@
       },
       "history": "{count, plural, one {Oportunidad anterior} other {# oportunidades anteriores}} de este cliente",
       "refreshClosed": "Buscar oportunidad nueva",
-      "refreshClosedHint": "Lee los mensajes desde que se cerró y, si el cliente pide algo nuevo, abre otro lead."
+      "refreshClosedHint": "Lee los mensajes desde que se cerró y, si el cliente pide algo nuevo, abre otro lead.",
+      "recurrent": "Recurrente",
+      "recurrentHint": "Cliente que vuelve: {previous, plural, one {# oportunidad anterior} other {# oportunidades anteriores}}, {booked, plural, one {# reserva} other {# reservas}}"
     },
     "common": {
       "loading": "Cargando…"
