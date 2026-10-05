@@ -4,6 +4,10 @@ import * as Sentry from '@sentry/nextjs'
 import { PAYMENT_ERROR_CODE, clearPaymentFailed, markPaymentFailed } from '@/lib/whatsapp/billing'
 import { ensureOpenLead, refreshLead } from '@/lib/leads/sync'
 import { applyDeliveryStatus } from '@/lib/whatsapp/delivery'
+import { detectAbuse, type AbuseReason } from '@/lib/bot/abuse'
+
+// ~10 min de nota de voz en opus. Mas largo no se manda a Whisper (costo).
+const MAX_AUDIO_BYTES = 2.5 * 1024 * 1024
 import { verifyWebhookSignature } from '@/lib/whatsapp/verify'
 import {
   webhookPayloadSchema,
@@ -306,13 +310,22 @@ async function processWebhook(body: WebhookPayload) {
                   signal: AbortSignal.timeout(20_000),
                 })
                 const audioBuffer = await audioRes.arrayBuffer()
-                const { OpenAI } = await import('openai')
-                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-                const transcript = await openai.audio.transcriptions.create({
-                  file: new File([audioBuffer], 'audio.ogg', { type: 'audio/ogg' }),
-                  model: 'whisper-1',
-                })
-                content = transcript.text
+                // Tope de costo: una nota de voz de >~10 min (opus ~240 KB/min)
+                // no se transcribe; entra como [Audio largo] y el bot pide que
+                // lo resuma por escrito o pasa a un agente.
+                if (audioBuffer.byteLength > MAX_AUDIO_BYTES) {
+                  log.info('audio too long, skipped transcription', { bytes: audioBuffer.byteLength, wamid: messageId })
+                  content = '[Audio largo]'
+                  mediaNote = 'una nota de voz muy larga que no se puede escuchar'
+                } else {
+                  const { OpenAI } = await import('openai')
+                  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+                  const transcript = await openai.audio.transcriptions.create({
+                    file: new File([audioBuffer], 'audio.ogg', { type: 'audio/ogg' }),
+                    model: 'whisper-1',
+                  })
+                  content = transcript.text
+                }
               }
             }
           } catch (error) {
@@ -531,7 +544,27 @@ async function processWebhook(body: WebhookPayload) {
         // Placeholders tipo [image]/[video]/[sticker] no van al bot — solo
         // texto real (incluye transcripciones de audio y descripciones de imagen).
         const isPlaceholder = /^\[[a-z_]+\]$/.test(content)
+        // Frenos de abuso (troll o bucle contra otro bot): en vez de seguir
+        // respondiendo, la conversacion pasa a un agente. Nunca corta a un
+        // cliente real: los limites estan muy por encima de una charla normal.
+        let brake: AbuseReason | null = null
         if (conversation.bot_active && content && !isPlaceholder) {
+          brake = await detectAbuse(supabase, conversation.id).catch(() => null)
+          if (brake) {
+            await supabase
+              .from('conversations')
+              .update({ bot_active: false, status: 'pending', assigned_agent_id: null })
+              .eq('id', conversation.id)
+            log.warn('bot paused by abuse brake', { reason: brake, conversation_id: conversation.id })
+            Sentry.captureMessage(`Abuse brake: ${brake}`, {
+              level: 'warning',
+              tags: { route: 'webhooks/whatsapp', org_id: waAccount.org_id, reason: brake },
+              extra: { conversation_id: conversation.id },
+            })
+          }
+        }
+
+        if (conversation.bot_active && content && !isPlaceholder && !brake) {
           const { data: org } = await supabase
             .from('organizations')
             .select('prompt, bot_config')
