@@ -4,9 +4,9 @@ import { useTranslations } from "next-intl";
 import { FadeUp, StaggerContainer, StaggerItem } from "./Motion";
 import { demoLink } from "@/lib/marketing/demoLink";
 
-// Cantidad de features por plan (claves f0..fN en pricing.tiers.N).
+// Un solo plan por ahora (claves f0..fN en pricing.tiers.0). Lo que viene
+// se anuncia abajo, sin precio, para no anclar un segundo plan.
 const BASE_FEATURES = [0, 1, 2, 3, 4, 5, 6, 7];
-const PLUS_FEATURES = [0, 1, 2, 3, 4];
 
 export function Pricing() {
   const t = useTranslations("pricing");
@@ -33,7 +33,7 @@ export function Pricing() {
         </FadeUp>
 
         <StaggerContainer
-          className="mt-10 sm:mt-16 grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 items-stretch max-w-4xl mx-auto"
+          className="mt-10 sm:mt-16 grid grid-cols-1 gap-5 items-stretch max-w-md mx-auto"
           staggerDelay={0.12}
         >
           {/* Tier 0 — Tourfy (plan vivo, destacado) */}
@@ -106,54 +106,13 @@ export function Pricing() {
             </div>
           </StaggerItem>
 
-          {/* Tier 1 — Tourfy Plus (coming soon) */}
-          <StaggerItem>
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-6 sm:p-8 h-full flex flex-col">
-              <div className="mb-6">
-                <span className="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-600">
-                  {t("tiers.1.badge")}
-                </span>
-              </div>
-              <h3 className="font-display text-xl font-bold text-navy-950 tracking-tight">
-                {t("tiers.1.name")}
-              </h3>
-              <p className="mt-2 text-sm text-slate-500 leading-relaxed min-h-[40px]">
-                {t("tiers.1.desc")}
-              </p>
-
-              {/* Price */}
-              <div className="mt-6 pb-6 border-b border-slate-100">
-                <div className="flex items-baseline gap-1">
-                  <span className="font-display text-4xl sm:text-5xl font-extrabold tracking-tighter text-navy-950/70">
-                    $1,000
-                  </span>
-                  <span className="text-sm font-medium text-slate-500">
-                    /{t("month")}
-                  </span>
-                </div>
-              </div>
-
-              {/* Features */}
-              <ul className="mt-6 space-y-3 flex-1">
-                {PLUS_FEATURES.map((i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <CheckIcon className="text-slate-400" />
-                    <span className="text-sm text-slate-600">
-                      {t(`tiers.1.f${i}`)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <span
-                aria-disabled
-                className="mt-8 flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-400 cursor-default select-none"
-              >
-                {t("tiers.1.cta")}
-              </span>
-            </div>
-          </StaggerItem>
         </StaggerContainer>
+
+        <FadeUp delay={0.2}>
+          <p className="mt-8 text-center text-sm text-slate-500 max-w-xl mx-auto">
+            <span className="font-semibold text-navy-900">{t("soon")}</span> {t("soonList")}
+          </p>
+        </FadeUp>
       </div>
     </section>
   );

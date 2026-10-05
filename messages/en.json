@@ -174,19 +174,10 @@
         "f5": "Sound alerts when a customer wants to book",
         "f6": "WhatsApp templates with delivery status",
         "f7": "Monthly metrics with CSV export"
-      },
-      "1": {
-        "badge": "Coming soon",
-        "name": "Tourfy Plus",
-        "desc": "For operators who want the bot to close sales for them too.",
-        "cta": "Coming soon",
-        "f0": "Everything in Tourfy",
-        "f1": "Automatic lead follow-ups",
-        "f2": "Payments & deposits via payment link in chat",
-        "f3": "Segment campaigns and post-tour review requests",
-        "f4": "Multiple WhatsApp numbers and priority support"
       }
-    }
+    },
+    "soon": "Coming soon:",
+    "soonList": "automatic follow-ups, payments and deposits via chat links, segment campaigns and post-tour review requests."
   },
   "footer": {
     "tagline1": "WhatsApp AI for tour agencies.",

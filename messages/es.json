@@ -174,19 +174,10 @@
         "f5": "Avisos con sonido cuando un cliente quiere reservar",
         "f6": "Plantillas de WhatsApp con estado de entrega",
         "f7": "Métricas mensuales con exportación a CSV"
-      },
-      "1": {
-        "badge": "Próximamente",
-        "name": "Tourfy Plus",
-        "desc": "Para operadoras que quieren que el bot además les cierre ventas.",
-        "cta": "Próximamente",
-        "f0": "Todo lo de Tourfy",
-        "f1": "Seguimientos automáticos a interesados",
-        "f2": "Cobros y anticipos con enlace de pago en el chat",
-        "f3": "Campañas a segmentos y pedido de reseñas después del tour",
-        "f4": "Varios números de WhatsApp y soporte prioritario"
       }
-    }
+    },
+    "soon": "Próximamente:",
+    "soonList": "seguimientos automáticos, cobros y anticipos por link en el chat, campañas a segmentos y pedido de reseñas después del tour."
   },
   "footer": {
     "tagline1": "IA de WhatsApp para agencias de turismo.",
