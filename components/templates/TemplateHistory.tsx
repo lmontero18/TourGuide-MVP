@@ -56,7 +56,9 @@ export default function TemplateHistory() {
   const months = useMemo(() => lastMonths(6), []);
   const monthLabel = (m: string) => {
     const [y, mm] = m.split("-").map(Number);
-    return new Date(y, mm - 1, 1).toLocaleDateString(locale, { month: "long", year: "numeric" });
+    const label = new Date(y, mm - 1, 1).toLocaleDateString(locale, { month: "long", year: "numeric" });
+    // Solo la primera letra ("Octubre de 2026", no "Octubre De 2026").
+    return label.charAt(0).toUpperCase() + label.slice(1);
   };
   const fmt = (iso: string) => new Date(iso).toLocaleString(locale, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   const status = (r: TemplateSend) => r.delivery_status ?? null;
@@ -79,7 +81,7 @@ export default function TemplateHistory() {
           aria-label={t("month")}
           value={month}
           onChange={(e) => setMonth(e.target.value)}
-          className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold capitalize text-navy-900"
+          className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-navy-900"
         >
           {months.map((m) => <option key={m} value={m}>{monthLabel(m)}</option>)}
         </select>
