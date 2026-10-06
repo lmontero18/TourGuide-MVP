@@ -1167,6 +1167,29 @@
     },
     "common": {
       "loading": "Loading…"
+    },
+    "feedback": {
+      "button": "Send feedback",
+      "title": "Tell us",
+      "sub": "Something not working or a feature you're missing? The Tourfy team reads it directly.",
+      "kindLabel": "Feedback type",
+      "kinds": {
+        "idea": "Idea or feature",
+        "bug": "Something's broken",
+        "other": "Other"
+      },
+      "messageLabel": "Your feedback",
+      "placeholders": {
+        "idea": "e.g. I'd like to export conversations…",
+        "bug": "What you were doing and what happened. e.g. Messages don't load when I open a chat…",
+        "other": "Write us anything…"
+      },
+      "send": "Send",
+      "sending": "Sending…",
+      "cancel": "Cancel",
+      "close": "Close",
+      "thanks": "Thanks! We got it and will get back to you soon.",
+      "error": "We couldn't send it. Try again."
     }
   },
   "blog": {
@@ -1260,6 +1283,8 @@
     "whatsappDisconnectFailed": "We couldn't disconnect the number. Please try again.",
     "paymentRequired": "Meta rejected the message because your WhatsApp account has no payment method. An admin can add one in Settings → WhatsApp.",
     "leadNotFound": "We couldn't find that lead.",
-    "leadUpdateFailed": "We couldn't save the lead."
+    "leadUpdateFailed": "We couldn't save the lead.",
+    "feedbackRateLimited": "You sent a lot of feedback in the last hour. Try again later.",
+    "feedbackFailed": "We couldn't save your feedback."
   }
 }

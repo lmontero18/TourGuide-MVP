@@ -1167,6 +1167,29 @@
     },
     "common": {
       "loading": "Cargando…"
+    },
+    "feedback": {
+      "button": "Enviar comentarios",
+      "title": "Cuéntanos",
+      "sub": "¿Algo no funciona o te falta una función? Lo lee directamente el equipo de Tourfy.",
+      "kindLabel": "Tipo de comentario",
+      "kinds": {
+        "idea": "Idea o función",
+        "bug": "Algo no funciona",
+        "other": "Otro"
+      },
+      "messageLabel": "Tu comentario",
+      "placeholders": {
+        "idea": "Ej. Me gustaría poder exportar las conversaciones…",
+        "bug": "Qué estabas haciendo y qué pasó. Ej. Al abrir un chat no cargan los mensajes…",
+        "other": "Escríbenos lo que quieras…"
+      },
+      "send": "Enviar",
+      "sending": "Enviando…",
+      "cancel": "Cancelar",
+      "close": "Cerrar",
+      "thanks": "¡Gracias! Lo recibimos y te respondemos pronto.",
+      "error": "No pudimos enviarlo. Intenta de nuevo."
     }
   },
   "blog": {
@@ -1260,6 +1283,8 @@
     "whatsappDisconnectFailed": "No pudimos desconectar el número. Intenta de nuevo.",
     "paymentRequired": "Meta rechazó el envío porque tu cuenta de WhatsApp no tiene un método de pago. Un administrador puede agregarlo en Configuración → WhatsApp.",
     "leadNotFound": "No encontramos ese lead.",
-    "leadUpdateFailed": "No pudimos guardar el lead."
+    "leadUpdateFailed": "No pudimos guardar el lead.",
+    "feedbackRateLimited": "Enviaste muchos comentarios en la última hora. Intenta más tarde.",
+    "feedbackFailed": "No pudimos guardar tu comentario."
   }
 }
