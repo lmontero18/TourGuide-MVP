@@ -1190,6 +1190,11 @@
       "close": "Cerrar",
       "thanks": "¡Gracias! Lo recibimos y te respondemos pronto.",
       "error": "No pudimos enviarlo. Intenta de nuevo."
+    },
+    "newVersion": {
+      "title": "Hay una nueva versión de Tourfy",
+      "body": "Recarga para ver las últimas mejoras.",
+      "reload": "Recargar"
     }
   },
   "blog": {

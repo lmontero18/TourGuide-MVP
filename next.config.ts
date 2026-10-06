@@ -6,6 +6,11 @@ import { withSentryConfig } from "@sentry/nextjs";
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  // Version del build (commit de Vercel) embebida en el cliente: el panel la
+  // compara con /api/version para avisar "hay una nueva version, recarga".
+  env: {
+    NEXT_PUBLIC_BUILD_ID: process.env.VERCEL_GIT_COMMIT_SHA ?? "dev",
+  },
   // Los posts del blog viven como .mdx en el repo (app/blog/posts/)
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   // Permite servir assets de dev (_next/*, HMR) cuando se accede via tunel (ngrok)

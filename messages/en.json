@@ -1190,6 +1190,11 @@
       "close": "Close",
       "thanks": "Thanks! We got it and will get back to you soon.",
       "error": "We couldn't send it. Try again."
+    },
+    "newVersion": {
+      "title": "A new version of Tourfy is available",
+      "body": "Reload to get the latest improvements.",
+      "reload": "Reload"
     }
   },
   "blog": {
