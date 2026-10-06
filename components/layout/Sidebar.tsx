@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversationsContext } from "@/components/providers/ConversationsProvider";
+import FeedbackButton from "@/components/feedback/FeedbackButton";
 
 const NAV_ITEMS = [
   {
@@ -166,6 +167,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           );
         })}
       </nav>
+
+      {/* Comentarios para el equipo de Tourfy */}
+      <div className="px-2 pb-1">
+        <FeedbackButton collapsed={collapsed} />
+      </div>
 
       {/* Collapse toggle */}
       <div className="border-t border-slate-100 p-2">
