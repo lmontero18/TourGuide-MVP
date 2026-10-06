@@ -13,6 +13,7 @@ import { useMonthlyUsage } from "@/hooks/useMonthlyUsage";
 import type { MetricsPeriod } from "@/types";
 import MetricsSkeleton from "@/components/skeletons/MetricsSkeleton";
 import TemplatesCard from "@/components/metrics/TemplatesCard";
+import { downloadCsv } from "@/lib/csv";
 
 const ROLLING: MetricsPeriod[] = ["7d", "30d", "90d"];
 
@@ -25,10 +26,6 @@ function recentMonths(): string[] {
   });
 }
 
-// CSV para abrir en Excel: resumen del periodo + conversaciones por dia.
-function toCsv(rows: (string | number)[][]) {
-  return rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
-}
 
 // % vs período anterior. Sin base (prev = 0) no hay % que mostrar.
 function delta(cur: number, prev: number): { change?: string; positive?: boolean } {
@@ -68,7 +65,7 @@ export default function MetricsPage() {
   function exportCsv() {
     if (!data) return;
     const label = period.startsWith("month:") ? monthLabel(period.slice(6)) : t(`period.${period}`);
-    const csv = toCsv([
+    const csv = [
       [t("csv.period"), label],
       [t("cards.activeConversations"), data.active_conversations],
       [t("cards.newContacts"), data.new_contacts],
@@ -82,14 +79,8 @@ export default function MetricsPage() {
       [],
       [t("csv.date"), t("csv.conversations")],
       ...data.daily.map((d) => [d.date, d.conversations]),
-    ]);
-    // BOM para que Excel abra bien los acentos.
-    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `${t("csv.filename")}-${period.replace("month:", "")}.csv`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    ];
+    downloadCsv(`${t("csv.filename")}-${period.replace("month:", "")}.csv`, csv);
   }
 
   return (

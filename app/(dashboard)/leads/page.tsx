@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLeads } from "@/hooks/useLeads";
 import type { LeadStatus } from "@/types";
 import { LeadBoardSkeleton } from "@/components/skeletons/LeadsSkeleton";
+import LeadsExport from "@/components/leads/LeadsExport";
 
 export default function LeadsPage() {
   const t = useTranslations("dashboard.leads");
@@ -77,7 +78,9 @@ export default function LeadsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <TopBar title={t("title")} />
+      <TopBar title={t("title")}>
+        <LeadsExport />
+      </TopBar>
       <div className="flex-1 overflow-y-auto p-5">
         <div className="space-y-5">
           <p className="max-w-2xl text-sm text-slate-500">{t("intro")}</p>

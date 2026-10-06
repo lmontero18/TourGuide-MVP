@@ -181,3 +181,21 @@ export function useContactLeads(contactId: string | null) {
     },
   })
 }
+
+export interface LeadExportRow extends LeadWithContact {
+  conversation: { assigned_agent: { full_name: string | null; email: string } | null } | null
+}
+
+// Leads creados desde `sinceIso` (null = todos) para exportar a CSV. A
+// diferencia del tablero, incluye cerrados viejos.
+export async function fetchLeadsForExport(sinceIso: string | null): Promise<LeadExportRow[]> {
+  let query = createClient()
+    .from('leads')
+    .select(`${LEAD_SELECT}, conversation:conversations(assigned_agent:users!conversations_assigned_agent_id_fkey(full_name, email))`)
+    .order('created_at', { ascending: false })
+    .limit(5000)
+  if (sinceIso) query = query.gte('created_at', sinceIso)
+  const { data, error } = await query
+  if (error) throw error
+  return (data ?? []) as unknown as LeadExportRow[]
+}

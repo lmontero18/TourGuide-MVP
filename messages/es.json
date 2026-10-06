@@ -1136,7 +1136,34 @@
       "refreshClosed": "Buscar oportunidad nueva",
       "refreshClosedHint": "Lee los mensajes desde que se cerró y, si el cliente pide algo nuevo, abre otro lead.",
       "recurrent": "Recurrente",
-      "recurrentHint": "Cliente que vuelve: {previous, plural, one {# oportunidad anterior} other {# oportunidades anteriores}}, {booked, plural, one {# reserva} other {# reservas}}"
+      "recurrentHint": "Cliente que vuelve: {previous, plural, one {# oportunidad anterior} other {# oportunidades anteriores}}, {booked, plural, one {# reserva} other {# reservas}}",
+      "export": {
+        "button": "Exportar",
+        "exporting": "Exportando…",
+        "period": "Período",
+        "periods": {
+          "7d": "Últimos 7 días",
+          "30d": "Últimos 30 días",
+          "90d": "Últimos 90 días",
+          "12m": "Últimos 12 meses",
+          "all": "Todos"
+        },
+        "cols": {
+          "created": "Creado",
+          "name": "Nombre",
+          "phone": "Teléfono",
+          "stage": "Etapa",
+          "temperature": "Temperatura",
+          "amount": "Monto",
+          "currency": "Moneda",
+          "closed": "Cerrado",
+          "agent": "Agente asignado"
+        },
+        "filename": "leads",
+        "empty": "No hay leads en ese período.",
+        "done": "{count, plural, one {# lead exportado} other {# leads exportados}}",
+        "error": "No pudimos exportar los leads."
+      }
     },
     "common": {
       "loading": "Cargando…"
