@@ -12,6 +12,7 @@ import TopBar from "@/components/layout/TopBar";
 import SettingsSkeleton from "@/components/settings/SettingsSkeleton";
 import { DEFAULT_RANGE, normalizeBusinessHours } from "@/lib/bot/businessHours";
 import type { Organization } from "@/types";
+import EmailPrefs from "@/components/settings/EmailPrefs";
 
 // La org viene de TanStack Query (compartida con Tours): con cache abre al
 // instante. El formulario se monta una vez con esos datos y es dueño de su
@@ -36,7 +37,10 @@ export default function SettingsPage() {
 
       <div className="flex-1 overflow-y-auto p-5">
         {org ? (
-          <SettingsForm initialOrg={org} />
+          <div className="max-w-2xl space-y-6">
+            <SettingsForm initialOrg={org} />
+            <EmailPrefs />
+          </div>
         ) : isError ? (
           <p className="text-sm text-red-600">{t("errors.load")}</p>
         ) : (

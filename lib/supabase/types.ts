@@ -221,6 +221,41 @@ export type Database = {
           },
         ]
       }
+      email_log: {
+        Row: {
+          created_at: string
+          dedupe_key: string
+          id: string
+          kind: string
+          org_id: string | null
+          recipients: string[]
+        }
+        Insert: {
+          created_at?: string
+          dedupe_key: string
+          id?: string
+          kind: string
+          org_id?: string | null
+          recipients?: string[]
+        }
+        Update: {
+          created_at?: string
+          dedupe_key?: string
+          id?: string
+          kind?: string
+          org_id?: string | null
+          recipients?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_log_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       embeddings: {
         Row: {
           content: string
@@ -567,6 +602,7 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          email_daily_summary: boolean
           full_name: string | null
           id: string
           org_id: string | null
@@ -576,6 +612,7 @@ export type Database = {
         Insert: {
           created_at?: string
           email: string
+          email_daily_summary?: boolean
           full_name?: string | null
           id: string
           org_id?: string | null
@@ -585,6 +622,7 @@ export type Database = {
         Update: {
           created_at?: string
           email?: string
+          email_daily_summary?: boolean
           full_name?: string | null
           id?: string
           org_id?: string | null

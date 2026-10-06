@@ -856,6 +856,14 @@
         "America_New_York": "USA (Eastern)",
         "America_Los_Angeles": "USA (Pacific)",
         "Europe_Madrid": "Spain"
+      },
+      "emails": {
+        "title": "Emails",
+        "sub": "Which Tourfy emails you receive.",
+        "dailySummary": "Daily summary",
+        "dailySummaryHint": "Every morning at 8:00: yesterday's conversations, night inquiries, customers ready to close and bookings.",
+        "always": "We always email you when a customer has been waiting 5 minutes, when Meta rejects sends for missing payment, and when it reviews a template.",
+        "error": "We couldn't save the change."
       }
     },
     "agents": {

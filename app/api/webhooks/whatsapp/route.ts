@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/nextjs'
 import { PAYMENT_ERROR_CODE, clearPaymentFailed, markPaymentFailed } from '@/lib/whatsapp/billing'
 import { ensureOpenLead, refreshLead } from '@/lib/leads/sync'
 import { applyDeliveryStatus } from '@/lib/whatsapp/delivery'
+import { notifyTemplateStatus } from '@/lib/whatsapp/templateStatus'
 import { detectAbuse, type AbuseReason } from '@/lib/bot/abuse'
 
 // ~10 min de nota de voz en opus. Mas largo no se manda a Whisper (costo).
@@ -205,6 +206,20 @@ async function processWebhook(body: WebhookPayload) {
     for (const change of changes) {
       const value = change.value
       if (!value) continue
+
+      // Meta aprobo o rechazo una plantilla (campo del webhook
+      // message_template_status_update, hay que suscribirlo en la app de Meta).
+      if (change.field === 'message_template_status_update') {
+        await notifyTemplateStatus(supabase, {
+          wabaId: entry.id,
+          event: value.event,
+          name: value.message_template_name,
+          language: value.message_template_language,
+          templateId: value.message_template_id,
+          reason: value.reason,
+        }, baseLog).catch((error) => baseLog.warn('template status notify failed', { error }))
+        continue
+      }
 
       const metadata = value.metadata
       const messages = value.messages
