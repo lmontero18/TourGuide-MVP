@@ -21,7 +21,7 @@ export async function generateMetadata({
   if (!post) return {};
 
   return {
-    title: `${post.title} — Tourfy`,
+    title: `${post.title} · Tourfy`,
     description: post.description,
     alternates: { canonical: `https://www.tourfy.app/blog/${post.slug}` },
     openGraph: {

@@ -13,11 +13,11 @@ export async function generateMetadata(): Promise<Metadata> {
   const isEs = (await getLocale()) === "es";
   return isEs
     ? {
-        title: "Política de privacidad — Tourfy",
+        title: "Política de privacidad · Tourfy",
         description: "Cómo Tourfy recopila, usa y protege los datos.",
       }
     : {
-        title: "Privacy Policy — Tourfy",
+        title: "Privacy Policy · Tourfy",
         description: "How Tourfy collects, uses and protects data.",
       };
 }

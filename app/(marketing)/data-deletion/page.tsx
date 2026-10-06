@@ -12,11 +12,11 @@ export async function generateMetadata(): Promise<Metadata> {
   const isEs = (await getLocale()) === "es";
   return isEs
     ? {
-        title: "Eliminación de datos — Tourfy",
+        title: "Eliminación de datos · Tourfy",
         description: "Cómo solicitar la eliminación de tus datos en Tourfy.",
       }
     : {
-        title: "Data Deletion — Tourfy",
+        title: "Data Deletion · Tourfy",
         description: "How to request deletion of your data from Tourfy.",
       };
 }

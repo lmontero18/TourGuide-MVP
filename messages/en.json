@@ -1143,7 +1143,7 @@
     }
   },
   "blog": {
-    "metaTitle": "Blog — Tourfy",
+    "metaTitle": "Blog · Tourfy",
     "metaDescription": "Practical guides for tour agencies in LATAM: WhatsApp automation, CRM for tour operators, and booking management.",
     "label": "Blog",
     "title": "Guides for tour agencies",
@@ -1159,7 +1159,7 @@
     }
   },
   "meta": {
-    "title": "Tourfy — WhatsApp AI for Tour Agencies",
+    "title": "Tourfy · WhatsApp AI for Tour Agencies",
     "description": "Your tours sell themselves at 2 AM. A WhatsApp bot trained on your tours, prices and tone that replies in seconds and hands you customers ready to book."
   },
   "apiErrors": {
