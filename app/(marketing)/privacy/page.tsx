@@ -3,11 +3,12 @@ import { getLocale } from "next-intl/server";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 
-// TODO: reemplazar por los datos reales antes de enviar a App Review de Meta.
-const LEGAL_NAME = "3-102-943883 Sociedad de Responsabilidad Limitada";
+// Misma entidad que factura (Stripe) y que firma los Términos (/terms).
+const LEGAL_NAME = "NOMADAI LLC";
+const LEGAL_ADDRESS = "30 North Gould Street, Ste N, Sheridan, Wyoming 82801, USA";
 const CONTACT_EMAIL = "naia@naiaautomate.com";
-const UPDATED_EN = "June 2, 2026";
-const UPDATED_ES = "2 de junio de 2026";
+const UPDATED_EN = "October 7, 2026";
+const UPDATED_ES = "7 de octubre de 2026";
 
 export async function generateMetadata(): Promise<Metadata> {
   const isEs = (await getLocale()) === "es";
@@ -91,8 +92,12 @@ function PrivacyEn() {
       <ul className={UL}>
         <li><strong>Meta Platforms</strong> — WhatsApp Business / Cloud API messaging.</li>
         <li><strong>Supabase</strong> — database, authentication and storage.</li>
-        <li><strong>OpenAI</strong> — extracting tours/FAQs from the content you import.</li>
+        <li><strong>OpenAI</strong> — generating the assistant&rsquo;s replies and extracting tours/FAQs from the content you import.</li>
         <li><strong>Vercel</strong> — application hosting.</li>
+        <li><strong>Hostinger</strong> — hosting of the bot engine (n8n).</li>
+        <li><strong>Upstash</strong> — temporary message buffering and rate limiting.</li>
+        <li><strong>Resend</strong> — transactional email (notifications and summaries).</li>
+        <li><strong>Sentry</strong> — error monitoring.</li>
         <li><strong>Stripe</strong> — subscription billing.</li>
       </ul>
       <p className={P}>We do not sell your personal data.</p>
@@ -126,7 +131,7 @@ function PrivacyEn() {
 
       <h2 className={H2}>9. Contact</h2>
       <p className={P}>
-        Questions about this policy:{" "}
+        {LEGAL_NAME} · {LEGAL_ADDRESS}. Questions about this policy:{" "}
         <a className={A} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
       </p>
     </>
@@ -182,8 +187,12 @@ function PrivacyEs() {
       <ul className={UL}>
         <li><strong>Meta Platforms</strong> — mensajería de WhatsApp Business / Cloud API.</li>
         <li><strong>Supabase</strong> — base de datos, autenticación y almacenamiento.</li>
-        <li><strong>OpenAI</strong> — extracción de tours/FAQs del contenido que importas.</li>
+        <li><strong>OpenAI</strong> — generación de las respuestas del asistente y extracción de tours/FAQs del contenido que importas.</li>
         <li><strong>Vercel</strong> — hosting de la aplicación.</li>
+        <li><strong>Hostinger</strong> — hosting del motor del bot (n8n).</li>
+        <li><strong>Upstash</strong> — almacenamiento temporal de mensajes y límites contra abuso.</li>
+        <li><strong>Resend</strong> — envío de correos (avisos y resúmenes).</li>
+        <li><strong>Sentry</strong> — monitoreo de errores.</li>
         <li><strong>Stripe</strong> — facturación de suscripciones.</li>
       </ul>
       <p className={P}>No vendemos tus datos personales.</p>
@@ -197,7 +206,7 @@ function PrivacyEs() {
 
       <h2 className={H2}>6. Tus derechos y eliminación de datos</h2>
       <p className={P}>
-        Puedes acceder, corregir o eliminar tus datos. Para solicitar la eliminación, seguí las
+        Puedes acceder, corregir o eliminar tus datos. Para solicitar la eliminación, sigue las
         instrucciones de nuestra página de{" "}
         <a className={A} href="/data-deletion">Eliminación de datos</a>, o escríbenos a{" "}
         <a className={A} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
@@ -218,7 +227,7 @@ function PrivacyEs() {
 
       <h2 className={H2}>9. Contacto</h2>
       <p className={P}>
-        Consultas sobre esta política:{" "}
+        {LEGAL_NAME} · {LEGAL_ADDRESS}. Consultas sobre esta política:{" "}
         <a className={A} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
       </p>
     </>
