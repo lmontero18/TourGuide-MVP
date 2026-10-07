@@ -25,11 +25,11 @@ export function CTA() {
               <p className="mt-5 text-base sm:text-lg text-slate-500 max-w-lg mx-auto leading-relaxed">
                 {t("sub")}
               </p>
-              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <div className="mt-8 flex flex-col items-center gap-5">
                 <a
                   href={demo.href}
                   {...(demo.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  className="inline-flex h-12 items-center justify-center rounded-xl bg-navy-900 px-7 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2"
+                  className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-xl bg-navy-900 px-7 text-sm font-bold text-white shadow-lg shadow-navy-900/20 transition-all hover:bg-navy-800 hover:shadow-xl hover:shadow-navy-900/25 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2"
                 >
                   {t("button")}
                   <svg
@@ -47,9 +47,16 @@ export function CTA() {
                     />
                   </svg>
                 </a>
-                <span className="text-sm text-slate-500">
-                  {t("note")}
-                </span>
+                <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-slate-500">
+                  {t("note").split(" · ").map((item) => (
+                    <li key={item} className="inline-flex items-center gap-1.5">
+                      <svg className="h-4 w-4 shrink-0 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>
