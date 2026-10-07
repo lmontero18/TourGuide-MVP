@@ -5,8 +5,10 @@ import { FadeUp, StaggerContainer, StaggerItem } from "./Motion";
 import { demoLink } from "@/lib/marketing/demoLink";
 
 // Un solo plan por ahora (claves f0..fN en pricing.tiers.0). Lo que viene
-// se anuncia abajo, sin precio, para no anclar un segundo plan.
-const BASE_FEATURES = [0, 1, 2, 3, 4, 5, 6, 7];
+// se anuncia abajo, sin precio, para no anclar un segundo plan. f8
+// (configuracion y mantenimiento incluidos) va primero: es lo que diferencia
+// la oferta de un bot que la agencia tiene que armar sola.
+const BASE_FEATURES = [8, 0, 1, 2, 3, 4, 5, 6, 7];
 
 export function Pricing() {
   const t = useTranslations("pricing");
@@ -103,6 +105,13 @@ export function Pricing() {
                   />
                 </svg>
               </a>
+              <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs font-medium text-slate-600">
+                <svg className="h-4 w-4 shrink-0 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+                </svg>
+                <span>{t("guarantee")}</span>
+              </p>
             </div>
           </StaggerItem>
 

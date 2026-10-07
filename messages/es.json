@@ -16,10 +16,10 @@
     "headline1": "Tus tours se venden",
     "headline2": "solos a las",
     "headline3": "2 AM",
-    "sub": "Un bot de WhatsApp entrenado con tus tours, tus precios y tu tono. Responde en segundos a cualquier hora y, cuando el cliente quiere reservar, se lo pasa a tu equipo para cerrar la venta.",
+    "sub": "Un vendedor en WhatsApp que atiende a tus clientes a toda hora con tus tours y tus precios, y te pasa los que quieren reservar. Lo configuramos y lo mantenemos nosotros.",
     "ctaPrimary": "Agenda una demo",
     "ctaSecondary": "Ver cómo funciona",
-    "trust": "Te lo dejamos funcionando en una llamada · Cancela cuando quieras · Soporte en español",
+    "trust": "Configurado por nosotros en una llamada · 30 días de garantía · Soporte en español",
     "mock": {
       "c1": "¿Hacen tours privados para empresas?",
       "c2": "¡Gracias! Nos vemos el sábado 🙌",
@@ -53,8 +53,8 @@
   },
   "features": {
     "label": "Funciones",
-    "title": "Todo lo que tu agencia necesita para no perder ni una consulta",
-    "sub": "Un bot que conoce tus tours a fondo, un panel en vivo para tu equipo y métricas para ver cómo rinde.",
+    "title": "Todo lo que hace tu mejor vendedor, sin horario",
+    "sub": "Conoce tus tours a fondo, atiende cada consulta al momento y le pasa a tu equipo solo a los clientes que quieren reservar.",
     "items": {
       "0": {
         "title": "Habla como tu mejor vendedor",
@@ -90,29 +90,29 @@
   },
   "how": {
     "label": "Cómo funciona",
-    "title": "De cero a bot respondiendo en una llamada",
-    "sub": "Sin programación. En una videollamada conectamos tu WhatsApp, cargamos tus tours y lo dejamos funcionando.",
+    "title": "Lo dejamos funcionando en una llamada",
+    "sub": "No tienes que aprender nada nuevo. En una videollamada cargamos tus tours, conectamos tu WhatsApp y lo dejamos respondiendo.",
     "steps": {
       "0": {
         "step": "PASO 1",
-        "title": "Importa tus tours",
-        "desc": "Pega la URL de tu sitio o sube tu tarifario en PDF. Leemos tus tours, precios y preguntas frecuentes; tú solo revisas y apruebas."
+        "title": "Cargamos tus tours",
+        "desc": "Nos pasas la URL de tu sitio o tu tarifario en PDF. Leemos tus tours, precios y preguntas frecuentes; tú solo revisas y apruebas."
       },
       "1": {
         "step": "PASO 2",
-        "title": "Conecta tu WhatsApp",
-        "desc": "Un clic con el registro oficial de Meta y tu número queda vinculado. Ahí mismo agregas el método de pago de WhatsApp."
+        "title": "Conectamos tu WhatsApp",
+        "desc": "En la misma llamada vinculamos tu número con el registro oficial de Meta y agregamos el método de pago de WhatsApp."
       },
       "2": {
         "step": "PASO 3",
-        "title": "Atiende desde el panel",
-        "desc": "El bot responde a cada viajero al instante. Ves todas las conversaciones en vivo y, cuando un cliente quiere reservar, te avisa para que cierres tú."
+        "title": "Tú solo cierras ventas",
+        "desc": "El bot responde a cada viajero al instante. Cuando un cliente quiere reservar, te avisa y tomas la conversación para cerrar."
       }
     },
     "checks": {
       "0": "Sin programación",
-      "1": "Te lo dejamos funcionando",
-      "2": "Cancela cuando quieras"
+      "1": "Configurado por nosotros",
+      "2": "Mantenimiento incluido"
     },
     "preview": {
       "handoffBadge": "Esperando agente",
@@ -150,21 +150,21 @@
   "ctaSection": {
     "title1": "Tu próximo cliente",
     "title2": "te está escribiendo ahora",
-    "sub": "Cada consulta sin responder es una reserva que se va con otra agencia. Pon a tu bot a trabajar hoy.",
+    "sub": "Cada consulta sin responder es una reserva que se va con otra agencia. Lo dejamos funcionando en una llamada.",
     "button": "Agenda una demo",
-    "note": "Te lo dejamos funcionando en una llamada · Cancela cuando quieras"
+    "note": "Configurado por nosotros · 30 días de garantía · Sin contrato"
   },
   "pricing": {
     "label": "Precios",
-    "title": "Un precio simple, sin sorpresas",
-    "sub": "Respuestas ilimitadas y sin costos ocultos. Meta cobra aparte las plantillas y los mensajes que pasen del límite gratuito, directo a tu agencia.",
+    "title": "Un precio, todo incluido",
+    "sub": "Cuesta menos que una persona atendiendo WhatsApp de noche y los fines de semana. Sin contrato: cancelas cuando quieras.",
     "month": "mes",
     "popular": "Todo incluido",
     "tiers": {
       "0": {
         "badge": "Disponible ahora",
         "name": "Tourfy",
-        "desc": "Tu vendedor 24/7 en WhatsApp. Te lo dejamos funcionando en una llamada.",
+        "desc": "Tu vendedor 24/7 en WhatsApp, configurado y mantenido por nosotros.",
         "cta": "Agenda una demo",
         "f0": "Bot 24/7 con respuestas ilimitadas, en el idioma del cliente",
         "f1": "Entiende fotos, notas de voz y ubicaciones",
@@ -173,11 +173,13 @@
         "f4": "Chat en vivo con toma de control y agentes ilimitados",
         "f5": "Avisos con sonido cuando un cliente quiere reservar",
         "f6": "Plantillas de WhatsApp con estado de entrega",
-        "f7": "Métricas mensuales con exportación a CSV"
+        "f7": "Métricas mensuales con exportación a CSV",
+        "f8": "Configuración y mantenimiento incluidos: nos mandas tours o precios nuevos y los cargamos"
       }
     },
     "soon": "Próximamente:",
-    "soonList": "seguimientos automáticos, cobros y anticipos por link en el chat, campañas a segmentos y pedido de reseñas después del tour."
+    "soonList": "seguimientos automáticos, cobros y anticipos por link en el chat, campañas a segmentos y pedido de reseñas después del tour.",
+    "guarantee": "Si el primer mes no te convence, te devolvemos el dinero."
   },
   "footer": {
     "tagline1": "IA de WhatsApp para agencias de turismo.",
