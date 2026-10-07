@@ -13,6 +13,7 @@ import SettingsSkeleton from "@/components/settings/SettingsSkeleton";
 import { DEFAULT_RANGE, normalizeBusinessHours } from "@/lib/bot/businessHours";
 import type { Organization } from "@/types";
 import EmailPrefs from "@/components/settings/EmailPrefs";
+import BillingPortal from "@/components/settings/BillingPortal";
 
 // La org viene de TanStack Query (compartida con Tours): con cache abre al
 // instante. El formulario se monta una vez con esos datos y es dueño de su
@@ -40,6 +41,7 @@ export default function SettingsPage() {
           <div className="max-w-2xl space-y-6">
             <SettingsForm initialOrg={org} />
             <EmailPrefs />
+            <BillingPortal />
           </div>
         ) : isError ? (
           <p className="text-sm text-red-600">{t("errors.load")}</p>
