@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import TopBar from "@/components/layout/TopBar";
+import SettingsShell from "@/components/settings/SettingsShell";
 import { useWhatsAppAccount } from "@/hooks/useWhatsAppAccount";
 import { queryKeys } from "@/lib/query/keys";
 import ConnectWhatsAppButton from "@/components/whatsapp/ConnectWhatsAppButton";
@@ -75,12 +75,9 @@ export default function WhatsAppSettingsPage() {
   };
 
   return (
-    <div className="flex h-full flex-col">
-      <TopBar title={t("title")} />
-
-      <div className="flex-1 overflow-y-auto p-5">
+    <SettingsShell>
         {loading ? <WhatsAppSettingsSkeleton /> : (
-        <div className="max-w-2xl space-y-6">
+        <div className="space-y-6">
           {account ? (
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
               <h2 className="text-sm font-bold text-navy-900 mb-4">{t("connectedNumber")}</h2>
@@ -212,7 +209,6 @@ export default function WhatsAppSettingsPage() {
           )}
         </div>
         )}
-      </div>
-    </div>
+    </SettingsShell>
   );
 }
