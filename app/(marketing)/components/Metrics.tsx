@@ -30,10 +30,12 @@ export function Metrics() {
           staggerDelay={0.1}
         >
           {metricValues.map((value, i) => (
-            <StaggerItem key={i}>
-              <div className="relative rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-7 text-center group transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5">
-                <span className="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter text-navy-950">
-                  {value}
+            <StaggerItem key={i} className="h-full">
+              <div className="relative h-full rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-7 text-center group transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-0.5">
+                {/* Alto fijo para que las cuatro cifras queden alineadas; el ∞ es un
+                    glifo chico en la fuente, se agranda para igualar a los numeros. */}
+                <span className="flex h-10 sm:h-14 lg:h-16 items-center justify-center font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-none tracking-tighter text-navy-950">
+                  <span className={value === "∞" ? "inline-block translate-y-[0.08em] text-[1.6em]" : undefined}>{value}</span>
                 </span>
                 <span className="block mt-1 text-sm sm:text-lg font-display font-bold text-blue-500">
                   {t(`items.${i}.unit`)}
