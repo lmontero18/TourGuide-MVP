@@ -865,6 +865,18 @@
         "dailySummaryHint": "Every morning at 8:00: yesterday's conversations, night inquiries, customers ready to close and bookings.",
         "always": "We always email you when a customer has been waiting 5 minutes, when Meta rejects sends for missing payment, and when it reviews a template.",
         "error": "We couldn't save the change."
+      },
+      "billing": {
+        "title": "Billing & payments",
+        "sub": "Your Tourfy subscription is managed in a secure Stripe portal.",
+        "items": {
+          "card": "Change your card",
+          "invoices": "Download invoices",
+          "tax": "Update tax details",
+          "cancel": "Cancel your subscription"
+        },
+        "open": "Open billing portal",
+        "hint": "Sign in with the email you used to pay; you'll get a code to confirm."
       }
     },
     "agents": {

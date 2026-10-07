@@ -865,6 +865,18 @@
         "dailySummaryHint": "Cada mañana a las 8:00: conversaciones de ayer, consultas de noche, clientes listos para cerrar y reservas.",
         "always": "Siempre te avisamos por correo cuando un cliente lleva 5 minutos esperando, cuando Meta rechaza envíos por falta de pago y cuando revisa una plantilla.",
         "error": "No pudimos guardar el cambio."
+      },
+      "billing": {
+        "title": "Facturación y pagos",
+        "sub": "Tu suscripción de Tourfy se administra en un portal seguro de Stripe.",
+        "items": {
+          "card": "Cambiar la tarjeta",
+          "invoices": "Descargar facturas",
+          "tax": "Actualizar datos fiscales",
+          "cancel": "Cancelar la suscripción"
+        },
+        "open": "Abrir portal de facturación",
+        "hint": "Entra con el correo con el que pagaste la suscripción; te llega un código para confirmar."
       }
     },
     "agents": {
