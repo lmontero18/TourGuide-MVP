@@ -877,6 +877,12 @@
         },
         "open": "Open billing portal",
         "hint": "Sign in with the email you used to pay; you'll get a code to confirm."
+      },
+      "tabs": {
+        "general": "General",
+        "whatsapp": "WhatsApp",
+        "emails": "Emails",
+        "billing": "Billing"
       }
     },
     "agents": {

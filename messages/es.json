@@ -877,6 +877,12 @@
         },
         "open": "Abrir portal de facturación",
         "hint": "Entra con el correo con el que pagaste la suscripción; te llega un código para confirmar."
+      },
+      "tabs": {
+        "general": "General",
+        "whatsapp": "WhatsApp",
+        "emails": "Correos",
+        "billing": "Facturación"
       }
     },
     "agents": {

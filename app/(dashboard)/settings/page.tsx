@@ -6,14 +6,11 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { queryKeys } from "@/lib/query/keys";
 import { useTranslations } from "next-intl";
 import { TIMEZONES, utcOffsetLabel } from "@/lib/timezones";
-import Link from "next/link";
 import { toast } from "sonner";
-import TopBar from "@/components/layout/TopBar";
 import SettingsSkeleton from "@/components/settings/SettingsSkeleton";
+import SettingsShell from "@/components/settings/SettingsShell";
 import { DEFAULT_RANGE, normalizeBusinessHours } from "@/lib/bot/businessHours";
 import type { Organization } from "@/types";
-import EmailPrefs from "@/components/settings/EmailPrefs";
-import BillingPortal from "@/components/settings/BillingPortal";
 
 // La org viene de TanStack Query (compartida con Tours): con cache abre al
 // instante. El formulario se monta una vez con esos datos y es dueño de su
@@ -23,33 +20,15 @@ export default function SettingsPage() {
   const { data: org, isError } = useOrganization();
 
   return (
-    <div className="flex h-full flex-col">
-      <TopBar title={t("title")}>
-        <Link
-          href="/settings/whatsapp"
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-          </svg>
-          WhatsApp
-        </Link>
-      </TopBar>
-
-      <div className="flex-1 overflow-y-auto p-5">
-        {org ? (
-          <div className="max-w-2xl space-y-6">
-            <SettingsForm initialOrg={org} />
-            <EmailPrefs />
-            <BillingPortal />
-          </div>
-        ) : isError ? (
-          <p className="text-sm text-red-600">{t("errors.load")}</p>
-        ) : (
-          <SettingsSkeleton />
-        )}
-      </div>
-    </div>
+    <SettingsShell>
+      {org ? (
+        <SettingsForm initialOrg={org} />
+      ) : isError ? (
+        <p className="text-sm text-red-600">{t("errors.load")}</p>
+      ) : (
+        <SettingsSkeleton />
+      )}
+    </SettingsShell>
   );
 }
 
@@ -122,7 +101,7 @@ function SettingsForm({ initialOrg }: { initialOrg: Organization }) {
   };
 
   return (
-          <div className="max-w-2xl space-y-6">
+          <div className="space-y-6">
             {/* Organization */}
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
               <h2 className="text-sm font-bold text-navy-900 mb-4">{t("org.title")}</h2>

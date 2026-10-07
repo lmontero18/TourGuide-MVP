@@ -1,13 +1,10 @@
-import { getTranslations } from "next-intl/server";
-import { Skeleton } from "@/components/ui/skeleton";
-import PageLoadingShell from "@/components/skeletons/PageLoadingShell";
+import SettingsShell from "@/components/settings/SettingsShell";
 import SettingsSkeleton from "@/components/settings/SettingsSkeleton";
 
-export default async function Loading() {
-  const t = await getTranslations("dashboard.settings");
+export default function Loading() {
   return (
-    <PageLoadingShell title={t("title")} actions={<Skeleton className="h-8 w-[104px] rounded-lg" />}>
+    <SettingsShell>
       <SettingsSkeleton />
-    </PageLoadingShell>
+    </SettingsShell>
   );
 }

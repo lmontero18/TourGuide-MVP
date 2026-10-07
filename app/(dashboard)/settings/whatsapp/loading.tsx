@@ -1,12 +1,10 @@
-import { getTranslations } from "next-intl/server";
-import PageLoadingShell from "@/components/skeletons/PageLoadingShell";
+import SettingsShell from "@/components/settings/SettingsShell";
 import WhatsAppSettingsSkeleton from "@/components/skeletons/WhatsAppSettingsSkeleton";
 
-export default async function Loading() {
-  const t = await getTranslations("dashboard.settings.whatsapp");
+export default function Loading() {
   return (
-    <PageLoadingShell title={t("title")}>
+    <SettingsShell>
       <WhatsAppSettingsSkeleton />
-    </PageLoadingShell>
+    </SettingsShell>
   );
 }
