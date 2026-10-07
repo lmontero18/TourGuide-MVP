@@ -185,8 +185,9 @@
     "product": "Product",
     "company": "Company",
     "legal": "Legal",
-    "rights": "Tourfy Inc. All rights reserved.",
+    "rights": "Tourfy · NOMADAI LLC. All rights reserved.",
     "status": "All systems operational",
+    "terms": "Terms of service",
     "privacy": "Privacy",
     "dataDeletion": "Data deletion"
   },

@@ -70,6 +70,7 @@ export function Footer() {
               </p>
               <ul className="space-y-2">
                 {[
+                  { label: t("terms"), href: "/terms" },
                   { label: t("privacy"), href: "/privacy" },
                   { label: t("dataDeletion"), href: "/data-deletion" },
                 ].map((item) => (
