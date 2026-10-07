@@ -65,14 +65,24 @@ export const webhookPayloadSchema = z.looseObject({
   entry: z
     .array(
       z.looseObject({
+        // WABA id (en eventos de plantillas identifica a la agencia).
+        id: z.string().max(64).optional(),
         changes: z
           .array(
             z.looseObject({
+              // "messages" o "message_template_status_update".
+              field: z.string().max(64).optional(),
               value: z
                 .looseObject({
                   metadata: z
                     .looseObject({ phone_number_id: z.string().max(64) })
                     .optional(),
+                  // message_template_status_update
+                  event: z.string().max(64).optional(),
+                  message_template_name: z.string().max(512).optional(),
+                  message_template_language: z.string().max(16).optional(),
+                  message_template_id: z.union([z.string(), z.number()]).optional(),
+                  reason: z.string().max(1000).nullable().optional(),
                   // Mensajes quedan como unknown acá — validación por mensaje
                   // con webhookMessageSchema en processWebhook.
                   messages: z.array(z.unknown()).optional(),

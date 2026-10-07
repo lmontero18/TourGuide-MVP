@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { compilePrompt, type CompilePromptInput } from '@/lib/bot/compilePrompt'
+import { compilePrompt, promptUsage, type CompilePromptInput } from '@/lib/bot/compilePrompt'
+import { sendOnce, teamEmail } from '@/lib/email/notify'
+import { box, esc, layout } from '@/lib/email/layout'
 import { checkPromptBudget } from '@/lib/bot/promptBudget'
 import { createLogger } from '@/lib/logger'
 import { dedupeBusiness, dedupeFaqs, dedupeTours } from '@/lib/knowledge/dedupe'
@@ -227,6 +229,35 @@ export async function PATCH(request: NextRequest) {
     console.error('Failed to finalize onboarding:', error)
     return NextResponse.json({ error: t('onboardingFinishFailed') }, { status: 500 })
   }
+
+  // Aviso interno: una agencia nueva quedo activa (una sola vez por org).
+  after(async () => {
+    const [{ data: admin }, { data: wa }] = await Promise.all([
+      serviceClient.from('users').select('email, full_name').eq('id', user.id).maybeSingle(),
+      serviceClient.from('whatsapp_accounts').select('phone_number').eq('org_id', org.id).maybeSingle(),
+    ])
+    const usage = promptUsage(promptInput)
+    await sendOnce(
+      serviceClient,
+      {
+        orgId: org.id,
+        kind: 'new_agency',
+        dedupeKey: `new_agency:${org.id}`,
+        to: [teamEmail()],
+        subject: `Nueva agencia: ${org.name}`,
+        html: layout({
+          title: `${esc(org.name)} terminó el onboarding`,
+          body: box(`Administrador: ${esc(admin?.full_name || admin?.email || user.email || '')}`, [
+            `Correo: ${esc(admin?.email || user.email || '')}`,
+            `WhatsApp: ${esc(wa?.phone_number || 'sin conectar')}`,
+            `Tours: ${tours.length} · Preguntas frecuentes: ${faqs.length} · Capacidad del bot: ${Math.round(usage.ratio * 100)}%`,
+          ]),
+          footer: 'Aviso interno del equipo de Tourfy.',
+        }),
+      },
+      createLogger({ route: 'onboarding', org_id: org.id })
+    ).catch(() => false)
+  })
 
   return NextResponse.json({ success: true, organization: org })
 }

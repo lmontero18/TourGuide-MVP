@@ -3,6 +3,8 @@ import * as Sentry from '@sentry/nextjs'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { GraphError } from '@/lib/whatsapp/templates'
 import type { Logger } from '@/lib/logger'
+import { appUrl, orgRecipients, sendOnce } from '@/lib/email/notify'
+import { layout, p } from '@/lib/email/layout'
 
 // Meta rechaza con 131042 cuando la WABA no tiene metodo de pago valido.
 // Somos Tech Provider: no podemos leer la tarjeta del cliente, asi que este
@@ -34,6 +36,29 @@ export async function markPaymentFailed(service: SupabaseClient, target: Target,
     level: 'warning',
     tags: { org_id: data?.org_id ?? 'unknown', route: 'whatsapp-billing' },
   })
+
+  // Correo a los administradores: como mucho uno por dia.
+  if (data?.org_id) {
+    const day = new Date().toISOString().slice(0, 10)
+    await sendOnce(
+      service,
+      {
+        orgId: data.org_id,
+        kind: 'payment_failed',
+        dedupeKey: `payment:${data.org_id}:${day}`,
+        to: await orgRecipients(service, data.org_id, { adminsOnly: true }),
+        subject: 'Tus plantillas no se están entregando: falta método de pago en Meta',
+        html: layout({
+          title: 'Meta no está entregando tus plantillas',
+          body:
+            p('Las plantillas de WhatsApp se cobran y tu cuenta no tiene un método de pago válido en Meta. Los mensajes normales del bot siguen funcionando.') +
+            p('Agrega una tarjeta en Meta y vuelve a enviar la plantilla. En Configuración → WhatsApp están los pasos.'),
+          cta: { label: 'Agregar método de pago', url: `${appUrl()}/settings/whatsapp#billing` },
+        }),
+      },
+      log
+    ).catch(() => false)
+  }
 }
 
 // Un mensaje cobrable (billable) que Meta entrega prueba que el pago ya
