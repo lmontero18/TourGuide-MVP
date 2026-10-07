@@ -83,7 +83,7 @@ async function summarize(service: SupabaseClient, org: { id: string; name: strin
       ]) +
       p(
         `El bot dio el ${botShare}% de las respuestas.` +
-          (night.size ? ` ${night.size} ${night.size === 1 ? 'consulta llegó' : 'consultas llegaron'} de noche (20:00–8:00) y el bot las atendió.` : '')
+          (night.size ? ` ${night.size} ${night.size === 1 ? 'consulta llegó' : 'consultas llegaron'} de noche (20:00–8:00) y el bot ${night.size === 1 ? 'la atendió' : 'las atendió'}.` : '')
       ) +
       (readyNames.length
         ? box('Para hoy', [`${readyNames.length} ${readyNames.length === 1 ? 'cliente listo' : 'clientes listos'} para cerrar: ${readyNames.slice(0, 5).map(esc).join(', ')}${readyNames.length > 5 ? '…' : ''}`])
