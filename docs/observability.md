@@ -11,6 +11,9 @@
 | Postgres / Auth / Realtime / Storage | Supabase | `/api/health` (query mínima) + dashboard de Supabase |
 | N8N (motor del bot) | Hostinger (`naia.naiaautomate.com`) | BetterStack (monitor HTTP directo) |
 | Cron `cleanup-media` (diario 06:00 UTC) | Vercel Cron | Heartbeat BetterStack |
+| Cron `auto-resolve` (diario 07:00 UTC) | Vercel Cron | Heartbeat BetterStack |
+| Crons `unanswered` + `handoff-alerts` (cada minuto) | pg_cron → pg_net → app | Heartbeat BetterStack (`PG_CRON`, lo pingea `unanswered`) |
+| Cron `daily-summary` (cada hora) | pg_cron → pg_net → app | Heartbeat BetterStack |
 | Backup diario DB→R2 (09:00 UTC) | GitHub Actions | Heartbeat BetterStack |
 
 > Nota: el ticket original menciona "workers en Railway" — no existen. El único
@@ -57,6 +60,9 @@ orgLog.error('algo fallo', { error, conversation_id })
 | `SENTRY_ORG` / `SENTRY_PROJECT` | Vercel (build) | Upload de source maps |
 | `SENTRY_AUTH_TOKEN` | Vercel (build, sensitive) | Upload de source maps (o usar la integración Sentry↔Vercel) |
 | `BETTERSTACK_HEARTBEAT_CLEANUP_MEDIA` | Vercel (prod) | Heartbeat del cron |
+| `BETTERSTACK_HEARTBEAT_AUTO_RESOLVE` | Vercel (prod) | Heartbeat de auto-resolve |
+| `BETTERSTACK_HEARTBEAT_PG_CRON` | Vercel (prod) | Heartbeat de la cadena pg_cron (cada minuto) |
+| `BETTERSTACK_HEARTBEAT_DAILY_SUMMARY` | Vercel (prod) | Heartbeat del resumen diario |
 | `BETTERSTACK_HEARTBEAT_DB_BACKUP` | GitHub Actions secret | Heartbeat del backup |
 
 Sin `SENTRY_AUTH_TOKEN` el build local pasa igual (solo no sube source maps).
@@ -78,6 +84,9 @@ Sin DSN, Sentry queda desactivado (además `enabled` exige `NODE_ENV=production`
 - [ ] Monitor HTTP → `https://naia.naiaautomate.com/healthz` — esperar **200**. ⚠️ Verificar primero con `curl -i`; si el reverse proxy de Hostinger no enruta `/healthz`, monitorear la raíz del host.
 - [ ] Heartbeat **cleanup-media** — período 24h, gracia 1h → copiar URL a env `BETTERSTACK_HEARTBEAT_CLEANUP_MEDIA` en Vercel (prod).
 - [ ] Heartbeat **db-backup** — período 24h, gracia 2h → GitHub secret `BETTERSTACK_HEARTBEAT_DB_BACKUP`.
+- [ ] Heartbeat **auto-resolve** — período 24h, gracia 1h → `BETTERSTACK_HEARTBEAT_AUTO_RESOLVE` en Vercel (prod).
+- [ ] Heartbeat **pg-cron** — período 5 min, gracia 5 min → `BETTERSTACK_HEARTBEAT_PG_CRON` en Vercel (prod).
+- [ ] Heartbeat **daily-summary** — período 1h, gracia 15 min → `BETTERSTACK_HEARTBEAT_DAILY_SUMMARY` en Vercel (prod).
 - [ ] Configurar el email de on-call.
 
 ## Qué significa cada alerta y primer paso
@@ -89,6 +98,9 @@ Sin DSN, Sentry queda desactivado (además `enabled` exige `NODE_ENV=production`
 | Monitor N8N caído | El bot no responde a nadie | Panel de Hostinger / reiniciar N8N |
 | Heartbeat cleanup-media sin ping | El cron falló o no corrió | Vercel → Logs `route:cron/cleanup-media` + Sentry |
 | Heartbeat db-backup sin ping | Backup diario falló | GitHub → Actions → "DB · Backup externo (R2)" |
+| Heartbeat auto-resolve sin ping | No se resolvieron conversaciones inactivas | Vercel → Logs `route:cron/auto-resolve` + Sentry |
+| Heartbeat pg-cron sin ping | Se cortó la cadena pg_cron: no salen avisos de mensaje sin respuesta ni de cliente esperando | Supabase → `select * from cron.job_run_details order by start_time desc limit 5` y `net._http_response` (¿401 = `cron_secret` de Vault distinto de `CRON_SECRET`?) |
+| Heartbeat daily-summary sin ping | El resumen diario no corrió | Vercel → Logs `route:cron/daily-summary` + Sentry |
 | Email de Sentry (issue nuevo) | Error nuevo en la app | Abrir el issue — trae stack, `org_id`, ruta |
 
 ## Cómo simular fallos (verificación)

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
 import { createLogger } from '@/lib/logger'
+import { pingHeartbeat } from '@/lib/monitoring/heartbeat'
 
 // Limpieza diaria de media de chat (Vercel Cron, ver vercel.json).
 // Borra del bucket chat-media los archivos con mas de RETENTION_DAYS y pone
@@ -27,17 +28,6 @@ function reportCronError(msg: string, error: { message: string }, extra?: Record
   Sentry.captureException(new Error(`${msg}: ${error.message}`), {
     tags: { route: 'cron/cleanup-media' },
     extra,
-  })
-}
-
-// Ping al heartbeat de BetterStack: si el cron no corre o falla, no llega el
-// ping y BetterStack alerta por email. Solo se pingea en el camino feliz.
-async function pingHeartbeat() {
-  const url = process.env.BETTERSTACK_HEARTBEAT_CLEANUP_MEDIA
-  if (!url) return
-  await fetch(url, { signal: AbortSignal.timeout(10_000) }).catch((error) => {
-    // Nunca fallar el cron por el ping — el trabajo ya se hizo.
-    log.warn('heartbeat ping failed', { error })
   })
 }
 
@@ -100,6 +90,6 @@ export async function GET(request: NextRequest) {
     if (expired.length < BATCH_SIZE) break
   }
 
-  await pingHeartbeat()
+  await pingHeartbeat('BETTERSTACK_HEARTBEAT_CLEANUP_MEDIA', log)
   return NextResponse.json({ deleted })
 }

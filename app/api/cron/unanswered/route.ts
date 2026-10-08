@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
 import { createLogger } from '@/lib/logger'
+import { pingHeartbeat } from '@/lib/monitoring/heartbeat'
 import { appUrl, orgRecipients, sendOnce } from '@/lib/email/notify'
 import { box, esc, layout, p } from '@/lib/email/layout'
 
@@ -103,6 +104,9 @@ export async function GET(request: NextRequest) {
         orgLog
       )
     }
+    // Corre cada minuto por pg_cron: su ping prueba toda la cadena (pg_cron →
+    // pg_net → Vault → app). Si se corta, tambien se cortan handoff-alerts.
+    await pingHeartbeat('BETTERSTACK_HEARTBEAT_PG_CRON', log)
     return NextResponse.json({ ok: true, checked: convs?.length ?? 0, flagged })
   } catch (error) {
     log.error('unanswered check failed', { error })
