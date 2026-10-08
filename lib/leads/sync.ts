@@ -178,13 +178,28 @@ export async function refreshLead(
       if (since < THROTTLE_MS || nothingNew) return
     }
 
+    // Lead reabierto (el cliente volvio despues de reservar o descartarse): la
+    // ficha se arma solo con los mensajes posteriores al cierre anterior. Sin
+    // esto, la IA mezclaba la oportunidad vieja (tour, grupo, pagos) con la
+    // nueva.
+    const { data: prevClosed } = await service
+      .from('leads')
+      .select('closed_at')
+      .eq('conversation_id', conversationId)
+      .neq('id', lead.id)
+      .not('closed_at', 'is', null)
+      .order('closed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    let msgQuery = service
+      .from('messages')
+      .select('role, content, created_at')
+      .eq('conversation_id', conversationId)
+    if (prevClosed?.closed_at) msgQuery = msgQuery.gt('created_at', prevClosed.closed_at)
+
     const [{ data: msgs }, { data: org }] = await Promise.all([
-      service
-        .from('messages')
-        .select('role, content, created_at')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: false })
-        .limit(TRANSCRIPT_MESSAGES),
+      msgQuery.order('created_at', { ascending: false }).limit(TRANSCRIPT_MESSAGES),
       service.from('organizations').select('tours, bot_config').eq('id', conv.org_id).single(),
     ])
     const transcript = ((msgs ?? []) as TranscriptLine[]).reverse()
@@ -196,11 +211,14 @@ export async function refreshLead(
 
     const extracted = await extractLead({ transcript, tourNames, today, timezone })
 
-    // Lo que edito una persona manda: la IA no pisa campos bloqueados, y un
-    // null de la IA no borra un dato que ya teniamos.
+    // Lo que edito una persona manda: la IA no pisa campos bloqueados. En la
+    // actualizacion automatica un null de la IA no borra un dato que ya
+    // teniamos (puede haber salido de la ventana de mensajes); "Actualizar con
+    // IA" (force) rehace la ficha desde cero, asi limpia datos viejos o mal
+    // extraidos.
     const locked = new Set(lead.locked_fields ?? [])
     const keep = <T,>(field: LeadField, prev: T | null | undefined, next: T | null) =>
-      locked.has(field) ? (prev ?? null) : (next ?? prev ?? null)
+      locked.has(field) ? (prev ?? null) : opts.force ? (next ?? null) : (next ?? prev ?? null)
 
     const metadata: LeadDetails = { ...(lead.metadata ?? {}) }
     for (const key of DETAIL_KEYS) metadata[key] = keep(key, lead.metadata?.[key], extracted[key] ?? null)
