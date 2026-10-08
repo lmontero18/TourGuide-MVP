@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
 import { createLogger } from '@/lib/logger'
+import { pingHeartbeat } from '@/lib/monitoring/heartbeat'
 import { appUrl, orgRecipients, sendOnce } from '@/lib/email/notify'
 import { box, esc, kpis, layout, p } from '@/lib/email/layout'
 
@@ -130,6 +131,7 @@ export async function GET(request: NextRequest) {
         Sentry.captureException(error, { tags: { route: 'cron/daily-summary', org_id: o.id } })
       }
     }
+    await pingHeartbeat('BETTERSTACK_HEARTBEAT_DAILY_SUMMARY', log)
     return NextResponse.json({ ok: true, orgs: orgs?.length ?? 0, sent })
   } catch (error) {
     log.error('daily summary failed', { error })

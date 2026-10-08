@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
 import { createLogger } from '@/lib/logger'
+import { pingHeartbeat } from '@/lib/monitoring/heartbeat'
 
 // Auto-resolver conversaciones inactivas (CODE-162, Vercel Cron diario, ver
 // vercel.json). Pasa a `resolved` las conversaciones ABIERTAS sin mensajes en
@@ -48,5 +49,6 @@ export async function GET(request: NextRequest) {
 
   const resolved = data?.length ?? 0
   log.info('auto-resolve done', { resolved })
+  await pingHeartbeat('BETTERSTACK_HEARTBEAT_AUTO_RESOLVE', log)
   return NextResponse.json({ resolved })
 }
