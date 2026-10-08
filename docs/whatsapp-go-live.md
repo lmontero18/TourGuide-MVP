@@ -30,8 +30,9 @@ El código no cambia. Lo que falta es **deploy** + **configuración en Meta** + 
 3. En Meta (Settings → Basic): **ícono PNG 1024×1024**, nombre, categoría, cargar las 2 URLs.
 4. Enviar **App Review** ("Incorporación sin socio").
 
-> Razón social cargada en `/privacy`: **3-102-943883 Sociedad de Responsabilidad Limitada**
-> (nombre comercial: TourGuide). Conviene un repaso legal humano antes de producción.
+> Razón social en `/privacy`, `/terms` y `/data-deletion`: **NOMADAI LLC** (Wyoming), la misma que
+> factura en Stripe (centralizada en `lib/legal.ts`). El App Review original se hizo con la SRL
+> 3-102-943883; desde 2026-10-07 todo está a nombre de la LLC.
 
 ---
 
@@ -41,7 +42,7 @@ El código no cambia. Lo que falta es **deploy** + **configuración en Meta** + 
 > Tené TODO esto listo antes de darle "Enviar".
 
 - [x] **1.1 Página de Política de privacidad** (`/privacy`) — ✅ creada, bilingüe, email + razón social
-  cargados (`3-102-943883 S.R.L.`). Falta solo un repaso legal humano antes de producción.
+  cargados (hoy NOMADAI LLC, ver arriba). Falta solo un repaso legal humano.
 - [x] **1.2 Página de eliminación de datos** (`/data-deletion`) — ✅ creada, bilingüe, email cargado.
 - [ ] **1.3 Deploy a producción** (Vercel) — *bloquea 1.4*. Las URLs y la app deben ser públicas.
 - [ ] **1.4 Cargar ambas URLs** en Meta → App → **Settings → Basic**:

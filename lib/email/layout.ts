@@ -2,6 +2,8 @@
 // cabecera navy con el logo, cuerpo blanco, boton y pie. Estilos inline
 // porque los clientes de correo ignoran <style>.
 
+import { LEGAL_ADDRESS, LEGAL_NAME } from '@/lib/legal'
+
 const NAVY = '#0d1b34'
 const MUTED = '#5a6680'
 const LINE = '#e5e8ef'
@@ -58,7 +60,7 @@ export function layout(input: { title: string; body: string; cta?: { label: stri
       </td></tr>
       <tr><td style="border-top:1px solid ${LINE};padding:14px 22px;font-size:12px;color:${MUTED}">${
         input.footer ?? 'Recibes este correo porque tu agencia usa Tourfy.'
-      }</td></tr>
+      }<div style="margin-top:8px;font-size:11px;color:${MUTED}">Tourfy · ${esc(LEGAL_NAME)} · ${esc(LEGAL_ADDRESS)}</div></td></tr>
     </table>
   </td></tr></table></body></html>`
 }
