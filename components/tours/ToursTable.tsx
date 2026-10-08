@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { Tour } from "@/types";
+import { reviewReasons } from "@/lib/tours/review";
 
 interface ToursTableProps {
   tours: Tour[];
@@ -11,13 +12,10 @@ interface ToursTableProps {
   onAdd: () => void;
 }
 
-// Bajo este umbral la extraccion por IA se marca para revisar (ver types: confidence).
-const REVIEW_THRESHOLD = 0.6;
-
 function PriceCell({ tour }: { tour: Tour }) {
   const t = useTranslations("dashboard.tours");
   const prices = (tour.prices ?? []).filter((p) => Number.isFinite(p.amount));
-  if (!prices.length) return <span className="text-xs text-slate-400">{t("noPrice")}</span>;
+  if (!prices.length) return <span className="text-xs font-semibold text-amber-700">{t("noPrice")}</span>;
   const first = prices[0];
   return (
     <span className="block font-bold tabular-nums text-navy-900">
@@ -33,20 +31,33 @@ export default function ToursTable({ tours, selectedId, onSelect, onAdd }: Tours
   const t = useTranslations("dashboard.tours");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+  const [onlyPending, setOnlyPending] = useState(false);
 
   const categories = useMemo(
     () => [...new Set(tours.map((tour) => tour.category?.trim()).filter((c): c is string => !!c))],
     [tours]
   );
 
+  // Lo pendiente de revisar va arriba; al completarlo baja con los demas.
+  const reasons = useMemo(() => new Map(tours.map((tour) => [tour.id, reviewReasons(tour)])), [tours]);
+  const pending = useMemo(() => tours.filter((tour) => tour.name.trim() && reasons.get(tour.id)?.length), [tours, reasons]);
+  const counts = useMemo(() => {
+    const c = { lowConfidence: 0, noPrice: 0, noDetails: 0 };
+    for (const tour of pending) for (const r of reasons.get(tour.id) ?? []) c[r]++;
+    return c;
+  }, [pending, reasons]);
+
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return tours.filter(
+    const filtered = tours.filter(
       (tour) =>
         (!category || tour.category === category) &&
+        (!onlyPending || (reasons.get(tour.id)?.length ?? 0) > 0) &&
         (!q || tour.name.toLowerCase().includes(q) || tour.info.toLowerCase().includes(q))
     );
-  }, [tours, query, category]);
+    const isPending = (tour: Tour) => ((reasons.get(tour.id)?.length ?? 0) > 0 ? 0 : 1);
+    return filtered.map((tour, i) => ({ tour, i })).sort((a, b) => isPending(a.tour) - isPending(b.tour) || a.i - b.i).map((x) => x.tour);
+  }, [tours, query, category, onlyPending, reasons]);
 
   const grid = "grid grid-cols-[minmax(0,1fr)_auto] md:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)_minmax(0,0.9fr)_20px] gap-4";
 
@@ -86,6 +97,41 @@ export default function ToursTable({ tours, selectedId, onSelect, onAdd }: Tours
         </button>
       </div>
 
+      {pending.length > 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-amber-900">{t("pendingTitle", { count: pending.length })}</p>
+            <p className="mt-0.5 text-xs text-amber-800">
+              {[
+                counts.noPrice && t("pendingNoPrice", { count: counts.noPrice }),
+                counts.lowConfidence && t("pendingLowConfidence", { count: counts.lowConfidence }),
+                counts.noDetails && t("pendingNoDetails", { count: counts.noDetails }),
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </div>
+          <button
+            onClick={() => setOnlyPending((v) => !v)}
+            aria-pressed={onlyPending}
+            className={`shrink-0 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
+              onlyPending ? "border-amber-900 bg-amber-900 text-white" : "border-amber-300 bg-white text-amber-900 hover:border-amber-400"
+            }`}
+          >
+            {onlyPending ? t("showAll") : t("showPending")}
+          </button>
+        </div>
+      ) : (
+        tours.some((tour) => tour.name.trim()) && (
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-green-700">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M5 13l4 4L19 7" />
+            </svg>
+            {t("allReviewed")}
+          </p>
+        )
+      )}
+
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className={`${grid} border-b border-slate-100 bg-slate-50/70 px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-400`}>
           <span>{t("colTour")}</span>
@@ -106,9 +152,14 @@ export default function ToursTable({ tours, selectedId, onSelect, onAdd }: Tours
             >
               <span className="min-w-0">
                 <span className="font-bold text-navy-900">{tour.name || t("untitled")}</span>
-                {typeof tour.confidence === "number" && tour.confidence < REVIEW_THRESHOLD && (
+                {reasons.get(tour.id)?.includes("lowConfidence") && (
                   <span className="ml-2 inline-flex rounded-full bg-amber-50 px-2 py-0.5 align-middle text-[11px] font-bold text-amber-700">
                     {t("review")}
+                  </span>
+                )}
+                {reasons.get(tour.id)?.includes("noDetails") && (
+                  <span className="ml-2 inline-flex rounded-full bg-amber-50 px-2 py-0.5 align-middle text-[11px] font-bold text-amber-700">
+                    {t("noDetailsBadge")}
                   </span>
                 )}
                 {tour.info && <span className="mt-0.5 block truncate text-[12.5px] text-slate-500">{tour.info}</span>}

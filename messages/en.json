@@ -454,7 +454,7 @@
       "noMatch": "No tours match your search.",
       "untitled": "Untitled tour",
       "review": "Review",
-      "listHint": "Click a tour to edit it. Tours marked \"Review\" were read from your site or rate sheet with low confidence.",
+      "listHint": "Tap a tour to edit it. Pending ones go first: no price, no details or read from your site with low confidence (\"Review\"). Once completed they move down.",
       "editTour": "Edit tour",
       "tourName": "Tour name",
       "tourNamePlaceholder": "Tour name",
@@ -557,7 +557,15 @@
         "apply": "{count, plural, one {Add 1 change} other {Add # changes}}",
         "applied": "{count, plural, one {1 change added. It saves automatically.} other {# changes added. They save automatically.}}",
         "close": "Close"
-      }
+      },
+      "pendingTitle": "{count, plural, one {1 tour to review} other {# tours to review}}",
+      "pendingNoPrice": "{count, plural, one {1 without a price} other {# without a price}}",
+      "pendingLowConfidence": "{count, plural, one {1 read with low confidence} other {# read with low confidence}}",
+      "pendingNoDetails": "{count, plural, one {1 without details} other {# without details}}",
+      "showPending": "Show pending only",
+      "showAll": "Show all",
+      "allReviewed": "Every tour has a price and details.",
+      "noDetailsBadge": "No details"
     },
     "topbar": {
       "search": "Search...",
