@@ -556,7 +556,8 @@
         "done": "Done",
         "apply": "{count, plural, one {Add 1 change} other {Add # changes}}",
         "applied": "{count, plural, one {1 change added. It saves automatically.} other {# changes added. They save automatically.}}",
-        "close": "Close"
+        "close": "Close",
+        "newBadge": "New"
       },
       "pendingTitle": "{count, plural, one {1 tour to review} other {# tours to review}}",
       "pendingNoPrice": "{count, plural, one {1 without a price} other {# without a price}}",
@@ -1264,7 +1265,17 @@
     "newVersion": {
       "title": "A new version of Tourfy is available",
       "body": "Reload to get the latest improvements.",
-      "reload": "Reload"
+      "reload": "Reload",
+      "featureTitle": "New in Tourfy: {title}",
+      "featureBody": "Reload the page to see it."
+    },
+    "whatsNew": {
+      "title": "What's new",
+      "sub": "The latest we added to Tourfy.",
+      "unseen": "{count, plural, one {What's new: 1 unseen} other {What's new: # unseen}}",
+      "new": "New",
+      "requested": "Requested by customers",
+      "try": "Try it"
     }
   },
   "blog": {

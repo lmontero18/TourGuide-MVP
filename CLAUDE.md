@@ -459,6 +459,10 @@ export async function getLeadStats(orgId: string, from: Date, to: Date) {
 - Props siempre tipadas con `interface`, no `type` para componentes
 - No pasar el cliente de Supabase como prop — cada componente lo instancia desde `lib/`
 
+### Novedades (changelog)
+- Toda funcion que el cliente nota lleva su entrada en `lib/changelog.ts` **en el mismo PR** (es/en, `href` a la pantalla, `requested: true` si la pidio un cliente, `adminOnly` si es solo para admins).
+- Aparece en el panel 🎁 de la barra de arriba, el aviso de version nueva la nombra, e `isNewFeature(id)` pone la etiqueta "Nuevo" sobre la funcion durante 14 dias.
+
 ### Errores
 - Las queries de Supabase siempre manejan `error`: `const { data, error } = await supabase...`
 - Los webhooks siempre responden 200 aunque fallen internamente (Meta reintenta en 4xx/5xx)

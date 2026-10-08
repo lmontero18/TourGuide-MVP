@@ -7,7 +7,14 @@ const POLL_MS = 5 * 60 * 1000
 
 // Avisa cuando hay un deploy nuevo: revisa /api/version cada 5 min y al
 // volver a la pestaña. En dev no hace nada (no hay commit).
-export function useNewVersion(onNewVersion: () => void) {
+export interface LatestChangelog {
+  id: string
+  adminOnly: boolean
+  es: string
+  en: string
+}
+
+export function useNewVersion(onNewVersion: (latest: LatestChangelog | null) => void) {
   const notified = useRef(false)
   const handler = useRef(onNewVersion)
   useEffect(() => {
@@ -21,10 +28,10 @@ export function useNewVersion(onNewVersion: () => void) {
       try {
         const res = await fetch('/api/version', { cache: 'no-store' })
         if (!res.ok) return
-        const { version } = (await res.json()) as { version?: string }
+        const { version, latest } = (await res.json()) as { version?: string; latest?: LatestChangelog | null }
         if (version && version !== 'dev' && version !== CURRENT) {
           notified.current = true
-          handler.current()
+          handler.current(latest ?? null)
         }
       } catch {
         // Sin red: se reintenta en el proximo ciclo.

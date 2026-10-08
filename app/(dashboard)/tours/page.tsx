@@ -15,6 +15,7 @@ import { promptUsage } from "@/lib/bot/compilePrompt";
 import KnowledgeCapacity from "@/components/tours/KnowledgeCapacity";
 import ImportDialog from "@/components/tours/ImportDialog";
 import { needsReview } from "@/lib/tours/review";
+import { isNewFeature } from "@/lib/changelog";
 import { useQueryClient } from "@tanstack/react-query";
 import { useOrganization } from "@/hooks/useOrganization";
 import { queryKeys } from "@/lib/query/keys";
@@ -234,6 +235,9 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
                     <path d="M21 12a9 9 0 0 1-15.5 6.2M3 12a9 9 0 0 1 15.5-6.2M21 4v5h-5M3 20v-5h5" />
                   </svg>
                   {t("reimport.open")}
+                  {isNewFeature("tours-reimport") && (
+                    <span className="rounded-full bg-blue-50 px-1.5 py-px text-[10px] font-bold text-blue-700">{t("reimport.newBadge")}</span>
+                  )}
                 </button>
               </div>
             </div>

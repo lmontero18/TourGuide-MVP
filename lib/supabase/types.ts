@@ -600,6 +600,7 @@ export type Database = {
       }
       users: {
         Row: {
+          changelog_seen_at: string | null
           created_at: string
           email: string
           email_daily_summary: boolean
@@ -610,6 +611,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          changelog_seen_at?: string | null
           created_at?: string
           email: string
           email_daily_summary?: boolean
@@ -620,6 +622,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          changelog_seen_at?: string | null
           created_at?: string
           email?: string
           email_daily_summary?: boolean
