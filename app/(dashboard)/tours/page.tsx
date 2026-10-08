@@ -13,6 +13,7 @@ import ToursSkeleton from "@/components/tours/ToursSkeleton";
 import type { BotConfig, BusinessSection, Organization, Tour } from "@/types";
 import { promptUsage } from "@/lib/bot/compilePrompt";
 import KnowledgeCapacity from "@/components/tours/KnowledgeCapacity";
+import ImportDialog from "@/components/tours/ImportDialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { useOrganization } from "@/hooks/useOrganization";
 import { queryKeys } from "@/lib/query/keys";
@@ -87,6 +88,7 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
   const [tab, setTab] = useState<Tab>("tours");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [importOpen, setImportOpen] = useState(false);
 
   // Autoguardado: debounce + un solo PATCH en vuelo a la vez. Si hay cambios
   // mientras se guarda, se encola otro guardado con lo ultimo.
@@ -219,7 +221,18 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
           <div className="mx-auto max-w-5xl space-y-5">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <p className="max-w-2xl text-sm text-slate-500">{t("subtitle")}</p>
-              <KnowledgeCapacity ratio={capacity} />
+              <div className="flex flex-wrap items-end gap-4">
+                <KnowledgeCapacity ratio={capacity} />
+                <button
+                  onClick={() => setImportOpen(true)}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-navy-900 transition-colors hover:border-slate-300 hover:bg-slate-50"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M21 12a9 9 0 0 1-15.5 6.2M3 12a9 9 0 0 1 15.5-6.2M21 4v5h-5M3 20v-5h5" />
+                  </svg>
+                  {t("reimport.open")}
+                </button>
+              </div>
             </div>
 
             <div role="tablist" className="flex gap-6 border-b border-slate-200">
@@ -249,6 +262,23 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
             {tab === "faqs" && <FaqAccordion faqs={faqs} onChange={(v) => edit({ faqs: v })} />}
           </div>
       </div>
+
+      <ImportDialog
+        open={importOpen}
+        current={{ tours, faqs: faqs.map(({ question, answer }) => ({ question, answer })), business }}
+        onClose={() => setImportOpen(false)}
+        onApply={(next) =>
+          edit({
+            tours: next.tours,
+            business: next.business,
+            // Las FAQs del editor llevan id local; las nuevas se agregan al final.
+            faqs: [
+              ...latest.current.faqs,
+              ...next.faqs.slice(latest.current.faqs.length).map((faq) => ({ id: crypto.randomUUID(), ...faq })),
+            ],
+          })
+        }
+      />
 
       <TourDrawer tour={selected} saveState={saveState} onChange={updateTour} onDelete={deleteTour} onClose={closeDrawer} />
     </div>
