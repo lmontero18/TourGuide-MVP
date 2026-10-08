@@ -39,6 +39,18 @@ export async function GET(request: NextRequest) {
       // Ya la tomo alguien o se resolvio: no hace falta avisar.
       if (!conv || conv.status !== 'pending' || conv.assigned_agent_id) continue
 
+      // Traspaso hecho por cron/unanswered (el bot no respondio): ese aviso
+      // ya salio al momento, no repetirlo a los 5 minutos.
+      const at = new Date(ev.created_at).getTime()
+      const { count: noReply } = await service
+        .from('conversation_events')
+        .select('id', { count: 'exact', head: true })
+        .eq('conversation_id', ev.conversation_id)
+        .eq('type', 'bot_no_reply')
+        .gte('created_at', new Date(at - 60_000).toISOString())
+        .lte('created_at', new Date(at + 60_000).toISOString())
+      if (noReply) continue
+
       const { data: lead } = await service
         .from('leads')
         .select('tour_interest, metadata, next_step')
