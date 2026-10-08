@@ -3,10 +3,10 @@ import { getLocale } from "next-intl/server";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 
-// TODO: reemplazar por los datos reales antes de enviar a App Review de Meta.
-const CONTACT_EMAIL = "naia@naiaautomate.com";
-const UPDATED_EN = "June 2, 2026";
-const UPDATED_ES = "2 de junio de 2026";
+import { CONTACT_EMAIL, LEGAL_ADDRESS, LEGAL_NAME } from "@/lib/legal";
+
+const UPDATED_EN = "October 7, 2026";
+const UPDATED_ES = "7 de octubre de 2026";
 
 export async function generateMetadata(): Promise<Metadata> {
   const isEs = (await getLocale()) === "es";
@@ -50,8 +50,9 @@ function DeletionEn() {
       <p className="mt-2 text-sm text-slate-400">Last updated: {UPDATED_EN}</p>
 
       <p className={`${P} mt-6`}>
-        This page explains how to delete the data Tourfy holds about you or your organization,
-        including data processed through the WhatsApp Business / Cloud API.
+        This page explains how to delete the data Tourfy, a service of {LEGAL_NAME} ({LEGAL_ADDRESS}),
+        holds about you or your organization, including data processed through the WhatsApp Business /
+        Cloud API.
       </p>
 
       <h2 className={H2}>Disconnect your WhatsApp number</h2>
@@ -105,8 +106,9 @@ function DeletionEs() {
       <p className="mt-2 text-sm text-slate-400">Última actualización: {UPDATED_ES}</p>
 
       <p className={`${P} mt-6`}>
-        Esta página explica cómo eliminar los datos que Tourfy tiene sobre ti o tu organización,
-        incluidos los datos procesados a través de la API de WhatsApp Business / Cloud.
+        Esta página explica cómo eliminar los datos que Tourfy, un servicio de {LEGAL_NAME} ({LEGAL_ADDRESS}),
+        tiene sobre ti o tu organización, incluidos los datos procesados a través de la API de WhatsApp
+        Business / Cloud.
       </p>
 
       <h2 className={H2}>Desconectar tu número de WhatsApp</h2>
@@ -146,7 +148,7 @@ function DeletionEs() {
       <h2 className={H2}>Contacto</h2>
       <p className={P}>
         Consultas:{" "}
-        <a className={A} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. Mirá también nuestra{" "}
+        <a className={A} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. Mira también nuestra{" "}
         <a className={A} href="/privacy">Política de privacidad</a>.
       </p>
     </>

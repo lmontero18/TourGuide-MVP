@@ -3,10 +3,8 @@ import { getLocale } from "next-intl/server";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 
-// Entidad que factura (Stripe) y con la que contrata la agencia.
-const LEGAL_NAME = "NOMADAI LLC";
-const LEGAL_ADDRESS = "30 North Gould Street, Ste N, Sheridan, Wyoming 82801, USA";
-const CONTACT_EMAIL = "naia@naiaautomate.com";
+import { CONTACT_EMAIL, LEGAL_ADDRESS, LEGAL_NAME } from "@/lib/legal";
+
 const UPDATED_EN = "October 7, 2026";
 const UPDATED_ES = "7 de octubre de 2026";
 
