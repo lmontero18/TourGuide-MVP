@@ -454,7 +454,7 @@
       "noMatch": "Ningún tour coincide con la búsqueda.",
       "untitled": "Tour sin nombre",
       "review": "Revisar",
-      "listHint": "Toca un tour para editarlo. Los marcados con \"Revisar\" los leímos de tu sitio o tarifario con poca certeza.",
+      "listHint": "Toca un tour para editarlo. Los pendientes van arriba: sin precio, sin detalles o leídos de tu sitio con poca certeza (\"Revisar\"). Al completarlos bajan con los demás.",
       "editTour": "Editar tour",
       "tourName": "Nombre del tour",
       "tourNamePlaceholder": "Nombre del tour",
@@ -557,7 +557,15 @@
         "apply": "{count, plural, one {Agregar 1 cambio} other {Agregar # cambios}}",
         "applied": "{count, plural, one {Se agregó 1 cambio. Se guarda solo.} other {Se agregaron # cambios. Se guarda solo.}}",
         "close": "Cerrar"
-      }
+      },
+      "pendingTitle": "{count, plural, one {1 tour para revisar} other {# tours para revisar}}",
+      "pendingNoPrice": "{count, plural, one {1 sin precio} other {# sin precio}}",
+      "pendingLowConfidence": "{count, plural, one {1 leído con poca certeza} other {# leídos con poca certeza}}",
+      "pendingNoDetails": "{count, plural, one {1 sin detalles} other {# sin detalles}}",
+      "showPending": "Ver solo pendientes",
+      "showAll": "Ver todos",
+      "allReviewed": "Todos los tours tienen precio y detalles.",
+      "noDetailsBadge": "Sin detalles"
     },
     "topbar": {
       "search": "Buscar…",

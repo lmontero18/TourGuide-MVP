@@ -14,6 +14,7 @@ import type { BotConfig, BusinessSection, Organization, Tour } from "@/types";
 import { promptUsage } from "@/lib/bot/compilePrompt";
 import KnowledgeCapacity from "@/components/tours/KnowledgeCapacity";
 import ImportDialog from "@/components/tours/ImportDialog";
+import { needsReview } from "@/lib/tours/review";
 import { useQueryClient } from "@tanstack/react-query";
 import { useOrganization } from "@/hooks/useOrganization";
 import { queryKeys } from "@/lib/query/keys";
@@ -205,8 +206,10 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
     setSelectedId(null);
   }, [selectedId]);
 
-  const TABS: { key: Tab; label: string; count: number }[] = [
-    { key: "tours", label: t("tabTours"), count: tours.length },
+  const pendingTours = tours.filter((tour) => tour.name.trim() && needsReview(tour)).length;
+
+  const TABS: { key: Tab; label: string; count: number; pending?: number }[] = [
+    { key: "tours", label: t("tabTours"), count: tours.length, pending: pendingTours },
     { key: "business", label: t("tabBusiness"), count: business.length },
     { key: "faqs", label: t("tabFaqs"), count: faqs.length },
   ];
@@ -252,6 +255,11 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
                     <span className={`rounded-full px-1.5 text-[11px] tabular-nums ${active ? "bg-navy-900 text-white" : "bg-slate-100 text-slate-400"}`}>
                       {item.count}
                     </span>
+                    {!!item.pending && (
+                      <span title={t("pendingTitle", { count: item.pending })} className="rounded-full bg-amber-100 px-1.5 text-[11px] font-bold tabular-nums text-amber-800">
+                        {item.pending}
+                      </span>
+                    )}
                   </button>
                 );
               })}
