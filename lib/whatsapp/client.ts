@@ -149,6 +149,33 @@ export async function registerPhoneNumber(
   throw new Error(`WhatsApp register error: ${JSON.stringify(error)}`)
 }
 
+// Coexistencia (numero que sigue en la app WhatsApp Business): pide a Meta que
+// mande por webhook los contactos ('smb_app_state_sync') o el historial
+// ('history') del celular. Solo se puede pedir UNA vez por onboarding y dentro
+// de las 24h siguientes. Devuelve el request_id (Meta lo pide para soporte).
+export async function requestSmbAppDataSync(
+  phoneNumberId: string,
+  accessToken: string,
+  syncType: 'smb_app_state_sync' | 'history'
+): Promise<string | null> {
+  const res = await fetch(`${GRAPH_API_BASE}/${phoneNumberId}/smb_app_data`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ messaging_product: 'whatsapp', sync_type: syncType }),
+  })
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(`WhatsApp smb_app_data error: ${JSON.stringify(error)}`)
+  }
+
+  const data = (await res.json().catch(() => ({}))) as { request_id?: string }
+  return data.request_id ?? null
+}
+
 export async function markAsRead(
   phoneNumberId: string,
   accessToken: string,

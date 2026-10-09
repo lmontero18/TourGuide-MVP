@@ -6,6 +6,7 @@ import { ensureOpenLead, refreshLead } from '@/lib/leads/sync'
 import { applyDeliveryStatus } from '@/lib/whatsapp/delivery'
 import { notifyTemplateStatus } from '@/lib/whatsapp/templateStatus'
 import { detectAbuse, type AbuseReason } from '@/lib/bot/abuse'
+import { applyContactSync, applyMessageEchoes } from '@/lib/whatsapp/coexistence'
 
 // ~10 min de nota de voz en opus. Mas largo no se manda a Whisper (costo).
 const MAX_AUDIO_BYTES = 2.5 * 1024 * 1024
@@ -218,6 +219,44 @@ async function processWebhook(body: WebhookPayload) {
           templateId: value.message_template_id,
           reason: value.reason,
         }, baseLog).catch((error) => baseLog.warn('template status notify failed', { error }))
+        continue
+      }
+
+      // La agencia desconecto Tourfy desde la app WhatsApp Business (Ajustes →
+      // Cuenta → Plataforma de negocios). El numero queda sin bot: se marca
+      // inactivo y se avisa, porque desde el panel no se ve que paso.
+      if (change.field === 'account_update' && value.event === 'PARTNER_REMOVED' && entry.id) {
+        const { data: removed } = await supabase
+          .from('whatsapp_accounts')
+          .update({ status: 'inactive' })
+          .eq('waba_id', entry.id)
+          .select('org_id')
+        for (const acc of removed ?? []) {
+          baseLog.warn('WhatsApp partner removed by the business', { org_id: acc.org_id, waba_id: entry.id })
+          Sentry.captureMessage('WhatsApp partner removed', {
+            level: 'warning',
+            tags: { route: 'webhooks/whatsapp', org_id: acc.org_id },
+          })
+        }
+        continue
+      }
+
+      // Coexistencia (CODE-190): lo que la agencia hace en la app del celular.
+      if (value.message_echoes || value.state_sync) {
+        const phoneNumberId = value.metadata?.phone_number_id
+        if (!phoneNumberId) continue
+        const { data: account } = await supabase
+          .from('whatsapp_accounts')
+          .select('org_id')
+          .eq('phone_number_id', phoneNumberId)
+          .maybeSingle()
+        if (!account) {
+          baseLog.warn('coexistence event for unknown phone_number_id', { phone_number_id: phoneNumberId })
+          continue
+        }
+        const log = baseLog.child({ org_id: account.org_id })
+        if (value.message_echoes) await applyMessageEchoes(supabase, account.org_id, value.message_echoes, log)
+        if (value.state_sync) await applyContactSync(supabase, account.org_id, value.state_sync, log)
         continue
       }
 

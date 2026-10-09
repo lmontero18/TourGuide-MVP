@@ -12,6 +12,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'whatsapp-coexistence',
+    date: '2026-10-09T22:00:00Z',
+    href: '/settings/whatsapp',
+    adminOnly: true,
+    es: {
+      title: 'Seguí usando WhatsApp en tu celular',
+      body: 'Podés conectar el número que ya usás en la app WhatsApp Business sin dejarla. Lo que respondés desde el celular aparece en Tourfy y el bot se pausa en esa conversación.',
+    },
+    en: {
+      title: 'Keep using WhatsApp on your phone',
+      body: 'Connect the number you already use in the WhatsApp Business app without leaving it. What you reply from your phone shows up in Tourfy and the bot pauses in that conversation.',
+    },
+  },
+  {
     id: 'mobile',
     date: '2026-10-09T18:00:00Z',
     href: '/conversations',
