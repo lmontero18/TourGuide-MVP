@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createLogger } from '@/lib/logger'
@@ -70,8 +70,11 @@ export async function POST(request: NextRequest) {
   // controlable por quien se registra, y un signup directo contra GoTrue con la
   // anon key daba admin de cualquier org. La asignacion se hace aca abajo, con
   // service client, despues de haber verificado que quien invita es admin.
+  // locale: idioma del correo de invitacion (template bilingue de Supabase,
+  // supabase/templates/invite.html). Va el del panel de quien invita.
+  const locale = (await getLocale()) === 'en' ? 'en' : 'es'
   const { data: inviteData, error: inviteError } = await serviceClient.auth.admin.inviteUserByEmail(email, {
-    data: { full_name: full_name || null },
+    data: { full_name: full_name || null, locale },
   })
 
   if (inviteError) {
