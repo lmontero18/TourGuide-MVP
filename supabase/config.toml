@@ -247,11 +247,11 @@ otp_expiry = 3600
 # y next=/set-password. En prod se configuran a mano en el dashboard (Authentication
 # -> Emails) con el mismo HTML de supabase/templates/.
 [auth.email.template.invite]
-subject = "Te invitaron a Tourfy"
+subject = "Te invitaron a Tourfy | You're invited to Tourfy"
 content_path = "./supabase/templates/invite.html"
 
 [auth.email.template.recovery]
-subject = "Restablece tu contraseña de Tourfy"
+subject = "Restablece tu contraseña de Tourfy | Reset your Tourfy password"
 content_path = "./supabase/templates/recovery.html"
 
 # Uncomment to customize notification email template

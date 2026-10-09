@@ -1,19 +1,41 @@
 <!-- Template "Invite user" de Supabase Auth. En prod se pega en
-     Authentication → Emails → Invite user. El link va a /auth/confirm con
-     token_hash (no {{ .ConfirmationURL }}): la app verifica el token del lado
-     del servidor y manda al invitado a crear su contraseña. -->
-<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #0f172a;">
-  <p style="font-size: 20px; font-weight: 800; margin: 0 0 24px;">Tourfy</p>
-  <h1 style="font-size: 22px; font-weight: 800; margin: 0 0 12px;">Te invitaron a Tourfy</h1>
-  <p style="font-size: 15px; line-height: 1.6; color: #475569; margin: 0 0 24px;">
-    Tu equipo te sumó a su cuenta de Tourfy para atender las conversaciones de WhatsApp de la agencia.
-    Acepta la invitación y crea tu contraseña para entrar.
-  </p>
-  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite&next=/set-password"
-     style="display: inline-block; background: #0f1b3d; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 15px; padding: 12px 24px; border-radius: 12px;">
-    Aceptar invitación
-  </a>
-  <p style="font-size: 13px; line-height: 1.6; color: #94a3b8; margin: 32px 0 0;">
-    Si no esperabas esta invitación, puedes ignorar este correo.
-  </p>
+     Authentication → Emails → Invite user. Bilingue: el idioma sale de
+     user_metadata.locale, que /api/agents/invite guarda con el idioma del panel
+     de quien invita (sin locale: español). El link va a /auth/confirm con
+     token_hash: la app verifica el token del lado del servidor y manda al
+     invitado a crear su contraseña. -->
+<div style="margin: 0; padding: 24px 12px; background: #f5f6fa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e8ef; border-radius: 14px; overflow: hidden;">
+    <div style="background: #0d1b34; padding: 16px 22px; color: #ffffff; font-size: 16px; font-weight: 800;">Tourfy</div>
+    <div style="padding: 24px 22px;">
+      {{ if eq .Data.locale "en" }}
+      <h1 style="margin: 0 0 12px; font-size: 20px; color: #0d1b34;">You've been invited to Tourfy</h1>
+      <p style="margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #5a6680;">
+        Your team added you to their Tourfy account to handle the agency's WhatsApp conversations.
+        Accept the invitation and create your password to sign in.
+      </p>
+      <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite&next=/set-password"
+         style="display: inline-block; background: #0d1b34; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 11px 20px; border-radius: 10px;">
+        Accept invitation
+      </a>
+      <p style="margin: 24px 0 0; font-size: 12px; line-height: 1.6; color: #94a3b8;">
+        If you weren't expecting this invitation, you can ignore this email.
+      </p>
+      {{ else }}
+      <h1 style="margin: 0 0 12px; font-size: 20px; color: #0d1b34;">Te invitaron a Tourfy</h1>
+      <p style="margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #5a6680;">
+        Tu equipo te sumó a su cuenta de Tourfy para atender las conversaciones de WhatsApp de la agencia.
+        Acepta la invitación y crea tu contraseña para entrar.
+      </p>
+      <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite&next=/set-password"
+         style="display: inline-block; background: #0d1b34; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 11px 20px; border-radius: 10px;">
+        Aceptar invitación
+      </a>
+      <p style="margin: 24px 0 0; font-size: 12px; line-height: 1.6; color: #94a3b8;">
+        Si no esperabas esta invitación, puedes ignorar este correo.
+      </p>
+      {{ end }}
+    </div>
+    <div style="border-top: 1px solid #e5e8ef; padding: 12px 22px; font-size: 11px; color: #5a6680;">Tourfy · NOMADAI LLC · 30 North Gould Street, Ste N, Sheridan, Wyoming 82801, USA</div>
+  </div>
 </div>

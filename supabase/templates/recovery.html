@@ -1,17 +1,38 @@
 <!-- Template "Reset password" de Supabase Auth. En prod se pega en
-     Authentication → Emails → Reset password. Mismo patron que invite.html:
+     Authentication → Emails → Reset password. Bilingue como invite.html: el
+     idioma sale de user_metadata.locale, que requestPasswordReset guarda con
+     el idioma de la pantalla desde donde se pidio (sin locale: español).
      token_hash → /auth/confirm → /set-password. -->
-<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #0f172a;">
-  <p style="font-size: 20px; font-weight: 800; margin: 0 0 24px;">Tourfy</p>
-  <h1 style="font-size: 22px; font-weight: 800; margin: 0 0 12px;">Restablece tu contraseña</h1>
-  <p style="font-size: 15px; line-height: 1.6; color: #475569; margin: 0 0 24px;">
-    Recibimos un pedido para cambiar la contraseña de tu cuenta de Tourfy. Toca el botón para crear una nueva.
-  </p>
-  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/set-password"
-     style="display: inline-block; background: #0f1b3d; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 15px; padding: 12px 24px; border-radius: 12px;">
-    Crear nueva contraseña
-  </a>
-  <p style="font-size: 13px; line-height: 1.6; color: #94a3b8; margin: 32px 0 0;">
-    Si no lo pediste, ignora este correo: tu contraseña sigue igual.
-  </p>
+<div style="margin: 0; padding: 24px 12px; background: #f5f6fa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e8ef; border-radius: 14px; overflow: hidden;">
+    <div style="background: #0d1b34; padding: 16px 22px; color: #ffffff; font-size: 16px; font-weight: 800;">Tourfy</div>
+    <div style="padding: 24px 22px;">
+      {{ if eq .Data.locale "en" }}
+      <h1 style="margin: 0 0 12px; font-size: 20px; color: #0d1b34;">Reset your password</h1>
+      <p style="margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #5a6680;">
+        We got a request to change the password of your Tourfy account. Tap the button to create a new one.
+      </p>
+      <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/set-password"
+         style="display: inline-block; background: #0d1b34; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 11px 20px; border-radius: 10px;">
+        Create new password
+      </a>
+      <p style="margin: 24px 0 0; font-size: 12px; line-height: 1.6; color: #94a3b8;">
+        If you didn't ask for this, ignore this email: your password stays the same.
+      </p>
+      {{ else }}
+      <h1 style="margin: 0 0 12px; font-size: 20px; color: #0d1b34;">Restablece tu contraseña</h1>
+      <p style="margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #5a6680;">
+        Recibimos un pedido para cambiar la contraseña de tu cuenta de Tourfy. Toca el botón para crear una nueva.
+      </p>
+      <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/set-password"
+         style="display: inline-block; background: #0d1b34; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 11px 20px; border-radius: 10px;">
+        Crear nueva contraseña
+      </a>
+      <p style="margin: 24px 0 0; font-size: 12px; line-height: 1.6; color: #94a3b8;">
+        Si no lo pediste, ignora este correo: tu contraseña sigue igual.
+      </p>
+      {{ end }}
+    </div>
+    <div style="border-top: 1px solid #e5e8ef; padding: 12px 22px; font-size: 11px; color: #5a6680;">Tourfy · NOMADAI LLC · 30 North Gould Street, Ste N, Sheridan, Wyoming 82801, USA</div>
+  </div>
 </div>
