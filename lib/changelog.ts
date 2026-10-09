@@ -1,12 +1,10 @@
 // Novedades de Tourfy que ve cada agencia en el panel 🎁 (TopBar). La mas
 // nueva va primero. Al sacar una funcion que el cliente nota, agregar la
-// entrada en el mismo PR. `requested`: la pidio un cliente (se muestra
-// "Pedido por clientes"). `adminOnly`: solo la ven los admins (ej. Tours).
+// entrada en el mismo PR. `adminOnly`: solo la ven los admins (ej. Tours).
 export interface ChangelogEntry {
   id: string
   date: string // ISO con hora: se compara contra users.changelog_seen_at
   href?: string
-  requested?: boolean
   adminOnly?: boolean
   es: { title: string; body: string }
   en: { title: string; body: string }
@@ -31,7 +29,6 @@ export const CHANGELOG: ChangelogEntry[] = [
     id: 'tours-reimport',
     date: '2026-10-08T22:40:00Z',
     href: '/tours',
-    requested: true,
     adminOnly: true,
     es: {
       title: 'Volver a importar tours',

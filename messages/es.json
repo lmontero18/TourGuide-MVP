@@ -1274,7 +1274,6 @@
       "sub": "Lo último que agregamos a Tourfy.",
       "unseen": "{count, plural, one {Novedades: 1 sin ver} other {Novedades: # sin ver}}",
       "new": "Nuevo",
-      "requested": "Pedido por clientes",
       "try": "Probar"
     }
   },
