@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import WhatsNew from "@/components/layout/WhatsNew";
 import { logout } from "@/app/(auth)/login/actions";
 import { useQueryClient } from "@tanstack/react-query";
 import { setLocale } from "@/app/actions/locale";
@@ -64,6 +65,7 @@ export default function TopBar({ title, children }: TopBarProps) {
       </h1>
       <div className="flex items-center gap-3">
         {children}
+        <WhatsNew />
         <NotificationBell />
         <div className="relative" ref={menuRef}>
           <button
