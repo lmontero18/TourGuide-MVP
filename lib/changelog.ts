@@ -12,6 +12,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'mobile',
+    date: '2026-10-09T18:00:00Z',
+    href: '/conversations',
+    es: {
+      title: 'Tourfy en el celular',
+      body: 'El panel ahora se adapta al teléfono: menú abajo, la lista de conversaciones a pantalla completa y el chat como en WhatsApp, con botón para volver.',
+    },
+    en: {
+      title: 'Tourfy on your phone',
+      body: 'The dashboard now fits your phone: menu at the bottom, the conversation list full screen and the chat like WhatsApp, with a back button.',
+    },
+  },
+  {
     id: 'assign-agent',
     date: '2026-10-09T15:00:00Z',
     href: '/conversations',

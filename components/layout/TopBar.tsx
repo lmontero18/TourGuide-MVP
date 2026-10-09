@@ -59,11 +59,11 @@ export default function TopBar({ title, children }: TopBarProps) {
   };
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-5">
-      <h1 className="font-display text-lg font-bold tracking-tight text-navy-900">
+    <header className="flex h-14 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 md:px-5">
+      <h1 className="min-w-0 truncate font-display text-lg font-bold tracking-tight text-navy-900">
         {title}
       </h1>
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-1.5 md:gap-3">
         {children}
         <WhatsNew />
         <NotificationBell />
