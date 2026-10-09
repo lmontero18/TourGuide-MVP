@@ -430,7 +430,9 @@
       "settings": "Settings",
       "expand": "Expand menu",
       "collapse": "Collapse menu",
-      "leads": "Leads"
+      "leads": "Leads",
+      "more": "More",
+      "menu": "Menu"
     },
     "tours": {
       "title": "What your bot knows",
@@ -717,7 +719,8 @@
         "error": "We couldn't assign the conversation",
         "onlyHolder": "{name} is handling it: only they or an admin can reassign it",
         "none": "Unassigned"
-      }
+      },
+      "backToList": "Back to the list"
     },
     "metrics": {
       "title": "Metrics",

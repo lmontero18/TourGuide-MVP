@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useConversationsContext } from "@/components/providers/ConversationsProvider";
 import FeedbackButton from "@/components/feedback/FeedbackButton";
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   {
     key: "conversations",
     href: "/conversations",
@@ -108,7 +108,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       initial={false}
       animate={{ width: collapsed ? 64 : 240 }}
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      className="flex h-screen flex-col border-r border-slate-200 bg-white shrink-0 overflow-hidden"
+      className="hidden h-full flex-col border-r border-slate-200 bg-white shrink-0 overflow-hidden md:flex"
     >
       {/* Logo */}
       <div className="flex h-14 items-center border-b border-slate-100 px-4">

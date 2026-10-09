@@ -20,13 +20,14 @@ export default function ConversationsLayout({ children }: { children: React.Reac
       <div className="flex flex-1 overflow-hidden">
         {/* En mobile, con una conversacion abierta se ve solo el chat */}
         <div
-          className={`w-full max-w-md border-r border-slate-200 bg-white overflow-hidden ${
+          className={`w-full border-slate-200 bg-white overflow-hidden lg:max-w-md lg:border-r ${
             activeId ? "hidden lg:block" : ""
           }`}
         >
           <ConversationList activeId={activeId} />
         </div>
-        <div className="flex-1 overflow-hidden">{children}</div>
+        {/* Sin conversacion abierta, en el celular solo se ve la lista */}
+        <div className={`flex-1 overflow-hidden ${activeId ? "" : "hidden lg:block"}`}>{children}</div>
       </div>
     </div>
   );

@@ -64,14 +64,14 @@ export default function AssignMenu({ conversationId, assignee, onAssigned }: Ass
         title={canAssign ? t("title") : t("onlyHolder", { name: assignee?.name ?? "" })}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="inline-flex h-8 max-w-[160px] items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex h-8 max-w-[160px] items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 md:px-3 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
           <circle cx="9" cy="7" r="4" />
           <path d="M19 8v6M22 11h-6" />
         </svg>
-        <span className="truncate">{assignee ? (assignee.id === user?.id ? t("you") : assignee.name) : t("title")}</span>
+        <span className="hidden truncate sm:inline">{assignee ? (assignee.id === user?.id ? t("you") : assignee.name) : t("title")}</span>
       </button>
       {open && (
         <div role="menu" className="absolute right-0 top-10 z-20 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg">

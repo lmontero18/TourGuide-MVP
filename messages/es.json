@@ -430,7 +430,9 @@
       "settings": "Configuración",
       "expand": "Expandir menú",
       "collapse": "Contraer menú",
-      "leads": "Leads"
+      "leads": "Leads",
+      "more": "Más",
+      "menu": "Menú"
     },
     "tours": {
       "title": "Lo que sabe tu bot",
@@ -717,7 +719,8 @@
         "error": "No pudimos asignar la conversación",
         "onlyHolder": "La atiende {name}: solo esa persona o un admin pueden reasignarla",
         "none": "Sin asignar"
-      }
+      },
+      "backToList": "Volver a la lista"
     },
     "metrics": {
       "title": "Métricas",
