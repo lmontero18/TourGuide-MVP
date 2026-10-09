@@ -63,7 +63,14 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
     },
     // "Otro agente tomo tu conversacion": para no escribirle dos personas al mismo cliente.
     onAssigneeChanged: (previous, item) => {
-      if (!me || previous?.id !== me || !item.assignee || item.assignee.id === me) return;
+      if (!me) return;
+      // Me la asignaron (CODE-187). Si me la asigne yo, estoy mirando esa
+      // conversacion y deliver() no avisa.
+      if (item.assignee?.id === me && previous?.id !== me) {
+        deliver(item, t("assignedTitle", { name: nameOf(item) }), item.lastMessage || t("assignedBody"), "urgent");
+        return;
+      }
+      if (previous?.id !== me || !item.assignee || item.assignee.id === me) return;
       deliver(item, t("takenTitle", { agent: item.assignee.name }), t("takenBody", { name: nameOf(item) }));
     },
   };

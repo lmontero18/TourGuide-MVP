@@ -708,7 +708,16 @@
         "copyFailed": "Couldn't copy",
         "code": "Code {code}"
       },
-      "templateTag": "template {name}"
+      "templateTag": "template {name}",
+      "assign": {
+        "title": "Assign to…",
+        "you": "You",
+        "assigned": "Assigned to {name}",
+        "unassigned": "Now unassigned: waiting for an agent again",
+        "error": "We couldn't assign the conversation",
+        "onlyHolder": "{name} is handling it: only they or an admin can reassign it",
+        "none": "Unassigned"
+      }
     },
     "metrics": {
       "title": "Metrics",
@@ -982,7 +991,9 @@
       "denied": "You blocked notifications in this browser. Enable them from the lock icon in the address bar.",
       "unsupported": "This browser doesn't support desktop notifications.",
       "events": "We notify you when the bot asks for a person, when a customer writes in one of your conversations, when another agent takes a conversation you had, and when Meta doesn't deliver a message you sent.",
-      "failedTitle": "Your message to {name} wasn't delivered"
+      "failedTitle": "Your message to {name} wasn't delivered",
+      "assignedTitle": "{name} was assigned to you",
+      "assignedBody": "Open the conversation to reply."
     },
     "templates": {
       "title": "WhatsApp templates",
@@ -1370,6 +1381,8 @@
     "leadNotFound": "We couldn't find that lead.",
     "leadUpdateFailed": "We couldn't save the lead.",
     "feedbackRateLimited": "You sent a lot of feedback in the last hour. Try again later.",
-    "feedbackFailed": "We couldn't save your feedback."
+    "feedbackFailed": "We couldn't save your feedback.",
+    "assignNotAllowed": "Someone else is handling this conversation. Only they or an admin can reassign it.",
+    "assignInvalidMember": "That person isn't on your team."
   }
 }

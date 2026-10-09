@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
 import TakeControlButton from "./TakeControlButton";
+import AssignMenu from "./AssignMenu";
 import TemplatePicker from "./TemplatePicker";
 import ConversationLeadButton from "@/components/leads/ConversationLeadButton";
 import { ChatMessagesSkeleton } from "./ChatSkeleton";
@@ -318,6 +319,7 @@ export default function ChatWindow({
           ) : (
             <>
               <TakeControlButton botActive={botActive} heldByOther={heldByOther} unassigned={!assignee} onToggle={handleToggleBot} />
+              <AssignMenu conversationId={conversationId} assignee={assignee} onAssigned={() => void refreshControl()} />
               <button
                 onClick={() => setStatusRemote("resolved")}
                 disabled={toggling}
