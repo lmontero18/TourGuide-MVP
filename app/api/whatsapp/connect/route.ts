@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { registerPhoneNumber } from '@/lib/whatsapp/client'
+import { registerPhoneNumber, requestSmbAppDataSync } from '@/lib/whatsapp/client'
 import { createLogger } from '@/lib/logger'
 
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0'
@@ -12,8 +12,13 @@ const baseLog = createLogger({ route: 'whatsapp/connect' })
 const connectSchema = z.object({
   code: z.string().min(1),
   waba_id: z.string().min(1),
-  phone_number_id: z.string().min(1),
+  // En coexistencia el evento de Meta puede venir solo con waba_id: se busca
+  // el numero del WABA abajo.
+  phone_number_id: z.string().min(1).optional(),
   phone_number: z.string().optional(),
+  // 'business_app' = coexistencia: el numero sigue en la app WhatsApp Business
+  // del celular (evento FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING). CODE-190.
+  onboarding: z.enum(['cloud_api', 'business_app']).default('cloud_api'),
 })
 
 export async function POST(request: NextRequest) {
@@ -43,7 +48,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: t('invalidInput') }, { status: 400 })
   }
 
-  const { code, waba_id, phone_number_id } = parsed.data
+  const { code, waba_id, onboarding } = parsed.data
+  const isBusinessApp = onboarding === 'business_app'
 
   try {
     // 1. Exchange code for a business integration system user access token.
@@ -87,9 +93,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: t('whatsappSubscribeFailed') }, { status: 400 })
     }
 
+    // 2b. Sin phone_number_id en el evento: el numero del WABA recien creado.
+    let phone_number_id = parsed.data.phone_number_id
+    if (!phone_number_id) {
+      const listRes = await fetch(`${GRAPH_API_BASE}/${waba_id}/phone_numbers?fields=id`, {
+        headers: { Authorization: `Bearer ${access_token}` },
+      })
+      const list = (await listRes.json().catch(() => ({}))) as { data?: { id: string }[] }
+      phone_number_id = list.data?.[0]?.id
+      if (!phone_number_id) {
+        log.warn('WABA has no phone number', { waba_id, onboarding })
+        return NextResponse.json({ error: t('whatsappConnectFailed') }, { status: 400 })
+      }
+    }
+
     // 3. Register the phone number on Cloud API (sets the two-step PIN). Idempotente.
+    // Un numero de la app WhatsApp Business ya esta registrado: Meta pide
+    // saltear este paso en coexistencia.
     const pin = process.env.META_DEFAULT_WABA_PIN
-    if (pin) {
+    if (pin && !isBusinessApp) {
       try {
         await registerPhoneNumber(phone_number_id, access_token, pin)
       } catch (err) {
@@ -163,6 +185,18 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) throw error
+
+    // 6. Coexistencia: pedir los contactos del celular (llegan por el webhook
+    // smb_app_state_sync). Meta lo acepta una sola vez y dentro de 24h; si
+    // falla no bloquea la conexion, el bot ya funciona sin la agenda.
+    if (isBusinessApp) {
+      try {
+        const requestId = await requestSmbAppDataSync(phone_number_id, access_token, 'smb_app_state_sync')
+        log.info('business app contact sync requested', { phone_number_id, request_id: requestId })
+      } catch (err) {
+        log.warn('business app contact sync request failed', { phone_number_id, error: err })
+      }
+    }
 
     return NextResponse.json({ success: true, account: waAccount })
   } catch (error) {

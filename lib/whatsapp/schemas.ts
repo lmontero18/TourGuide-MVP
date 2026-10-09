@@ -86,6 +86,11 @@ export const webhookPayloadSchema = z.looseObject({
                   // Mensajes quedan como unknown acá — validación por mensaje
                   // con webhookMessageSchema en processWebhook.
                   messages: z.array(z.unknown()).optional(),
+                  // Coexistencia (CODE-190): mensajes que la agencia manda
+                  // desde la app del celular y contactos de su agenda. Se
+                  // validan por item en lib/whatsapp/coexistence.ts.
+                  message_echoes: z.array(z.unknown()).optional(),
+                  state_sync: z.array(z.unknown()).optional(),
                   // Estados de entrega de lo que enviamos (bot o agentes). Solo
                   // interesan los 'failed' con codigo de error (ej. 131042).
                   statuses: z

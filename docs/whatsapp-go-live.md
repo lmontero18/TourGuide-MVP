@@ -127,6 +127,10 @@ Ruta: App Dashboard → **Casos de uso → Personalizar** (WhatsApp) → **"Inco
   con un número real (ya no da el error de BSP/TP).
 - [ ] **5.4 Webhook de producción:** reconfigurar el Callback URL con el dominio de producción
   (no ngrok) y resuscribir el campo `messages`.
+- [ ] **5.4b Embedded Signup v4 + coexistencia (CODE-190):** v2 se apaga el 15/10/2026.
+  Crear una configuración nueva de Login for Business (v4, con la opción de conectar números
+  de la app WhatsApp Business) y apuntar `NEXT_PUBLIC_META_CONFIG_ID` a ella. Suscribir además
+  los campos `smb_message_echoes`, `smb_app_state_sync` y `account_update`.
 - [ ] **5.5 Facturación:** definir el flujo de tarjeta de crédito de los clientes onboarded
   (cada cliente agrega su tarjeta a la cuenta en la plataforma de WhatsApp Business).
 

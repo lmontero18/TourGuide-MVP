@@ -18,15 +18,18 @@ declare global {
 }
 
 interface SessionInfo {
-  phone_number_id: string;
+  phone_number_id?: string;
   waba_id: string;
+  onboarding: "cloud_api" | "business_app";
 }
 
 interface Props {
   onConnected?: (account: { phone_number: string; status: string }) => void;
 }
 
-type SignupEvent = "FINISH" | "CANCEL" | "ERROR";
+// FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING: el numero sigue en la app WhatsApp
+// Business del celular (coexistencia, CODE-190).
+type SignupEvent = "FINISH" | "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING" | "CANCEL" | "ERROR";
 
 export default function ConnectWhatsAppButton({ onConnected }: Props) {
   const t = useTranslations("dashboard.connectWhatsApp");
@@ -76,10 +79,11 @@ export default function ConnectWhatsAppButton({ onConnected }: Props) {
         if (data?.type !== "WA_EMBEDDED_SIGNUP") return;
 
         lastEventRef.current = data.event as SignupEvent;
-        if (data.event === "FINISH") {
+        if (data.event === "FINISH" || data.event === "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING") {
           sessionInfoRef.current = {
-            phone_number_id: data.data.phone_number_id,
-            waba_id: data.data.waba_id,
+            phone_number_id: data.data?.phone_number_id,
+            waba_id: data.data?.waba_id,
+            onboarding: data.event === "FINISH" ? "cloud_api" : "business_app",
           };
         }
         // CANCEL / ERROR: el usuario cerró el popup o Meta reportó un error.
@@ -117,7 +121,7 @@ export default function ConnectWhatsAppButton({ onConnected }: Props) {
         }
 
         // Meta reportó un error, o la sesión quedó incompleta.
-        if (lastEventRef.current === "ERROR" || !code || !session) {
+        if (lastEventRef.current === "ERROR" || !code || !session?.waba_id) {
           toast.error(t("metaError"));
           return;
         }
@@ -129,6 +133,7 @@ export default function ConnectWhatsAppButton({ onConnected }: Props) {
             code,
             waba_id: session.waba_id,
             phone_number_id: session.phone_number_id,
+            onboarding: session.onboarding,
           }),
         });
 
@@ -155,10 +160,11 @@ export default function ConnectWhatsAppButton({ onConnected }: Props) {
         config_id: CONFIG_ID,
         response_type: "code",
         override_default_response_type: true,
-        extras: {
-          feature: "whatsapp_embedded_signup",
-          sessionInfoVersion: "3",
-        },
+        // Embedded Signup v4: extras vacio a proposito. Productos y la opcion
+        // de conectar un numero de la app WhatsApp Business salen de la
+        // configuracion de Login for Business (CONFIG_ID). v2 se apaga el
+        // 15/10/2026.
+        extras: {},
       }
     );
   };

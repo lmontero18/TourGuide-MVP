@@ -11,11 +11,13 @@ igual cada vez. Compartir pantalla con la agencia durante toda la llamada.
 - [ ] **Facebook personal** de quien administra el negocio (tiene que poder entrar a
       business.facebook.com como admin del portafolio comercial, o crearlo en la llamada).
 - [ ] **Número de WhatsApp** que va a usar el bot:
-  - Si hoy lo usan en la app de WhatsApp (normal o Business), al conectarlo a la API
-    **deja de funcionar en la app del celular**: desde ahí se atiende en el panel de
-    Tourfy. Avisarles antes. Nuestro Embedded Signup no tiene activada la coexistencia
-    (`featureType: whatsapp_business_app_onboarding`), y para conectarlo hay que borrar
-    el número de la app primero. Si no quieren perderlo, usar un número nuevo.
+  - Si hoy lo usan en la **app WhatsApp Business** (v2.24.17+): se conecta con
+    **coexistencia** (CODE-190) y siguen usándolo en el celular. Lo que respondan desde
+    ahí aparece en Tourfy y pausa el bot en esa conversación. Avisarles: se apagan
+    difusiones, mensajes temporales y editar/borrar; hay que abrir la app al menos cada
+    14 días; para desconectar, desde la app (Ajustes → Cuenta → Plataforma de negocios).
+  - Si lo usan en **WhatsApp normal** (no Business): pasarlo primero a la app Business,
+    o borrarlo de la app y conectarlo solo a la API.
   - Tiene que poder recibir un SMS o una llamada para el código de verificación.
 - [ ] **Tarjeta** Visa, Mastercard o Amex habilitada para compras internacionales
       (Meta le cobra directo a la agencia; Tourfy nunca la ve).
