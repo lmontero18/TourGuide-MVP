@@ -72,9 +72,6 @@ export default function WhatsNew() {
                     {freshIds.has(entry.id) && (
                       <span className="rounded-full bg-blue-50 px-1.5 py-px text-[10px] font-bold text-blue-700">{t("new")}</span>
                     )}
-                    {entry.requested && (
-                      <span className="rounded-full bg-green-50 px-1.5 py-px text-[10px] font-bold text-green-700">{t("requested")}</span>
-                    )}
                   </div>
                   <p className="mt-1 text-sm font-semibold text-navy-900">{copy.title}</p>
                   <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{copy.body}</p>
