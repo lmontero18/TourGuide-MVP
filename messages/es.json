@@ -708,7 +708,16 @@
         "copyFailed": "No se pudo copiar",
         "code": "Código {code}"
       },
-      "templateTag": "plantilla {name}"
+      "templateTag": "plantilla {name}",
+      "assign": {
+        "title": "Asignar a…",
+        "you": "Tú",
+        "assigned": "Asignada a {name}",
+        "unassigned": "Quedó sin asignar: vuelve a esperar a un agente",
+        "error": "No pudimos asignar la conversación",
+        "onlyHolder": "La atiende {name}: solo esa persona o un admin pueden reasignarla",
+        "none": "Sin asignar"
+      }
     },
     "metrics": {
       "title": "Métricas",
@@ -982,7 +991,9 @@
       "denied": "Bloqueaste las notificaciones en este navegador. Actívalas desde el candado de la barra de direcciones.",
       "unsupported": "Este navegador no admite notificaciones de escritorio.",
       "events": "Te avisamos cuando el bot pide una persona, cuando un cliente te escribe en una conversación tuya, cuando otro agente toma una conversación que tenías y cuando Meta no entrega un mensaje que enviaste.",
-      "failedTitle": "No se entregó tu mensaje a {name}"
+      "failedTitle": "No se entregó tu mensaje a {name}",
+      "assignedTitle": "Te asignaron a {name}",
+      "assignedBody": "Abre la conversación para responder."
     },
     "templates": {
       "title": "Plantillas de WhatsApp",
@@ -1370,6 +1381,8 @@
     "leadNotFound": "No encontramos ese lead.",
     "leadUpdateFailed": "No pudimos guardar el lead.",
     "feedbackRateLimited": "Enviaste muchos comentarios en la última hora. Intenta más tarde.",
-    "feedbackFailed": "No pudimos guardar tu comentario."
+    "feedbackFailed": "No pudimos guardar tu comentario.",
+    "assignNotAllowed": "Esta conversación la atiende otra persona. Solo ella o un admin pueden reasignarla.",
+    "assignInvalidMember": "Esa persona no es parte de tu equipo."
   }
 }

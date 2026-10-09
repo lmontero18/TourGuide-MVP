@@ -12,6 +12,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'assign-agent',
+    date: '2026-10-09T15:00:00Z',
+    href: '/conversations',
+    es: {
+      title: 'Asignar conversaciones a tu equipo',
+      body: 'En cada chat, "Asignar a…" pasa la conversación a otra persona del equipo. A quien se la asignan le llega un aviso en la app y un correo.',
+    },
+    en: {
+      title: 'Assign conversations to your team',
+      body: 'In each chat, "Assign to…" hands the conversation to someone else on the team. They get an in-app notification and an email.',
+    },
+  },
+  {
     id: 'tours-review-first',
     date: '2026-10-08T22:50:00Z',
     href: '/tours',
