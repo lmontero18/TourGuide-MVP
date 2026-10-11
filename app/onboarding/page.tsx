@@ -36,13 +36,14 @@ const STEP_COUNT = 3;
 
 // Codigos estables; la etiqueta visible sale de onboarding.countries.<codigo>.
 const COUNTRIES = [
+  "cr",
+  "ni",
   "mx",
   "co",
   "pe",
   "ar",
   "cl",
   "br",
-  "cr",
   "ec",
   "gt",
   "pa",
