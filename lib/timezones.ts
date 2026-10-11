@@ -2,13 +2,13 @@
 // La zona define el horario de atencion, la hora que ve el bot, las metricas
 // de fuera de horario y el corte del mes del tier gratis de Meta.
 export const TIMEZONES: { id: string; label: string }[] = [
+  { id: 'America/Costa_Rica', label: 'Costa Rica' },
   { id: 'America/Mexico_City', label: 'México (Ciudad de México)' },
   { id: 'America/Cancun', label: 'México (Cancún)' },
   { id: 'America/Guatemala', label: 'Guatemala' },
   { id: 'America/El_Salvador', label: 'El Salvador' },
   { id: 'America/Tegucigalpa', label: 'Honduras' },
   { id: 'America/Managua', label: 'Nicaragua' },
-  { id: 'America/Costa_Rica', label: 'Costa Rica' },
   { id: 'America/Panama', label: 'Panamá' },
   { id: 'America/Havana', label: 'Cuba' },
   { id: 'America/Santo_Domingo', label: 'República Dominicana' },
