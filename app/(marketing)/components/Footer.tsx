@@ -51,7 +51,6 @@ export function Footer() {
                 {[
                   { label: nav("features"), href: "/#features" },
                   { label: nav("howItWorks"), href: "/#how-it-works" },
-                  { label: nav("pricing"), href: "/#pricing" },
                   { label: nav("blog"), href: "/blog" },
                 ].map((item) => (
                   <li key={item.href}>
