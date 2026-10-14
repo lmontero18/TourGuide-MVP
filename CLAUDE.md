@@ -463,6 +463,9 @@ export async function getLeadStats(orgId: string, from: Date, to: Date) {
 - Toda funcion que el cliente nota lleva su entrada en `lib/changelog.ts` **en el mismo PR** (es/en, `href` a la pantalla, `adminOnly` si es solo para admins).
 - Aparece en el panel 🎁 de la barra de arriba, el aviso de version nueva la nombra, e `isNewFeature(id)` pone la etiqueta "Nuevo" sobre la funcion durante 14 dias.
 
+### Feature flags
+- Todo lo nuevo que pueda romper algo para los clientes nace `'beta'` en `lib/features.ts` y se envuelve con `hasFeature()`: se prueba en prod con las orgs `is_beta` y despues se pasa a `'live'`. Ver `docs/feature-flags.md`.
+
 ### Errores
 - Las queries de Supabase siempre manejan `error`: `const { data, error } = await supabase...`
 - Los webhooks siempre responden 200 aunque fallen internamente (Meta reintenta en 4xx/5xx)

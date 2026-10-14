@@ -512,7 +512,9 @@ export type Database = {
           business_info: Json
           created_at: string
           faqs: Json | null
+          features: string[]
           id: string
+          is_beta: boolean
           name: string
           onboarded_at: string | null
           plan: Database["public"]["Enums"]["plan_type"]
@@ -527,7 +529,9 @@ export type Database = {
           business_info?: Json
           created_at?: string
           faqs?: Json | null
+          features?: string[]
           id?: string
+          is_beta?: boolean
           name: string
           onboarded_at?: string | null
           plan?: Database["public"]["Enums"]["plan_type"]
@@ -542,7 +546,9 @@ export type Database = {
           business_info?: Json
           created_at?: string
           faqs?: Json | null
+          features?: string[]
           id?: string
+          is_beta?: boolean
           name?: string
           onboarded_at?: string | null
           plan?: Database["public"]["Enums"]["plan_type"]

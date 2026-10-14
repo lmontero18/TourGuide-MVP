@@ -27,7 +27,7 @@
 -- =====================================================================
 
 begin;
-select plan(23);
+select plan(25);
 
 -- ---------- IDs de prueba ----------
 --   Org R: c0000000-...-0001      Org S: c0000000-...-0002
@@ -204,6 +204,16 @@ exception when insufficient_privilege then
   perform set_config('t.admin_upsert_wa', 'blocked', true);
 end $$;
 
+-- Un admin no puede activarse features: is_beta/features quedan fuera del grant
+-- por columna de organizations (solo service role).
+do $$ begin
+  update public.organizations set is_beta = true
+   where id = 'c0000000-0000-4000-8000-000000000002';
+  perform set_config('t.admin_is_beta', 'allowed', true);
+exception when insufficient_privilege then
+  perform set_config('t.admin_is_beta', 'blocked', true);
+end $$;
+
 reset role;
 
 -- ============ Bloque SIGNUP: la via GoTrue ============
@@ -257,6 +267,9 @@ select is( (select count(*)::int from information_schema.columns
 
 -- Regresion: los grants por columna no rompieron el flujo de conectar WhatsApp
 select is( current_setting('t.admin_upsert_wa'), 'allowed', 'admin: SI puede hacer upsert de su cuenta de WhatsApp (connect no se rompio)');
+select is( current_setting('t.admin_is_beta'), 'blocked', 'admin: NO puede marcar su org como beta');
+select is( (select is_beta from public.organizations where id = 'c0000000-0000-4000-8000-000000000002'),
+           false, 'organizations.is_beta no cambio');
 
 -- Estado real de la DB despues de los intentos.
 -- NO es redundante con los asserts de arriba: un UPDATE bloqueado por RLS (a
