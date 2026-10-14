@@ -17,6 +17,7 @@ import { useConversationControl } from "@/hooks/useConversationControl";
 import { useAuth } from "@/hooks/useAuth";
 import { useSendChatFile } from "@/hooks/useSendChatFile";
 import { hasFeature } from "@/lib/features";
+import { outboundMediaContent, outboundMediaSpec, type OutboundMediaKind } from "@/lib/whatsapp/outboundMedia";
 import type { Assignee, ConversationStatus, MessageRole } from "@/types";
 
 interface ChatWindowProps {
@@ -34,6 +35,9 @@ interface OptimisticMessage {
   role: MessageRole;
   sentAt: number;
   status: "pending" | "failed";
+  // Foto/PDF que se esta mandando (CODE-194): se muestra al instante con la
+  // miniatura local; desaparece cuando llega el mensaje real con este path.
+  media?: { kind: OutboundMediaKind; previewUrl: string | null; path: string | null };
 }
 
 const WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -61,7 +65,7 @@ export default function ChatWindow({
   const t = useTranslations("dashboard.chat");
   const locale = useLocale();
   const { user, featureFlags } = useAuth();
-  const sendFile = useSendChatFile(conversationId);
+  const chatFile = useSendChatFile(conversationId);
   const canAttach = hasFeature(featureFlags, "attachments");
   const { messages, loading } = useMessages(conversationId);
   const { botActive, assignee, status, setState: setControl, refresh: refreshControl } = useConversationControl(
@@ -97,6 +101,7 @@ export default function ChatWindow({
     () =>
       optimistic.filter((opt) => {
         if (opt.status === "failed") return true;
+        if (opt.media) return !opt.media.path || !messages.some((m) => m.media_url === opt.media?.path);
         return !messages.some(
           (m) =>
             m.role === opt.role &&
@@ -116,6 +121,7 @@ export default function ChatWindow({
       sortAt: new Date(m.created_at).getTime(),
       mediaPath: m.media_url,
       mediaType: m.media_type ?? null,
+      previewUrl: null as string | null,
       pending: false,
       failed: false,
       delivery: m.delivery_status ?? null,
@@ -131,7 +137,8 @@ export default function ChatWindow({
       createdAt: formatTime(new Date(o.sentAt).toISOString(), locale),
       sortAt: o.sentAt,
       mediaPath: null as string | null,
-      mediaType: null as string | null,
+      mediaType: (o.media?.kind ?? null) as string | null,
+      previewUrl: o.media?.previewUrl ?? null,
       pending: o.status === "pending",
       failed: o.status === "failed",
       delivery: null,
@@ -191,6 +198,49 @@ export default function ChatWindow({
         prev.map((o) => (o.id === tempId ? { ...o, status: "failed" } : o))
       );
       toast.error(err instanceof Error ? err.message : t("errors.send"));
+    }
+  };
+
+  // Fotos/PDFs: aparecen en el chat al instante con animacion de envio. Se
+  // suben todos en paralelo (lo lento) y se mandan en orden, uno por mensaje;
+  // el texto va con el primero.
+  const handleSendFiles = async (files: File[], caption: string) => {
+    const base = Date.now();
+    const items = files.map((file, i) => {
+      const kind = outboundMediaSpec(file.type)?.kind ?? "document";
+      return {
+        file,
+        caption: i === 0 ? caption : "",
+        opt: {
+          id: `opt-${crypto.randomUUID()}`,
+          content: outboundMediaContent(kind, file.name, i === 0 ? caption : ""),
+          role: "agent" as const,
+          sentAt: base + i,
+          status: "pending" as const,
+          media: { kind, previewUrl: kind === "image" ? URL.createObjectURL(file) : null, path: null },
+        },
+      };
+    });
+    setOptimistic((prev) => [...prev, ...items.map((it) => it.opt)]);
+    const patch = (id: string, next: Partial<OptimisticMessage> & { path?: string }) =>
+      setOptimistic((prev) =>
+        prev.map((o) =>
+          o.id === id
+            ? { ...o, ...next, media: o.media && next.path ? { ...o.media, path: next.path } : o.media }
+            : o
+        )
+      );
+
+    const uploads = items.map((it) => chatFile.upload(it.file));
+    for (const [i, it] of items.entries()) {
+      try {
+        const path = await uploads[i];
+        await chatFile.send(path, it.file, it.caption);
+        patch(it.opt.id, { path });
+      } catch (err) {
+        patch(it.opt.id, { status: "failed" });
+        toast.error(err instanceof Error && err.message ? err.message : t("errors.upload"));
+      }
     }
   };
 
@@ -433,6 +483,7 @@ export default function ChatWindow({
               createdAt={msg.createdAt}
               mediaPath={msg.mediaPath}
               mediaType={msg.mediaType}
+              previewUrl={msg.previewUrl}
               pending={msg.pending}
               failed={msg.failed}
               delivery={msg.delivery}
@@ -471,7 +522,7 @@ export default function ChatWindow({
       {!(windowClosed && pickingTemplate) && (
         <ChatInput
           onSend={handleSend}
-          onSendFile={canAttach ? sendFile : undefined}
+          onSendFiles={canAttach ? handleSendFiles : undefined}
           disabled={botActive || heldByOther || windowClosed}
           placeholder={
             windowClosed
