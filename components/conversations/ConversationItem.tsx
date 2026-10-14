@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import StatusBadge from "./StatusBadge";
 import AssigneeBadge from "./AssigneeBadge";
 import type { Assignee, ConversationStatus } from "@/types";
+import { parseReaction } from "@/lib/whatsapp/placeholders";
 
 interface ConversationItemProps {
   id: string;
@@ -55,6 +56,12 @@ export default function ConversationItem({
   const locale = useLocale();
   const displayName = contactName || contactPhone;
   const lastMessageAt = formatRelative(lastMessageIso, t, locale);
+  const tChat = useTranslations("dashboard.chat");
+  // Reacciones: "👍 Reaccionó a un mensaje" en vez del marcador crudo.
+  const reaction = parseReaction(lastMessage);
+  const preview = reaction
+    ? [reaction.emoji, tChat(reaction.removed ? "reactionRemoved" : "reacted")].filter(Boolean).join(" ")
+    : lastMessage;
   const initials = contactName
     ? contactName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
     : "#";
@@ -87,7 +94,7 @@ export default function ConversationItem({
         </div>
         <div className="flex items-center justify-between gap-2 mt-0.5">
           <p className={`text-xs truncate ${unread ? "text-navy-700 font-medium" : "text-slate-500"}`}>
-            {lastMessage}
+            {preview}
           </p>
           {unreadCount > 0 && (
             <span className="shrink-0 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 text-[10px] font-bold text-white">
