@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+
+// ~8 lineas de text-sm (20px) + padding.
+const MAX_HEIGHT = 180;
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -12,6 +15,16 @@ interface ChatInputProps {
 export default function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
   const t = useTranslations("dashboard.chat");
   const [value, setValue] = useState("");
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  // Crece con el texto hasta MAX_HEIGHT y despues scrollea adentro (CODE-192).
+  // Al enviar, value vuelve a "" y la altura vuelve a la minima.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT)}px`;
+  }, [value]);
 
   const handleSend = () => {
     if (!value.trim() || disabled) return;
@@ -22,6 +35,7 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
   return (
     <div className="flex items-end gap-2 border-t border-slate-200 bg-white p-3">
       <textarea
+        ref={ref}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => {
@@ -32,8 +46,8 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
         }}
         placeholder={placeholder || t("typePlaceholder")}
         disabled={disabled}
-        rows={1}
-        className="flex-1 resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-navy-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 transition-all"
+        rows={2}
+        className="flex-1 resize-none overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-navy-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 transition-all"
       />
       <button
         onClick={handleSend}

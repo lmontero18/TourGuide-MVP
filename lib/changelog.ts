@@ -12,6 +12,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'chat-input-grows',
+    date: '2026-10-14T23:00:00Z',
+    href: '/conversations',
+    es: {
+      title: 'Más espacio para escribir',
+      body: 'El cuadro de respuesta del chat ahora crece mientras escribís, para que puedas ver y revisar mensajes largos antes de enviarlos.',
+    },
+    en: {
+      title: 'More room to write',
+      body: 'The chat reply box now grows as you type, so you can see and review long messages before sending them.',
+    },
+  },
+  {
     id: 'whatsapp-coexistence',
     date: '2026-10-09T22:00:00Z',
     href: '/settings/whatsapp',
