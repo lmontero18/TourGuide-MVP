@@ -13,31 +13,27 @@ const MAX_FILES = 10;
 interface Attachment {
   id: string;
   file: File;
-  // Miniatura (solo imagenes); se libera al quitarla o enviarla.
+  // Miniatura (solo imagenes); se libera al quitarla.
   url: string | null;
-  status: "ready" | "sending" | "failed";
 }
 
 interface ChatInputProps {
   onSend: (message: string) => void;
   // Si viene, se pueden adjuntar fotos y PDFs (CODE-194): clip, arrastrar o
-  // pegar. Cada archivo sale como un mensaje; el texto va con el primero.
-  // Devuelve true si se envio.
-  onSendFile?: (file: File, caption: string) => Promise<boolean>;
+  // pegar. Al enviar la bandeja se vacia y el chat muestra el envio.
+  onSendFiles?: (files: File[], caption: string) => void;
   disabled?: boolean;
   placeholder?: string;
 }
 
-export default function ChatInput({ onSend, onSendFile, disabled, placeholder }: ChatInputProps) {
+export default function ChatInput({ onSend, onSendFiles, disabled, placeholder }: ChatInputProps) {
   const t = useTranslations("dashboard.chat");
   const [value, setValue] = useState("");
   const [files, setFiles] = useState<Attachment[]>([]);
-  const [sending, setSending] = useState(false);
   const [dragging, setDragging] = useState(false);
   const ref = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const busy = disabled || sending;
-  const canAttach = !!onSendFile && !disabled;
+  const canAttach = !!onSendFiles && !disabled;
 
   // Crece con el texto hasta MAX_HEIGHT y despues scrollea adentro (CODE-192).
   // Al enviar, value vuelve a "" y la altura vuelve a la minima.
@@ -65,7 +61,6 @@ export default function ChatInput({ onSend, onSendFile, disabled, placeholder }:
         id: crypto.randomUUID(),
         file,
         url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
-        status: "ready" as const,
       })),
     ]);
   };
@@ -77,30 +72,14 @@ export default function ChatInput({ onSend, onSendFile, disabled, placeholder }:
       return prev.filter((a) => a.id !== id);
     });
 
-  const setStatus = (id: string, status: Attachment["status"]) =>
-    setFiles((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
-
-  const handleSend = async () => {
-    if (busy) return;
-    if (files.length && onSendFile) {
-      setSending(true);
-      let caption = value.trim();
-      // En orden y de a uno: el cliente los recibe como los elegiste. Si uno
-      // falla se frena y quedan los que faltan para reintentar.
-      for (const a of files) {
-        setStatus(a.id, "sending");
-        const ok = await onSendFile(a.file, caption);
-        if (!ok) {
-          setStatus(a.id, "failed");
-          break;
-        }
-        if (caption) {
-          caption = "";
-          setValue("");
-        }
-        removeFile(a.id);
-      }
-      setSending(false);
+  const handleSend = () => {
+    if (disabled) return;
+    if (files.length && onSendFiles) {
+      // Las miniaturas de la bandeja se liberan: el chat usa sus propias.
+      files.forEach((a) => a.url && URL.revokeObjectURL(a.url));
+      onSendFiles(files.map((a) => a.file), value.trim());
+      setFiles([]);
+      setValue("");
       return;
     }
     if (!value.trim()) return;
@@ -138,9 +117,7 @@ export default function ChatInput({ onSend, onSendFile, disabled, placeholder }:
             <div
               key={a.id}
               title={a.file.name}
-              className={`group relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border bg-slate-50 ${
-                a.status === "failed" ? "border-red-300" : "border-slate-200"
-              }`}
+              className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50"
             >
               {a.url ? (
                 // eslint-disable-next-line @next/next/no-img-element -- object URL local
@@ -151,27 +128,17 @@ export default function ChatInput({ onSend, onSendFile, disabled, placeholder }:
                   <span className="line-clamp-2 break-all text-[10px] leading-tight text-slate-600">{a.file.name}</span>
                 </div>
               )}
-              {a.status === "sending" && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/70">
-                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-navy-900 border-t-transparent" aria-label={t("sendingFile")} />
-                </div>
-              )}
-              {a.status === "failed" && (
-                <span className="absolute inset-x-0 bottom-0 bg-red-500 py-0.5 text-center text-[9px] font-bold text-white">{t("fileFailed")}</span>
-              )}
-              {!sending && (
-                <button
-                  type="button"
-                  onClick={() => removeFile(a.id)}
-                  aria-label={t("removeAttachment")}
-                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-navy-900/70 text-white opacity-90 hover:bg-navy-900"
-                >
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => removeFile(a.id)}
+                aria-label={t("removeAttachment")}
+                className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-navy-900/70 text-white opacity-90 hover:bg-navy-900"
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
             </div>
           ))}
-          {files.length < MAX_FILES && !sending && (
+          {files.length < MAX_FILES && (
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
@@ -186,7 +153,7 @@ export default function ChatInput({ onSend, onSendFile, disabled, placeholder }:
       )}
 
       <div className="flex items-end gap-2">
-        {onSendFile && (
+        {onSendFiles && (
           <>
             <input
               ref={fileRef}
@@ -202,7 +169,7 @@ export default function ChatInput({ onSend, onSendFile, disabled, placeholder }:
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              disabled={busy || files.length >= MAX_FILES}
+              disabled={disabled || files.length >= MAX_FILES}
               aria-label={t("attach")}
               title={t("attach")}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition-all hover:border-slate-300 hover:text-navy-900 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -229,13 +196,13 @@ export default function ChatInput({ onSend, onSendFile, disabled, placeholder }:
             addFiles(e.clipboardData.files);
           }}
           placeholder={files.length ? t("captionPlaceholder") : placeholder || t("typePlaceholder")}
-          disabled={busy}
+          disabled={disabled}
           rows={2}
           className="flex-1 resize-none overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-navy-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 transition-all"
         />
         <button
           onClick={handleSend}
-          disabled={busy || (!value.trim() && !files.length)}
+          disabled={disabled || (!value.trim() && !files.length)}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy-900 text-white transition-all hover:bg-navy-800 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

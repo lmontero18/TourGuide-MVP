@@ -17,6 +17,8 @@ interface MessageBubbleProps {
   createdAt: string;
   mediaPath?: string | null;
   mediaType?: string | null;
+  // Miniatura local de una foto que se esta enviando (optimista).
+  previewUrl?: string | null;
   pending?: boolean;
   failed?: boolean;
   delivery?: DeliveryStatus | null;
@@ -24,6 +26,10 @@ interface MessageBubbleProps {
   senderId?: string | null;
   senderName?: string | null;
   templateName?: string | null;
+}
+
+function Spinner({ className = "" }: { className?: string }) {
+  return <span className={`h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white border-t-transparent ${className}`} />;
 }
 
 // ✓ enviado · ✓✓ entregado · ✓✓ celeste leido (como WhatsApp).
@@ -58,7 +64,7 @@ const ROLE_STYLES: Record<MessageRole, { wrapper: string; bubble: string; label:
   },
 };
 
-export default function MessageBubble({ content, role, createdAt, mediaPath, mediaType, pending, failed, delivery, errorCode, senderId, senderName, templateName }: MessageBubbleProps) {
+export default function MessageBubble({ content, role, createdAt, mediaPath, mediaType, previewUrl, pending, failed, delivery, errorCode, senderId, senderName, templateName }: MessageBubbleProps) {
   const t = useTranslations("dashboard.chat");
   const tD = useTranslations("dashboard.chat.delivery");
   const { role: userRole, user } = useAuth();
@@ -73,7 +79,8 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, med
           .filter(Boolean)
           .join(" · ")
       : null;
-  const mediaUrl = useChatMediaUrl(mediaPath);
+  const signedUrl = useChatMediaUrl(mediaPath);
+  const mediaUrl = signedUrl ?? previewUrl ?? null;
   const [imgFailed, setImgFailed] = useState(false);
   const isMediaPlaceholder = /^\[[a-z_]+\]$/.test(content);
   const reaction = parseReaction(content);
@@ -102,9 +109,9 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, med
             {agentLabel}
           </span>
         )}
-        {mediaUrl && doc ? (
+        {doc && (mediaUrl || pending) ? (
           <a
-            href={mediaUrl}
+            href={mediaUrl ?? undefined}
             target="_blank"
             rel="noopener noreferrer"
             title={t("openDocument")}
@@ -116,9 +123,10 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, med
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
             </svg>
             <span className="truncate">{doc.filename}</span>
+            {pending && <Spinner className="ml-auto" />}
           </a>
         ) : mediaUrl && (
-          <a href={mediaUrl} target="_blank" rel="noopener noreferrer" className="block mb-1.5">
+          <a href={mediaUrl} target="_blank" rel="noopener noreferrer" className="relative block mb-1.5">
             {/* eslint-disable-next-line @next/next/no-img-element -- signed URL efímera, no optimizable por next/image */}
             <img
               src={mediaUrl}
@@ -128,6 +136,11 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, med
               onLoad={() => setImgFailed(false)}
               onError={() => setImgFailed(true)}
             />
+            {pending && (
+              <span className="absolute inset-0 flex items-center justify-center rounded-lg bg-navy-900/40">
+                <Spinner className="h-6 w-6" />
+              </span>
+            )}
           </a>
         )}
         {reaction ? (
@@ -135,7 +148,7 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, med
             {reaction.emoji && <span className="text-xl leading-none">{reaction.emoji}</span>}
             <span className="italic">{t(reaction.removed ? "reactionRemoved" : "reacted")}</span>
           </p>
-        ) : doc && mediaUrl ? (
+        ) : doc && (mediaUrl || pending) ? (
           doc.caption && <p className="text-sm leading-relaxed whitespace-pre-wrap">{doc.caption}</p>
         ) : (
           !(mediaUrl && !imgFailed && isMediaPlaceholder) && (
