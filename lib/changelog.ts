@@ -12,6 +12,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'reactions-emoji',
+    date: '2026-10-14T23:30:00Z',
+    href: '/conversations',
+    es: {
+      title: 'Ves con qué emoji reaccionó el cliente',
+      body: 'Cuando un cliente reacciona a un mensaje en WhatsApp, en el chat ves el emoji (👍, ❤️, 😮…) en vez de "(reaction)".',
+    },
+    en: {
+      title: 'See which emoji the customer reacted with',
+      body: 'When a customer reacts to a message on WhatsApp, the chat shows the emoji (👍, ❤️, 😮…) instead of "(reaction)".',
+    },
+  },
+  {
     id: 'chat-input-grows',
     date: '2026-10-14T23:00:00Z',
     href: '/conversations',

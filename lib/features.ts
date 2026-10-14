@@ -9,7 +9,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 export type FeatureStage = 'beta' | 'live'
 
 export const FEATURES = {
-  reactions: 'beta', // CODE-193
+  reactions: 'live', // CODE-193
   attachments: 'beta', // CODE-194
 } as const satisfies Record<string, FeatureStage>
 
