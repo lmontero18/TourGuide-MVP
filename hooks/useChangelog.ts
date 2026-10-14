@@ -34,7 +34,10 @@ export function useChangelog() {
 
   async function markSeen() {
     if (!user || !unseen.length) return
-    const now = new Date().toISOString()
+    // Nunca antes de la novedad mas nueva: si una entrada quedo con fecha a
+    // futuro (o el reloj del equipo atrasa), el punto no debe volver.
+    const newest = Math.max(...unseen.map((e) => new Date(e.date).getTime()))
+    const now = new Date(Math.max(Date.now(), newest)).toISOString()
     queryClient.setQueryData(KEY, now)
     const { error } = await createClient().from('users').update({ changelog_seen_at: now }).eq('id', user.id)
     if (error) void queryClient.invalidateQueries({ queryKey: KEY })
