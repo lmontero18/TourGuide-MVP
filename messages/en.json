@@ -727,11 +727,13 @@
         "none": "Unassigned"
       },
       "backToList": "Back to the list",
-      "attach": "Attach photo or PDF",
+      "attach": "Attach photos or PDFs",
       "removeAttachment": "Remove file",
       "captionPlaceholder": "Add a message (optional)...",
       "sendingFile": "Sending file...",
-      "openDocument": "Open PDF"
+      "openDocument": "Open PDF",
+      "dropFiles": "Drop your photos or PDFs here",
+      "fileFailed": "Not sent"
     },
     "metrics": {
       "title": "Metrics",
