@@ -49,6 +49,8 @@ export const webhookMessageSchema = z
         address: z.string().max(1024).optional(),
       })
       .optional(),
+    // Reaccion a un mensaje. emoji vacio = el cliente quito la reaccion.
+    reaction: z.looseObject({ emoji: z.string().max(64).optional() }).optional(),
     contacts: z
       .array(z.looseObject({ name: z.looseObject({ formatted_name: z.string().max(512).optional() }).optional() }))
       .max(20)

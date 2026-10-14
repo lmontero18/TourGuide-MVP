@@ -20,6 +20,8 @@ import { checkRateLimit } from '@/lib/ratelimit'
 import { createLogger, type Logger } from '@/lib/logger'
 import { DEFAULT_TIMEZONE } from '@/lib/bot/businessHours'
 import type { BotConfig } from '@/types'
+import { orgHasFeature } from '@/lib/features'
+import { isPlaceholder, reactionContent } from '@/lib/whatsapp/placeholders'
 
 function getServiceClient() {
   return createClient(
@@ -469,6 +471,10 @@ async function processWebhook(body: WebhookPayload) {
           const names = (message.contacts ?? []).map((c) => c.name?.formatted_name).filter(Boolean)
           content = `[Contacto compartido: ${names.join(', ') || 'sin nombre'}]`
           mediaNote = 'un contacto'
+        } else if (type === 'reaction' && (await orgHasFeature(supabase, waAccount.org_id, 'reactions'))) {
+          // Se guarda con el emoji para mostrarlo en el chat (CODE-193). Sigue
+          // siendo marcador: no va al bot ni dispara "sin respuesta".
+          content = reactionContent(message.reaction?.emoji)
         } else {
           // reaction, unsupported, etc.: placeholder en minuscula, no va al bot
           // (una reaccion con emoji no pide respuesta).
@@ -597,12 +603,12 @@ async function processWebhook(body: WebhookPayload) {
         // Call N8N bot if active and we have processable content.
         // Placeholders tipo [image]/[video]/[sticker] no van al bot — solo
         // texto real (incluye transcripciones de audio y descripciones de imagen).
-        const isPlaceholder = /^\[[a-z_]+\]$/.test(content)
+        const placeholder = isPlaceholder(content)
         // Frenos de abuso (troll o bucle contra otro bot): en vez de seguir
         // respondiendo, la conversacion pasa a un agente. Nunca corta a un
         // cliente real: los limites estan muy por encima de una charla normal.
         let brake: AbuseReason | null = null
-        if (conversation.bot_active && content && !isPlaceholder) {
+        if (conversation.bot_active && content && !placeholder) {
           brake = await detectAbuse(supabase, conversation.id).catch(() => null)
           if (brake) {
             await supabase
@@ -618,7 +624,7 @@ async function processWebhook(body: WebhookPayload) {
           }
         }
 
-        if (conversation.bot_active && content && !isPlaceholder && !brake) {
+        if (conversation.bot_active && content && !placeholder && !brake) {
           const { data: org } = await supabase
             .from('organizations')
             .select('prompt, bot_config')

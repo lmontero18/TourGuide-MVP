@@ -5,6 +5,7 @@ import { createLogger } from '@/lib/logger'
 import { pingHeartbeat } from '@/lib/monitoring/heartbeat'
 import { appUrl, orgRecipients, sendOnce } from '@/lib/email/notify'
 import { box, esc, layout, p } from '@/lib/email/layout'
+import { isPlaceholder } from '@/lib/whatsapp/placeholders'
 
 // Mensaje del cliente sin respuesta (CODE-177). pg_cron la llama cada minuto.
 // Si el bot esta activo y el ultimo mensaje es del cliente hace mas de 2 min,
@@ -15,9 +16,9 @@ import { box, esc, layout, p } from '@/lib/email/layout'
 const WAIT_MIN = 2
 const LOOKBACK_MIN = 30
 
-// Reacciones y tipos no soportados se guardan como "[reaction]": no van al
-// bot porque no piden respuesta (mismo criterio que el webhook).
-const isPlaceholder = (content: string) => /^\[[a-z_]+\]$/.test(content)
+// Reacciones y tipos no soportados se guardan como marcador ("[reaction] 👍",
+// "[video]"): no van al bot porque no piden respuesta (mismo criterio que el
+// webhook, ver lib/whatsapp/placeholders.ts).
 
 const log = createLogger({ route: 'cron/unanswered' })
 

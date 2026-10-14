@@ -664,6 +664,8 @@
         "sent": "Template sent"
       },
       "imageAlt": "Image sent by the customer",
+      "reacted": "Reacted to a message",
+      "reactionRemoved": "Removed their reaction",
       "failed": "Not sent",
       "errors": {
         "send": "We couldn't send the message. Try again.",

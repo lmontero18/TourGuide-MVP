@@ -4,6 +4,8 @@
 // pasa a 'live'; cuando ya no hay vuelta atras se borra la entrada y el `if`.
 // Las orgs se marcan con SQL (service role), un admin no puede auto-activarse.
 // Ver docs/feature-flags.md.
+import type { SupabaseClient } from '@supabase/supabase-js'
+
 export type FeatureStage = 'beta' | 'live'
 
 export const FEATURES = {
@@ -22,4 +24,12 @@ export function hasFeature(org: OrgFeatureFlags | null | undefined, key: Feature
   if ((FEATURES[key] as FeatureStage) === 'live') return true
   if (!org) return false
   return org.is_beta || org.features.includes(key)
+}
+
+// Para webhook / crons con service client. Un feature 'live' no consulta la DB;
+// si la consulta falla la org queda sin el feature (falla cerrado).
+export async function orgHasFeature(supabase: SupabaseClient, orgId: string, key: FeatureKey): Promise<boolean> {
+  if ((FEATURES[key] as FeatureStage) === 'live') return true
+  const { data } = await supabase.from('organizations').select('is_beta, features').eq('id', orgId).maybeSingle()
+  return hasFeature(data as OrgFeatureFlags | null, key)
 }
