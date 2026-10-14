@@ -282,6 +282,7 @@ export type Database = {
           created_at: string
           emailed: boolean
           id: string
+          image_path: string | null
           kind: string
           message: string
           org_id: string | null
@@ -293,6 +294,7 @@ export type Database = {
           created_at?: string
           emailed?: boolean
           id?: string
+          image_path?: string | null
           kind: string
           message: string
           org_id?: string | null
@@ -304,6 +306,7 @@ export type Database = {
           created_at?: string
           emailed?: boolean
           id?: string
+          image_path?: string | null
           kind?: string
           message?: string
           org_id?: string | null

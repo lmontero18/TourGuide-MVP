@@ -1285,7 +1285,12 @@
       "cancel": "Cancelar",
       "close": "Cerrar",
       "thanks": "¡Gracias! Lo recibimos y te respondemos pronto.",
-      "error": "No pudimos enviarlo. Intenta de nuevo."
+      "error": "No pudimos enviarlo. Intenta de nuevo.",
+      "attach": "Adjuntar captura",
+      "attachHint": "También puedes pegarla con Ctrl/Cmd + V",
+      "removeImage": "Quitar captura",
+      "imageType": "La captura tiene que ser una imagen JPG, PNG o WebP.",
+      "imageTooLarge": "La captura es muy grande (máximo 4 MB)."
     },
     "newVersion": {
       "title": "Hay una nueva versión de Tourfy",
@@ -1400,6 +1405,8 @@
     "assignInvalidMember": "Esa persona no es parte de tu equipo.",
     "fileTypeNotAllowed": "Solo se pueden enviar fotos (JPG o PNG) y PDFs.",
     "fileTooLarge": "El archivo es muy grande: fotos hasta 5 MB y PDFs hasta 16 MB.",
-    "uploadFailed": "No pudimos subir el archivo. Intenta de nuevo."
+    "uploadFailed": "No pudimos subir el archivo. Intenta de nuevo.",
+    "feedbackImageType": "La captura tiene que ser una imagen JPG, PNG o WebP.",
+    "feedbackImageTooLarge": "La captura es muy grande (máximo 4 MB)."
   }
 }

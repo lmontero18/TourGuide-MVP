@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 type Kind = "bug" | "idea" | "other";
 const KINDS: Kind[] = ["idea", "bug", "other"];
+// Captura opcional: mismo limite que el server (Vercel corta en 4.5 MB).
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
 // "Enviar comentarios" del sidebar: las agencias nos cuentan errores o lo
 // que les falta. Llega por correo al equipo de Tourfy (y queda guardado).
@@ -17,6 +20,24 @@ export default function FeedbackButton({ collapsed }: { collapsed: boolean }) {
   const [kind, setKind] = useState<Kind>("idea");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  // Captura + object URL de su miniatura (se libera al cambiarla o quitarla).
+  const [shot, setShot] = useState<{ file: File; url: string } | null>(null);
+  const image = shot?.file ?? null;
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function setImage(file: File | null) {
+    setShot((prev) => {
+      if (prev) URL.revokeObjectURL(prev.url);
+      return file ? { file, url: URL.createObjectURL(file) } : null;
+    });
+  }
+
+  function pickImage(file: File | null | undefined) {
+    if (!file) return;
+    if (!IMAGE_TYPES.includes(file.type)) return toast.error(t("imageType"));
+    if (file.size > MAX_IMAGE_BYTES) return toast.error(t("imageTooLarge"));
+    setImage(file);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -29,15 +50,17 @@ export default function FeedbackButton({ collapsed }: { collapsed: boolean }) {
     e.preventDefault();
     if (message.trim().length < 3) return;
     setSending(true);
-    const res = await fetch("/api/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind, message: message.trim(), page: pathname }),
-    }).catch(() => null);
+    const form = new FormData();
+    form.set("kind", kind);
+    form.set("message", message.trim());
+    if (pathname) form.set("page", pathname);
+    if (image) form.set("image", image);
+    const res = await fetch("/api/feedback", { method: "POST", body: form }).catch(() => null);
     setSending(false);
     if (res?.ok) {
       toast.success(t("thanks"));
       setMessage("");
+      setImage(null);
       setOpen(false);
     } else {
       const body = await res?.json().catch(() => ({}));
@@ -102,9 +125,50 @@ export default function FeedbackButton({ collapsed }: { collapsed: boolean }) {
               maxLength={4000}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onPaste={(e) => {
+                const file = Array.from(e.clipboardData.files).find((f) => f.type.startsWith("image/"));
+                if (file) {
+                  e.preventDefault();
+                  pickImage(file);
+                }
+              }}
               placeholder={t(`placeholders.${kind}`)}
               className="mt-3 w-full resize-y rounded-xl border border-slate-200 px-3 py-2 text-sm text-navy-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
+
+            <input
+              ref={fileRef}
+              type="file"
+              accept={IMAGE_TYPES.join(",")}
+              className="hidden"
+              onChange={(e) => {
+                pickImage(e.target.files?.[0]);
+                e.target.value = "";
+              }}
+            />
+            {shot ? (
+              <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element -- object URL local */}
+                <img src={shot.url} alt="" className="h-14 w-20 rounded-lg object-cover" />
+                <span className="min-w-0 flex-1 truncate text-xs text-slate-600">{shot.file.name}</span>
+                <button type="button" onClick={() => setImage(null)} className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-navy-900">
+                  {t("removeImage")}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                title={t("attachHint")}
+                className="mt-2 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-50 hover:text-navy-900"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                </svg>
+                {t("attach")}
+                <span className="font-normal text-slate-400">· {t("attachHint")}</span>
+              </button>
+            )}
 
             <div className="mt-4 flex justify-end gap-2">
               <button type="button" onClick={() => setOpen(false)} className="h-9 rounded-lg px-4 text-xs font-medium text-slate-500 hover:text-navy-900">{t("cancel")}</button>

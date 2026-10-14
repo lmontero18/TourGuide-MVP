@@ -16,6 +16,23 @@ const schema = z.object({
 
 // Tope por usuario para que el formulario no se use como spam.
 const MAX_PER_HOUR = 10
+// Captura opcional. Vercel corta el body en 4.5 MB: la imagen hasta 4 MB.
+const IMAGE_TYPES: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024
+
+// multipart (con captura) o JSON (sin captura).
+async function readBody(request: NextRequest): Promise<{ fields: unknown; image: File | null }> {
+  if (request.headers.get('content-type')?.includes('multipart/form-data')) {
+    const form = await request.formData().catch(() => null)
+    if (!form) return { fields: null, image: null }
+    const image = form.get('image')
+    return {
+      fields: { kind: form.get('kind'), message: form.get('message'), page: form.get('page') ?? undefined },
+      image: image instanceof File && image.size > 0 ? image : null,
+    }
+  }
+  return { fields: await request.json().catch(() => null), image: null }
+}
 const KIND_LABEL = { bug: 'Error', idea: 'Idea / función', other: 'Otro' } as const
 
 // Comentarios desde el panel → tabla feedback + correo al equipo de Tourfy.
@@ -25,8 +42,12 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
 
-  const parsed = schema.safeParse(await request.json().catch(() => null))
+  const { fields, image } = await readBody(request)
+  const parsed = schema.safeParse(fields)
   if (!parsed.success) return NextResponse.json({ error: t('invalidInput') }, { status: 400 })
+  const imageExt = image ? IMAGE_TYPES[image.type] : null
+  if (image && !imageExt) return NextResponse.json({ error: t('feedbackImageType') }, { status: 400 })
+  if (image && image.size > MAX_IMAGE_BYTES) return NextResponse.json({ error: t('feedbackImageTooLarge') }, { status: 413 })
 
   const service = await createServiceClient()
   const { data: profile } = await service
@@ -60,6 +81,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: t('feedbackFailed') }, { status: 500 })
   }
 
+  // La captura se guarda aunque falle el correo. Si falla la subida, el
+  // comentario igual llega (sin imagen).
+  let attachment: { filename: string; content: string } | null = null
+  if (image && imageExt) {
+    const bytes = Buffer.from(await image.arrayBuffer())
+    const path = `${row.id}.${imageExt}`
+    const { error: uploadError } = await service.storage
+      .from('feedback')
+      .upload(path, bytes, { contentType: image.type })
+    if (uploadError) {
+      log.warn('feedback image upload failed', { error: uploadError, org_id: profile?.org_id })
+    } else {
+      await service.from('feedback').update({ image_path: path }).eq('id', row.id)
+    }
+    attachment = { filename: `captura.${imageExt}`, content: bytes.toString('base64') }
+  }
+
   const org = (profile?.organizations as { name?: string } | null)?.name ?? 'sin agencia'
   const who = profile?.full_name || profile?.email || user.email || user.id
   const emailed = await sendEmail({
@@ -70,10 +108,12 @@ export async function POST(request: NextRequest) {
       `Agencia: ${org}`,
       `De: ${who} (${profile?.role ?? 'sin rol'}) <${profile?.email ?? user.email ?? ''}>`,
       `Página: ${page ?? '-'}`,
+      ...(attachment ? ['Captura: adjunta'] : []),
       '',
       message,
     ].join('\n'),
     replyTo: profile?.email ?? user.email ?? undefined,
+    attachments: attachment ? [attachment] : undefined,
   }).catch(() => false)
 
   if (emailed) {
