@@ -727,11 +727,13 @@
         "none": "Sin asignar"
       },
       "backToList": "Volver a la lista",
-      "attach": "Adjuntar foto o PDF",
+      "attach": "Adjuntar fotos o PDFs",
       "removeAttachment": "Quitar archivo",
       "captionPlaceholder": "Agrega un mensaje (opcional)…",
       "sendingFile": "Enviando archivo…",
-      "openDocument": "Abrir PDF"
+      "openDocument": "Abrir PDF",
+      "dropFiles": "Suelta aquí tus fotos o PDFs",
+      "fileFailed": "No se envió"
     },
     "metrics": {
       "title": "Métricas",
