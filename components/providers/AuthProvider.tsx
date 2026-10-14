@@ -4,6 +4,7 @@ import { createContext, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User as AppUser } from "@/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import type { OrgFeatureFlags } from "@/lib/features";
 
 export interface AuthState {
   user: SupabaseUser | null;
@@ -12,6 +13,8 @@ export interface AuthState {
   orgId: string | null;
   role: AppUser["role"] | null;
   onboardedAt: string | null;
+  // Feature flags de la org (lib/features.ts). null = sin features beta.
+  featureFlags: OrgFeatureFlags | null;
 }
 
 const EMPTY: AuthState = {
@@ -21,7 +24,10 @@ const EMPTY: AuthState = {
   orgId: null,
   role: null,
   onboardedAt: null,
+  featureFlags: null,
 };
+
+type OrgRow = { onboarded_at: string | null; is_beta?: boolean; features?: string[] };
 
 export const AuthContext = createContext<AuthState | null>(null);
 
@@ -44,15 +50,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loadedFor.current = user.id;
       const { data } = await supabase
         .from("users")
-        .select("id, org_id, email, full_name, role, created_at, updated_at, organizations(onboarded_at)")
+        .select("id, org_id, email, full_name, role, created_at, updated_at, organizations(onboarded_at, is_beta, features)")
         .eq("id", user.id)
         .single();
 
       if (cancelled) return;
 
       const orgData = data?.organizations as unknown as
-        | { onboarded_at: string | null }
-        | { onboarded_at: string | null }[]
+        | OrgRow
+        | OrgRow[]
         | null;
       const org = Array.isArray(orgData) ? orgData[0] : orgData;
 
@@ -63,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         orgId: data?.org_id ?? null,
         role: data?.role ?? null,
         onboardedAt: org?.onboarded_at ?? null,
+        featureFlags: org ? { is_beta: org.is_beta ?? false, features: org.features ?? [] } : null,
       });
     }
 
