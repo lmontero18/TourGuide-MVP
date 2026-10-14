@@ -8,6 +8,7 @@ import type { DeliveryStatus, MessageRole } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { deliveryReason } from "@/lib/whatsapp/deliveryReasons";
 import { useChatMediaUrl } from "@/hooks/useChatMediaUrl";
+import { parseReaction } from "@/lib/whatsapp/placeholders";
 
 interface MessageBubbleProps {
   content: string;
@@ -73,6 +74,7 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
   const mediaUrl = useChatMediaUrl(mediaPath);
   const [imgFailed, setImgFailed] = useState(false);
   const isMediaPlaceholder = /^\[[a-z_]+\]$/.test(content);
+  const reaction = parseReaction(content);
 
   // Mensaje que Meta no entrego: la burbuja pasa a rojo claro y abajo se
   // explica el motivo con la accion para resolverlo.
@@ -109,8 +111,15 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
             />
           </a>
         )}
-        {!(mediaUrl && !imgFailed && isMediaPlaceholder) && (
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+        {reaction ? (
+          <p className="flex items-center gap-1.5 text-sm text-slate-500">
+            {reaction.emoji && <span className="text-xl leading-none">{reaction.emoji}</span>}
+            <span className="italic">{t(reaction.removed ? "reactionRemoved" : "reacted")}</span>
+          </p>
+        ) : (
+          !(mediaUrl && !imgFailed && isMediaPlaceholder) && (
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+          )
         )}
         <span className={`flex items-center gap-1 text-[10px] mt-1 ${
           role === "agent" && !undelivered ? "text-white/50" : "text-slate-400"

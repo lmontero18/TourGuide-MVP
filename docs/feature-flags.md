@@ -17,7 +17,7 @@ Un admin no puede activarse nada: esas columnas no tienen grant de UPDATE para
 
 1. Agregarlo en `FEATURES` como `'beta'` y envolver lo nuevo con `hasFeature`.
 2. Merge → prod. Solo las orgs beta lo ven. Probar.
-3. Pasarlo a `'live'` (PR de una línea) → lo ven todas.
+3. Pasarlo a `'live'` → lo ven todas. En ese mismo PR va su entrada en `lib/changelog.ts` (no antes: el panel de novedades lo ven todas las agencias).
 4. Cuando ya no hay vuelta atrás, borrar la entrada y los `if`.
 
 ## Leer los flags

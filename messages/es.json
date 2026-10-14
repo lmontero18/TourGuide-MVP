@@ -664,6 +664,8 @@
         "sent": "Plantilla enviada"
       },
       "imageAlt": "Imagen enviada por el cliente",
+      "reacted": "Reaccionó a un mensaje",
+      "reactionRemoved": "Quitó su reacción",
       "failed": "No se envió",
       "errors": {
         "send": "No pudimos enviar el mensaje. Intenta de nuevo.",
