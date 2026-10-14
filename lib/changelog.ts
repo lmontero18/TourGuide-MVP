@@ -12,6 +12,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'chat-attachments',
+    date: '2026-10-15T00:30:00Z',
+    href: '/conversations',
+    es: {
+      title: 'Mandá fotos y PDFs desde el chat',
+      body: 'Con el clip 📎 (o arrastrando o pegando) podés mandarle al cliente varias fotos o PDFs a la vez: itinerarios, fotos del tour, comprobantes.',
+    },
+    en: {
+      title: 'Send photos and PDFs from the chat',
+      body: 'With the 📎 clip (or by dragging or pasting) you can send the customer several photos or PDFs at once: itineraries, tour photos, receipts.',
+    },
+  },
+  {
     id: 'reactions-emoji',
     date: '2026-10-14T23:30:00Z',
     href: '/conversations',
