@@ -1285,7 +1285,12 @@
       "cancel": "Cancel",
       "close": "Close",
       "thanks": "Thanks! We got it and will get back to you soon.",
-      "error": "We couldn't send it. Try again."
+      "error": "We couldn't send it. Try again.",
+      "attach": "Attach screenshot",
+      "attachHint": "You can also paste it with Ctrl/Cmd + V",
+      "removeImage": "Remove screenshot",
+      "imageType": "The screenshot must be a JPG, PNG or WebP image.",
+      "imageTooLarge": "The screenshot is too large (4 MB max)."
     },
     "newVersion": {
       "title": "A new version of Tourfy is available",
@@ -1400,6 +1405,8 @@
     "assignInvalidMember": "That person isn't on your team.",
     "fileTypeNotAllowed": "You can only send photos (JPG or PNG) and PDFs.",
     "fileTooLarge": "The file is too large: photos up to 5 MB and PDFs up to 16 MB.",
-    "uploadFailed": "We couldn't upload the file. Please try again."
+    "uploadFailed": "We couldn't upload the file. Please try again.",
+    "feedbackImageType": "The screenshot must be a JPG, PNG or WebP image.",
+    "feedbackImageTooLarge": "The screenshot is too large (4 MB max)."
   }
 }

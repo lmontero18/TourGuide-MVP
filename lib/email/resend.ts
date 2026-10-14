@@ -3,7 +3,20 @@ import 'server-only'
 // Envio de correos transaccionales por la API de Resend (mismo dominio que
 // el SMTP de Supabase Auth: no-reply@tourfy.app). Sin RESEND_API_KEY no
 // manda nada y devuelve false: quien llama decide el fallback.
-export async function sendEmail(input: { to: string; subject: string; text: string; html?: string; replyTo?: string }): Promise<boolean> {
+// Adjunto: content en base64.
+export interface EmailAttachment {
+  filename: string
+  content: string
+}
+
+export async function sendEmail(input: {
+  to: string
+  subject: string
+  text: string
+  html?: string
+  replyTo?: string
+  attachments?: EmailAttachment[]
+}): Promise<boolean> {
   const key = process.env.RESEND_API_KEY
   if (!key) return false
   const res = await fetch('https://api.resend.com/emails', {
@@ -16,6 +29,7 @@ export async function sendEmail(input: { to: string; subject: string; text: stri
       text: input.text,
       ...(input.html ? { html: input.html } : {}),
       ...(input.replyTo ? { reply_to: input.replyTo } : {}),
+      ...(input.attachments?.length ? { attachments: input.attachments } : {}),
     }),
     signal: AbortSignal.timeout(10_000),
   })
