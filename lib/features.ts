@@ -10,7 +10,7 @@ export type FeatureStage = 'beta' | 'live'
 
 export const FEATURES = {
   reactions: 'live', // CODE-193
-  attachments: 'beta', // CODE-194
+  attachments: 'live', // CODE-194
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES
