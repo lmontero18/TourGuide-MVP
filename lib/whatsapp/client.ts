@@ -104,7 +104,8 @@ export async function sendMediaMessage(
   to: string,
   type: 'image' | 'document' | 'video',
   url: string,
-  caption?: string
+  caption?: string,
+  filename?: string
 ) {
   return callGraphApi(phoneNumberId, accessToken, {
     messaging_product: 'whatsapp',
@@ -113,6 +114,8 @@ export async function sendMediaMessage(
     [type]: {
       link: url,
       ...(caption && { caption }),
+      // Solo documentos: el nombre con el que el cliente ve el archivo.
+      ...(type === 'document' && filename && { filename }),
     },
   })
 }

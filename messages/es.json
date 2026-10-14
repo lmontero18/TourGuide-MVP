@@ -671,7 +671,10 @@
         "send": "No pudimos enviar el mensaje. Intenta de nuevo.",
         "delete": "No pudimos eliminar la conversación.",
         "update": "No pudimos actualizar la conversación.",
-        "load": "No pudimos cargar la conversación."
+        "load": "No pudimos cargar la conversación.",
+        "fileType": "Solo se pueden enviar fotos (JPG o PNG) y PDFs.",
+        "fileTooLarge": "El archivo es muy grande: fotos hasta 5 MB y PDFs hasta 16 MB.",
+        "upload": "No pudimos enviar el archivo. Intenta de nuevo."
       },
       "deleteConfirm": "¿Eliminar esta conversación? Se ocultará de la bandeja. Si el cliente vuelve a escribir, reaparece.",
       "deleted": "Conversación eliminada",
@@ -723,7 +726,12 @@
         "onlyHolder": "La atiende {name}: solo esa persona o un admin pueden reasignarla",
         "none": "Sin asignar"
       },
-      "backToList": "Volver a la lista"
+      "backToList": "Volver a la lista",
+      "attach": "Adjuntar foto o PDF",
+      "removeAttachment": "Quitar archivo",
+      "captionPlaceholder": "Agrega un mensaje (opcional)…",
+      "sendingFile": "Enviando archivo…",
+      "openDocument": "Abrir PDF"
     },
     "metrics": {
       "title": "Métricas",
@@ -1389,6 +1397,9 @@
     "feedbackRateLimited": "Enviaste muchos comentarios en la última hora. Intenta más tarde.",
     "feedbackFailed": "No pudimos guardar tu comentario.",
     "assignNotAllowed": "Esta conversación la atiende otra persona. Solo ella o un admin pueden reasignarla.",
-    "assignInvalidMember": "Esa persona no es parte de tu equipo."
+    "assignInvalidMember": "Esa persona no es parte de tu equipo.",
+    "fileTypeNotAllowed": "Solo se pueden enviar fotos (JPG o PNG) y PDFs.",
+    "fileTooLarge": "El archivo es muy grande: fotos hasta 5 MB y PDFs hasta 16 MB.",
+    "uploadFailed": "No pudimos subir el archivo. Intenta de nuevo."
   }
 }

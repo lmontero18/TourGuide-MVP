@@ -9,12 +9,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { deliveryReason } from "@/lib/whatsapp/deliveryReasons";
 import { useChatMediaUrl } from "@/hooks/useChatMediaUrl";
 import { parseReaction } from "@/lib/whatsapp/placeholders";
+import { parseDocumentContent } from "@/lib/whatsapp/outboundMedia";
 
 interface MessageBubbleProps {
   content: string;
   role: MessageRole;
   createdAt: string;
   mediaPath?: string | null;
+  mediaType?: string | null;
   pending?: boolean;
   failed?: boolean;
   delivery?: DeliveryStatus | null;
@@ -56,7 +58,7 @@ const ROLE_STYLES: Record<MessageRole, { wrapper: string; bubble: string; label:
   },
 };
 
-export default function MessageBubble({ content, role, createdAt, mediaPath, pending, failed, delivery, errorCode, senderId, senderName, templateName }: MessageBubbleProps) {
+export default function MessageBubble({ content, role, createdAt, mediaPath, mediaType, pending, failed, delivery, errorCode, senderId, senderName, templateName }: MessageBubbleProps) {
   const t = useTranslations("dashboard.chat");
   const tD = useTranslations("dashboard.chat.delivery");
   const { role: userRole, user } = useAuth();
@@ -75,6 +77,8 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
   const [imgFailed, setImgFailed] = useState(false);
   const isMediaPlaceholder = /^\[[a-z_]+\]$/.test(content);
   const reaction = parseReaction(content);
+  // PDF que mando un agente (CODE-194): tarjeta con el nombre + su texto.
+  const doc = mediaType === "document" ? parseDocumentContent(content) : null;
 
   // Mensaje que Meta no entrego: la burbuja pasa a rojo claro y abajo se
   // explica el motivo con la accion para resolverlo.
@@ -98,7 +102,22 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
             {agentLabel}
           </span>
         )}
-        {mediaUrl && (
+        {mediaUrl && doc ? (
+          <a
+            href={mediaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t("openDocument")}
+            className={`mb-1.5 flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-semibold ${
+              role === "agent" ? "bg-white/10 hover:bg-white/15" : "bg-slate-100 hover:bg-slate-200"
+            }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
+            </svg>
+            <span className="truncate">{doc.filename}</span>
+          </a>
+        ) : mediaUrl && (
           <a href={mediaUrl} target="_blank" rel="noopener noreferrer" className="block mb-1.5">
             {/* eslint-disable-next-line @next/next/no-img-element -- signed URL efímera, no optimizable por next/image */}
             <img
@@ -116,6 +135,8 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, pen
             {reaction.emoji && <span className="text-xl leading-none">{reaction.emoji}</span>}
             <span className="italic">{t(reaction.removed ? "reactionRemoved" : "reacted")}</span>
           </p>
+        ) : doc && mediaUrl ? (
+          doc.caption && <p className="text-sm leading-relaxed whitespace-pre-wrap">{doc.caption}</p>
         ) : (
           !(mediaUrl && !imgFailed && isMediaPlaceholder) && (
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>

@@ -15,6 +15,8 @@ import { ChatMessagesSkeleton } from "./ChatSkeleton";
 import { useMessages } from "@/hooks/useMessages";
 import { useConversationControl } from "@/hooks/useConversationControl";
 import { useAuth } from "@/hooks/useAuth";
+import { useSendChatFile } from "@/hooks/useSendChatFile";
+import { hasFeature } from "@/lib/features";
 import type { Assignee, ConversationStatus, MessageRole } from "@/types";
 
 interface ChatWindowProps {
@@ -58,7 +60,9 @@ export default function ChatWindow({
   const router = useRouter();
   const t = useTranslations("dashboard.chat");
   const locale = useLocale();
-  const { user } = useAuth();
+  const { user, featureFlags } = useAuth();
+  const sendFile = useSendChatFile(conversationId);
+  const canAttach = hasFeature(featureFlags, "attachments");
   const { messages, loading } = useMessages(conversationId);
   const { botActive, assignee, status, setState: setControl, refresh: refreshControl } = useConversationControl(
     conversationId,
@@ -111,6 +115,7 @@ export default function ChatWindow({
       createdAt: formatTime(m.created_at, locale),
       sortAt: new Date(m.created_at).getTime(),
       mediaPath: m.media_url,
+      mediaType: m.media_type ?? null,
       pending: false,
       failed: false,
       delivery: m.delivery_status ?? null,
@@ -126,6 +131,7 @@ export default function ChatWindow({
       createdAt: formatTime(new Date(o.sentAt).toISOString(), locale),
       sortAt: o.sentAt,
       mediaPath: null as string | null,
+      mediaType: null as string | null,
       pending: o.status === "pending",
       failed: o.status === "failed",
       delivery: null,
@@ -426,6 +432,7 @@ export default function ChatWindow({
               role={msg.role}
               createdAt={msg.createdAt}
               mediaPath={msg.mediaPath}
+              mediaType={msg.mediaType}
               pending={msg.pending}
               failed={msg.failed}
               delivery={msg.delivery}
@@ -464,6 +471,7 @@ export default function ChatWindow({
       {!(windowClosed && pickingTemplate) && (
         <ChatInput
           onSend={handleSend}
+          onSendFile={canAttach ? sendFile : undefined}
           disabled={botActive || heldByOther || windowClosed}
           placeholder={
             windowClosed
