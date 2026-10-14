@@ -13,7 +13,7 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
   {
     id: 'chat-attachments',
-    date: '2026-10-15T00:30:00Z',
+    date: '2026-10-14T22:50:00Z',
     href: '/conversations',
     es: {
       title: 'Mandá fotos y PDFs desde el chat',
@@ -26,7 +26,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   },
   {
     id: 'reactions-emoji',
-    date: '2026-10-14T23:30:00Z',
+    date: '2026-10-14T22:30:00Z',
     href: '/conversations',
     es: {
       title: 'Ves con qué emoji reaccionó el cliente',
@@ -39,7 +39,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   },
   {
     id: 'chat-input-grows',
-    date: '2026-10-14T23:00:00Z',
+    date: '2026-10-14T22:15:00Z',
     href: '/conversations',
     es: {
       title: 'Más espacio para escribir',
