@@ -995,16 +995,38 @@
       },
       "notifications": {
         "title": "Avisos del equipo",
-        "sub": "Quién recibe los avisos y correos de clientes que piden atención.",
+        "sub": "Decide a quién le avisamos cuando un cliente necesita que lo atienda una persona.",
         "you": "tú",
         "scopeLabel": "Avisos de {name}",
         "scope": {
-          "all": "Todos",
-          "mine": "Solo los suyos"
+          "all": "Todas",
+          "mine": "Solo las suyas"
         },
         "sound": "Sonido",
         "soundLabel": "Sonido para {name}",
-        "help": "\"Todos\": recibe los traspasos del bot y los avisos de clientes sin respuesta, en el panel y por correo. \"Solo los suyos\": solo las conversaciones que le asignan o que tomó. Lo asignado le llega siempre.",
+        "columns": {
+          "person": "Persona",
+          "scope": "Recibe avisos de",
+          "sound": "Sonido"
+        },
+        "explain": {
+          "all": {
+            "title": "Todas",
+            "body": "Le avisamos cada vez que un cliente pide hablar con una persona, aunque la conversación no sea suya. También le llega un correo si nadie la toma en 5 minutos o si el bot deja a un cliente sin respuesta.",
+            "fit": "Para quien atiende a los clientes."
+          },
+          "mine": {
+            "title": "Solo las suyas",
+            "body": "Solo le avisamos de las conversaciones que le asignan o que tomó: cuando ese cliente le escribe. No recibe los avisos ni los correos del resto del equipo.",
+            "fit": "Para quien atiende solo a sus clientes, o casi no usa el panel."
+          },
+          "sound": {
+            "title": "Sonido",
+            "body": "Suena una alerta en el panel cuando le llega un aviso. Cada persona también puede silenciarlo desde la campana de arriba."
+          }
+        },
+        "always": "Las conversaciones que le asignan a alguien le llegan siempre, elija la opción que elija.",
+        "nobody": "Nadie recibe todos los avisos. Si un cliente pide hablar con una persona, nadie del equipo se va a enterar. Pon al menos a una persona en \"Todas\".",
         "error": "No pudimos guardar el cambio. Intenta de nuevo."
       }
     },
