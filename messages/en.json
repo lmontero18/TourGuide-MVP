@@ -991,6 +991,20 @@
         "role": "We couldn't change the role.",
         "resend": "We couldn't resend the invitation.",
         "remove": "We couldn't remove this member."
+      },
+      "notifications": {
+        "title": "Team notifications",
+        "sub": "Who gets the alerts and emails when a customer needs attention.",
+        "you": "you",
+        "scopeLabel": "Notifications for {name}",
+        "scope": {
+          "all": "All",
+          "mine": "Only theirs"
+        },
+        "sound": "Sound",
+        "soundLabel": "Sound for {name}",
+        "help": "\"All\": gets bot handoffs and unanswered-customer alerts, in the dashboard and by email. \"Only theirs\": only conversations assigned to them or that they took. Assignments always reach them.",
+        "error": "We couldn't save the change. Please try again."
       }
     },
     "notifications": {
@@ -1409,6 +1423,7 @@
     "fileTooLarge": "The file is too large: photos up to 5 MB and PDFs up to 16 MB.",
     "uploadFailed": "We couldn't upload the file. Please try again.",
     "feedbackImageType": "The screenshot must be a JPG, PNG or WebP image.",
-    "feedbackImageTooLarge": "The screenshot is too large (4 MB max)."
+    "feedbackImageTooLarge": "The screenshot is too large (4 MB max).",
+    "notificationPrefsFailed": "We couldn't save that person's notifications."
   }
 }

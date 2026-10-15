@@ -991,6 +991,20 @@
         "role": "No pudimos cambiar el rol.",
         "resend": "No pudimos reenviar la invitación.",
         "remove": "No pudimos quitar a este miembro."
+      },
+      "notifications": {
+        "title": "Avisos del equipo",
+        "sub": "Quién recibe los avisos y correos de clientes que piden atención.",
+        "you": "tú",
+        "scopeLabel": "Avisos de {name}",
+        "scope": {
+          "all": "Todos",
+          "mine": "Solo los suyos"
+        },
+        "sound": "Sonido",
+        "soundLabel": "Sonido para {name}",
+        "help": "\"Todos\": recibe los traspasos del bot y los avisos de clientes sin respuesta, en el panel y por correo. \"Solo los suyos\": solo las conversaciones que le asignan o que tomó. Lo asignado le llega siempre.",
+        "error": "No pudimos guardar el cambio. Intenta de nuevo."
       }
     },
     "notifications": {
@@ -1409,6 +1423,7 @@
     "fileTooLarge": "El archivo es muy grande: fotos hasta 5 MB y PDFs hasta 16 MB.",
     "uploadFailed": "No pudimos subir el archivo. Intenta de nuevo.",
     "feedbackImageType": "La captura tiene que ser una imagen JPG, PNG o WebP.",
-    "feedbackImageTooLarge": "La captura es muy grande (máximo 4 MB)."
+    "feedbackImageTooLarge": "La captura es muy grande (máximo 4 MB).",
+    "notificationPrefsFailed": "No pudimos guardar los avisos de esa persona."
   }
 }

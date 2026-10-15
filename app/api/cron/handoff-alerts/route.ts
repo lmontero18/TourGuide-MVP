@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
           orgId: ev.org_id,
           kind: 'handoff_unattended',
           dedupeKey: `handoff:${ev.id}`,
-          to: await orgRecipients(service, ev.org_id),
+          to: await orgRecipients(service, ev.org_id, { attention: true }),
           subject: `${name} está esperando hace ${minutes} minutos`,
           html,
         },
