@@ -995,38 +995,12 @@
       },
       "notifications": {
         "title": "Team notifications",
-        "sub": "Choose who we notify when a customer needs a person to help them.",
+        "sub": "Who gets general alerts: when the bot asks for someone to help a customer.",
         "you": "you",
-        "scopeLabel": "Notifications for {name}",
-        "scope": {
-          "all": "All",
-          "mine": "Only theirs"
-        },
-        "sound": "Sound",
-        "soundLabel": "Sound for {name}",
-        "columns": {
-          "person": "Person",
-          "scope": "Gets notified about",
-          "sound": "Sound"
-        },
-        "explain": {
-          "all": {
-            "title": "All",
-            "body": "We notify them every time a customer asks to talk to a person, even if the conversation isn't theirs. They also get an email if nobody takes it within 5 minutes or if the bot leaves a customer without an answer.",
-            "fit": "For whoever handles customers."
-          },
-          "mine": {
-            "title": "Only theirs",
-            "body": "We only notify them about conversations assigned to them or that they took: when that customer writes to them. They don't get the rest of the team's alerts or emails.",
-            "fit": "For people who only handle their own customers, or rarely use the dashboard."
-          },
-          "sound": {
-            "title": "Sound",
-            "body": "An alert sound plays in the dashboard when a notification arrives. Each person can also mute it from the bell at the top."
-          }
-        },
-        "always": "Conversations assigned to someone always reach them, whichever option they have.",
-        "nobody": "Nobody gets all notifications. If a customer asks to talk to a person, nobody on the team will find out. Set at least one person to \"All\".",
+        "column": "General alerts",
+        "toggleLabel": "General alerts for {name}",
+        "help": "With general alerts on, the person gets a dashboard alert and an email when the bot asks for someone to help a customer or when a customer is left without an answer. With them off, they get none of that. Their own conversations always reach them: the email when a conversation is assigned to them and the messages from customers they're handling.",
+        "nobody": "Nobody has general alerts on. If the bot asks for someone to help a customer, nobody on the team will find out.",
         "error": "We couldn't save the change. Please try again."
       }
     },

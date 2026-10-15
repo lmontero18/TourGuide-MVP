@@ -33,7 +33,7 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
   const t = useTranslations("dashboard.notifications");
   const tD = useTranslations("dashboard.chat.delivery");
   const prefs = useNotificationPrefs();
-  // Lo que decidio el admin (CODE-195): si recibe traspasos y si suena.
+  // Lo que decidio el admin (CODE-195): si recibe los avisos generales.
   const teamPrefs = useMyNotifyPrefs();
   const match = pathname.match(/^\/conversations\/([^/]+)/);
   const activeId = match ? match[1] : null;
@@ -50,7 +50,7 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
     } else if (prefs.desktop) {
       showDesktopNotification({ title, body, tag: `conversation:${item.id}`, onClick: open });
     }
-    if (prefs.sound && teamPrefs.sound && isLastFocusedTab()) playChime(kind);
+    if (prefs.sound && isLastFocusedTab()) playChime(kind);
   };
 
   const nameOf = (item: ConversationListItem) => item.contactName || item.contactPhone;
