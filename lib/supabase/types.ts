@@ -615,6 +615,8 @@ export type Database = {
           email_daily_summary: boolean
           full_name: string | null
           id: string
+          notify_scope: string
+          notify_sound: boolean
           org_id: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
@@ -626,6 +628,8 @@ export type Database = {
           email_daily_summary?: boolean
           full_name?: string | null
           id: string
+          notify_scope?: string
+          notify_sound?: boolean
           org_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -637,6 +641,8 @@ export type Database = {
           email_daily_summary?: boolean
           full_name?: string | null
           id?: string
+          notify_scope?: string
+          notify_sound?: boolean
           org_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
