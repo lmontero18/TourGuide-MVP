@@ -62,3 +62,7 @@ docs/m5/
 Thumbs.db
 
 certificates
+# Skipper — machine-local artifacts (hook scratch + derived index), never commit
+.claude/.skipper-*
+.skipper/*
+!.skipper/receipts/
