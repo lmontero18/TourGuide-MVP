@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversations, type ConversationEvents, type ConversationListItem } from "@/hooks/useConversations";
 import { useNotificationPrefs } from "@/hooks/useNotificationPrefs";
+import { useMyNotifyPrefs } from "@/hooks/useMyNotifyPrefs";
 import { useDeliveryFailures } from "@/hooks/useDeliveryFailures";
 import { deliveryReason } from "@/lib/whatsapp/deliveryReasons";
 import { isLastFocusedTab, markTabFocused, playChime, showDesktopNotification, type ChimeKind } from "@/lib/notifications/alert";
@@ -32,6 +33,8 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
   const t = useTranslations("dashboard.notifications");
   const tD = useTranslations("dashboard.chat.delivery");
   const prefs = useNotificationPrefs();
+  // Lo que decidio el admin (CODE-195): si recibe traspasos y si suena.
+  const teamPrefs = useMyNotifyPrefs();
   const match = pathname.match(/^\/conversations\/([^/]+)/);
   const activeId = match ? match[1] : null;
 
@@ -47,15 +50,16 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
     } else if (prefs.desktop) {
       showDesktopNotification({ title, body, tag: `conversation:${item.id}`, onClick: open });
     }
-    if (prefs.sound && isLastFocusedTab()) playChime(kind);
+    if (prefs.sound && teamPrefs.sound && isLastFocusedTab()) playChime(kind);
   };
 
   const nameOf = (item: ConversationListItem) => item.contactName || item.contactPhone;
   const me = user?.id ?? null;
 
   const events: ConversationEvents = {
-    // Todo el equipo: alguien tiene que tomarla.
-    onHandoff: (item) => deliver(item, t("handoffTitle", { name: nameOf(item) }), item.lastMessage || t("handoffBody"), "urgent"),
+    // Todo el equipo: alguien tiene que tomarla. Menos a quien el admin dejo
+    // en "solo los suyos".
+    onHandoff: (item) => teamPrefs.scope === "all" && deliver(item, t("handoffTitle", { name: nameOf(item) }), item.lastMessage || t("handoffBody"), "urgent"),
     // Solo quien la atiende.
     onCustomerMessage: (item, content) => {
       if (!me || item.assignee?.id !== me || item.status === "resolved") return;

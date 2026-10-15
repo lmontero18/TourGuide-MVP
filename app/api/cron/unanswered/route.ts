@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
           orgId: conv.org_id,
           kind: 'bot_no_reply',
           dedupeKey: `no_reply:${last.id}`,
-          to: await orgRecipients(service, conv.org_id),
+          to: await orgRecipients(service, conv.org_id, { attention: true }),
           subject: `${name} no recibió respuesta del bot`,
           html,
         },

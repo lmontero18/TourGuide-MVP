@@ -16,7 +16,7 @@ export async function GET() {
   const service = await createServiceClient()
   const { data: members, error } = await service
     .from('users')
-    .select('id, email, full_name, role, created_at')
+    .select('id, email, full_name, role, created_at, notify_scope, notify_sound')
     .eq('org_id', ctx.orgId)
     .order('created_at', { ascending: true })
 
@@ -40,6 +40,8 @@ export async function GET() {
         invited_at: authUser?.invited_at ?? null,
         last_sign_in_at: authUser?.last_sign_in_at ?? null,
         is_self: m.id === ctx.userId,
+        notify_scope: m.notify_scope,
+        notify_sound: m.notify_sound,
       }
     })
   )

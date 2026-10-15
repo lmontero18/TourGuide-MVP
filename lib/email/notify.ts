@@ -8,15 +8,17 @@ export const appUrl = () => (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.to
 export const teamEmail = () => process.env.FEEDBACK_EMAIL || 'naia@naiaautomate.com'
 
 // Correos del equipo de una agencia. adminsOnly = solo administradores;
-// onlySummary = los que no apagaron el resumen diario.
+// onlySummary = los que no apagaron el resumen diario; attention = avisos de
+// "cliente necesita atencion": solo quienes el admin dejo en 'all' (CODE-195).
 export async function orgRecipients(
   service: SupabaseClient,
   orgId: string,
-  opts: { adminsOnly?: boolean; onlySummary?: boolean } = {}
+  opts: { adminsOnly?: boolean; onlySummary?: boolean; attention?: boolean } = {}
 ): Promise<string[]> {
   let query = service.from('users').select('email').eq('org_id', orgId)
   if (opts.adminsOnly) query = query.eq('role', 'admin')
   if (opts.onlySummary) query = query.eq('email_daily_summary', true)
+  if (opts.attention) query = query.eq('notify_scope', 'all')
   const { data } = await query
   return [...new Set(((data ?? []) as { email: string | null }[]).map((u) => u.email).filter((e): e is string => !!e))]
 }

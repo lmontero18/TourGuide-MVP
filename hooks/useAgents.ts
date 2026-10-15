@@ -3,7 +3,7 @@
 import { useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import type { Role, TeamMember } from '@/types'
+import type { NotifyScope, Role, TeamMember } from '@/types'
 
 type ActionResult = { ok: true } | { ok: false; error: string; code?: string }
 
@@ -44,5 +44,15 @@ export function useAgents() {
       withReload(call(`/api/agents/${id}`, { method: 'PATCH', body: JSON.stringify({ role }) })),
     remove: (id: string) => withReload(call(`/api/agents/${id}`, { method: 'DELETE' })),
     resend: (id: string) => call(`/api/agents/${id}/resend`, { method: 'POST' }),
+    // Optimista: el control cambia al instante y vuelve atras si falla.
+    setNotifications: async (id: string, prefs: { notify_scope?: NotifyScope; notify_sound?: boolean }) => {
+      const prev = queryClient.getQueryData<TeamMember[]>(queryKeys.agents)
+      queryClient.setQueryData<TeamMember[]>(queryKeys.agents, (list) =>
+        list?.map((a) => (a.id === id ? { ...a, ...prefs } : a))
+      )
+      const result = await call(`/api/agents/${id}/notifications`, { method: 'PATCH', body: JSON.stringify(prefs) })
+      if (!result.ok) queryClient.setQueryData(queryKeys.agents, prev)
+      return result
+    },
   }
 }

@@ -254,7 +254,12 @@ export interface TeamMember {
   invited_at: string | null
   last_sign_in_at: string | null
   is_self: boolean
+  notify_scope: NotifyScope
+  notify_sound: boolean
 }
+
+// Que avisos de "cliente necesita atencion" recibe cada persona (CODE-195).
+export type NotifyScope = 'all' | 'mine'
 
 // Quien atiende una conversacion cuando el bot esta pausado.
 export interface Assignee {
