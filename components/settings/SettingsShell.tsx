@@ -4,13 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import TopBar from "@/components/layout/TopBar";
+import { useAuth } from "@/hooks/useAuth";
+import { hasFeature, type FeatureKey } from "@/lib/features";
 
 const TABS = [
   { key: "general", href: "/settings" },
   { key: "whatsapp", href: "/settings/whatsapp" },
   { key: "emails", href: "/settings/emails" },
+  { key: "notifications", href: "/settings/notifications", feature: "notifications" },
   { key: "billing", href: "/settings/billing" },
-] as const;
+] as const satisfies { key: string; href: string; feature?: FeatureKey }[];
 
 interface SettingsShellProps {
   children: React.ReactNode;
@@ -22,12 +25,14 @@ interface SettingsShellProps {
 export default function SettingsShell({ children }: SettingsShellProps) {
   const t = useTranslations("dashboard.settings");
   const pathname = usePathname();
+  const { featureFlags } = useAuth();
+  const tabs = TABS.filter((tab) => !("feature" in tab) || hasFeature(featureFlags, tab.feature));
 
   return (
     <div className="flex h-full flex-col">
       <TopBar title={t("title")} />
       <nav aria-label={t("title")} className="flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-5">
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const active = pathname === tab.href;
           return (
             <Link

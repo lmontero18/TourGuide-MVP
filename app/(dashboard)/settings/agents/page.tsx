@@ -6,16 +6,12 @@ import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
 import AgentRow from "@/components/agents/AgentRow";
 import { useAgents } from "@/hooks/useAgents";
-import { useAuth } from "@/hooks/useAuth";
-import { hasFeature } from "@/lib/features";
-import TeamNotifications from "@/components/agents/TeamNotifications";
 import type { Role } from "@/types";
 import { AgentRowsSkeleton } from "@/components/skeletons/AgentsSkeleton";
 
 export default function AgentsPage() {
   const t = useTranslations("dashboard.agents");
-  const { agents, error, invite, changeRole, remove, resend, setNotifications } = useAgents();
-  const { featureFlags } = useAuth();
+  const { agents, error, invite, changeRole, remove, resend } = useAgents();
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
@@ -165,10 +161,6 @@ export default function AgentsPage() {
               ))}
             </div>
           </div>
-
-          {agents && hasFeature(featureFlags, "notifications") && (
-            <TeamNotifications agents={agents} onChange={setNotifications} />
-          )}
         </div>
       </div>
     </div>

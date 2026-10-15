@@ -21,7 +21,7 @@ export default function TeamNotifications({ agents, onChange }: TeamNotification
   };
 
   return (
-    <div className="mt-5 rounded-2xl border border-slate-200 bg-white">
+    <section className="rounded-2xl border border-slate-200 bg-white">
       <div className="border-b border-slate-100 px-5 py-3">
         <h2 className="text-sm font-bold text-navy-900">{t("title")}</h2>
         <p className="mt-0.5 text-xs text-slate-400">{t("sub")}</p>
@@ -53,7 +53,7 @@ export default function TeamNotifications({ agents, onChange }: TeamNotification
                   </button>
                 ))}
               </div>
-              <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-600">
+              <div className="inline-flex items-center gap-2 text-xs font-medium text-slate-600">
                 <button
                   type="button"
                   role="switch"
@@ -62,15 +62,15 @@ export default function TeamNotifications({ agents, onChange }: TeamNotification
                   onClick={() => update(a.id, { notify_sound: !a.notify_sound })}
                   className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${a.notify_sound ? "bg-emerald-500" : "bg-slate-300"}`}
                 >
-                  <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${a.notify_sound ? "translate-x-4" : "translate-x-0.5"}`} />
+                  <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${a.notify_sound ? "left-[18px]" : "left-0.5"}`} />
                 </button>
-                {t("sound")}
-              </label>
+                <span aria-hidden>{t("sound")}</span>
+              </div>
             </div>
           );
         })}
       </div>
       <p className="border-t border-slate-100 px-5 py-3 text-[11px] leading-relaxed text-slate-400">{t("help")}</p>
-    </div>
+    </section>
   );
 }
