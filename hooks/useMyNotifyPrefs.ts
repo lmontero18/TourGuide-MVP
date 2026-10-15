@@ -5,9 +5,10 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import type { NotifyScope } from '@/types'
 
-const DEFAULTS = { scope: 'all' as NotifyScope, sound: true }
+const DEFAULTS = { scope: 'all' as NotifyScope }
 
-// Avisos que el admin le configuro a este usuario (CODE-195). Si la consulta
+// Si el admin le dejo los avisos generales a este usuario (CODE-195). El
+// sonido es personal, va en la campana. Si la consulta
 // falla se usan los valores de siempre: nunca dejar a alguien sin avisos.
 export function useMyNotifyPrefs() {
   const { user } = useAuth()
@@ -18,11 +19,11 @@ export function useMyNotifyPrefs() {
     queryFn: async () => {
       const { data, error } = await createClient()
         .from('users')
-        .select('notify_scope, notify_sound')
+        .select('notify_scope')
         .eq('id', user!.id)
         .single()
       if (error || !data) return DEFAULTS
-      return { scope: data.notify_scope as NotifyScope, sound: data.notify_sound }
+      return { scope: data.notify_scope as NotifyScope }
     },
   })
   return data ?? DEFAULTS
