@@ -27,7 +27,7 @@
 -- =====================================================================
 
 begin;
-select plan(25);
+select plan(26);
 
 -- ---------- IDs de prueba ----------
 --   Org R: c0000000-...-0001      Org S: c0000000-...-0002
@@ -162,6 +162,15 @@ exception when insufficient_privilege then
   perform set_config('t.escala_org', 'blocked', true);
 end $$;
 
+-- Un agente no puede cambiarse los avisos que le configuro el admin (CODE-195).
+do $$ begin
+  update public.users set notify_scope = 'mine'
+   where id = 'c0000000-0000-4000-8000-0000000000a1';
+  perform set_config('t.agent_notify', 'allowed', true);
+exception when insufficient_privilege then
+  perform set_config('t.agent_notify', 'blocked', true);
+end $$;
+
 do $$ begin
   update public.organizations set plan = 'pro'
    where id = 'c0000000-0000-4000-8000-000000000001';
@@ -268,6 +277,7 @@ select is( (select count(*)::int from information_schema.columns
 -- Regresion: los grants por columna no rompieron el flujo de conectar WhatsApp
 select is( current_setting('t.admin_upsert_wa'), 'allowed', 'admin: SI puede hacer upsert de su cuenta de WhatsApp (connect no se rompio)');
 select is( current_setting('t.admin_is_beta'), 'blocked', 'admin: NO puede marcar su org como beta');
+select is( current_setting('t.agent_notify'), 'blocked', 'agent: NO puede cambiarse sus avisos (lo decide el admin)');
 select is( (select is_beta from public.organizations where id = 'c0000000-0000-4000-8000-000000000002'),
            false, 'organizations.is_beta no cambio');
 
