@@ -12,6 +12,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'team-general-alerts',
+    date: '2026-10-15T02:10:00Z',
+    href: '/settings/notifications',
+    adminOnly: true,
+    es: {
+      title: 'Elegí quién recibe los avisos generales',
+      body: 'En Configuración → Avisos del equipo decidís quién recibe el aviso y el correo cuando el bot pide que alguien atienda a un cliente. Quien lo tenga apagado igual recibe lo suyo: las conversaciones que le asignan y los mensajes de sus clientes.',
+    },
+    en: {
+      title: 'Choose who gets general alerts',
+      body: 'In Settings → Team notifications you decide who gets the alert and email when the bot asks for someone to help a customer. People with it off still get their own: conversations assigned to them and messages from their customers.',
+    },
+  },
+  {
     id: 'chat-attachments',
     date: '2026-10-14T22:50:00Z',
     href: '/conversations',
