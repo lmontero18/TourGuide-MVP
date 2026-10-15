@@ -995,7 +995,7 @@
       },
       "notifications": {
         "title": "Team notifications",
-        "sub": "Who gets the alerts and emails when a customer needs attention.",
+        "sub": "Choose who we notify when a customer needs a person to help them.",
         "you": "you",
         "scopeLabel": "Notifications for {name}",
         "scope": {
@@ -1004,7 +1004,29 @@
         },
         "sound": "Sound",
         "soundLabel": "Sound for {name}",
-        "help": "\"All\": gets bot handoffs and unanswered-customer alerts, in the dashboard and by email. \"Only theirs\": only conversations assigned to them or that they took. Assignments always reach them.",
+        "columns": {
+          "person": "Person",
+          "scope": "Gets notified about",
+          "sound": "Sound"
+        },
+        "explain": {
+          "all": {
+            "title": "All",
+            "body": "We notify them every time a customer asks to talk to a person, even if the conversation isn't theirs. They also get an email if nobody takes it within 5 minutes or if the bot leaves a customer without an answer.",
+            "fit": "For whoever handles customers."
+          },
+          "mine": {
+            "title": "Only theirs",
+            "body": "We only notify them about conversations assigned to them or that they took: when that customer writes to them. They don't get the rest of the team's alerts or emails.",
+            "fit": "For people who only handle their own customers, or rarely use the dashboard."
+          },
+          "sound": {
+            "title": "Sound",
+            "body": "An alert sound plays in the dashboard when a notification arrives. Each person can also mute it from the bell at the top."
+          }
+        },
+        "always": "Conversations assigned to someone always reach them, whichever option they have.",
+        "nobody": "Nobody gets all notifications. If a customer asks to talk to a person, nobody on the team will find out. Set at least one person to \"All\".",
         "error": "We couldn't save the change. Please try again."
       }
     },
