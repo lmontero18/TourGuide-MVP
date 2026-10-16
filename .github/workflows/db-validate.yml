@@ -33,10 +33,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # Levanta el stack local y aplica TODAS las migraciones. Si una migración
-      # está rota, este paso falla. (Se puede acelerar con `-x` excluyendo
-      # servicios; se dejó plano por fiabilidad.)
+      # está rota, este paso falla. Solo lo que usan los tests: db, auth,
+      # storage (las migraciones crean buckets) y meta (gen types). El resto
+      # (studio, realtime, rest, kong, logs, mail…) solo suma descargas.
       - name: Start Supabase (aplica migraciones)
-        run: pnpm exec supabase start
+        run: pnpm exec supabase start -x analytics,edge-runtime,imgproxy,inbucket,kong,realtime,rest,studio,vector
 
       - name: Verificar tipos en sync con el schema
         run: |
