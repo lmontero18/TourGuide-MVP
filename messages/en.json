@@ -574,10 +574,7 @@
       "pickups": {
         "loadError": "We couldn't load pickups. Reload the page.",
         "search": "Search hotel or zone…",
-        "all": "All",
-        "own": "Own",
         "addZone": "+ Zone",
-        "editTour": "Edit tour",
         "counts": "{zones, plural, =1 {1 zone} other {# zones}} · {places, plural, =1 {1 hotel} other {# hotels}}",
         "zone": "Zone",
         "placesCount": "{count, plural, =1 {1 hotel} other {# hotels}}",
@@ -598,11 +595,10 @@
         "departuresHint": "One column per departure: Morning, Afternoon, Night or the start time.",
         "removeTour": "Remove from table",
         "save": "Save",
-        "addTour": "+ Tours",
+        "addTour": "+ Add tour",
         "collapse": "Close zone",
         "expand": "Show the zone's hotels",
         "zoneNamePlaceholder": "Zone name",
-        "noToursInFilter": "No tours with this filter",
         "pickToursCta": "+ Choose the tours with hotel pickup",
         "addZoneCta": "+ Add the first zone",
         "addZoneHint": "A zone is a group of hotels picked up at the same time.",
@@ -614,7 +610,7 @@
         "uploading": "Reading…",
         "uploadError": "We couldn't read the file. Try again.",
         "pickTitle": "Tours with hotel pickup",
-        "pickHint": "Check the tours that include pickup. Each starts with one departure (Morning); add Afternoon or Night with the pencil next to its name.",
+        "pickHint": "Check the tours that include pickup. Each starts with one departure (Morning); add Afternoon or Night with \"Departures and operator\".",
         "noTours": "You don't have tours yet. Add them in the Tours tab.",
         "external": "Run by another company",
         "externalPlaceholder": "Company name",
@@ -652,7 +648,6 @@
           "saving": "Saving…",
           "saveError": "Couldn't save. Try again."
         },
-        "editTourNamed": "Edit {name}",
         "pendingCount": "{count, plural, =1 {1 cell pending} other {# cells pending}}",
         "legendNone": "that tour doesn't pick up there",
         "legendPending": "pending: the bot hands the question to your team",
@@ -664,7 +659,14 @@
         "cellNoneHint": "the bot says so",
         "cellPendingHint": "goes to your team",
         "cellInherit": "Same as the zone",
-        "botLine": "The bot answers from this table."
+        "toursTitle": "Tours with pickup",
+        "byOperator": "Run by {name}",
+        "ownTour": "Own tour",
+        "departuresCount": "{count, plural, =1 {1 departure} other {# departures}}",
+        "allFilled": "all filled in",
+        "noTourSelected": "Choose which tours include hotel pickup",
+        "tourSettings": "Departures and operator",
+        "cellHint": "Click a time to change it."
       }
     },
     "topbar": {

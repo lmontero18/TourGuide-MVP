@@ -574,10 +574,7 @@
       "pickups": {
         "loadError": "No pudimos cargar las recogidas. Recarga la página.",
         "search": "Buscar hotel o zona…",
-        "all": "Todos",
-        "own": "Propios",
         "addZone": "+ Zona",
-        "editTour": "Editar tour",
         "counts": "{zones, plural, =1 {1 zona} other {# zonas}} · {places, plural, =1 {1 hotel} other {# hoteles}}",
         "zone": "Zona",
         "placesCount": "{count, plural, =1 {1 hotel} other {# hoteles}}",
@@ -598,11 +595,10 @@
         "departuresHint": "Una columna por salida: Mañana, Tarde, Noche o la hora de inicio.",
         "removeTour": "Quitar de la tabla",
         "save": "Guardar",
-        "addTour": "+ Tours",
+        "addTour": "+ Agregar tour",
         "collapse": "Cerrar zona",
         "expand": "Ver hoteles de la zona",
         "zoneNamePlaceholder": "Nombre de la zona",
-        "noToursInFilter": "Ningún tour con este filtro",
         "pickToursCta": "+ Elige los tours que recogen en hotel",
         "addZoneCta": "+ Agrega la primera zona",
         "addZoneHint": "Una zona es un grupo de hoteles donde se recoge a la misma hora.",
@@ -614,7 +610,7 @@
         "uploading": "Leyendo…",
         "uploadError": "No pudimos leer el archivo. Intenta de nuevo.",
         "pickTitle": "Tours que recogen en hotel",
-        "pickHint": "Marca los tours que llevan recogida. Cada uno arranca con una salida (Mañana); agrega Tarde o Noche con el lápiz al lado de su nombre.",
+        "pickHint": "Marca los tours que llevan recogida. Cada uno arranca con una salida (Mañana); agrega Tarde o Noche con \"Salidas y operador\".",
         "noTours": "Todavía no tienes tours. Agrégalos en la pestaña Tours.",
         "external": "Lo hace otra empresa",
         "externalPlaceholder": "Nombre de la empresa",
@@ -652,7 +648,6 @@
           "saving": "Guardando…",
           "saveError": "No se pudo guardar. Intenta de nuevo."
         },
-        "editTourNamed": "Editar {name}",
         "pendingCount": "{count, plural, =1 {1 celda pendiente} other {# celdas pendientes}}",
         "legendNone": "ese tour no recoge ahí",
         "legendPending": "pendiente: el bot pasa la pregunta a tu equipo",
@@ -664,7 +659,14 @@
         "cellNoneHint": "el bot lo dice",
         "cellPendingHint": "pasa al equipo",
         "cellInherit": "Igual que la zona",
-        "botLine": "El bot responde con esta tabla."
+        "toursTitle": "Tours con recogida",
+        "byOperator": "Lo hace {name}",
+        "ownTour": "Tour propio",
+        "departuresCount": "{count, plural, =1 {1 salida} other {# salidas}}",
+        "allFilled": "todo cargado",
+        "noTourSelected": "Elige qué tours llevan recogida en hotel",
+        "tourSettings": "Salidas y operador",
+        "cellHint": "Click en una hora para cambiarla."
       }
     },
     "topbar": {
