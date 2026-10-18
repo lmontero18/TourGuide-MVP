@@ -260,78 +260,74 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("search")}
-            aria-label={t("search")}
-            className="h-9 w-56 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-          />
-          {operators.length > 0 && (
-            <>
-              <button onClick={() => setFilter({ kind: "all" })} className={chip(filter.kind === "all")}>{t("all")}</button>
-              <button onClick={() => setFilter({ kind: "own" })} className={chip(filter.kind === "own")}>{t("own")}</button>
-              {operators.map((name) => (
-                <button key={name} onClick={() => setFilter({ kind: "operator", name })} className={chip(filter.kind === "operator" && filter.name === name)}>
-                  {name}
-                </button>
-              ))}
-            </>
-          )}
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t("search")}
+              aria-label={t("search")}
+              className="h-9 w-60 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            />
+            <p className="text-xs text-slate-500">
+              {t("counts", { zones: data.zones.length, places: data.places.length })}
+              {pending > 0 && <span className="ml-1.5 font-semibold text-amber-700">· {t("pendingCount", { count: pending })}</span>}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <SaveStatus state={saveState} onRetry={() => void flush()} />
+            <UploadButton onImported={onImported} variant="secondary" />
+            <button
+              onClick={() => setDialog({ mode: "pick" })}
+              className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-navy-900 hover:border-slate-300 hover:bg-slate-50"
+            >
+              {t("addTour")}
+            </button>
+            <button onClick={addZone} className="h-9 rounded-lg bg-navy-900 px-3 text-xs font-semibold text-white hover:bg-navy-800">
+              {t("addZone")}
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <SaveStatus state={saveState} onRetry={() => void flush()} />
-          <UploadButton onImported={onImported} variant="secondary" />
-          <button
-            onClick={() => setDialog({ mode: "pick" })}
-            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-navy-900 hover:border-slate-300 hover:bg-slate-50"
-          >
-            {t("addTour")}
-          </button>
-          <button onClick={addZone} className="h-9 rounded-lg bg-navy-900 px-3 text-xs font-semibold text-white hover:bg-navy-800">
-            {t("addZone")}
-          </button>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-sm text-slate-500">
-        <p>
-          <strong className="text-navy-900">{t("counts", { zones: data.zones.length, places: data.places.length })}</strong>
-          {pending > 0 && <span className="ml-2 font-semibold text-amber-700">{t("pendingCount", { count: pending })}</span>}
-        </p>
-        <p className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="inline-flex items-center gap-1.5"><span className="font-semibold tabular-nums text-navy-900">7:00</span>{t("legendTime")}</span>
-          <span className="inline-flex items-center gap-1.5"><span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500">{t("cellNone")}</span>{t("legendNone")}</span>
-          <span className="inline-flex items-center gap-1.5"><span className="rounded border border-dashed border-amber-400 bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700">{t("cellPending")}</span>{t("legendPending")}</span>
-        </p>
+        {operators.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button onClick={() => setFilter({ kind: "all" })} className={chip(filter.kind === "all")}>{t("all")}</button>
+            <button onClick={() => setFilter({ kind: "own" })} className={chip(filter.kind === "own")}>{t("own")}</button>
+            {operators.map((name) => (
+              <button key={name} onClick={() => setFilter({ kind: "operator", name })} className={chip(filter.kind === "operator" && filter.name === name)}>
+                {name}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full border-separate border-spacing-0 text-[13px]">
           <thead>
             <tr>
-              <th rowSpan={2} scope="col" className="sticky left-0 z-10 min-w-60 border-b border-r border-slate-200 bg-white px-4 py-3 text-left text-xs font-semibold text-slate-500">
+              <th rowSpan={2} scope="col" className="sticky left-0 z-10 w-60 min-w-60 border-b border-r border-slate-200 bg-white px-4 py-3 text-left align-bottom text-xs font-semibold text-slate-500">
                 {t("zone")}
               </th>
               {columns.map((col) => (
-                <th key={col.tour_id} colSpan={col.departures.length} scope="colgroup" className="border-l border-slate-100 px-2 pb-1 pt-3 text-center font-bold text-navy-900">
-                  <span className="inline-flex items-center gap-1">
-                    {tourName.get(col.tour_id)}
+                <th key={col.tour_id} colSpan={col.departures.length} scope="colgroup" className="border-l border-slate-100 px-3 pb-1 pt-3 align-top">
+                  <div className="flex items-start justify-center gap-1">
+                    <span title={tourName.get(col.tour_id)} className="line-clamp-2 text-center text-xs font-bold leading-snug text-navy-900">
+                      {tourName.get(col.tour_id)}
+                    </span>
                     <button
                       onClick={() => setDialog({ mode: "settings", tourId: col.tour_id })}
                       aria-label={t("editTourNamed", { name: tourName.get(col.tour_id) ?? "" })}
                       title={t("editTour")}
-                      className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-navy-900"
+                      className="-mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-navy-900"
                     >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                         <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
                       </svg>
                     </button>
-                  </span>
-                  {col.operator && <span className="block text-[11px] font-medium text-slate-400">{col.operator}</span>}
+                  </div>
+                  {col.operator && <span className="mt-0.5 block truncate text-center text-[11px] font-medium text-slate-400">{col.operator}</span>}
                 </th>
               ))}
               {!columns.length && (
@@ -345,7 +341,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
             <tr>
               {columns.flatMap((col) =>
                 col.departures.map((label, i) => (
-                  <th key={`${col.tour_id}-${i}`} scope="col" className="border-b border-slate-200 px-2 pb-2.5 pt-0.5 text-center text-[11px] font-medium text-slate-500">
+                  <th key={`${col.tour_id}-${i}`} scope="col" className={`w-24 min-w-24 border-b border-slate-200 px-1 pb-2.5 pt-1 text-center text-[11px] font-medium text-slate-400 ${i === 0 ? "border-l border-l-slate-100" : ""}`}>
                     {label}
                   </th>
                 ))
@@ -378,17 +374,19 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                         >
                           {open ? "▾" : "▸"}
                         </button>
-                        <ZoneName
-                          name={zone.name}
-                          autoFocus={focusZone === zone.id}
-                          onChange={(name) => renameZone(zone.id, name)}
-                        />
-                        <span className="shrink-0 text-xs font-normal text-slate-500">{t("placesCount", { count: places.length })}</span>
+                        <div className="min-w-0 flex-1">
+                          <ZoneName
+                            name={zone.name}
+                            autoFocus={focusZone === zone.id}
+                            onChange={(name) => renameZone(zone.id, name)}
+                          />
+                          <span className="block px-1.5 text-[11px] font-normal text-slate-400">{t("placesCount", { count: places.length })}</span>
+                        </div>
                       </div>
                     </th>
                     {columns.flatMap((col) =>
                       col.departures.map((label, i) => (
-                        <td key={`${col.tour_id}-${i}`} className="border-b border-slate-100 px-1 py-1 text-center">
+                        <td key={`${col.tour_id}-${i}`} className={`h-12 border-b border-slate-100 px-1 text-center ${i === 0 ? "border-l border-l-slate-100" : ""}`}>
                           <PickupCell
                             value={times.get(timeKey(col.tour_id, i, zone.id)) ?? null}
                             label={`${zone.name} · ${tourName.get(col.tour_id)} · ${label}`}
@@ -425,7 +423,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                         </th>
                         {columns.flatMap((col) =>
                           col.departures.map((label, i) => (
-                            <td key={`${col.tour_id}-${i}`} className="border-b border-slate-200 px-1 py-1 text-center">
+                            <td key={`${col.tour_id}-${i}`} className={`h-12 border-b border-slate-200 px-1 text-center ${i === 0 ? "border-l border-l-amber-100" : ""}`}>
                               <PickupCell
                                 value={times.get(timeKey(col.tour_id, i, zone.id, place.id)) ?? null}
                                 inherited={times.get(timeKey(col.tour_id, i, zone.id)) ?? null}
@@ -445,9 +443,11 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
         </table>
       </div>
 
-      <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-[13px] text-navy-700">
-        <strong>{t("botTitle")}</strong> {t("botHint")}
-      </div>
+      <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
+        <span>{t("botLine")}</span>
+        <span className="inline-flex items-center gap-1.5"><span className="font-semibold text-slate-500">{t("cellNone")}</span>{t("legendNone")}</span>
+        <span className="inline-flex items-center gap-1.5"><span className="font-bold text-amber-500">—</span>{t("legendPending")}</span>
+      </p>
 
       {dialog?.mode === "pick" && (
         <TourPicker
@@ -551,7 +551,7 @@ function ZoneName({ name, autoFocus, onChange }: { name: string; autoFocus: bool
       onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
       placeholder={t("zoneNamePlaceholder")}
       aria-label={t("zoneName")}
-      className="h-8 min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1.5 font-semibold text-navy-900 outline-none placeholder:font-normal placeholder:text-slate-400 hover:border-slate-200 focus:border-blue-500 focus:bg-white"
+      className="h-7 w-full min-w-0 rounded-md border border-transparent bg-transparent px-1.5 text-sm font-semibold text-navy-900 outline-none placeholder:font-normal placeholder:text-slate-400 hover:border-slate-200 focus:border-blue-500 focus:bg-white"
     />
   );
 }
@@ -628,11 +628,15 @@ function PickupCell({ value, inherited, label, onChange }: {
   const shown = value ?? (isHotel ? inherited : null);
   let content: React.ReactNode;
   if (shown === NO_PICKUP) {
-    content = <span className={`rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold ${value ? "text-slate-600" : "text-slate-400"}`}>{t("cellNone")}</span>;
+    content = <span className={`text-xs font-medium ${value ? "text-slate-500" : "text-slate-300"}`}>{t("cellNone")}</span>;
   } else if (shown) {
-    content = <span className={`tabular-nums ${value && isHotel ? "font-bold text-amber-900" : value ? "text-navy-900" : "text-slate-400"}`}>{shown}</span>;
+    content = <span className={`text-sm tabular-nums ${value && isHotel ? "font-bold text-amber-800" : value ? "font-medium text-navy-900" : "text-slate-300"}`}>{shown}</span>;
   } else {
-    content = <span className="rounded border border-dashed border-amber-400 bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700">{t("cellPending")}</span>;
+    content = (
+      <span title={t("cellPending")} className="text-base font-bold leading-none text-amber-400">
+        —<span className="sr-only">{t("cellPending")}</span>
+      </span>
+    );
   }
 
   const option = (active: boolean) =>
@@ -646,7 +650,7 @@ function PickupCell({ value, inherited, label, onChange }: {
         aria-label={label}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="flex h-8 min-w-16 items-center justify-center rounded-md border border-transparent px-1 hover:border-slate-200 hover:bg-white focus-visible:border-blue-500 focus-visible:outline-none"
+        className="mx-auto flex h-9 w-full max-w-20 items-center justify-center rounded-md border border-transparent hover:border-slate-200 hover:bg-white focus-visible:border-blue-500 focus-visible:outline-none"
       >
         {content}
       </button>
@@ -680,16 +684,16 @@ function PickupCell({ value, inherited, label, onChange }: {
           </label>
           <div className="border-t border-slate-100 pt-1">
             <button onClick={() => pick(NO_PICKUP)} className={option(value === NO_PICKUP)}>
-              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500">{t("cellNone")}</span>
-              <span className="text-xs text-slate-500">{t("cellNoneHint")}</span>
+              <span className="w-5 text-center text-slate-400">✕</span>
+              <span className="text-xs">{t("cellNone")} <span className="text-slate-400">· {t("cellNoneHint")}</span></span>
             </button>
             <button onClick={() => pick(null)} className={option(value === null)}>
               {isHotel ? (
                 <span className="text-xs">{t("cellInherit")}{inherited ? ` (${inherited === NO_PICKUP ? t("cellNone") : inherited})` : ""}</span>
               ) : (
                 <>
-                  <span className="rounded border border-dashed border-amber-400 bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700">{t("cellPending")}</span>
-                  <span className="text-xs text-slate-500">{t("cellPendingHint")}</span>
+                  <span className="w-5 text-center font-bold text-amber-400">—</span>
+                  <span className="text-xs">{t("cellPending")} <span className="text-slate-400">· {t("cellPendingHint")}</span></span>
                 </>
               )}
             </button>

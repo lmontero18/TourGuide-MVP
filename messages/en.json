@@ -578,7 +578,7 @@
         "own": "Own",
         "addZone": "+ Zone",
         "editTour": "Edit tour",
-        "counts": "{zones, plural, =1 {1 zone} other {# zones}} · {places, plural, =1 {1 hotel} other {# hotels}}.",
+        "counts": "{zones, plural, =1 {1 zone} other {# zones}} · {places, plural, =1 {1 hotel} other {# hotels}}",
         "zone": "Zone",
         "placesCount": "{count, plural, =1 {1 hotel} other {# hotels}}",
         "zoneName": "Zone name",
@@ -591,8 +591,6 @@
         "ownTimes": "Own times",
         "ownTimesHint": "Tap a hotel if it's picked up at a different time than the rest of its zone.",
         "useZoneTimes": "Use the zone's",
-        "botTitle": "The bot uses this table.",
-        "botHint": "When a client asks what time they're picked up, it answers with their hotel's time. If the hotel isn't listed, it hands off to your team.",
         "departures": "Departures",
         "departureName": "Departure {n}",
         "addDeparture": "+ Departure",
@@ -656,9 +654,8 @@
         },
         "editTourNamed": "Edit {name}",
         "pendingCount": "{count, plural, =1 {1 cell pending} other {# cells pending}}",
-        "legendTime": "pickup time",
         "legendNone": "that tour doesn't pick up there",
-        "legendPending": "not filled in: the bot hands it to your team",
+        "legendPending": "pending: the bot hands the question to your team",
         "cellNone": "No pickup",
         "cellPending": "Pending",
         "cellTimeLabel": "Pickup time",
@@ -666,7 +663,8 @@
         "cellInvalid": "Type a time like 7:30 or 14:05.",
         "cellNoneHint": "the bot says so",
         "cellPendingHint": "goes to your team",
-        "cellInherit": "Same as the zone"
+        "cellInherit": "Same as the zone",
+        "botLine": "The bot answers from this table."
       }
     },
     "topbar": {
