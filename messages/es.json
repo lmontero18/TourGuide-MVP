@@ -617,7 +617,7 @@
         "uploading": "Leyendo…",
         "uploadError": "No pudimos leer el archivo. Intenta de nuevo.",
         "pickTitle": "Tours que recogen en hotel",
-        "pickHint": "Marca los tours que llevan recogida. Cada uno arranca con una salida (Mañana); agrega Tarde o Noche con \"+ salida\" en la tabla.",
+        "pickHint": "Marca los tours que llevan recogida. Cada uno arranca con una salida (Mañana); agrega Tarde o Noche con el lápiz al lado de su nombre.",
         "noTours": "Todavía no tienes tours. Agrégalos en la pestaña Tours.",
         "external": "Lo hace otra empresa",
         "externalPlaceholder": "Nombre de la empresa",
@@ -655,9 +655,7 @@
           "saving": "Guardando…",
           "saveError": "No se pudo guardar. Intenta de nuevo."
         },
-        "editTourNamed": "Editar {name}",
-        "addDepartureTo": "Agregar salida a {name}",
-        "addDepartureShort": "+ salida"
+        "editTourNamed": "Editar {name}"
       }
     },
     "topbar": {
