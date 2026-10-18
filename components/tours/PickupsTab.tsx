@@ -312,8 +312,8 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
               </th>
               {columns.map((col) => (
                 <th key={col.tour_id} colSpan={col.departures.length} scope="colgroup" className="border-l border-slate-100 px-3 pb-1 pt-3 align-top">
-                  <div className="flex items-start justify-center gap-1">
-                    <span title={tourName.get(col.tour_id)} className="line-clamp-2 text-center text-xs font-bold leading-snug text-navy-900">
+                  <div className="flex items-start justify-end gap-1">
+                    <span title={tourName.get(col.tour_id)} className="line-clamp-2 text-right text-xs font-bold leading-snug text-navy-900">
                       {tourName.get(col.tour_id)}
                     </span>
                     <button
@@ -327,7 +327,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                       </svg>
                     </button>
                   </div>
-                  {col.operator && <span className="mt-0.5 block truncate text-center text-[11px] font-medium text-slate-400">{col.operator}</span>}
+                  {col.operator && <span className="mt-0.5 block truncate pr-7 text-right text-[11px] font-medium text-slate-400">{col.operator}</span>}
                 </th>
               ))}
               {!columns.length && (
@@ -341,7 +341,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
             <tr>
               {columns.flatMap((col) =>
                 col.departures.map((label, i) => (
-                  <th key={`${col.tour_id}-${i}`} scope="col" className={`w-24 min-w-24 border-b border-slate-200 px-1 pb-2.5 pt-1 text-center text-[11px] font-medium text-slate-400 ${i === 0 ? "border-l border-l-slate-100" : ""}`}>
+                  <th key={`${col.tour_id}-${i}`} scope="col" className={`w-24 min-w-24 border-b border-slate-200 pb-2.5 pl-1 pr-4 pt-1 text-right text-[11px] font-medium text-slate-400 ${i === 0 ? "border-l border-l-slate-100" : ""}`}>
                     {label}
                   </th>
                 ))
@@ -386,7 +386,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                     </th>
                     {columns.flatMap((col) =>
                       col.departures.map((label, i) => (
-                        <td key={`${col.tour_id}-${i}`} className={`h-12 border-b border-slate-100 px-1 text-center ${i === 0 ? "border-l border-l-slate-100" : ""}`}>
+                        <td key={`${col.tour_id}-${i}`} className={`h-12 border-b border-slate-100 pl-1 pr-2 text-right ${i === 0 ? "border-l border-l-slate-100" : ""}`}>
                           <PickupCell
                             value={times.get(timeKey(col.tour_id, i, zone.id)) ?? null}
                             label={`${zone.name} · ${tourName.get(col.tour_id)} · ${label}`}
@@ -423,7 +423,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                         </th>
                         {columns.flatMap((col) =>
                           col.departures.map((label, i) => (
-                            <td key={`${col.tour_id}-${i}`} className={`h-12 border-b border-slate-200 px-1 text-center ${i === 0 ? "border-l border-l-amber-100" : ""}`}>
+                            <td key={`${col.tour_id}-${i}`} className={`h-12 border-b border-slate-200 pl-1 pr-2 text-right ${i === 0 ? "border-l border-l-amber-100" : ""}`}>
                               <PickupCell
                                 value={times.get(timeKey(col.tour_id, i, zone.id, place.id)) ?? null}
                                 inherited={times.get(timeKey(col.tour_id, i, zone.id)) ?? null}
@@ -650,7 +650,7 @@ function PickupCell({ value, inherited, label, onChange }: {
         aria-label={label}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="mx-auto flex h-9 w-full max-w-20 items-center justify-center rounded-md border border-transparent hover:border-slate-200 hover:bg-white focus-visible:border-blue-500 focus-visible:outline-none"
+        className="ml-auto flex h-9 w-full max-w-20 items-center justify-end rounded-md border border-transparent px-2 hover:border-slate-200 hover:bg-white focus-visible:border-blue-500 focus-visible:outline-none"
       >
         {content}
       </button>
