@@ -233,6 +233,14 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
       times: prev.times.filter((x) => x.tour_id !== next.tour_id || x.departure < next.departures.length),
     }));
 
+  // "+ salida" en el encabezado: Mañana → Tarde → Noche → Salida 4…
+  const addDeparture = (col: PickupTour) => {
+    const defaults = [t("slots.morning"), t("slots.afternoon"), t("slots.night")];
+    const n = col.departures.length;
+    const label = defaults.find((d, i) => i >= n && !col.departures.includes(d)) ?? `${t("slots.departure")} ${n + 1}`;
+    updateTour({ ...col, departures: [...col.departures, label] });
+  };
+
   const chip = (active: boolean) =>
     `h-8 rounded-full border px-3 text-xs font-semibold transition-colors ${
       active ? "border-navy-900 bg-navy-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
@@ -301,9 +309,19 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
               </th>
               {columns.map((col) => (
                 <th key={col.tour_id} colSpan={col.departures.length} scope="colgroup" className="border-l border-slate-100 px-2 pb-1 pt-3 text-center font-bold text-navy-900">
-                  <button onClick={() => setDialog({ mode: "settings", tourId: col.tour_id })} className="rounded px-1 hover:bg-slate-100" title={t("editTour")}>
+                  <span className="inline-flex items-center gap-1">
                     {tourName.get(col.tour_id)}
-                  </button>
+                    <button
+                      onClick={() => setDialog({ mode: "settings", tourId: col.tour_id })}
+                      aria-label={t("editTourNamed", { name: tourName.get(col.tour_id) ?? "" })}
+                      title={t("editTour")}
+                      className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-navy-900"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                      </svg>
+                    </button>
+                  </span>
                   {col.operator && <span className="block text-[11px] font-medium text-slate-400">{col.operator}</span>}
                 </th>
               ))}
@@ -320,6 +338,16 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                 col.departures.map((label, i) => (
                   <th key={`${col.tour_id}-${i}`} scope="col" className="border-b border-slate-200 px-2 pb-2.5 pt-0.5 text-center text-[11px] font-medium text-slate-500">
                     {label}
+                    {i === col.departures.length - 1 && col.departures.length < 8 && (
+                      <button
+                        onClick={() => addDeparture(col)}
+                        aria-label={t("addDepartureTo", { name: tourName.get(col.tour_id) ?? "" })}
+                        title={t("addDeparture")}
+                        className="ml-1.5 rounded-full border border-dashed border-slate-300 px-1.5 text-[10px] font-semibold text-slate-500 hover:border-blue-400 hover:text-blue-600"
+                      >
+                        {t("addDepartureShort")}
+                      </button>
+                    )}
                   </th>
                 ))
               )}

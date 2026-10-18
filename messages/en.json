@@ -617,7 +617,7 @@
         "uploading": "Reading…",
         "uploadError": "We couldn't read the file. Try again.",
         "pickTitle": "Tours with hotel pickup",
-        "pickHint": "Check the tours that include pickup. Each starts with one departure; change it later by tapping its name in the table.",
+        "pickHint": "Check the tours that include pickup. Each starts with one departure (Morning); add Afternoon or Night with \"+ departure\" in the table.",
         "noTours": "You don't have tours yet. Add them in the Tours tab.",
         "external": "Run by another company",
         "externalPlaceholder": "Company name",
@@ -654,7 +654,10 @@
           "save": "Save {zones} zones and {hotels} hotels",
           "saving": "Saving…",
           "saveError": "Couldn't save. Try again."
-        }
+        },
+        "editTourNamed": "Edit {name}",
+        "addDepartureTo": "Add a departure to {name}",
+        "addDepartureShort": "+ departure"
       }
     },
     "topbar": {
