@@ -578,7 +578,7 @@
         "own": "Propios",
         "addZone": "+ Zona",
         "editTour": "Editar tour",
-        "counts": "{zones, plural, =1 {1 zona} other {# zonas}} · {places, plural, =1 {1 hotel} other {# hoteles}}.",
+        "counts": "{zones, plural, =1 {1 zona} other {# zonas}} · {places, plural, =1 {1 hotel} other {# hoteles}}",
         "zone": "Zona",
         "placesCount": "{count, plural, =1 {1 hotel} other {# hoteles}}",
         "zoneName": "Nombre de la zona",
@@ -591,8 +591,6 @@
         "ownTimes": "Horas propias",
         "ownTimesHint": "Toca un hotel si recoge a otra hora que el resto de su zona.",
         "useZoneTimes": "Usar las de la zona",
-        "botTitle": "El bot usa esta tabla.",
-        "botHint": "Si un cliente pregunta a qué hora lo recogen, responde con la hora de su hotel. Si el hotel no está, lo pasa a tu equipo.",
         "departures": "Salidas",
         "departureName": "Salida {n}",
         "addDeparture": "+ Salida",
@@ -656,9 +654,8 @@
         },
         "editTourNamed": "Editar {name}",
         "pendingCount": "{count, plural, =1 {1 celda pendiente} other {# celdas pendientes}}",
-        "legendTime": "hora de recogida",
         "legendNone": "ese tour no recoge ahí",
-        "legendPending": "sin cargar: el bot lo pasa a tu equipo",
+        "legendPending": "pendiente: el bot pasa la pregunta a tu equipo",
         "cellNone": "No recoge",
         "cellPending": "Pendiente",
         "cellTimeLabel": "Hora de recogida",
@@ -666,7 +663,8 @@
         "cellInvalid": "Escribe una hora como 7:30 o 14:05.",
         "cellNoneHint": "el bot lo dice",
         "cellPendingHint": "pasa al equipo",
-        "cellInherit": "Igual que la zona"
+        "cellInherit": "Igual que la zona",
+        "botLine": "El bot responde con esta tabla."
       }
     },
     "topbar": {
