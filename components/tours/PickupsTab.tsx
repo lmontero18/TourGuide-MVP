@@ -65,7 +65,6 @@ interface EditorProps {
   onImported: (draft: PickupDraft, fileName: string) => void;
 }
 
-type OperatorFilter = { kind: "all" } | { kind: "own" } | { kind: "operator"; name: string };
 type Dialog = { mode: "pick" } | { mode: "settings"; tourId: string } | null;
 
 function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
@@ -74,7 +73,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [manual, setManual] = useState(false);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<OperatorFilter>({ kind: "all" });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [openZones, setOpenZones] = useState<Set<string>>(new Set());
   const [ownRows, setOwnRows] = useState<Set<string>>(new Set());
   const [focusZone, setFocusZone] = useState<string | null>(null);
@@ -138,27 +137,21 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
     [data.tours]
   );
 
-  const columns = useMemo(
-    () =>
-      data.tours.filter(
-        (x) =>
-          tourName.has(x.tour_id) &&
-          (filter.kind === "all" ||
-            (filter.kind === "own" && !x.operator) ||
-            (filter.kind === "operator" && x.operator === filter.name))
-      ),
-    [data.tours, tourName, filter]
-  );
-  const slotCount = columns.reduce((n, x) => n + x.departures.length, 0);
-  // Celdas de zona sin cargar: el bot pasa esas preguntas al equipo.
-  const pending = useMemo(
-    () =>
-      data.zones.reduce(
-        (n, zone) => n + columns.reduce((m, col) => m + col.departures.filter((_, i) => !times.has(timeKey(col.tour_id, i, zone.id))).length, 0),
-        0
-      ),
-    [data.zones, columns, times]
-  );
+  // Tours de la tabla que siguen existiendo en la pestaña Tours.
+  const listed = useMemo(() => data.tours.filter((x) => tourName.has(x.tour_id)), [data.tours, tourName]);
+  const selected = listed.find((x) => x.tour_id === selectedId) ?? listed[0] ?? null;
+
+  // Celdas de zona sin cargar por tour: el bot pasa esas preguntas al equipo.
+  const pendingByTour = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const tour of listed) {
+      map.set(
+        tour.tour_id,
+        data.zones.reduce((n, zone) => n + tour.departures.filter((_, i) => !times.has(timeKey(tour.tour_id, i, zone.id))).length, 0)
+      );
+    }
+    return map;
+  }, [listed, data.zones, times]);
 
   const placesByZone = useMemo(() => {
     const map = new Map<string, PickupData["places"]>();
@@ -215,8 +208,9 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
       times: prev.times.filter((x) => x.place_id !== placeId),
     }));
 
-  const clearOwnTimes = (placeId: string) => {
-    edit((prev) => ({ ...prev, times: prev.times.filter((x) => x.place_id !== placeId) }));
+  // "Usar las de la zona" en un hotel: saca sus horas propias de este tour.
+  const clearOwnTimes = (placeId: string, tourId: string) => {
+    edit((prev) => ({ ...prev, times: prev.times.filter((x) => !(x.place_id === placeId && x.tour_id === tourId)) }));
     setOwnRows((prev) => {
       const next = new Set(prev);
       next.delete(placeId);
@@ -225,14 +219,18 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
   };
 
   // Lista de tours con casillas: los marcados quedan en la tabla.
-  const pickTours = (selected: string[]) =>
+  const pickTours = (ids: string[]) => {
     edit((prev) => {
-      const keep = prev.tours.filter((x) => selected.includes(x.tour_id));
-      const added: PickupTour[] = selected
+      const keep = prev.tours.filter((x) => ids.includes(x.tour_id));
+      const added: PickupTour[] = ids
         .filter((id) => !prev.tours.some((x) => x.tour_id === id))
         .map((id, i) => ({ tour_id: id, departures: [t("slots.morning")], operator: null, sort: keep.length + i }));
-      return { ...prev, tours: [...keep, ...added], times: prev.times.filter((x) => selected.includes(x.tour_id)) };
+      return { ...prev, tours: [...keep, ...added], times: prev.times.filter((x) => ids.includes(x.tour_id)) };
     });
+    const firstNew = ids.find((id) => !data.tours.some((x) => x.tour_id === id));
+    if (firstNew) setSelectedId(firstNew);
+    setManual(true);
+  };
 
   const updateTour = (next: PickupTour) =>
     edit((prev) => ({
@@ -242,212 +240,214 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
       times: prev.times.filter((x) => x.tour_id !== next.tour_id || x.departure < next.departures.length),
     }));
 
-  const chip = (active: boolean) =>
-    `h-8 rounded-full border px-3 text-xs font-semibold transition-colors ${
-      active ? "border-navy-900 bg-navy-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-    }`;
   const settingsTour = dialog?.mode === "settings" ? data.tours.find((x) => x.tour_id === dialog.tourId) ?? null : null;
   const isEmpty = !data.zones.length && !data.tours.length;
 
   if (isEmpty && !manual) {
-    return (
-      <ImportHero
-        onImported={onImported}
-        onManual={() => setManual(true)}
-      />
-    );
+    return <ImportHero onImported={onImported} onManual={() => setManual(true)} />;
   }
+
+  const summary = (tour: PickupTour) => {
+    const pending = pendingByTour.get(tour.tour_id) ?? 0;
+    return [
+      tour.operator ? t("byOperator", { name: tour.operator }) : t("ownTour"),
+      t("departuresCount", { count: tour.departures.length }),
+      pending ? t("pendingCount", { count: pending }) : t("allFilled"),
+    ].join(" · ");
+  };
 
   return (
     <div className="space-y-4">
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t("search")}
-              aria-label={t("search")}
-              className="h-9 w-60 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-            />
-            <p className="text-xs text-slate-500">
-              {t("counts", { zones: data.zones.length, places: data.places.length })}
-              {pending > 0 && <span className="ml-1.5 font-semibold text-amber-700">· {t("pendingCount", { count: pending })}</span>}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <SaveStatus state={saveState} onRetry={() => void flush()} />
-            <UploadButton onImported={onImported} variant="secondary" />
-            <button
-              onClick={() => setDialog({ mode: "pick" })}
-              className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-navy-900 hover:border-slate-300 hover:bg-slate-50"
-            >
-              {t("addTour")}
-            </button>
-            <button onClick={addZone} className="h-9 rounded-lg bg-navy-900 px-3 text-xs font-semibold text-white hover:bg-navy-800">
-              {t("addZone")}
-            </button>
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("search")}
+            aria-label={t("search")}
+            className="h-9 w-64 rounded-lg border border-slate-200 bg-white px-3 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          />
+          <p className="text-sm text-slate-500">{t("counts", { zones: data.zones.length, places: data.places.length })}</p>
         </div>
-        {operators.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <button onClick={() => setFilter({ kind: "all" })} className={chip(filter.kind === "all")}>{t("all")}</button>
-            <button onClick={() => setFilter({ kind: "own" })} className={chip(filter.kind === "own")}>{t("own")}</button>
-            {operators.map((name) => (
-              <button key={name} onClick={() => setFilter({ kind: "operator", name })} className={chip(filter.kind === "operator" && filter.name === name)}>
-                {name}
+        <div className="flex items-center gap-2">
+          <SaveStatus state={saveState} onRetry={() => void flush()} />
+          <UploadButton onImported={onImported} variant="secondary" />
+          <button onClick={addZone} className="h-9 rounded-lg bg-navy-900 px-3 text-xs font-semibold text-white hover:bg-navy-800">
+            {t("addZone")}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
+        <section aria-label={t("toursTitle")} className="overflow-hidden rounded-2xl border border-slate-200 bg-white lg:w-72 lg:shrink-0">
+          <p className="px-4 pb-2 pt-3.5 text-xs font-semibold text-slate-500">{t("toursTitle")}</p>
+          {listed.map((tour) => {
+            const active = tour.tour_id === selected?.tour_id;
+            const pending = pendingByTour.get(tour.tour_id) ?? 0;
+            return (
+              <button
+                key={tour.tour_id}
+                onClick={() => setSelectedId(tour.tour_id)}
+                aria-current={active}
+                className={`flex w-full items-center justify-between gap-3 border-l-[3px] border-t border-t-slate-100 px-4 py-3 text-left transition-colors ${
+                  active ? "border-l-navy-900 bg-slate-50" : "border-l-transparent hover:bg-slate-50"
+                }`}
+              >
+                <span className="min-w-0">
+                  <span className={`block text-sm text-navy-900 ${active ? "font-bold" : "font-medium"}`}>{tourName.get(tour.tour_id)}</span>
+                  <span className="block truncate text-xs text-slate-400">
+                    {[tour.operator, tour.departures.join(" · ")].filter(Boolean).join(" · ")}
+                  </span>
+                </span>
+                {pending > 0 && (
+                  <span title={t("pendingCount", { count: pending })} className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 px-1.5 text-xs font-bold tabular-nums text-amber-800">
+                    {pending}
+                  </span>
+                )}
               </button>
-            ))}
-          </div>
-        )}
-      </div>
+            );
+          })}
+          <button
+            onClick={() => setDialog({ mode: "pick" })}
+            className="w-full border-t border-slate-100 px-4 py-3 text-left text-sm font-semibold text-blue-600 hover:bg-slate-50 hover:text-blue-700"
+          >
+            {t("addTour")}
+          </button>
+        </section>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-        <table className="w-full border-separate border-spacing-0 text-[13px]">
-          <thead>
-            <tr>
-              <th rowSpan={2} scope="col" className="sticky left-0 z-10 w-60 min-w-60 border-b border-r border-slate-200 bg-white px-4 py-3 text-left align-bottom text-xs font-semibold text-slate-500">
-                {t("zone")}
-              </th>
-              {columns.map((col) => (
-                <th key={col.tour_id} colSpan={col.departures.length} scope="colgroup" className="border-l border-slate-100 px-3 pb-1 pt-3 align-top">
-                  <div className="flex items-start justify-end gap-1">
-                    <span title={tourName.get(col.tour_id)} className="line-clamp-2 text-right text-xs font-bold leading-snug text-navy-900">
-                      {tourName.get(col.tour_id)}
-                    </span>
-                    <button
-                      onClick={() => setDialog({ mode: "settings", tourId: col.tour_id })}
-                      aria-label={t("editTourNamed", { name: tourName.get(col.tour_id) ?? "" })}
-                      title={t("editTour")}
-                      className="-mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-navy-900"
-                    >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                      </svg>
-                    </button>
-                  </div>
-                  {col.operator && <span className="mt-0.5 block truncate pr-7 text-right text-[11px] font-medium text-slate-400">{col.operator}</span>}
-                </th>
-              ))}
-              {!columns.length && (
-                <th rowSpan={2} scope="col" className="border-b border-slate-200 px-4 py-3 text-left font-normal">
-                  <button onClick={() => setDialog({ mode: "pick" })} className="text-sm font-semibold text-blue-600 hover:text-blue-700">
-                    {data.tours.length ? t("noToursInFilter") : t("pickToursCta")}
-                  </button>
-                </th>
-              )}
-            </tr>
-            <tr>
-              {columns.flatMap((col) =>
-                col.departures.map((label, i) => (
-                  <th key={`${col.tour_id}-${i}`} scope="col" className={`w-24 min-w-24 border-b border-slate-200 pb-2.5 pl-1 pr-4 pt-1 text-right text-[11px] font-medium text-slate-400 ${i === 0 ? "border-l border-l-slate-100" : ""}`}>
-                    {label}
-                  </th>
-                ))
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {!data.zones.length && (
-              <tr>
-                <td colSpan={Math.max(slotCount, 1) + 1} className="px-4 py-6">
-                  <button onClick={addZone} className="text-sm font-semibold text-blue-600 hover:text-blue-700">{t("addZoneCta")}</button>
-                  <p className="mt-1 text-xs text-slate-500">{t("addZoneHint")}</p>
-                </td>
-              </tr>
-            )}
-            {zones.map((zone) => {
-              const open = isOpen(zone.id);
-              const places = placesByZone.get(zone.id) ?? [];
-              const exceptions = places.filter((p) => ownRows.has(p.id) || data.times.some((x) => x.place_id === p.id));
-              return (
-                <Fragment key={zone.id}>
-                  <tr className={open ? "bg-slate-50" : "bg-white"}>
-                    <th scope="row" className={`sticky left-0 z-10 border-b border-r border-slate-100 border-r-slate-200 px-3 py-2 text-left font-semibold ${open ? "bg-slate-50" : "bg-white"}`}>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => setOpenZones((prev) => toggle(prev, zone.id))}
-                          aria-expanded={open}
-                          aria-label={open ? t("collapse") : t("expand")}
-                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-[11px] text-slate-400 hover:bg-slate-100"
-                        >
-                          {open ? "▾" : "▸"}
-                        </button>
-                        <div className="min-w-0 flex-1">
-                          <ZoneName
-                            name={zone.name}
-                            autoFocus={focusZone === zone.id}
-                            onChange={(name) => renameZone(zone.id, name)}
-                          />
-                          <span className="block px-1.5 text-[11px] font-normal text-slate-400">{t("placesCount", { count: places.length })}</span>
-                        </div>
-                      </div>
-                    </th>
-                    {columns.flatMap((col) =>
-                      col.departures.map((label, i) => (
-                        <td key={`${col.tour_id}-${i}`} className={`h-12 border-b border-slate-100 pl-1 pr-2 text-right ${i === 0 ? "border-l border-l-slate-100" : ""}`}>
-                          <PickupCell
-                            value={times.get(timeKey(col.tour_id, i, zone.id)) ?? null}
-                            label={`${zone.name} · ${tourName.get(col.tour_id)} · ${label}`}
-                            onChange={(time) => edit((prev) => setTime(prev, col.tour_id, i, zone.id, null, time))}
-                          />
-                        </td>
-                      ))
-                    )}
-                    {!columns.length && <td className="border-b border-slate-100" />}
-                  </tr>
-                  {open && (
-                    <tr className="bg-slate-50">
-                      <td colSpan={Math.max(slotCount, 1) + 1} className="border-b border-slate-200 py-3 pl-11 pr-4">
-                        <ZonePanel
-                          places={places}
-                          ownRows={ownRows}
-                          onAddPlace={(name) => addPlace(zone.id, name)}
-                          onRemovePlace={removePlace}
-                          onToggleOwn={(placeId) => setOwnRows((prev) => toggle(prev, placeId))}
-                          onRemoveZone={() => removeZone(zone.id)}
-                        />
-                      </td>
+        <section className="min-w-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          {!selected ? (
+            <div className="px-6 py-12 text-center">
+              <p className="text-sm font-bold text-navy-900">{t("noTourSelected")}</p>
+              <button onClick={() => setDialog({ mode: "pick" })} className="mt-2 text-sm font-semibold text-blue-600 hover:text-blue-700">
+                {t("pickToursCta")}
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+                <div className="min-w-0">
+                  <h2 className="font-display text-xl font-bold text-navy-900">{tourName.get(selected.tour_id)}</h2>
+                  <p className="mt-0.5 text-[13px] text-slate-500">{summary(selected)}</p>
+                </div>
+                <button
+                  onClick={() => setDialog({ mode: "settings", tourId: selected.tour_id })}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-navy-900 hover:border-slate-300 hover:bg-slate-50"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg>
+                  {t("tourSettings")}
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-xs text-slate-500">
+                      <th scope="col" className="px-5 py-3 text-left font-semibold">{t("zone")}</th>
+                      {selected.departures.map((label, i) => (
+                        <th key={i} scope="col" className="w-28 px-5 py-3 text-right font-semibold">{label}</th>
+                      ))}
                     </tr>
-                  )}
-                  {open &&
-                    exceptions.map((place) => (
-                      <tr key={place.id} className="bg-amber-50">
-                        <th scope="row" className="sticky left-0 z-10 border-b border-r border-slate-200 bg-amber-50 py-2 pl-11 pr-4 text-left font-medium text-navy-900">
-                          <span className="block">{place.name}</span>
-                          <span className="flex items-center gap-2 text-[11px] font-normal text-amber-800">
-                            {t("ownTimes")}
-                            <button onClick={() => clearOwnTimes(place.id)} className="underline hover:text-amber-900">{t("useZoneTimes")}</button>
-                          </span>
-                        </th>
-                        {columns.flatMap((col) =>
-                          col.departures.map((label, i) => (
-                            <td key={`${col.tour_id}-${i}`} className={`h-12 border-b border-slate-200 pl-1 pr-2 text-right ${i === 0 ? "border-l border-l-amber-100" : ""}`}>
-                              <PickupCell
-                                value={times.get(timeKey(col.tour_id, i, zone.id, place.id)) ?? null}
-                                inherited={times.get(timeKey(col.tour_id, i, zone.id)) ?? null}
-                                label={`${place.name} · ${tourName.get(col.tour_id)} · ${label}`}
-                                onChange={(time) => edit((prev) => setTime(prev, col.tour_id, i, zone.id, place.id, time))}
-                              />
-                            </td>
-                          ))
-                        )}
-                        {!columns.length && <td className="border-b border-slate-200" />}
+                  </thead>
+                  <tbody>
+                    {!data.zones.length && (
+                      <tr className="border-t border-slate-100">
+                        <td colSpan={selected.departures.length + 1} className="px-5 py-6">
+                          <button onClick={addZone} className="text-sm font-semibold text-blue-600 hover:text-blue-700">{t("addZoneCta")}</button>
+                          <p className="mt-1 text-xs text-slate-500">{t("addZoneHint")}</p>
+                        </td>
                       </tr>
-                    ))}
-                </Fragment>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                    )}
+                    {zones.map((zone) => {
+                      const open = isOpen(zone.id);
+                      const places = placesByZone.get(zone.id) ?? [];
+                      const exceptions = places.filter(
+                        (p) => ownRows.has(p.id) || data.times.some((x) => x.place_id === p.id && x.tour_id === selected.tour_id)
+                      );
+                      return (
+                        <Fragment key={zone.id}>
+                          <tr className={`border-t border-slate-100 ${open ? "bg-slate-50" : ""}`}>
+                            <th scope="row" className="px-3 py-1.5 text-left font-semibold">
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  onClick={() => setOpenZones((prev) => toggle(prev, zone.id))}
+                                  aria-expanded={open}
+                                  aria-label={open ? t("collapse") : t("expand")}
+                                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[11px] text-slate-400 hover:bg-slate-100"
+                                >
+                                  {open ? "▾" : "▸"}
+                                </button>
+                                <ZoneName name={zone.name} autoFocus={focusZone === zone.id} onChange={(name) => renameZone(zone.id, name)} />
+                                <span className="shrink-0 pr-2 text-xs font-normal text-slate-400">{t("placesCount", { count: places.length })}</span>
+                              </div>
+                            </th>
+                            {selected.departures.map((label, i) => (
+                              <td key={i} className="px-3 py-1.5 text-right">
+                                <PickupCell
+                                  value={times.get(timeKey(selected.tour_id, i, zone.id)) ?? null}
+                                  label={`${zone.name} · ${label}`}
+                                  onChange={(time) => edit((prev) => setTime(prev, selected.tour_id, i, zone.id, null, time))}
+                                />
+                              </td>
+                            ))}
+                          </tr>
+                          {open && (
+                            <tr className="bg-slate-50">
+                              <td colSpan={selected.departures.length + 1} className="pb-3 pl-12 pr-5 pt-1">
+                                <ZonePanel
+                                  places={places}
+                                  ownRows={ownRows}
+                                  onAddPlace={(name) => addPlace(zone.id, name)}
+                                  onRemovePlace={removePlace}
+                                  onToggleOwn={(placeId) => setOwnRows((prev) => toggle(prev, placeId))}
+                                  onRemoveZone={() => removeZone(zone.id)}
+                                />
+                              </td>
+                            </tr>
+                          )}
+                          {open &&
+                            exceptions.map((place) => (
+                              <tr key={place.id} className="bg-amber-50">
+                                <th scope="row" className="py-2 pl-12 pr-5 text-left font-medium text-navy-900">
+                                  {place.name}
+                                  <span className="ml-2 text-xs font-normal text-amber-800">{t("ownTimes")}</span>
+                                  <button onClick={() => clearOwnTimes(place.id, selected.tour_id)} className="ml-2 text-xs font-normal text-amber-800 underline hover:text-amber-900">
+                                    {t("useZoneTimes")}
+                                  </button>
+                                </th>
+                                {selected.departures.map((label, i) => (
+                                  <td key={i} className="px-3 py-1.5 text-right">
+                                    <PickupCell
+                                      value={times.get(timeKey(selected.tour_id, i, zone.id, place.id)) ?? null}
+                                      inherited={times.get(timeKey(selected.tour_id, i, zone.id)) ?? null}
+                                      label={`${place.name} · ${label}`}
+                                      onChange={(time) => edit((prev) => setTime(prev, selected.tour_id, i, zone.id, place.id, time))}
+                                    />
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                        </Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
-      <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
-        <span>{t("botLine")}</span>
-        <span className="inline-flex items-center gap-1.5"><span className="font-semibold text-slate-500">{t("cellNone")}</span>{t("legendNone")}</span>
-        <span className="inline-flex items-center gap-1.5"><span className="font-bold text-amber-500">—</span>{t("legendPending")}</span>
-      </p>
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-slate-100 px-5 py-3 text-xs text-slate-400">
+                <span>{t("cellHint")}</span>
+                <span>
+                  <strong className="font-semibold text-slate-500">{t("cellNone")}</strong> {t("legendNone")} ·{" "}
+                  <strong className="font-bold text-amber-500">—</strong> {t("legendPending")}
+                </span>
+              </div>
+            </>
+          )}
+        </section>
+      </div>
 
       {dialog?.mode === "pick" && (
         <TourPicker
