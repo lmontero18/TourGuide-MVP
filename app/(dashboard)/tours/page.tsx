@@ -19,8 +19,11 @@ import { isNewFeature } from "@/lib/changelog";
 import { useQueryClient } from "@tanstack/react-query";
 import { useOrganization } from "@/hooks/useOrganization";
 import { queryKeys } from "@/lib/query/keys";
+import { useAuth } from "@/hooks/useAuth";
+import { hasFeature } from "@/lib/features";
+import PickupsTab from "@/components/tours/PickupsTab";
 
-type Tab = "tours" | "business" | "faqs";
+type Tab = "tours" | "business" | "faqs" | "pickups";
 
 interface Knowledge {
   tours: Tour[];
@@ -91,6 +94,8 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [importOpen, setImportOpen] = useState(false);
+  const { featureFlags } = useAuth();
+  const showPickups = hasFeature(featureFlags, "pickups");
 
   // Autoguardado: debounce + un solo PATCH en vuelo a la vez. Si hay cambios
   // mientras se guarda, se encola otro guardado con lo ultimo.
@@ -209,10 +214,12 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
 
   const pendingTours = tours.filter((tour) => tour.name.trim() && needsReview(tour)).length;
 
-  const TABS: { key: Tab; label: string; count: number; pending?: number }[] = [
+  const TABS: { key: Tab; label: string; count?: number; pending?: number; isNew?: boolean }[] = [
     { key: "tours", label: t("tabTours"), count: tours.length, pending: pendingTours },
     { key: "business", label: t("tabBusiness"), count: business.length },
     { key: "faqs", label: t("tabFaqs"), count: faqs.length },
+    // Recogidas: detras del flag `pickups`.
+    ...(showPickups ? [{ key: "pickups" as const, label: t("tabPickups"), isNew: true }] : []),
   ];
 
   return (
@@ -256,9 +263,14 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
                     }`}
                   >
                     {item.label}
-                    <span className={`rounded-full px-1.5 text-[11px] tabular-nums ${active ? "bg-navy-900 text-white" : "bg-slate-100 text-slate-400"}`}>
-                      {item.count}
-                    </span>
+                    {item.count !== undefined && (
+                      <span className={`rounded-full px-1.5 text-[11px] tabular-nums ${active ? "bg-navy-900 text-white" : "bg-slate-100 text-slate-400"}`}>
+                        {item.count}
+                      </span>
+                    )}
+                    {item.isNew && (
+                      <span className="rounded-full bg-blue-50 px-1.5 py-px text-[10px] font-bold text-blue-700">{t("reimport.newBadge")}</span>
+                    )}
                     {!!item.pending && (
                       <span title={t("pendingTitle", { count: item.pending })} className="rounded-full bg-amber-100 px-1.5 text-[11px] font-bold tabular-nums text-amber-800">
                         {item.pending}
@@ -272,6 +284,7 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
             {tab === "tours" && <ToursTable tours={tours} selectedId={selectedId} onSelect={setSelectedId} onAdd={addTour} />}
             {tab === "business" && <BusinessGrid sections={business} onChange={(v) => edit({ business: v })} />}
             {tab === "faqs" && <FaqAccordion faqs={faqs} onChange={(v) => edit({ faqs: v })} />}
+            {tab === "pickups" && showPickups && <PickupsTab tours={tours} />}
           </div>
       </div>
 

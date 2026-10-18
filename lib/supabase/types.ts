@@ -563,6 +563,164 @@ export type Database = {
         }
         Relationships: []
       }
+      pickup_places: {
+        Row: {
+          aliases: string[]
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+          zone_id: string
+        }
+        Insert: {
+          aliases?: string[]
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+          zone_id: string
+        }
+        Update: {
+          aliases?: string[]
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pickup_places_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pickup_places_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "pickup_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pickup_times: {
+        Row: {
+          departure: number
+          id: string
+          org_id: string
+          pickup_time: string
+          place_id: string | null
+          tour_id: string
+          zone_id: string
+        }
+        Insert: {
+          departure: number
+          id?: string
+          org_id: string
+          pickup_time: string
+          place_id?: string | null
+          tour_id: string
+          zone_id: string
+        }
+        Update: {
+          departure?: number
+          id?: string
+          org_id?: string
+          pickup_time?: string
+          place_id?: string | null
+          tour_id?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pickup_times_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pickup_times_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "pickup_places"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pickup_times_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "pickup_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pickup_tours: {
+        Row: {
+          departures: string[]
+          operator: string | null
+          org_id: string
+          sort: number
+          tour_id: string
+        }
+        Insert: {
+          departures: string[]
+          operator?: string | null
+          org_id: string
+          sort?: number
+          tour_id: string
+        }
+        Update: {
+          departures?: string[]
+          operator?: string | null
+          org_id?: string
+          sort?: number
+          tour_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pickup_tours_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pickup_zones: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+          sort: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+          sort?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+          sort?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pickup_zones_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           created_at: string
@@ -738,6 +896,10 @@ export type Database = {
           metadata: Json
           similarity: number
         }[]
+      }
+      save_pickups: {
+        Args: { p_places: Json; p_times: Json; p_tours: Json; p_zones: Json }
+        Returns: undefined
       }
     }
     Enums: {

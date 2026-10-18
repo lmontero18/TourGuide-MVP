@@ -76,6 +76,43 @@ export interface Tour {
   confidence?: number  // 0..1 de la extraccion por IA. <0.6 => bandera de revision en la UI.
 }
 
+// Recogidas (flag `pickups`): hora de recogida por tour, salida y zona de
+// hoteles. Una hora con place_id es la excepcion de ese hotel dentro de su zona.
+export interface PickupZone {
+  id: string
+  name: string
+  sort: number
+}
+
+export interface PickupPlace {
+  id: string
+  zone_id: string
+  name: string
+  aliases: string[]
+}
+
+export interface PickupTour {
+  tour_id: string        // id del tour en organizations.tours
+  departures: string[]   // nombre de cada salida: "Mañana", "Tarde", "8:00"...
+  operator: string | null // operador externo que lo hace; null = tour propio
+  sort: number
+}
+
+export interface PickupTime {
+  tour_id: string
+  departure: number      // indice en PickupTour.departures
+  zone_id: string
+  place_id: string | null
+  pickup_time: string    // H:MM
+}
+
+export interface PickupData {
+  zones: PickupZone[]
+  places: PickupPlace[]
+  tours: PickupTour[]
+  times: PickupTime[]
+}
+
 // Seccion titulada del contexto general del negocio (sobre nosotros, politicas,
 // formas de pago, contacto, horarios, zonas, etc.). Flexible: la IA crea las que existan.
 export interface BusinessSection {
