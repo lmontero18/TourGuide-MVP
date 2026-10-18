@@ -4,6 +4,7 @@ import { useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import type { PickupData } from '@/types'
+import type { PickupDraft } from '@/lib/pickups/parseSheet'
 
 async function fetchPickups(): Promise<PickupData> {
   const res = await fetch('/api/pickups')
@@ -37,4 +38,18 @@ export function usePickups(enabled: boolean) {
   )
 
   return { ...query, save }
+}
+
+// Sube el Excel de recogidas y devuelve el borrador para revisar (no guarda).
+export async function importPickupsFile(file: File): Promise<{ draft?: PickupDraft; error?: string }> {
+  const form = new FormData()
+  form.append('file', file)
+  try {
+    const res = await fetch('/api/pickups/import', { method: 'POST', body: form })
+    const body = await res.json().catch(() => ({}))
+    if (!res.ok) return { error: body.error ?? '' }
+    return { draft: body.draft as PickupDraft }
+  } catch {
+    return { error: '' }
+  }
 }
