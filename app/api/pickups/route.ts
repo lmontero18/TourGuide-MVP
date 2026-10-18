@@ -57,7 +57,8 @@ const bodySchema = z.object({
     departure: z.number().int().min(0).max(7),
     zone_id: z.uuid(),
     place_id: z.uuid().nullable(),
-    pickup_time: z.string().regex(TIME, 'invalidTime'),
+    // 'none' = no recoge ahi (distinto de no tener fila: sin cargar).
+    pickup_time: z.union([z.literal('none'), z.string().regex(TIME, 'invalidTime')]),
   })).max(20000),
 })
 

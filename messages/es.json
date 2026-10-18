@@ -579,7 +579,6 @@
         "addZone": "+ Zona",
         "editTour": "Editar tour",
         "counts": "{zones, plural, =1 {1 zona} other {# zonas}} · {places, plural, =1 {1 hotel} other {# hoteles}}.",
-        "hint": "Cada celda es la hora en que se pasa a recoger al cliente para esa salida. Vacía = ese tour no recoge en la zona.",
         "zone": "Zona",
         "placesCount": "{count, plural, =1 {1 hotel} other {# hoteles}}",
         "zoneName": "Nombre de la zona",
@@ -655,7 +654,19 @@
           "saving": "Guardando…",
           "saveError": "No se pudo guardar. Intenta de nuevo."
         },
-        "editTourNamed": "Editar {name}"
+        "editTourNamed": "Editar {name}",
+        "pendingCount": "{count, plural, =1 {1 celda pendiente} other {# celdas pendientes}}",
+        "legendTime": "hora de recogida",
+        "legendNone": "ese tour no recoge ahí",
+        "legendPending": "sin cargar: el bot lo pasa a tu equipo",
+        "cellNone": "No recoge",
+        "cellPending": "Pendiente",
+        "cellTimeLabel": "Hora de recogida",
+        "cellOk": "Listo",
+        "cellInvalid": "Escribe una hora como 7:30 o 14:05.",
+        "cellNoneHint": "el bot lo dice",
+        "cellPendingHint": "pasa al equipo",
+        "cellInherit": "Igual que la zona"
       }
     },
     "topbar": {

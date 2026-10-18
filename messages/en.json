@@ -579,7 +579,6 @@
         "addZone": "+ Zone",
         "editTour": "Edit tour",
         "counts": "{zones, plural, =1 {1 zone} other {# zones}} · {places, plural, =1 {1 hotel} other {# hotels}}.",
-        "hint": "Each cell is the time the client is picked up for that departure. Empty = that tour doesn't pick up in the zone.",
         "zone": "Zone",
         "placesCount": "{count, plural, =1 {1 hotel} other {# hotels}}",
         "zoneName": "Zone name",
@@ -655,7 +654,19 @@
           "saving": "Saving…",
           "saveError": "Couldn't save. Try again."
         },
-        "editTourNamed": "Edit {name}"
+        "editTourNamed": "Edit {name}",
+        "pendingCount": "{count, plural, =1 {1 cell pending} other {# cells pending}}",
+        "legendTime": "pickup time",
+        "legendNone": "that tour doesn't pick up there",
+        "legendPending": "not filled in: the bot hands it to your team",
+        "cellNone": "No pickup",
+        "cellPending": "Pending",
+        "cellTimeLabel": "Pickup time",
+        "cellOk": "Done",
+        "cellInvalid": "Type a time like 7:30 or 14:05.",
+        "cellNoneHint": "the bot says so",
+        "cellPendingHint": "goes to your team",
+        "cellInherit": "Same as the zone"
       }
     },
     "topbar": {

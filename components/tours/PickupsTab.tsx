@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import type { PickupData, PickupTour, Tour } from "@/types";
 import type { PickupDraft } from "@/lib/pickups/parseSheet";
 import { importPickupsFile, usePickups } from "@/hooks/usePickups";
-import { fold, indexTimes, normalizeTime, setTime, timeKey } from "@/lib/pickups/grid";
+import { fold, indexTimes, NO_PICKUP, normalizeTime, setTime, timeKey } from "@/lib/pickups/grid";
 import SaveStatus, { type SaveState } from "./SaveStatus";
 import PickupsImport from "./PickupsImport";
 
@@ -150,6 +150,15 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
     [data.tours, tourName, filter]
   );
   const slotCount = columns.reduce((n, x) => n + x.departures.length, 0);
+  // Celdas de zona sin cargar: el bot pasa esas preguntas al equipo.
+  const pending = useMemo(
+    () =>
+      data.zones.reduce(
+        (n, zone) => n + columns.reduce((m, col) => m + col.departures.filter((_, i) => !times.has(timeKey(col.tour_id, i, zone.id))).length, 0),
+        0
+      ),
+    [data.zones, columns, times]
+  );
 
   const placesByZone = useMemo(() => {
     const map = new Map<string, PickupData["places"]>();
@@ -288,9 +297,17 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
         </div>
       </div>
 
-      <p className="text-sm text-slate-500">
-        <strong className="text-navy-900">{t("counts", { zones: data.zones.length, places: data.places.length })}</strong> {t("hint")}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-sm text-slate-500">
+        <p>
+          <strong className="text-navy-900">{t("counts", { zones: data.zones.length, places: data.places.length })}</strong>
+          {pending > 0 && <span className="ml-2 font-semibold text-amber-700">{t("pendingCount", { count: pending })}</span>}
+        </p>
+        <p className="flex flex-wrap items-center gap-3 text-xs">
+          <span className="inline-flex items-center gap-1.5"><span className="font-semibold tabular-nums text-navy-900">7:00</span>{t("legendTime")}</span>
+          <span className="inline-flex items-center gap-1.5"><span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500">{t("cellNone")}</span>{t("legendNone")}</span>
+          <span className="inline-flex items-center gap-1.5"><span className="rounded border border-dashed border-amber-400 bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700">{t("cellPending")}</span>{t("legendPending")}</span>
+        </p>
+      </div>
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full border-separate border-spacing-0 text-[13px]">
@@ -372,10 +389,10 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                     {columns.flatMap((col) =>
                       col.departures.map((label, i) => (
                         <td key={`${col.tour_id}-${i}`} className="border-b border-slate-100 px-1 py-1 text-center">
-                          <TimeCell
-                            value={times.get(timeKey(col.tour_id, i, zone.id)) ?? ""}
+                          <PickupCell
+                            value={times.get(timeKey(col.tour_id, i, zone.id)) ?? null}
                             label={`${zone.name} · ${tourName.get(col.tour_id)} · ${label}`}
-                            onCommit={(time) => edit((prev) => setTime(prev, col.tour_id, i, zone.id, null, time))}
+                            onChange={(time) => edit((prev) => setTime(prev, col.tour_id, i, zone.id, null, time))}
                           />
                         </td>
                       ))
@@ -409,12 +426,11 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                         {columns.flatMap((col) =>
                           col.departures.map((label, i) => (
                             <td key={`${col.tour_id}-${i}`} className="border-b border-slate-200 px-1 py-1 text-center">
-                              <TimeCell
-                                value={times.get(timeKey(col.tour_id, i, zone.id, place.id)) ?? ""}
-                                placeholder={times.get(timeKey(col.tour_id, i, zone.id)) ?? ""}
-                                highlight
+                              <PickupCell
+                                value={times.get(timeKey(col.tour_id, i, zone.id, place.id)) ?? null}
+                                inherited={times.get(timeKey(col.tour_id, i, zone.id)) ?? null}
                                 label={`${place.name} · ${tourName.get(col.tour_id)} · ${label}`}
-                                onCommit={(time) => edit((prev) => setTime(prev, col.tour_id, i, zone.id, place.id, time))}
+                                onChange={(time) => edit((prev) => setTime(prev, col.tour_id, i, zone.id, place.id, time))}
                               />
                             </td>
                           ))
@@ -540,55 +556,147 @@ function ZoneName({ name, autoFocus, onChange }: { name: string; autoFocus: bool
   );
 }
 
-// Una hora editable. Se guarda al salir del campo; si no es una hora valida
-// vuelve a la anterior.
-function TimeCell({ value, placeholder, highlight, label, onCommit }: {
-  value: string;
-  placeholder?: string;
-  highlight?: boolean;
+// Una celda de la tabla. Click abre un menu con los tres estados: una hora,
+// "No recoge" o "Pendiente" (sin cargar). En la fila de un hotel con horas
+// propias, la tercera opcion es "Igual que la zona" y se ve la hora heredada.
+function PickupCell({ value, inherited, label, onChange }: {
+  value: string | null;
+  inherited?: string | null;
   label: string;
-  onCommit: (time: string | null) => void;
+  onChange: (time: string | null) => void;
 }) {
-  const [draft, setDraft] = useState(value);
+  const t = useTranslations("dashboard.tours.pickups");
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const [draft, setDraft] = useState("");
   const [invalid, setInvalid] = useState(false);
-  // Si la hora cambia desde afuera (otra celda, un guardado), se muestra la nueva.
-  const [shown, setShown] = useState(value);
-  if (shown !== value) {
-    setShown(value);
-    setDraft(value);
-  }
+  const button = useRef<HTMLButtonElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
+  const isHotel = inherited !== undefined;
 
-  const commit = () => {
-    if (!draft.trim()) {
-      setInvalid(false);
-      if (value) onCommit(null);
-      return;
-    }
+  // Menu en posicion fija: la tabla tiene scroll horizontal y lo cortaria.
+  const show = () => {
+    const rect = button.current?.getBoundingClientRect();
+    if (!rect) return;
+    setPos({ top: rect.bottom + 4, left: Math.max(8, Math.min(rect.left + rect.width / 2 - 104, window.innerWidth - 216)) });
+    setDraft(value && value !== NO_PICKUP ? value : "");
+    setInvalid(false);
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: Event) => {
+      if (e.type === "mousedown" && (menu.current?.contains(e.target as Node) || button.current?.contains(e.target as Node))) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        button.current?.focus();
+      }
+    };
+    document.addEventListener("mousedown", close);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const pick = (next: string | null) => {
+    if (next !== value) onChange(next);
+    setOpen(false);
+    button.current?.focus();
+  };
+
+  const saveTime = () => {
+    if (!draft.trim()) return;
     const time = normalizeTime(draft);
     if (!time) {
       setInvalid(true);
-      setDraft(value);
       return;
     }
-    setInvalid(false);
-    setDraft(time);
-    if (time !== value) onCommit(time);
+    pick(time);
   };
 
+  // Lo que se ve en la celda.
+  const shown = value ?? (isHotel ? inherited : null);
+  let content: React.ReactNode;
+  if (shown === NO_PICKUP) {
+    content = <span className={`rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold ${value ? "text-slate-600" : "text-slate-400"}`}>{t("cellNone")}</span>;
+  } else if (shown) {
+    content = <span className={`tabular-nums ${value && isHotel ? "font-bold text-amber-900" : value ? "text-navy-900" : "text-slate-400"}`}>{shown}</span>;
+  } else {
+    content = <span className="rounded border border-dashed border-amber-400 bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700">{t("cellPending")}</span>;
+  }
+
+  const option = (active: boolean) =>
+    `flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm ${active ? "bg-slate-100 font-semibold text-navy-900" : "text-slate-700 hover:bg-slate-50"}`;
+
   return (
-    <input
-      value={draft}
-      onChange={(e) => setDraft(e.target.value)}
-      onBlur={commit}
-      onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-      placeholder={placeholder || "—"}
-      aria-label={label}
-      aria-invalid={invalid}
-      inputMode="numeric"
-      className={`h-8 w-16 rounded-md border bg-transparent text-center tabular-nums outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 ${
-        invalid ? "border-red-400" : "border-transparent hover:border-slate-200"
-      } ${highlight && draft ? "font-bold text-amber-900" : "text-navy-900"} placeholder:text-slate-300`}
-    />
+    <>
+      <button
+        ref={button}
+        onClick={() => (open ? setOpen(false) : show())}
+        aria-label={label}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        className="flex h-8 min-w-16 items-center justify-center rounded-md border border-transparent px-1 hover:border-slate-200 hover:bg-white focus-visible:border-blue-500 focus-visible:outline-none"
+      >
+        {content}
+      </button>
+      {open && pos && (
+        <div
+          ref={menu}
+          role="dialog"
+          aria-label={label}
+          style={{ top: pos.top, left: pos.left }}
+          className="fixed z-50 w-52 space-y-1 rounded-xl border border-slate-200 bg-white p-2 text-left shadow-xl"
+        >
+          <label className="block px-1 pb-1">
+            <span className="mb-1 block text-[11px] font-semibold text-slate-500">{t("cellTimeLabel")}</span>
+            <span className="flex gap-1.5">
+              <input
+                autoFocus
+                value={draft}
+                onChange={(e) => {
+                  setDraft(e.target.value);
+                  setInvalid(false);
+                }}
+                onKeyDown={(e) => e.key === "Enter" && saveTime()}
+                placeholder="7:30"
+                inputMode="numeric"
+                aria-invalid={invalid}
+                className={`h-9 min-w-0 flex-1 rounded-lg border px-2 text-sm tabular-nums outline-none focus:ring-2 focus:ring-blue-500/20 ${invalid ? "border-red-400" : "border-slate-200 focus:border-blue-500"}`}
+              />
+              <button onClick={saveTime} className="h-9 rounded-lg bg-navy-900 px-3 text-xs font-semibold text-white hover:bg-navy-800">{t("cellOk")}</button>
+            </span>
+            {invalid && <span className="mt-1 block text-[11px] text-red-600">{t("cellInvalid")}</span>}
+          </label>
+          <div className="border-t border-slate-100 pt-1">
+            <button onClick={() => pick(NO_PICKUP)} className={option(value === NO_PICKUP)}>
+              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500">{t("cellNone")}</span>
+              <span className="text-xs text-slate-500">{t("cellNoneHint")}</span>
+            </button>
+            <button onClick={() => pick(null)} className={option(value === null)}>
+              {isHotel ? (
+                <span className="text-xs">{t("cellInherit")}{inherited ? ` (${inherited === NO_PICKUP ? t("cellNone") : inherited})` : ""}</span>
+              ) : (
+                <>
+                  <span className="rounded border border-dashed border-amber-400 bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700">{t("cellPending")}</span>
+                  <span className="text-xs text-slate-500">{t("cellPendingHint")}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

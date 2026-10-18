@@ -1,5 +1,8 @@
 import type { PickupData, PickupTime } from '@/types'
 
+// Valor de una celda que dice explicitamente "no recoge". Sin valor = sin cargar.
+export const NO_PICKUP = 'none'
+
 // Clave de una hora en la tabla: tour + salida + zona (+ hotel si es excepcion).
 export function timeKey(tourId: string, departure: number, zoneId: string, placeId: string | null = null) {
   return `${tourId}|${departure}|${zoneId}|${placeId ?? ''}`
@@ -20,7 +23,7 @@ export function normalizeTime(raw: string): string | null {
   return `${h}:${String(m).padStart(2, '0')}`
 }
 
-// Pone o borra una hora (vacio = ese tour no recoge ahi).
+// Pone una hora o NO_PICKUP; null la borra (queda sin cargar).
 export function setTime(data: PickupData, tourId: string, departure: number, zoneId: string, placeId: string | null, time: string | null): PickupData {
   const key = timeKey(tourId, departure, zoneId, placeId)
   const times = data.times.filter((x) => timeKey(x.tour_id, x.departure, x.zone_id, x.place_id) !== key)
