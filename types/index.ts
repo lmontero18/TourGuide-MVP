@@ -103,7 +103,7 @@ export interface PickupTime {
   departure: number      // indice en PickupTour.departures
   zone_id: string
   place_id: string | null
-  pickup_time: string    // H:MM
+  pickup_time: string    // H:MM, o 'none' = no recoge (sin fila = sin cargar)
 }
 
 export interface PickupData {
