@@ -233,14 +233,6 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
       times: prev.times.filter((x) => x.tour_id !== next.tour_id || x.departure < next.departures.length),
     }));
 
-  // "+ salida" en el encabezado: Mañana → Tarde → Noche → Salida 4…
-  const addDeparture = (col: PickupTour) => {
-    const defaults = [t("slots.morning"), t("slots.afternoon"), t("slots.night")];
-    const n = col.departures.length;
-    const label = defaults.find((d, i) => i >= n && !col.departures.includes(d)) ?? `${t("slots.departure")} ${n + 1}`;
-    updateTour({ ...col, departures: [...col.departures, label] });
-  };
-
   const chip = (active: boolean) =>
     `h-8 rounded-full border px-3 text-xs font-semibold transition-colors ${
       active ? "border-navy-900 bg-navy-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
@@ -338,16 +330,6 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                 col.departures.map((label, i) => (
                   <th key={`${col.tour_id}-${i}`} scope="col" className="border-b border-slate-200 px-2 pb-2.5 pt-0.5 text-center text-[11px] font-medium text-slate-500">
                     {label}
-                    {i === col.departures.length - 1 && col.departures.length < 8 && (
-                      <button
-                        onClick={() => addDeparture(col)}
-                        aria-label={t("addDepartureTo", { name: tourName.get(col.tour_id) ?? "" })}
-                        title={t("addDeparture")}
-                        className="ml-1.5 rounded-full border border-dashed border-slate-300 px-1.5 text-[10px] font-semibold text-slate-500 hover:border-blue-400 hover:text-blue-600"
-                      >
-                        {t("addDepartureShort")}
-                      </button>
-                    )}
                   </th>
                 ))
               )}
