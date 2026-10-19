@@ -12,6 +12,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'chat-day-dividers',
+    date: '2026-10-19T15:00:00Z',
+    href: '/conversations',
+    es: {
+      title: 'Ves en qué día llegó cada mensaje',
+      body: 'En las conversaciones largas, el chat separa los mensajes por día: "Hoy", "Ayer" o la fecha, como en WhatsApp.',
+    },
+    en: {
+      title: 'See which day each message arrived',
+      body: 'In long conversations, the chat splits messages by day: "Today", "Yesterday" or the date, like WhatsApp.',
+    },
+  },
+  {
     id: 'team-general-alerts',
     date: '2026-10-15T02:10:00Z',
     href: '/settings/notifications',
