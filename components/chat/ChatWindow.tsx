@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useEffect, useState, useMemo } from "react";
+import { Fragment, useRef, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -53,6 +53,29 @@ function formatTime(iso: string, locale: string) {
   return new Date(iso).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
 }
 
+// Dia local del mensaje (zona horaria de quien mira), para los separadores.
+function dayKey(ms: number) {
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+// "Hoy", "Ayer", "lunes 13 de octubre" (con año si no es el actual).
+function dayLabel(ms: number, locale: string, today: string, yesterday: string) {
+  const now = new Date();
+  if (dayKey(ms) === dayKey(now.getTime())) return today;
+  const y = new Date(now);
+  y.setDate(now.getDate() - 1);
+  if (dayKey(ms) === dayKey(y.getTime())) return yesterday;
+  const d = new Date(ms);
+  const label = d.toLocaleDateString(locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    ...(d.getFullYear() !== now.getFullYear() ? { year: "numeric" } : {}),
+  });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 export default function ChatWindow({
   conversationId,
   contactName,
@@ -67,6 +90,7 @@ export default function ChatWindow({
   const { user, featureFlags } = useAuth();
   const chatFile = useSendChatFile(conversationId);
   const canAttach = hasFeature(featureFlags, "attachments");
+  const showDays = hasFeature(featureFlags, "dayDividers");
   const { messages, loading } = useMessages(conversationId);
   const { botActive, assignee, status, setState: setControl, refresh: refreshControl } = useConversationControl(
     conversationId,
@@ -475,9 +499,18 @@ export default function ChatWindow({
         ) : combined.length === 0 ? (
           <div className="flex h-full items-center justify-center text-xs text-slate-400">{t("noMessages")}</div>
         ) : (
-          combined.map((msg) => (
+          combined.map((msg, i) => (
+            <Fragment key={msg.key}>
+            {showDays && (i === 0 || dayKey(combined[i - 1].sortAt) !== dayKey(msg.sortAt)) && (
+              <div className="flex items-center gap-3 py-1" role="separator" aria-label={dayLabel(msg.sortAt, locale, t("today"), t("yesterday"))}>
+                <span className="h-px flex-1 bg-slate-200" />
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-500">
+                  {dayLabel(msg.sortAt, locale, t("today"), t("yesterday"))}
+                </span>
+                <span className="h-px flex-1 bg-slate-200" />
+              </div>
+            )}
             <MessageBubble
-              key={msg.key}
               content={msg.content}
               role={msg.role}
               createdAt={msg.createdAt}
@@ -492,6 +525,7 @@ export default function ChatWindow({
               senderName={msg.senderName}
               templateName={msg.templateName}
             />
+            </Fragment>
           ))
         )}
       </div>

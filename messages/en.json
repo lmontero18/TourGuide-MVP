@@ -831,7 +831,9 @@
       "sendingFile": "Sending file...",
       "openDocument": "Open PDF",
       "dropFiles": "Drop your photos or PDFs here",
-      "fileFailed": "Not sent"
+      "fileFailed": "Not sent",
+      "today": "Today",
+      "yesterday": "Yesterday"
     },
     "metrics": {
       "title": "Metrics",
