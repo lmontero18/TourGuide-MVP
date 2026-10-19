@@ -90,7 +90,6 @@ export default function ChatWindow({
   const { user, featureFlags } = useAuth();
   const chatFile = useSendChatFile(conversationId);
   const canAttach = hasFeature(featureFlags, "attachments");
-  const showDays = hasFeature(featureFlags, "dayDividers");
   const { messages, loading } = useMessages(conversationId);
   const { botActive, assignee, status, setState: setControl, refresh: refreshControl } = useConversationControl(
     conversationId,
@@ -501,7 +500,7 @@ export default function ChatWindow({
         ) : (
           combined.map((msg, i) => (
             <Fragment key={msg.key}>
-            {showDays && (i === 0 || dayKey(combined[i - 1].sortAt) !== dayKey(msg.sortAt)) && (
+            {(i === 0 || dayKey(combined[i - 1].sortAt) !== dayKey(msg.sortAt)) && (
               <div className="flex items-center gap-3 py-1" role="separator" aria-label={dayLabel(msg.sortAt, locale, t("today"), t("yesterday"))}>
                 <span className="h-px flex-1 bg-slate-200" />
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-500">
