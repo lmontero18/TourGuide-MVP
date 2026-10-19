@@ -1372,7 +1372,15 @@
         "empty": "No hay leads en ese período.",
         "done": "{count, plural, one {# lead exportado} other {# leads exportados}}",
         "error": "No pudimos exportar los leads."
-      }
+      },
+      "saleAsk": "¿Cuánto se vendió?",
+      "saleFromQuote": "Lo sacamos de la conversación: «{quote}». Revísalo antes de guardar.",
+      "saleSave": "Guardar",
+      "saleSkip": "Ahora no",
+      "saleHint": "Con el monto, la tarjeta de Ingresos muestra lo que vendiste con Tourfy.",
+      "missingAmount": "{count, plural, =1 {1 venta sin monto} other {# ventas sin monto}} este mes.",
+      "missingAmountHint": "Complétalas para que Ingresos muestre lo que vendiste.",
+      "missingAmountCta": "Completar"
     },
     "common": {
       "loading": "Cargando…"
