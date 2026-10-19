@@ -22,6 +22,7 @@ import { DEFAULT_TIMEZONE } from '@/lib/bot/businessHours'
 import type { BotConfig } from '@/types'
 import { orgHasFeature } from '@/lib/features'
 import { isPlaceholder, reactionContent } from '@/lib/whatsapp/placeholders'
+import { BOT_LIMITS } from '@/lib/bot/limits'
 
 function getServiceClient() {
   return createClient(
@@ -679,6 +680,8 @@ async function processWebhook(body: WebhookPayload) {
           // lee el modelo y el prompt entero esta en español (gpt-5-mini mezclaba).
           const systemPrompt =
             `${org?.prompt ?? ''}\n\n` +
+            // Va siempre, para todas las agencias: ver lib/bot/limits.ts.
+            `${BOT_LIMITS}\n\n` +
             `Fecha y hora actual (zona horaria de la agencia): ${nowFormatted}.\n` +
             `Recordatorio: responde todo el mensaje en el idioma del ultimo mensaje del cliente, sin mezclar idiomas.` +
             // Medios (CODE-177): el bot recibe una nota entre corchetes. Que
