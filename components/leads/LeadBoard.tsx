@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import type { LeadWithContact } from "@/hooks/useLeads";
 import type { LeadStatus } from "@/types";
 import { STAGES, STAGE_DOT, TEMPERATURE, formatMoney, timeAgo } from "./leadMeta";
+import { cleanText } from "@/lib/leads/emptyValue";
 
 interface LeadBoardProps {
   leads: LeadWithContact[];
@@ -44,7 +45,7 @@ function LeadCard({ lead, selected, onSelect, history }: { lead: LeadWithContact
           </span>
         )}
       </span>
-      <span className="mt-0.5 block truncate text-xs text-slate-600">{lead.tour_interest || t("noTourYet")}</span>
+      <span className="mt-0.5 block truncate text-xs text-slate-600">{cleanText(lead.tour_interest) || t("noTourYet")}</span>
       {detail && <span className="block truncate text-[11px] text-slate-400">{detail}</span>}
       <span className="mt-2 flex items-center justify-between gap-2 text-[11px] text-slate-400">
         {temp ? <span className={`rounded-full px-1.5 py-px font-bold ${temp.className}`}>{t(`temperature.${temp.key}`)}</span> : <span />}

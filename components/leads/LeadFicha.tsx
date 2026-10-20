@@ -8,6 +8,7 @@ import { useContactLeads, type LeadPatch, type LeadWithContact } from "@/hooks/u
 import type { LeadField, LeadStatus } from "@/types";
 import { FICHA_FIELDS, STAGES, STAGE_DOT, TEMPERATURE, formatMoney, timeAgo } from "./leadMeta";
 import { suggestAmount } from "@/lib/leads/quoteAmount";
+import { cleanText } from "@/lib/leads/emptyValue";
 
 interface LeadFichaProps {
   lead: LeadWithContact;
@@ -20,10 +21,10 @@ interface LeadFichaProps {
 const CURRENCIES = ["USD", "NIO", "CRC", "MXN", "PEN", "COP", "GTQ", "EUR"];
 
 function fieldValue(lead: LeadWithContact, key: LeadField): string {
-  if (key === "tour_interest") return lead.tour_interest ?? "";
-  if (key === "summary") return lead.summary ?? "";
-  if (key === "next_step") return lead.next_step ?? "";
-  return lead.metadata?.[key] ?? "";
+  if (key === "tour_interest") return cleanText(lead.tour_interest) ?? "";
+  if (key === "summary") return cleanText(lead.summary) ?? "";
+  if (key === "next_step") return cleanText(lead.next_step) ?? "";
+  return cleanText(lead.metadata?.[key]) ?? "";
 }
 
 // Campo editable en el lugar: guarda al salir si cambio. Al guardarlo queda
