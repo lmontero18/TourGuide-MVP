@@ -23,6 +23,7 @@ import type { BotConfig } from '@/types'
 import { hasFeature, orgHasFeature, type OrgFeatureFlags } from '@/lib/features'
 import { isPlaceholder, reactionContent } from '@/lib/whatsapp/placeholders'
 import { BOT_LIMITS, BOT_PICKUPS } from '@/lib/bot/limits'
+import { BOT_STYLE } from '@/lib/bot/style'
 
 function getServiceClient() {
   return createClient(
@@ -683,6 +684,8 @@ async function processWebhook(body: WebhookPayload) {
             // Va siempre, para todas las agencias: ver lib/bot/limits.ts.
             `${BOT_LIMITS}\n\n` +
             (hasFeature(org as OrgFeatureFlags | null, 'pickups') ? `${BOT_PICKUPS}\n\n` : '') +
+            // Al final a proposito: el modelo copiaba el formato de ficha de los datos.
+            `${BOT_STYLE}\n\n` +
             `Fecha y hora actual (zona horaria de la agencia): ${nowFormatted}.\n` +
             `Recordatorio: responde todo el mensaje en el idioma del ultimo mensaje del cliente, sin mezclar idiomas.` +
             // Medios (CODE-177): el bot recibe una nota entre corchetes. Que
