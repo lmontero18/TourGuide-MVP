@@ -7,8 +7,6 @@ import { toast } from "sonner";
 import { useContactLeads, type LeadPatch, type LeadWithContact } from "@/hooks/useLeads";
 import type { LeadField, LeadStatus } from "@/types";
 import { FICHA_FIELDS, STAGES, STAGE_DOT, TEMPERATURE, formatMoney, timeAgo } from "./leadMeta";
-import { useAuth } from "@/hooks/useAuth";
-import { hasFeature } from "@/lib/features";
 import { suggestAmount } from "@/lib/leads/quoteAmount";
 
 interface LeadFichaProps {
@@ -100,16 +98,14 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
   const closed = lead.status === "converted" || lead.status === "lost";
   const [amount, setAmount] = useState(lead.amount != null ? String(lead.amount) : "");
   const temp = lead.intent ? TEMPERATURE[lead.intent] : null;
-  // Monto de la venta (flag saleAmount): al marcar "Vendido" sin monto se pide
-  // con un cuadro propio, ya llenado con lo que se cotizo en la conversacion.
-  const { featureFlags } = useAuth();
-  const askAmount = hasFeature(featureFlags, "saleAmount");
+  // Monto de la venta: al marcar "Vendido" sin monto se pide con un cuadro
+  // propio, ya llenado con lo que se cotizo en la conversacion.
   const suggestion = suggestAmount(lead.metadata?.quote, lead.metadata?.group_size);
   const [justWon, setJustWon] = useState(false);
   const [skipped, setSkipped] = useState(false);
   const [draftAmount, setDraftAmount] = useState(suggestion ? String(suggestion.amount) : "");
   const [draftCurrency, setDraftCurrency] = useState(suggestion?.currency ?? lead.currency ?? "USD");
-  const showAsk = askAmount && lead.status === "converted" && lead.amount == null && !skipped;
+  const showAsk = lead.status === "converted" && lead.amount == null && !skipped;
   const confirmAmount = () => {
     const n = Number(draftAmount.replace(",", "."));
     if (!draftAmount.trim() || !Number.isFinite(n) || n < 0) return toast.error(t("amountInvalid"));

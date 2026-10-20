@@ -8,7 +8,6 @@ import LeadBoard from "@/components/leads/LeadBoard";
 import LeadDrawer from "@/components/leads/LeadDrawer";
 import { formatMoney } from "@/components/leads/leadMeta";
 import { useAuth } from "@/hooks/useAuth";
-import { hasFeature } from "@/lib/features";
 import { useLeads } from "@/hooks/useLeads";
 import type { LeadStatus } from "@/types";
 import { LeadBoardSkeleton } from "@/components/skeletons/LeadsSkeleton";
@@ -17,8 +16,7 @@ import LeadsExport from "@/components/leads/LeadsExport";
 export default function LeadsPage() {
   const t = useTranslations("dashboard.leads");
   const locale = useLocale();
-  const { orgId, featureFlags } = useAuth();
-  const askAmount = hasFeature(featureFlags, "saleAmount");
+  const { orgId } = useAuth();
   const { leads, error, update, refresh } = useLeads(orgId);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -42,7 +40,7 @@ export default function LeadsPage() {
     const revenue = new Map<string, number>();
     for (const l of won) if (l.amount != null) revenue.set(l.currency ?? "USD", (revenue.get(l.currency ?? "USD") ?? 0) + l.amount);
     return {
-      // Ventas del mes sin monto: no suman en Ingresos (flag saleAmount).
+      // Ventas del mes sin monto: no suman en Ingresos.
       missingAmount: won.filter((l) => l.amount == null),
       created: all.filter((l) => inMonth(l.created_at)).length,
       ready: all.filter((l) => l.status === "qualified").length,
@@ -99,7 +97,7 @@ export default function LeadsPage() {
             ))}
           </div>
 
-          {askAmount && kpis.missingAmount.length > 0 && (
+          {kpis.missingAmount.length > 0 && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
               <p className="text-sm text-green-900">
                 <strong>{t("missingAmount", { count: kpis.missingAmount.length })}</strong> {t("missingAmountHint")}

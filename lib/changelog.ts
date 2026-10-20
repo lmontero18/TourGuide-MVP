@@ -12,6 +12,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'lead-sale-amount',
+    date: '2026-10-19T22:30:00Z',
+    href: '/leads',
+    es: {
+      title: 'Ve cuánto vendiste con Tourfy',
+      body: 'Al marcar una oportunidad como Reservado te preguntamos el monto, ya llenado con lo que se cotizó en el chat. Así la tarjeta de Ingresos muestra lo que vendiste este mes.',
+    },
+    en: {
+      title: 'See how much you sold with Tourfy',
+      body: 'When you mark an opportunity as Booked we ask for the amount, prefilled with what was quoted in the chat. That way the Revenue card shows what you sold this month.',
+    },
+  },
+  {
     id: 'chat-day-dividers',
     date: '2026-10-19T15:00:00Z',
     href: '/conversations',
