@@ -24,6 +24,7 @@ import { hasFeature, orgHasFeature, type OrgFeatureFlags } from '@/lib/features'
 import { isPlaceholder, reactionContent } from '@/lib/whatsapp/placeholders'
 import { BOT_LIMITS, BOT_PICKUPS } from '@/lib/bot/limits'
 import { BOT_STYLE } from '@/lib/bot/style'
+import { leadContext, type LeadCard } from '@/lib/bot/leadContext'
 
 function getServiceClient() {
   return createClient(
@@ -627,11 +628,24 @@ async function processWebhook(body: WebhookPayload) {
         }
 
         if (conversation.bot_active && content && !placeholder && !brake) {
-          const { data: org } = await supabase
-            .from('organizations')
-            .select('prompt, bot_config, is_beta, features')
-            .eq('id', waAccount.org_id)
-            .single()
+          const [{ data: org }, { data: lead }] = await Promise.all([
+            supabase
+              .from('organizations')
+              .select('prompt, bot_config, is_beta, features')
+              .eq('id', waAccount.org_id)
+              .single(),
+            // Ficha del lead abierto: ver lib/bot/leadContext.ts. Si falla, el
+            // bot responde igual sin ella.
+            supabase
+              .from('leads')
+              .select('tour_interest, metadata')
+              .eq('conversation_id', conversation.id)
+              .not('status', 'in', '(converted,lost)')
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+          ])
+          const leadNote = leadContext(lead as LeadCard | null)
 
           const { getMessagingToken } = await import('@/lib/whatsapp/token')
           const tok = getMessagingToken()
@@ -684,6 +698,7 @@ async function processWebhook(body: WebhookPayload) {
             // Va siempre, para todas las agencias: ver lib/bot/limits.ts.
             `${BOT_LIMITS}\n\n` +
             (hasFeature(org as OrgFeatureFlags | null, 'pickups') ? `${BOT_PICKUPS}\n\n` : '') +
+            (leadNote ? `${leadNote}\n\n` : '') +
             // Al final a proposito: el modelo copiaba el formato de ficha de los datos.
             `${BOT_STYLE}\n\n` +
             `Fecha y hora actual (zona horaria de la agencia): ${nowFormatted}.\n` +
