@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useContactLeads, type LeadPatch, type LeadWithContact } from "@/hooks/useLeads";
 import type { LeadField, LeadStatus } from "@/types";
 import { FICHA_FIELDS, STAGES, STAGE_DOT, TEMPERATURE, formatMoney, timeAgo } from "./leadMeta";
+import { suggestAmount } from "@/lib/leads/quoteAmount";
 
 interface LeadFichaProps {
   lead: LeadWithContact;
@@ -97,6 +98,20 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
   const closed = lead.status === "converted" || lead.status === "lost";
   const [amount, setAmount] = useState(lead.amount != null ? String(lead.amount) : "");
   const temp = lead.intent ? TEMPERATURE[lead.intent] : null;
+  // Monto de la venta: al marcar "Vendido" sin monto se pide con un cuadro
+  // propio, ya llenado con lo que se cotizo en la conversacion.
+  const suggestion = suggestAmount(lead.metadata?.quote, lead.metadata?.group_size);
+  const [justWon, setJustWon] = useState(false);
+  const [skipped, setSkipped] = useState(false);
+  const [draftAmount, setDraftAmount] = useState(suggestion ? String(suggestion.amount) : "");
+  const [draftCurrency, setDraftCurrency] = useState(suggestion?.currency ?? lead.currency ?? "USD");
+  const showAsk = lead.status === "converted" && lead.amount == null && !skipped;
+  const confirmAmount = () => {
+    const n = Number(draftAmount.replace(",", "."));
+    if (!draftAmount.trim() || !Number.isFinite(n) || n < 0) return toast.error(t("amountInvalid"));
+    setAmount(String(n));
+    void run({ amount: n, currency: draftCurrency });
+  };
 
   const run = async (patch: LeadPatch) => {
     const res = await onUpdate(lead.id, patch);
@@ -104,7 +119,9 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
   };
   const saveField = (field: LeadField, value: string | null) => void run({ fields: { [field]: value } });
   const setStage = (status: LeadStatus) => {
-    if (status !== lead.status) void run({ status });
+    if (status === lead.status) return;
+    if (status === "converted") setJustWon(true);
+    void run({ status });
   };
   const saveAmount = () => {
     const n = amount.trim() === "" ? null : Number(amount.replace(",", "."));
@@ -151,7 +168,43 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
         </div>
       </div>
 
-      {lead.status === "converted" && (
+      {showAsk && (
+        <div className="rounded-xl border-2 border-green-300 bg-green-50 p-4">
+          <label htmlFor="lead-sale-amount" className="text-sm font-bold text-green-900">{t("saleAsk")}</label>
+          {suggestion && lead.metadata?.quote && (
+            <p className="mt-0.5 text-xs text-green-800">{t("saleFromQuote", { quote: lead.metadata.quote })}</p>
+          )}
+          <div className="mt-2 flex flex-wrap gap-2">
+            <input
+              id="lead-sale-amount"
+              inputMode="decimal"
+              autoFocus={focusAmount || justWon}
+              value={draftAmount}
+              onChange={(e) => setDraftAmount(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && confirmAmount()}
+              placeholder="150"
+              className="w-32 rounded-lg border border-green-300 bg-white px-3 py-2 text-sm font-bold tabular-nums text-navy-900 outline-none focus:border-green-500"
+            />
+            <select
+              aria-label={t("currency")}
+              value={draftCurrency}
+              onChange={(e) => setDraftCurrency(e.target.value)}
+              className="rounded-lg border border-green-300 bg-white px-2 py-2 text-sm text-navy-900"
+            >
+              {[...new Set([draftCurrency, ...CURRENCIES])].map((c) => <option key={c}>{c}</option>)}
+            </select>
+            <button onClick={confirmAmount} className="rounded-lg bg-green-700 px-4 py-2 text-sm font-bold text-white hover:bg-green-800">
+              {t("saleSave")}
+            </button>
+            <button onClick={() => setSkipped(true)} className="px-2 text-xs font-semibold text-green-800 hover:text-green-900">
+              {t("saleSkip")}
+            </button>
+          </div>
+          <p className="mt-2 text-[11px] text-green-700">{t("saleHint")}</p>
+        </div>
+      )}
+
+      {lead.status === "converted" && !showAsk && (
         <div className="rounded-xl border border-green-200 bg-green-50/60 p-3">
           <label htmlFor="lead-amount" className="text-xs font-bold text-green-800">{t("amount")}</label>
           <div className="mt-1.5 flex gap-2">

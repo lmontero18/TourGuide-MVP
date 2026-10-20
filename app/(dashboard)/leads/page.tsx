@@ -40,6 +40,8 @@ export default function LeadsPage() {
     const revenue = new Map<string, number>();
     for (const l of won) if (l.amount != null) revenue.set(l.currency ?? "USD", (revenue.get(l.currency ?? "USD") ?? 0) + l.amount);
     return {
+      // Ventas del mes sin monto: no suman en Ingresos.
+      missingAmount: won.filter((l) => l.amount == null),
       created: all.filter((l) => inMonth(l.created_at)).length,
       ready: all.filter((l) => l.status === "qualified").length,
       won: won.length,
@@ -94,6 +96,23 @@ export default function LeadsPage() {
               </div>
             ))}
           </div>
+
+          {kpis.missingAmount.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
+              <p className="text-sm text-green-900">
+                <strong>{t("missingAmount", { count: kpis.missingAmount.length })}</strong> {t("missingAmountHint")}
+              </p>
+              <button
+                onClick={() => {
+                  setFocusAmount(true);
+                  setSelectedId(kpis.missingAmount[0].id);
+                }}
+                className="rounded-lg bg-green-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-green-800"
+              >
+                {t("missingAmountCta")}
+              </button>
+            </div>
+          )}
 
           <label className="flex h-10 max-w-md items-center gap-2 rounded-xl border border-slate-200 bg-white px-3">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400" aria-hidden="true">

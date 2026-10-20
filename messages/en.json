@@ -1372,7 +1372,15 @@
         "empty": "No leads in that period.",
         "done": "{count, plural, one {# lead exported} other {# leads exported}}",
         "error": "We couldn't export the leads."
-      }
+      },
+      "saleAsk": "How much was the sale?",
+      "saleFromQuote": "Taken from the conversation: “{quote}”. Check it before saving.",
+      "saleSave": "Save",
+      "saleSkip": "Not now",
+      "saleHint": "With the amount, the Revenue card shows what you sold with Tourfy.",
+      "missingAmount": "{count, plural, =1 {1 sale without an amount} other {# sales without an amount}} this month.",
+      "missingAmountHint": "Fill them in so Revenue shows what you sold.",
+      "missingAmountCta": "Fill in"
     },
     "common": {
       "loading": "Loading…"
