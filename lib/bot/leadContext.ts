@@ -1,4 +1,5 @@
 import type { LeadDetails } from '@/types'
+import { cleanText } from '@/lib/leads/emptyValue'
 
 // Ficha del lead (la que arma la IA en lib/leads/extract.ts) pegada al system
 // prompt en cada mensaje. La memoria del bot en N8N guarda pocos mensajes: en
@@ -21,10 +22,10 @@ const FIELDS: [keyof LeadDetails, string][] = [
 export function leadContext(lead: LeadCard | null): string {
   if (!lead) return ''
   const lines = [
-    lead.tour_interest ? `- Tour: ${lead.tour_interest}` : null,
+    cleanText(lead.tour_interest) ? `- Tour: ${cleanText(lead.tour_interest)}` : null,
     ...FIELDS.map(([key, label]) => {
-      const value = lead.metadata?.[key]
-      return typeof value === 'string' && value.trim() ? `- ${label}: ${value.trim().slice(0, 200)}` : null
+      const value = cleanText(lead.metadata?.[key])
+      return value ? `- ${label}: ${value.slice(0, 200)}` : null
     }),
   ].filter(Boolean)
   if (lines.length === 0) return ''

@@ -1,6 +1,7 @@
 import 'server-only'
 import OpenAI from 'openai'
 import type { LeadDetails, LeadIntent } from '@/types'
+import { cleanText } from './emptyValue'
 
 // Extractor de la ficha del lead. gpt-4o-mini: sacar campos a un JSON es una
 // tarea simple y cuesta ~$0.0005 por llamada (ver doc de costos de IA).
@@ -69,8 +70,7 @@ const ROLE_LABEL: Record<TranscriptLine['role'], string> = {
   agent: 'Agente',
 }
 
-const clip = (v: unknown, max: number) =>
-  typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null
+const clip = (v: unknown, max: number) => cleanText(v)?.slice(0, max) ?? null
 
 export async function extractLead(input: {
   transcript: TranscriptLine[]
