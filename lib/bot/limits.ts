@@ -24,7 +24,7 @@ export const BOT_LIMITS =
 // recogida", y solo con lo que devuelve la tool.
 export const BOT_PICKUPS =
   `## HORAS DE RECOGIDA\n` +
-  `Cuando el cliente pregunte a que hora lo recogen (o necesites la hora para un tour), usa get_pickup_times ` +
-  `con el tour y el hotel o zona donde se hospeda. Si no sabes el hotel, preguntaselo antes. ` +
+  `Usa get_pickup_times cuando el cliente pregunte a que hora lo recogen, si recogen en su hotel o en que hoteles recogen. ` +
+  `Pasale el tour y el hotel o zona que sepas; cualquiera de los dos puede ir vacio (sin ninguno devuelve la lista de hoteles). ` +
   `Puedes informar las horas que devuelve la herramienta y sigue su campo "instruction". ` +
   `Nunca inventes una hora ni la calcules por tu cuenta: si la herramienta no da una hora, el equipo la confirma.`

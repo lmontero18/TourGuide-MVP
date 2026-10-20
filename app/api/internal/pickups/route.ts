@@ -20,12 +20,13 @@ const log = createLogger({ route: 'internal/pickups' })
 
 const bodySchema = z.object({
   conversation_id: z.string().uuid(),
-  tour: z.string().trim().min(1).max(200),
+  tour: z.string().trim().max(200).nullish(),
   hotel: z.string().trim().max(200).nullish(),
 })
 
 // Tool `get_pickup_times` del bot (N8N): hora de recogida de un tour en el
-// hotel del cliente, segun la tabla de Recogidas de la agencia. La org sale de
+// hotel del cliente, segun la tabla de Recogidas de la agencia. Sin tour ni
+// hotel devuelve en que hoteles se recoge. La org sale de
 // la conversacion, no del body: el bot no puede leer recogidas de otra agencia.
 // Responde 200 con `status` + `instruction` aunque no encuentre nada, para que
 // el modelo sepa que decir; 4xx/5xx solo para errores reales.
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
         times: (times?.data ?? []) as PickupTime[],
       },
       (Array.isArray(org?.data?.tours) ? org.data.tours : []) as unknown as Tour[],
-      parsed.tour,
+      parsed.tour ?? null,
       parsed.hotel ?? null
     )
 
