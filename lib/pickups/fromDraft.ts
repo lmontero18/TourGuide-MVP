@@ -1,20 +1,6 @@
 import type { PickupData, Tour } from '@/types'
 import type { DraftColumn, PickupDraft, SlotKind } from './parseSheet'
-import { fold } from './grid'
-
-const STOPWORDS = new Set(['tour', 'tours', 'de', 'del', 'la', 'las', 'el', 'los', 'y', 'en', 'a', 'al', 'desde', 'the', 'and', 'to', 'of', 'from', 'con', 'with'])
-
-function tokens(text: string) {
-  return fold(text)
-    .split(/[^\p{L}\p{N}]+/u)
-    .filter((w) => w.length >= 3 && !STOPWORDS.has(w))
-}
-
-// "perezosos" ~ "perezoso": uno empieza con el otro (palabras de 5+ letras,
-// para que "cano" no calce con "canopy").
-function near(a: string, b: string) {
-  return a === b || (Math.min(a.length, b.length) >= 5 && (a.startsWith(b) || b.startsWith(a)))
-}
+import { near, tokens } from './grid'
 
 export type MatchQuality = 'exact' | 'partial'
 

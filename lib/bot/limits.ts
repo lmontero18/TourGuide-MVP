@@ -17,3 +17,14 @@ export const BOT_LIMITS =
   `Cuando el cliente quiera reservar, pagar o confirmar: resume en un mensaje corto lo acordado (tour, fecha, ` +
   `cantidad de personas, hotel si lo dijo y total si lo sabes), dile que alguien del equipo le confirma los cupos y le ` +
   `envia los datos de pago, y usa transfer_to_human.`
+
+// Recogidas (flag `pickups`): la agencia cargo sus horas en Tours › Recogidas y
+// el bot las consulta con la tool `get_pickup_times` (N8N → /api/internal/pickups).
+// Va despues de BOT_LIMITS: es la excepcion a "no puedes confirmar horarios de
+// recogida", y solo con lo que devuelve la tool.
+export const BOT_PICKUPS =
+  `## HORAS DE RECOGIDA\n` +
+  `Cuando el cliente pregunte a que hora lo recogen (o necesites la hora para un tour), usa get_pickup_times ` +
+  `con el tour y el hotel o zona donde se hospeda. Si no sabes el hotel, preguntaselo antes. ` +
+  `Puedes informar las horas que devuelve la herramienta y sigue su campo "instruction". ` +
+  `Nunca inventes una hora ni la calcules por tu cuenta: si la herramienta no da una hora, el equipo la confirma.`
