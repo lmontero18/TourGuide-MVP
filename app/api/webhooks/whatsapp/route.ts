@@ -22,7 +22,8 @@ import { DEFAULT_TIMEZONE } from '@/lib/bot/businessHours'
 import type { BotConfig } from '@/types'
 import { hasFeature, orgHasFeature, type OrgFeatureFlags } from '@/lib/features'
 import { isPlaceholder, reactionContent } from '@/lib/whatsapp/placeholders'
-import { BOT_LIMITS, BOT_PICKUPS } from '@/lib/bot/limits'
+import { BOT_HANDOFF, BOT_LIMITS, BOT_PICKUPS } from '@/lib/bot/limits'
+import { languageReminder } from '@/lib/bot/language'
 import { BOT_STYLE } from '@/lib/bot/style'
 import { leadContext, type LeadCard } from '@/lib/bot/leadContext'
 
@@ -693,16 +694,18 @@ async function processWebhook(body: WebhookPayload) {
           }
           // El recordatorio de idioma va al final a proposito: es lo ultimo que
           // lee el modelo y el prompt entero esta en español (gpt-5-mini mezclaba).
+          // Nombra el idioma detectado: ver lib/bot/language.ts.
           const systemPrompt =
             `${org?.prompt ?? ''}\n\n` +
             // Va siempre, para todas las agencias: ver lib/bot/limits.ts.
             `${BOT_LIMITS}\n\n` +
+            `${BOT_HANDOFF}\n\n` +
             (hasFeature(org as OrgFeatureFlags | null, 'pickups') ? `${BOT_PICKUPS}\n\n` : '') +
             (leadNote ? `${leadNote}\n\n` : '') +
             // Al final a proposito: el modelo copiaba el formato de ficha de los datos.
             `${BOT_STYLE}\n\n` +
             `Fecha y hora actual (zona horaria de la agencia): ${nowFormatted}.\n` +
-            `Recordatorio: responde todo el mensaje en el idioma del ultimo mensaje del cliente, sin mezclar idiomas.` +
+            languageReminder(content) +
             // Medios (CODE-177): el bot recibe una nota entre corchetes. Que
             // responda como una persona; transferir solo si hace falta.
             (mediaNote
