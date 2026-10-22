@@ -12,6 +12,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'pickups',
+    date: '2026-10-22T16:00:00Z',
+    href: '/tours',
+    adminOnly: true,
+    es: {
+      title: 'Horas de recogida en el bot',
+      body: 'En Tours › Recogidas cargas a qué hora pasas por cada zona u hotel en cada tour, o importas tu tabla. El bot le dice al cliente a qué hora lo recogen y en qué hoteles recogen.',
+    },
+    en: {
+      title: 'Pickup times in the bot',
+      body: 'In Tours › Pickups you set what time you pick up at each zone or hotel for each tour, or import your table. The bot tells the client their pickup time and which hotels you pick up from.',
+    },
+  },
+  {
     id: 'lead-sale-amount',
     date: '2026-10-19T22:30:00Z',
     href: '/leads',
