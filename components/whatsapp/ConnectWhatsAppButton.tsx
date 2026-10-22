@@ -44,6 +44,7 @@ export default function ConnectWhatsAppButton({ onConnected }: Props) {
   useEffect(() => {
     if (!APP_ID) return;
     if (window.FB) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- el SDK de Meta ya cargo en otra pantalla: window.FB es estado externo
       setSdkReady(true);
       return;
     }
