@@ -7,8 +7,17 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversationsContext } from "@/components/providers/ConversationsProvider";
 import FeedbackButton from "@/components/feedback/FeedbackButton";
+import { hasFeature, type FeatureKey, type OrgFeatureFlags } from "@/lib/features";
 
-export const NAV_ITEMS = [
+interface NavItem {
+  key: string;
+  href: string;
+  icon: React.ReactNode;
+  adminOnly?: boolean;
+  feature?: FeatureKey;
+}
+
+export const NAV_ITEMS: NavItem[] = [
   {
     key: "conversations",
     href: "/conversations",
@@ -24,6 +33,16 @@ export const NAV_ITEMS = [
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="4" width="5" height="16" rx="1.5" /><rect x="10" y="4" width="5" height="11" rx="1.5" /><rect x="17" y="4" width="4" height="7" rx="1.5" />
+      </svg>
+    ),
+  },
+  {
+    key: "bookings",
+    feature: "bookings",
+    href: "/bookings",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4" /><path d="M8 2v4" /><path d="M3 10h18" /><path d="M8 14h3" /><path d="M8 18h6" />
       </svg>
     ),
   },
@@ -83,6 +102,12 @@ export const NAV_ITEMS = [
   },
 ];
 
+// Items que ve el usuario: los de admin solo para admins y los de un feature
+// solo si su org lo tiene.
+export function visibleNavItems(role: string | null, featureFlags: OrgFeatureFlags | null) {
+  return NAV_ITEMS.filter((item) => (!item.adminOnly || role !== "agent") && (!item.feature || hasFeature(featureFlags, item.feature)));
+}
+
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
@@ -91,11 +116,11 @@ interface SidebarProps {
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const t = useTranslations("dashboard.sidebar");
-  const { role } = useAuth();
+  const { role, featureFlags } = useAuth();
   const { unreadTotal } = useConversationsContext();
   // Mientras carga el rol (null) se muestran todos: ocultarlos haria parpadear
   // el menu a cada admin. El proxy igual bloquea las rutas para agentes.
-  const navItems = NAV_ITEMS.filter((item) => !item.adminOnly || role !== "agent");
+  const navItems = visibleNavItems(role, featureFlags);
   // Item activo = el href mas largo que matchee. /settings/agents cae tambien
   // bajo /settings, y sin esto se marcarian los dos.
   const activeHref = navItems
