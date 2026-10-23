@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversationsContext } from "@/components/providers/ConversationsProvider";
 import FeedbackButton from "@/components/feedback/FeedbackButton";
-import { NAV_ITEMS } from "@/components/layout/Sidebar";
+import { visibleNavItems } from "@/components/layout/Sidebar";
 
 // Navegacion del celular (debajo de md): barra fija abajo con las 4 secciones
 // principales y "Mas" con el resto. En la compu se usa el Sidebar.
@@ -16,14 +16,14 @@ const PRIMARY = 4;
 export default function MobileNav() {
   const pathname = usePathname();
   const t = useTranslations("dashboard.sidebar");
-  const { role } = useAuth();
+  const { role, featureFlags } = useAuth();
   const { unreadTotal } = useConversationsContext();
   // Abierto "en" una ruta: al navegar se cierra solo, sin efecto.
   const [openAt, setOpenAt] = useState<string | null>(null);
   const moreOpen = openAt === pathname;
   const setMoreOpen = (open: boolean) => setOpenAt(open ? pathname : null);
 
-  const items = NAV_ITEMS.filter((item) => !item.adminOnly || role !== "agent");
+  const items = visibleNavItems(role, featureFlags);
   const primary = items.slice(0, PRIMARY);
   const rest = items.slice(PRIMARY);
   const activeHref = items

@@ -17,4 +17,6 @@ export const queryKeys = {
   conversation: (id: string) => ['conversation', id] as const,
   messages: (conversationId: string) => ['messages', conversationId] as const,
   pickups: ['pickups'] as const,
+  bookingsRange: (from: string, to: string) => ['bookings', 'range', from, to] as const,
+  leadBookings: (leadId: string) => ['bookings', 'by-lead', leadId] as const,
 }

@@ -9,6 +9,9 @@ import type { LeadField, LeadStatus } from "@/types";
 import { FICHA_FIELDS, STAGES, STAGE_DOT, TEMPERATURE, formatMoney, timeAgo } from "./leadMeta";
 import { suggestAmount } from "@/lib/leads/quoteAmount";
 import { cleanText } from "@/lib/leads/emptyValue";
+import { useAuth } from "@/hooks/useAuth";
+import { hasFeature } from "@/lib/features";
+import LeadBookings from "@/components/bookings/LeadBookings";
 
 interface LeadFichaProps {
   lead: LeadWithContact;
@@ -95,6 +98,7 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
   const locale = useLocale();
   const [refreshing, setRefreshing] = useState(false);
   const { data: contactLeads } = useContactLeads(lead.contact_id);
+  const { featureFlags } = useAuth();
   const past = (contactLeads ?? []).filter((l) => l.id !== lead.id);
   const closed = lead.status === "converted" || lead.status === "lost";
   const [amount, setAmount] = useState(lead.amount != null ? String(lead.amount) : "");
@@ -232,6 +236,8 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
           <p className="mt-1.5 text-[11px] text-green-700">{t("amountHint")}</p>
         </div>
       )}
+
+      {hasFeature(featureFlags, "bookings") && <LeadBookings lead={lead} />}
 
       <div className="rounded-xl bg-slate-50 px-2 py-1">
         <EditableField key={`summary-${lead.summary}`} lead={lead} field="summary" label={t("summary")} multiline stacked onSave={saveField} />

@@ -113,6 +113,24 @@ export interface PickupData {
   times: PickupTime[]
 }
 
+// Reserva (flag `bookings`): un tour reservado en un dia, creado desde un lead
+// Reservado. departure y pickup_time son lo que confirmo el equipo.
+export interface Booking {
+  id: string
+  org_id: string
+  lead_id: string
+  tour_id: string | null
+  tour_name: string
+  date: string           // YYYY-MM-DD
+  departure: string | null
+  pax: number | null
+  place: string | null
+  pickup_time: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
 // Seccion titulada del contexto general del negocio (sobre nosotros, politicas,
 // formas de pago, contacto, horarios, zonas, etc.). Flexible: la IA crea las que existan.
 export interface BusinessSection {

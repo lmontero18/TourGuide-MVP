@@ -20,13 +20,13 @@ function score(query: string[], name: string[]) {
   return hits / Math.max(query.length, Math.min(name.length, 3))
 }
 
-interface Candidate<T> {
+export interface Candidate<T> {
   item: T
   names: string[]
 }
 
 // Mejor candidato o, si hay empate o nada convence, las opciones mas cercanas.
-function best<T>(query: string, candidates: Candidate<T>[], toTokens: (text: string) => string[]) {
+export function best<T>(query: string, candidates: Candidate<T>[], toTokens: (text: string) => string[]) {
   const q = fold(query)
   const qTokens = toTokens(query)
   const scored = candidates

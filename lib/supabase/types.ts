@@ -34,6 +34,79 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date: string
+          departure: string | null
+          id: string
+          lead_id: string
+          notes: string | null
+          org_id: string
+          pax: number | null
+          pickup_time: string | null
+          place: string | null
+          tour_id: string | null
+          tour_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date: string
+          departure?: string | null
+          id?: string
+          lead_id: string
+          notes?: string | null
+          org_id: string
+          pax?: number | null
+          pickup_time?: string | null
+          place?: string | null
+          tour_id?: string | null
+          tour_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          departure?: string | null
+          id?: string
+          lead_id?: string
+          notes?: string | null
+          org_id?: string
+          pax?: number | null
+          pickup_time?: string | null
+          place?: string | null
+          tour_id?: string | null
+          tour_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           channel: string

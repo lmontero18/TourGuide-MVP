@@ -13,6 +13,7 @@ export const FEATURES = {
   attachments: 'live', // CODE-194
   notifications: 'live', // CODE-195
   pickups: 'live', // Recogidas por zona y tour
+  bookings: 'beta', // Reservas por dia con hora de recogida
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES
