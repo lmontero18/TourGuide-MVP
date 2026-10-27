@@ -1384,7 +1384,19 @@
       "saleHint": "With the amount, the Revenue card shows what you sold with Tourfy.",
       "missingAmount": "{count, plural, =1 {1 sale without an amount} other {# sales without an amount}} this month.",
       "missingAmountHint": "Fill them in so Revenue shows what you sold.",
-      "missingAmountCta": "Fill in"
+      "missingAmountCta": "Fill in",
+      "panel": {
+        "clickToEdit": "Click to edit",
+        "more": "Show more",
+        "less": "Show less",
+        "add": "Add",
+        "byAi": "Filled by AI. If you correct it, AI stops changing it.",
+        "amount": "Amount",
+        "amountPlaceholder": "Add amount",
+        "trip": "The trip",
+        "hideEmpty": "Hide empty",
+        "addFields": "+ Add {fields}"
+      }
     },
     "common": {
       "loading": "Loading…"
@@ -1483,6 +1495,38 @@
       "dateRequired": "The date is missing.",
       "paxInvalid": "The number of guests isn't valid.",
       "timeInvalid": "The pickup time isn't valid (e.g. 6:45)."
+    },
+    "inbox": {
+      "title": "Inbox",
+      "toAnswerCount": "{count} to answer",
+      "overADay": "{count} over a day",
+      "tabs": {
+        "toAnswer": "To answer",
+        "theirTurn": "Waiting on them",
+        "all": "All"
+      },
+      "search": "Search client, tour or message",
+      "empty": {
+        "toAnswer": "Nobody is waiting for an answer. 🎉",
+        "theirTurn": "No conversations waiting on the client.",
+        "all": "No conversations."
+      },
+      "yesterday": "Yesterday",
+      "waiting": "Waiting {time}",
+      "min": "{count}m",
+      "h": "{count}h",
+      "d": "{count}d",
+      "bot": "Bot",
+      "unread": "Unread",
+      "insight": {
+        "title": "What's going on",
+        "waiting": "{name} wrote {since} ago and nobody has answered.",
+        "minutes": "{count} min",
+        "hours": "{count, plural, one {# hour} other {# hours}}",
+        "days": "{count, plural, one {# day} other {# days}}",
+        "client": "The client",
+        "hide": "Hide"
+      }
     }
   },
   "blog": {

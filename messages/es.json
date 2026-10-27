@@ -1384,7 +1384,19 @@
       "saleHint": "Con el monto, la tarjeta de Ingresos muestra lo que vendiste con Tourfy.",
       "missingAmount": "{count, plural, =1 {1 venta sin monto} other {# ventas sin monto}} este mes.",
       "missingAmountHint": "Complétalas para que Ingresos muestre lo que vendiste.",
-      "missingAmountCta": "Completar"
+      "missingAmountCta": "Completar",
+      "panel": {
+        "clickToEdit": "Clic para editar",
+        "more": "Ver más",
+        "less": "Ver menos",
+        "add": "Agregar",
+        "byAi": "Lo llenó la IA. Si lo corriges, la IA ya no lo cambia.",
+        "amount": "Monto",
+        "amountPlaceholder": "Agregar monto",
+        "trip": "El viaje",
+        "hideEmpty": "Ocultar vacíos",
+        "addFields": "+ Agregar {fields}"
+      }
     },
     "common": {
       "loading": "Cargando…"
@@ -1483,6 +1495,38 @@
       "dateRequired": "Falta la fecha.",
       "paxInvalid": "La cantidad de personas no es válida.",
       "timeInvalid": "La hora de recogida no es válida (ej. 6:45)."
+    },
+    "inbox": {
+      "title": "Bandeja",
+      "toAnswerCount": "{count, plural, one {# por responder} other {# por responder}}",
+      "overADay": "{count, plural, one {# hace más de un día} other {# hace más de un día}}",
+      "tabs": {
+        "toAnswer": "Por responder",
+        "theirTurn": "Esperando al cliente",
+        "all": "Todas"
+      },
+      "search": "Buscar cliente, tour o mensaje",
+      "empty": {
+        "toAnswer": "Nadie está esperando respuesta. 🎉",
+        "theirTurn": "No hay conversaciones esperando al cliente.",
+        "all": "No hay conversaciones."
+      },
+      "yesterday": "Ayer",
+      "waiting": "Esperando {time}",
+      "min": "{count} min",
+      "h": "{count} h",
+      "d": "{count} d",
+      "bot": "Bot",
+      "unread": "Sin leer",
+      "insight": {
+        "title": "Qué está pasando",
+        "waiting": "{name} escribió hace {since} y nadie respondió.",
+        "minutes": "{count} min",
+        "hours": "{count, plural, one {# hora} other {# horas}}",
+        "days": "{count, plural, one {# día} other {# días}}",
+        "client": "El cliente",
+        "hide": "Ocultar"
+      }
     }
   },
   "blog": {

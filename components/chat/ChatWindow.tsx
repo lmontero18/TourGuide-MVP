@@ -28,6 +28,10 @@ interface ChatWindowProps {
   initialStatus?: ConversationStatus;
   // Boton Ficha: lo arma la pagina, que tambien muestra el panel de la ficha.
   leadButton?: React.ReactNode;
+  // Prueba de diseno (usuarios preview): linea bajo el nombre y aviso sobre el
+  // cuadro de texto.
+  subtitle?: string;
+  insight?: React.ReactNode;
 }
 
 interface OptimisticMessage {
@@ -85,6 +89,8 @@ export default function ChatWindow({
   initialAssignee = null,
   initialStatus = "open",
   leadButton,
+  subtitle,
+  insight,
 }: ChatWindowProps) {
   const router = useRouter();
   const t = useTranslations("dashboard.chat");
@@ -396,7 +402,7 @@ export default function ChatWindow({
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-navy-900">{contactName || contactPhone}</p>
-            <p className="truncate text-[10px] text-slate-400">{contactPhone}</p>
+            <p className="truncate text-[10px] text-slate-400">{subtitle || contactPhone}</p>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1.5 md:gap-2">
@@ -530,6 +536,8 @@ export default function ChatWindow({
           ))
         )}
       </div>
+
+      {insight}
 
       {/* Input — only enabled when agent has control */}
       {windowClosed && pickingTemplate ? (
