@@ -1506,14 +1506,20 @@
       "overADay": "{count, plural, one {# hace más de un día} other {# hace más de un día}}",
       "tabs": {
         "toAnswer": "Por responder",
+        "waiting": "Esperando agente",
+        "mine": "Mías",
         "theirTurn": "Esperando al cliente",
+        "resolved": "Resueltas",
         "all": "Todas"
       },
       "search": "Buscar cliente, tour o mensaje",
       "empty": {
         "toAnswer": "Nadie está esperando respuesta. 🎉",
         "theirTurn": "No hay conversaciones esperando al cliente.",
-        "all": "No hay conversaciones."
+        "all": "No hay conversaciones.",
+        "waiting": "Nadie está esperando un agente.",
+        "mine": "No tienes conversaciones asignadas.",
+        "resolved": "No hay conversaciones resueltas."
       },
       "yesterday": "Ayer",
       "waiting": "Esperando {time}",
