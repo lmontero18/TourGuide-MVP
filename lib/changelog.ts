@@ -12,6 +12,58 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'inbox-v2',
+    date: '2026-10-27T04:00:00Z',
+    href: '/conversations',
+    es: {
+      title: 'Nueva bandeja: ves quién espera respuesta',
+      body: 'La pestaña "Por responder" junta a los clientes que esperan al equipo, con cuánto llevan esperando. Cada chat muestra el tour, la etapa y un resumen de qué está pasando.',
+    },
+    en: {
+      title: 'New inbox: see who is waiting for an answer',
+      body: 'The "To answer" tab gathers the clients waiting for your team and how long they have waited. Each chat shows the tour, the stage and a summary of what is going on.',
+    },
+  },
+  {
+    id: 'lead-panel',
+    date: '2026-10-27T04:00:00Z',
+    href: '/conversations',
+    es: {
+      title: 'La ficha del cliente, siempre a la vista',
+      body: 'Al lado del chat ves la ficha del cliente: etapa, monto, fecha, grupo, precio cotizado con el total y el próximo paso. Todo se edita con un clic.',
+    },
+    en: {
+      title: 'The customer card, always in view',
+      body: 'Next to the chat you see the customer card: stage, amount, date, group, quoted price with the total and the next step. Click anything to edit it.',
+    },
+  },
+  {
+    id: 'dark-mode',
+    date: '2026-10-27T04:00:00Z',
+    href: '/conversations',
+    es: {
+      title: 'Modo oscuro',
+      body: 'Con el botón de la luna, arriba a la derecha, cambias Tourfy a oscuro. Se recuerda en este navegador.',
+    },
+    en: {
+      title: 'Dark mode',
+      body: 'Use the moon button at the top right to switch Tourfy to dark. Your choice is remembered in this browser.',
+    },
+  },
+  {
+    id: 'agent-knowledge',
+    date: '2026-10-27T04:00:00Z',
+    href: '/tours',
+    es: {
+      title: 'Todo el equipo puede editar tours y preguntas',
+      body: 'Los agentes ahora entran a Tours y preguntas para corregir precios, tours y respuestas del bot. Cada sección y cada tour muestra quién lo modificó por última vez.',
+    },
+    en: {
+      title: 'Your whole team can edit tours and FAQs',
+      body: 'Agents can now open Tours and FAQs to fix prices, tours and bot answers. Each section and tour shows who edited it last.',
+    },
+  },
+  {
     id: 'pickups',
     date: '2026-10-22T16:00:00Z',
     href: '/tours',

@@ -14,12 +14,11 @@ export const FEATURES = {
   notifications: 'live', // CODE-195
   pickups: 'live', // Recogidas por zona y tour
   bookings: 'beta', // Reservas por dia con hora de recogida
-  leadPanel: 'beta', // Ficha del cliente siempre abierta a la derecha del chat
-  inboxPreview: 'beta', // Bandeja nueva, aviso "Que esta pasando" y modo oscuro
-  // Agentes editan Tours y preguntas. Ojo: la DB lo replica en
-  // can_edit_knowledge() (migracion 20261027010000); al pasar a 'live' sacar
-  // la condicion tambien ahi.
-  agentKnowledge: 'beta',
+  leadPanel: 'live', // Ficha del cliente siempre abierta a la derecha del chat
+  inboxPreview: 'live', // Bandeja nueva, aviso "Que esta pasando" y modo oscuro
+  // Agentes editan Tours y preguntas (en la DB: can_edit_knowledge(), ya sin
+  // flag desde 20261027020000).
+  agentKnowledge: 'live',
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES
