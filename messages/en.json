@@ -1506,20 +1506,14 @@
       "overADay": "{count} over a day",
       "tabs": {
         "toAnswer": "To answer",
-        "waiting": "Waiting for agent",
         "mine": "Mine",
-        "theirTurn": "Waiting on them",
-        "resolved": "Resolved",
         "all": "All"
       },
       "search": "Search client, tour or message",
       "empty": {
         "toAnswer": "Nobody is waiting for an answer. 🎉",
-        "theirTurn": "No conversations waiting on the client.",
-        "all": "No conversations.",
-        "waiting": "Nobody is waiting for an agent.",
         "mine": "No conversations assigned to you.",
-        "resolved": "No resolved conversations."
+        "all": "No conversations."
       },
       "yesterday": "Yesterday",
       "waiting": "Waiting {time}",
@@ -1540,7 +1534,7 @@
       "channels": {
         "whatsapp": "WhatsApp"
       },
-      "more": "More"
+      "resolved": "Resolved"
     },
     "theme": {
       "dark": "Dark mode",
