@@ -348,7 +348,6 @@ export default function ConversationLeadPanel({ lead, update, refresh, contactNa
           {initials(contactName)}
         </div>
         <h2 className="mt-3 max-w-full truncate font-display text-lg font-extrabold text-navy-900">{name}</h2>
-        {contactName && <p className="text-xs text-slate-400">{contactPhone}</p>}
         {contactPhone && (
           <div className="mt-4 flex gap-2">
             <a href={`tel:+${contactPhone.replace(/\D/g, "")}`} title={t("call")} aria-label={t("call")} className={iconButton}>
