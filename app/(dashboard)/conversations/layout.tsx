@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import ConversationList from "@/components/conversations/ConversationList";
 import InboxList from "@/components/conversations/InboxList";
 import TopBar from "@/components/layout/TopBar";
-import { hasFeature, isPreviewUser } from "@/lib/features";
+import { hasFeature } from "@/lib/features";
 import { useAuth } from "@/hooks/useAuth";
 
 // La lista vive en el layout, no en cada pagina: Next no re-monta los layouts
@@ -18,7 +18,7 @@ export default function ConversationsLayout({ children }: { children: React.Reac
   const activeId = params.id;
   // Con la ficha fija a la derecha (flag leadPanel) la lista se angosta para
   // que el chat no quede apretado en una laptop.
-  const { user, featureFlags } = useAuth();
+  const { featureFlags } = useAuth();
   const narrowList = hasFeature(featureFlags, "leadPanel");
 
   return (
@@ -31,8 +31,8 @@ export default function ConversationsLayout({ children }: { children: React.Reac
             activeId ? "hidden lg:block" : ""
           }`}
         >
-          {/* Prueba del diseno nuevo de la bandeja: solo usuarios preview */}
-          {isPreviewUser(user?.id) ? <InboxList activeId={activeId} /> : <ConversationList activeId={activeId} />}
+          {/* Prueba del diseno nuevo de la bandeja (flag inboxPreview) */}
+          {hasFeature(featureFlags, "inboxPreview") ? <InboxList activeId={activeId} /> : <ConversationList activeId={activeId} />}
         </div>
         {/* Sin conversacion abierta, en el celular solo se ve la lista */}
         <div className={`flex-1 overflow-hidden ${activeId ? "" : "hidden lg:block"}`}>{children}</div>

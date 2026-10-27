@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
-import { isPreviewUser } from "@/lib/features";
+import { hasFeature } from "@/lib/features";
 
-// Modo oscuro (prueba, solo usuarios preview). Los colores viven en
+// Modo oscuro (prueba, flag inboxPreview). Los colores viven en
 // app/globals.css bajo html[data-theme="dark"]; aca solo se pone el atributo
 // y se recuerda la eleccion en este navegador.
 const STORAGE_KEY = "tourfy-theme";
@@ -27,8 +27,8 @@ function apply(theme: Theme) {
 // Montado en el layout del dashboard: aplica el tema guardado y lo saca al
 // salir (la landing y el login quedan siempre claros).
 export function DashboardTheme() {
-  const { user } = useAuth();
-  const enabled = isPreviewUser(user?.id);
+  const { featureFlags } = useAuth();
+  const enabled = hasFeature(featureFlags, "inboxPreview");
   useEffect(() => {
     if (!enabled) return;
     apply(readStored());
@@ -39,11 +39,11 @@ export function DashboardTheme() {
 
 export default function ThemeToggle() {
   const t = useTranslations("dashboard.theme");
-  const { user } = useAuth();
+  const { featureFlags } = useAuth();
   // Sin hidratacion que cuidar: hasta que carga el usuario (solo en el
   // navegador) el boton no se muestra.
   const [theme, setTheme] = useState<Theme>(() => (typeof window === "undefined" ? "light" : readStored()));
-  if (!isPreviewUser(user?.id)) return null;
+  if (!hasFeature(featureFlags, "inboxPreview")) return null;
 
   const toggle = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";

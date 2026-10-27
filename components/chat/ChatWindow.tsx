@@ -29,7 +29,7 @@ interface ChatWindowProps {
   initialStatus?: ConversationStatus;
   // Boton Ficha: lo arma la pagina, que tambien muestra el panel de la ficha.
   leadButton?: React.ReactNode;
-  // Prueba de diseno (usuarios preview): linea bajo el nombre y aviso sobre el
+  // Prueba de diseno (flag inboxPreview): linea bajo el nombre y aviso sobre el
   // cuadro de texto.
   subtitle?: string;
   insight?: React.ReactNode;
