@@ -15,11 +15,12 @@ function fill(text: string, values: Record<string, string>) {
   return text.replace(/\{\{\s*([a-z][a-z0-9_]*)\s*\}\}/g, (_, v: string) => values[v] || `{{${v}}}`);
 }
 
-// Burbuja estilo WhatsApp: asi lo va a ver el cliente.
+// Burbuja estilo WhatsApp: asi lo va a ver el cliente. En modo oscuro usa
+// los colores del modo oscuro de WhatsApp (wa-preview en app/globals.css).
 export default function TemplatePreview({ header, body, footer, buttons = [], values = {} }: TemplatePreviewProps) {
   return (
-    <div className="rounded-2xl bg-[#e9e2d8] p-4">
-      <div className="max-w-[300px] rounded-lg rounded-tl-none bg-white shadow-sm">
+    <div className="wa-preview rounded-2xl bg-[#e9e2d8] p-4">
+      <div className="wa-preview-bubble max-w-[300px] rounded-lg rounded-tl-none bg-white shadow-sm">
         <div className="px-3 pt-2 pb-1.5 space-y-1">
           {header && <p className="text-[13px] font-bold text-[#111b21] whitespace-pre-wrap">{fill(header, values)}</p>}
           <p className="text-[13px] leading-snug text-[#111b21] whitespace-pre-wrap break-words">

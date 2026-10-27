@@ -199,8 +199,39 @@ html[data-theme="dark"] .bubble-own {
   background-color: #2f2f37;
   color: #f4f4f5;
 }
-html[data-theme="dark"] .bubble-own .text-white\/50 {
-  color: #9b9ba5;
+/* Dentro de la burbuja: "Tu", hora, tildes y la tarjeta de PDF usan blanco
+   con transparencia, y "white" en oscuro es el panel. */
+html[data-theme="dark"] .bubble-own .text-white\/50,
+html[data-theme="dark"] .bubble-own .text-white\/60 {
+  color: #a1a1aa;
+}
+/* Tildes de "leido": el sky-300 claro, no el tinte oscuro del modo oscuro. */
+html[data-theme="dark"] .bubble-own .text-sky-300 {
+  color: #7dd3fc;
+}
+html[data-theme="dark"] .bubble-own .bg-white\/10 {
+  background-color: rgb(255 255 255 / 0.08);
+}
+html[data-theme="dark"] .bubble-own .hover\:bg-white\/15:hover {
+  background-color: rgb(255 255 255 / 0.12);
+}
+
+/* Vista previa de plantillas: colores del modo oscuro de WhatsApp. */
+html[data-theme="dark"] .wa-preview {
+  background-color: #0b141a;
+}
+html[data-theme="dark"] .wa-preview-bubble {
+  background-color: #202c33;
+  border-color: #2a3942;
+}
+html[data-theme="dark"] .wa-preview .text-\[\#111b21\] {
+  color: #e9edef;
+}
+html[data-theme="dark"] .wa-preview .text-\[\#667781\] {
+  color: #8696a0;
+}
+html[data-theme="dark"] .wa-preview .border-slate-100 {
+  border-color: #2a3942;
 }
 
 /* Fondos de modales y paneles: oscurecen, no aclaran. */
