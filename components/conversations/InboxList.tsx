@@ -12,7 +12,7 @@ import type { ConversationListItem } from "@/hooks/useConversations";
 import { STAGE_DOT, formatMoney, isCurrentLead } from "@/components/leads/leadMeta";
 import { parseReaction } from "@/lib/whatsapp/placeholders";
 
-// Bandeja por lo que hay que hacer (prueba de diseno, solo usuarios preview):
+// Bandeja por lo que hay que hacer (prueba de diseno, flag inboxPreview):
 // "Por responder" = el cliente escribio ultimo y no lo tiene el bot.
 // "Esperando al cliente" = le respondimos y falta que conteste.
 // Mas las pestañas de siempre: esperando agente, mias y resueltas.

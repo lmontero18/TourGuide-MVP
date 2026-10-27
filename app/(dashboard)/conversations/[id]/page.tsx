@@ -8,7 +8,7 @@ import ChatInsight from "@/components/chat/ChatInsight";
 import ConversationLeadButton from "@/components/leads/ConversationLeadButton";
 import ConversationLeadPanel from "@/components/leads/ConversationLeadPanel";
 import { toAssignee } from "@/lib/assignee";
-import { hasFeature, isPreviewUser } from "@/lib/features";
+import { hasFeature } from "@/lib/features";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversationDetail } from "@/hooks/useConversationDetail";
 import { useConversationLead } from "@/hooks/useLeads";
@@ -22,10 +22,10 @@ export default function ConversationDetailPage() {
   const id = params.id as string;
   const { data: conv, isPending, isError } = useConversationDetail(id);
   const conversationLead = useConversationLead(id);
-  const { user, featureFlags } = useAuth();
+  const { featureFlags } = useAuth();
   const showPanel = hasFeature(featureFlags, "leadPanel");
-  // Prueba del diseno nuevo de la bandeja: solo usuarios preview.
-  const preview = isPreviewUser(user?.id);
+  // Prueba del diseno nuevo de la bandeja (flag inboxPreview).
+  const preview = hasFeature(featureFlags, "inboxPreview");
   const { conversations } = useConversationsContext();
   const item = conversations.find((c) => c.id === id);
 

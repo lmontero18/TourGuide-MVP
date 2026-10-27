@@ -61,7 +61,7 @@
   --font-body: var(--font-jakarta);
 }
 
-/* ── Modo oscuro (prueba, solo usuarios preview: components/layout/ThemeToggle) ──
+/* ── Modo oscuro (prueba, flag inboxPreview: components/layout/ThemeToggle) ──
    No hay clases dark: en los componentes. Se invierten las variables de color:
    los grises y el navy se dan vuelta (el texto navy pasa a claro, los botones
    navy pasan a claros con texto oscuro), "white" pasa a ser el panel oscuro y
