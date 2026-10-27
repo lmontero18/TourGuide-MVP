@@ -11,6 +11,7 @@ import { cleanText } from "@/lib/leads/emptyValue";
 import { useAuth } from "@/hooks/useAuth";
 import { hasFeature } from "@/lib/features";
 import LeadBookings from "@/components/bookings/LeadBookings";
+import { useCelebrateSale } from "@/hooks/useCelebrateSale";
 
 interface ConversationLeadPanelProps extends ConversationLead {
   contactName: string | null;
@@ -388,15 +389,17 @@ function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "upd
   const temp = lead.intent ? TEMPERATURE[lead.intent] : null;
   const suggestion = suggestAmount(lead.metadata?.quote, lead.metadata?.group_size);
 
+  const celebrate = useCelebrateSale();
   const run = async (patch: LeadPatch) => {
     const res = await update(lead.id, patch);
     if (!res.ok) toast.error(res.error || t("saveError"));
+    return res.ok;
   };
   const saveField = (field: LeadField) => (value: string | null) => void run({ fields: { [field]: value } });
   const setStage = (status: LeadStatus) => {
     if (status === lead.status) return;
     if (status === "converted" && lead.amount == null) setJustWon(true);
-    void run({ status });
+    void run({ status }).then((ok) => ok && status === "converted" && celebrate());
   };
 
   const filled = TRIP_FIELDS.filter((f) => fieldValue(lead, f));
