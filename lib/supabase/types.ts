@@ -408,6 +408,7 @@ export type Database = {
         Row: {
           amount: number | null
           closed_at: string | null
+          closed_by: string | null
           contact_id: string
           conversation_id: string | null
           created_at: string
@@ -427,6 +428,7 @@ export type Database = {
         Insert: {
           amount?: number | null
           closed_at?: string | null
+          closed_by?: string | null
           contact_id: string
           conversation_id?: string | null
           created_at?: string
@@ -446,6 +448,7 @@ export type Database = {
         Update: {
           amount?: number | null
           closed_at?: string | null
+          closed_by?: string | null
           contact_id?: string
           conversation_id?: string | null
           created_at?: string
@@ -463,6 +466,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_contact_id_fkey"
             columns: ["contact_id"]
@@ -945,6 +955,10 @@ export type Database = {
     Functions: {
       auth_org_id: { Args: never; Returns: string }
       auth_role: { Args: never; Returns: string }
+      business_minutes: {
+        Args: { p_from: string; p_hours: Json; p_to: string; p_tz: string }
+        Returns: number
+      }
       can_edit_knowledge: { Args: never; Returns: boolean }
       get_org_metrics: { Args: { p_from: string; p_to: string }; Returns: Json }
       get_org_metrics_month: { Args: { p_month: string }; Returns: Json }
@@ -953,6 +967,7 @@ export type Database = {
         Args: { p_months?: number }
         Returns: Json
       }
+      get_team_metrics: { Args: { p_from: string; p_to: string }; Returns: Json }
       get_unread_counts: {
         Args: never
         Returns: {
@@ -991,7 +1006,7 @@ export type Database = {
         | "past_due"
         | "canceled"
         | "unpaid"
-      user_role: "admin" | "agent"
+      user_role: "admin" | "agent" | "owner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1133,7 +1148,7 @@ export const Constants = {
         "canceled",
         "unpaid",
       ],
-      user_role: ["admin", "agent"],
+      user_role: ["admin", "agent", "owner"],
     },
   },
 } as const
