@@ -930,8 +930,9 @@
         "filename": "tourfy-metrics"
       },
       "tabs": {
-        "general": "Overview",
-        "team": "Team"
+        "business": "Business",
+        "team": "Team",
+        "bot": "Bot & activity"
       },
       "team": {
         "lessThanMinute": "<1 min",
@@ -958,7 +959,9 @@
           "salesHint": "The ones they marked Booked (or, when unknown, the ones assigned to them).",
           "sold": "Sold",
           "closeRate": "Close rate",
-          "closeRateHint": "Sales over opportunities in their conversations during the period."
+          "closeRateHint": "Sales over opportunities in their conversations during the period.",
+          "lastUsed": "Last used",
+          "lastUsedHint": "Last message they sent from their account."
         },
         "roles": {
           "admin": "Admin",
@@ -968,6 +971,55 @@
         "notes": {
           "hours": "Times count only within the agency's business hours.",
           "unassigned": "{count, plural, one {# sale can't be attributed} other {# sales can't be attributed}}: they were marked before Tourfy started recording who closes each sale."
+        },
+        "never": "never"
+      },
+      "business": {
+        "kpi": {
+          "sold": "Sold",
+          "soldHint": "Sum of the amounts of sales marked Booked in the period.",
+          "bookings": "Bookings",
+          "bookingsHint": "Opportunities marked Booked in the period.",
+          "leads": "New inquiries",
+          "leadsHint": "Clients who wrote on WhatsApp and became an opportunity in the period.",
+          "conversion": "Conversion",
+          "conversionHint": "Of the inquiries that came in during the period, how many are already marked Booked.",
+          "conversionNote": "{sales} of {leads} inquiries"
+        },
+        "salesNote": "Sold and Bookings only count the sales your team marks as Booked on the customer card, with their amount. A sale that closes but isn't marked doesn't show up here.",
+        "funnel": {
+          "title": "Sales funnel",
+          "steps": {
+            "new": "Inquiries",
+            "contacted": "Quoted",
+            "qualified": "Ready to close",
+            "converted": "Booked"
+          },
+          "lost": "{count, plural, one {# inquiry lost} other {# inquiries lost}}"
+        },
+        "tours": {
+          "title": "Most requested tours",
+          "empty": "No inquiries with a tour in this period yet.",
+          "leads": "{count, plural, one {# inquiry} other {# inquiries}}",
+          "sales": "{count, plural, one {# booking} other {# bookings}}"
+        },
+        "waiting": {
+          "title": "Clients waiting now",
+          "empty": "Nobody is waiting for your team.",
+          "unassigned": "unassigned",
+          "more": "and {count} more"
+        },
+        "care": {
+          "title": "Team response",
+          "response": "Typical response",
+          "responseHint": "How long the team takes to reply (median), in business hours.",
+          "lessThanMinute": "<1 min",
+          "longWaits": "Waited over 1 hour",
+          "longWaitsHint": "Conversations where a client waited over an hour (in business hours) for the team to reply.",
+          "handoffs": "Bot handed off, nobody replied",
+          "handoffsHint": "Times the bot handed the chat to the team and nobody on the team wrote afterwards.",
+          "handoffsValue": "{unanswered} of {total}",
+          "hoursNote": "Times count only within the agency's business hours."
         }
       }
     },

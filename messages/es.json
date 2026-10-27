@@ -930,8 +930,9 @@
         "filename": "tourfy-metricas"
       },
       "tabs": {
-        "general": "General",
-        "team": "Equipo"
+        "business": "Negocio",
+        "team": "Equipo",
+        "bot": "Bot y actividad"
       },
       "team": {
         "lessThanMinute": "<1 min",
@@ -958,7 +959,9 @@
           "salesHint": "Las que marcó como Reservado (o, si no se sabe quién, las asignadas a esta persona).",
           "sold": "Vendido",
           "closeRate": "Cierre",
-          "closeRateHint": "Ventas sobre oportunidades de sus conversaciones en el período."
+          "closeRateHint": "Ventas sobre oportunidades de sus conversaciones en el período.",
+          "lastUsed": "Último uso",
+          "lastUsedHint": "Último mensaje que mandó desde su cuenta."
         },
         "roles": {
           "admin": "Administrador",
@@ -968,6 +971,55 @@
         "notes": {
           "hours": "Los tiempos cuentan solo dentro del horario de atención de la agencia.",
           "unassigned": "{count, plural, one {# venta no tiene a quién atribuirse} other {# ventas no tienen a quién atribuirse}}: se marcaron antes de que Tourfy guardara quién cierra cada venta."
+        },
+        "never": "nunca"
+      },
+      "business": {
+        "kpi": {
+          "sold": "Vendido",
+          "soldHint": "Suma de los montos de las ventas marcadas como Reservado en el período.",
+          "bookings": "Reservas",
+          "bookingsHint": "Oportunidades marcadas como Reservado en el período.",
+          "leads": "Consultas nuevas",
+          "leadsHint": "Clientes que escribieron por WhatsApp y se volvieron oportunidad en el período.",
+          "conversion": "Conversión",
+          "conversionHint": "De las consultas que llegaron en el período, cuántas ya están marcadas como Reservado.",
+          "conversionNote": "{sales} de {leads} consultas"
+        },
+        "salesNote": "Vendido y Reservas cuentan solo las ventas que el equipo marca como Reservado en la ficha del cliente, con su monto. Si una venta se cierra pero no se marca, no aparece acá.",
+        "funnel": {
+          "title": "Embudo de ventas",
+          "steps": {
+            "new": "Consultas",
+            "contacted": "Cotizadas",
+            "qualified": "Listas para cerrar",
+            "converted": "Reservadas"
+          },
+          "lost": "{count, plural, one {# consulta perdida} other {# consultas perdidas}}"
+        },
+        "tours": {
+          "title": "Tours más pedidos",
+          "empty": "Todavía no hay consultas con un tour en este período.",
+          "leads": "{count, plural, one {# consulta} other {# consultas}}",
+          "sales": "{count, plural, one {# reserva} other {# reservas}}"
+        },
+        "waiting": {
+          "title": "Clientes esperando ahora",
+          "empty": "Nadie está esperando respuesta del equipo.",
+          "unassigned": "sin asignar",
+          "more": "y {count} más"
+        },
+        "care": {
+          "title": "Atención del equipo",
+          "response": "Respuesta típica",
+          "responseHint": "Cuánto tarda el equipo en contestar (mediana), en horario de atención.",
+          "lessThanMinute": "<1 min",
+          "longWaits": "Esperaron más de 1 hora",
+          "longWaitsHint": "Conversaciones donde un cliente esperó más de 1 hora (en horario) a que el equipo le contestara.",
+          "handoffs": "El bot pasó y nadie respondió",
+          "handoffsHint": "Veces que el bot pasó la conversación al equipo y nadie del equipo escribió después.",
+          "handoffsValue": "{unanswered} de {total}",
+          "hoursNote": "Los tiempos cuentan solo dentro del horario de atención de la agencia."
         }
       }
     },
