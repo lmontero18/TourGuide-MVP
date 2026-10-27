@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import type { LeadWithContact } from "@/hooks/useLeads";
 import type { ConversationListItem } from "@/hooks/useConversations";
 import { cleanText } from "@/lib/leads/emptyValue";
+import { isCurrentLead } from "@/components/leads/leadMeta";
 
 interface ChatInsightProps {
   lead: LeadWithContact | null | undefined;
@@ -26,7 +27,7 @@ export default function ChatInsight({ lead, item, contactName }: ChatInsightProp
     return () => clearInterval(timer);
   }, []);
 
-  const summary = cleanText(lead?.summary);
+  const summary = lead && isCurrentLead(lead, item?.lastMessageIso ?? null) ? cleanText(lead.summary) : null;
   const waitingMs =
     item && item.status !== "resolved" && !item.botActive && item.lastRole === "user" && item.lastMessageIso
       ? now - new Date(item.lastMessageIso).getTime()

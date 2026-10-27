@@ -1395,7 +1395,8 @@
         "amountPlaceholder": "Add amount",
         "trip": "The trip",
         "hideEmpty": "Hide empty",
-        "addFields": "+ Add {fields}"
+        "addFields": "+ Add {fields}",
+        "staleNotice": "This card is from before: it was marked {stage} on {date} and the client wrote again."
       }
     },
     "common": {

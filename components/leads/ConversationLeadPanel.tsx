@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useContactLeads, type ConversationLead, type LeadPatch, type LeadWithContact } from "@/hooks/useLeads";
 import type { LeadField, LeadStatus } from "@/types";
-import { FICHA_FIELDS, STAGES, STAGE_DOT, TEMPERATURE, formatMoney, timeAgo } from "./leadMeta";
+import { FICHA_FIELDS, STAGES, STAGE_DOT, TEMPERATURE, formatMoney, isCurrentLead, timeAgo } from "./leadMeta";
 import { suggestAmount } from "@/lib/leads/quoteAmount";
 import { cleanText } from "@/lib/leads/emptyValue";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,6 +15,9 @@ import LeadBookings from "@/components/bookings/LeadBookings";
 interface ConversationLeadPanelProps extends ConversationLead {
   contactName: string | null;
   contactPhone: string;
+  // Ultimo mensaje de la conversacion: si llego despues de cerrar la
+  // oportunidad, la ficha avisa que es de antes.
+  lastMessageIso: string | null;
 }
 
 const CURRENCIES = ["USD", "NIO", "CRC", "MXN", "PEN", "COP", "GTQ", "EUR"];
@@ -111,7 +114,7 @@ function InlineText({
 // Version compacta de LeadFicha: los datos se leen como texto, los vacios
 // quedan escondidos y la etapa es un menu. En pantallas angostas no entra y
 // queda el boton Ficha del encabezado con la ficha completa.
-export default function ConversationLeadPanel({ lead, update, refresh, contactName, contactPhone }: ConversationLeadPanelProps) {
+export default function ConversationLeadPanel({ lead, update, refresh, contactName, contactPhone, lastMessageIso }: ConversationLeadPanelProps) {
   const t = useTranslations("dashboard.leads");
   const name = contactName || contactPhone || t("unknownContact");
 
@@ -154,7 +157,7 @@ export default function ConversationLeadPanel({ lead, update, refresh, contactNa
           {[0, 1, 2, 3, 4].map((i) => <div key={i} className="h-5 animate-pulse rounded bg-slate-100" />)}
         </div>
       ) : lead ? (
-        <PanelBody key={lead.id} lead={lead} update={update} refresh={refresh} />
+        <PanelBody key={lead.id} lead={lead} update={update} refresh={refresh} stale={!isCurrentLead(lead, lastMessageIso)} />
       ) : (
         <p className="px-5 py-5 text-sm text-slate-500">{t("noLeadYet")}</p>
       )}
@@ -162,7 +165,7 @@ export default function ConversationLeadPanel({ lead, update, refresh, contactNa
   );
 }
 
-function PanelBody({ lead, update, refresh }: Pick<ConversationLead, "update" | "refresh"> & { lead: LeadWithContact }) {
+function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "update" | "refresh"> & { lead: LeadWithContact; stale: boolean }) {
   const t = useTranslations("dashboard.leads");
   const tp = useTranslations("dashboard.leads.panel");
   const locale = useLocale();
@@ -207,8 +210,28 @@ function PanelBody({ lead, update, refresh }: Pick<ConversationLead, "update" | 
       <span title={tp("byAi")} className="ml-1 text-[10px] text-slate-300">✦</span>
     );
 
+  const refreshNow = async () => {
+    setRefreshing(true);
+    const ok = await refresh(lead.id);
+    setRefreshing(false);
+    if (!ok) toast.error(t("refreshError"));
+  };
+
   return (
     <div className="divide-y divide-slate-100">
+      {stale && (
+        <div className="bg-slate-50 px-5 py-3 text-xs text-slate-600">
+          <p>
+            {tp("staleNotice", {
+              stage: t(`stages.${lead.status}`).toLowerCase(),
+              date: new Date(lead.closed_at ?? lead.updated_at).toLocaleDateString(locale, { day: "numeric", month: "short" }),
+            })}
+          </p>
+          <button onClick={refreshNow} disabled={refreshing} className="mt-1 font-semibold text-navy-900 hover:underline disabled:opacity-40">
+            ↻ {refreshing ? t("refreshing") : t("refreshClosed")}
+          </button>
+        </div>
+      )}
       <div className="space-y-1 px-5 py-4">
         <div className="flex items-center justify-between gap-3 py-1">
           <label htmlFor="panel-stage" className="text-sm text-slate-500">{t("stage")}</label>
@@ -336,12 +359,7 @@ function PanelBody({ lead, update, refresh }: Pick<ConversationLead, "update" | 
         <span>{t("updated", { when: timeAgo(lead.updated_at, locale) })}</span>
         <span aria-hidden>·</span>
         <button
-          onClick={async () => {
-            setRefreshing(true);
-            const ok = await refresh(lead.id);
-            setRefreshing(false);
-            if (!ok) toast.error(t("refreshError"));
-          }}
+          onClick={refreshNow}
           disabled={refreshing}
           title={closed ? t("refreshClosedHint") : undefined}
           className="font-semibold text-slate-500 hover:text-navy-900 disabled:opacity-40"
