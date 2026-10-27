@@ -15,16 +15,25 @@ import { parseReaction } from "@/lib/whatsapp/placeholders";
 // Bandeja por lo que hay que hacer (prueba de diseno, solo usuarios preview):
 // "Por responder" = el cliente escribio ultimo y no lo tiene el bot.
 // "Esperando al cliente" = le respondimos y falta que conteste.
-type Tab = "toAnswer" | "theirTurn" | "all";
-const TABS: Tab[] = ["toAnswer", "theirTurn", "all"];
+// Mas las pestañas de siempre: esperando agente, mias y resueltas.
+type Tab = "toAnswer" | "waiting" | "mine" | "theirTurn" | "resolved" | "all";
+const TABS: Tab[] = ["toAnswer", "waiting", "mine", "theirTurn", "resolved", "all"];
 const DAY_MS = 86_400_000;
 const HOUR_MS = 3_600_000;
 
-const inTab: Record<Tab, (c: ConversationListItem) => boolean> = {
-  toAnswer: (c) => c.status !== "resolved" && !c.botActive && c.lastRole === "user",
-  theirTurn: (c) => c.status !== "resolved" && c.lastRole !== null && c.lastRole !== "user",
-  all: () => true,
-};
+const isToAnswer = (c: ConversationListItem) => c.status !== "resolved" && !c.botActive && c.lastRole === "user";
+
+function tabFilters(me: string | undefined): Record<Tab, (c: ConversationListItem) => boolean> {
+  return {
+    toAnswer: isToAnswer,
+    // Esperando agente = el bot pidio un humano y nadie la tomo.
+    waiting: (c) => c.status === "pending" && !c.assignee,
+    mine: (c) => c.status !== "resolved" && !!me && c.assignee?.id === me,
+    theirTurn: (c) => c.status !== "resolved" && c.lastRole !== null && c.lastRole !== "user",
+    resolved: (c) => c.status === "resolved",
+    all: () => true,
+  };
+}
 
 function initials(name: string | null) {
   if (!name) return "#";
@@ -67,7 +76,8 @@ function stamp(iso: string | null, locale: string, yesterday: string, now: numbe
 }
 
 export default function InboxList({ activeId }: { activeId?: string }) {
-  const { orgId, loading: authLoading } = useAuth();
+  const { user, orgId, loading: authLoading } = useAuth();
+  const inTab = useMemo(() => tabFilters(user?.id), [user?.id]);
   const { conversations, loading } = useConversationsContext();
   const { leads } = useLeads(orgId);
   const t = useTranslations("dashboard.inbox");
@@ -93,10 +103,10 @@ export default function InboxList({ activeId }: { activeId?: string }) {
 
   const counts = useMemo(
     () => Object.fromEntries(TABS.map((k) => [k, conversations.filter(inTab[k]).length])) as Record<Tab, number>,
-    [conversations]
+    [conversations, inTab]
   );
   const overADay = useMemo(
-    () => conversations.filter((c) => inTab.toAnswer(c) && waitedMs(c, now) >= DAY_MS).length,
+    () => conversations.filter((c) => isToAnswer(c) && waitedMs(c, now) >= DAY_MS).length,
     [conversations, now]
   );
 
@@ -115,7 +125,7 @@ export default function InboxList({ activeId }: { activeId?: string }) {
     });
     // Por responder: primero el que mas lleva esperando.
     return tab === "toAnswer" ? [...list].sort((a, b) => waitedMs(b, now) - waitedMs(a, now)) : list;
-  }, [conversations, tab, search, leadByConversation, now]);
+  }, [conversations, tab, search, leadByConversation, now, inTab]);
 
   const isLoading = authLoading || loading;
 
@@ -127,18 +137,19 @@ export default function InboxList({ activeId }: { activeId?: string }) {
           <span className="font-semibold text-navy-900">{t("toAnswerCount", { count: counts.toAnswer })}</span>
           {overADay > 0 && <span className="text-red-600"> · {t("overADay", { count: overADay })}</span>}
         </p>
-        <div className="mt-4 flex gap-5 border-b border-slate-100" role="tablist">
+        {/* Una sola fila que se desliza: con seis pestañas no entran todas */}
+        <div className="-mx-5 mt-4 flex gap-5 overflow-x-auto border-b border-slate-100 px-5 [scrollbar-width:none]" role="tablist">
           {TABS.map((k) => (
             <button
               key={k}
               role="tab"
               aria-selected={tab === k}
               onClick={() => setTab(k)}
-              className={`-mb-px inline-flex items-center gap-1.5 border-b-2 pb-2.5 text-sm transition-colors ${
+              className={`-mb-px inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 pb-2.5 text-sm transition-colors ${
                 tab === k ? "border-navy-900 font-semibold text-navy-900" : "border-transparent text-slate-500 hover:text-navy-900"
               }`}
             >
-              {k === "toAnswer" && counts.toAnswer > 0 && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
+              {(k === "toAnswer" || k === "waiting") && counts[k] > 0 && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
               {t(`tabs.${k}`)}
               <span className="text-xs text-slate-400">{counts[k]}</span>
             </button>
@@ -172,7 +183,7 @@ export default function InboxList({ activeId }: { activeId?: string }) {
           filtered.map((c) => {
             const found = leadByConversation.get(c.id);
             const lead = found && isCurrentLead(found, c.lastMessageIso) ? found : undefined;
-            const waiting = inTab.toAnswer(c) ? waitedMs(c, now) : null;
+            const waiting = isToAnswer(c) ? waitedMs(c, now) : null;
             const reaction = parseReaction(c.lastMessage);
             const preview = reaction
               ? [reaction.emoji, tChat(reaction.removed ? "reactionRemoved" : "reacted")].filter(Boolean).join(" ")
