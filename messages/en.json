@@ -1392,11 +1392,14 @@
         "add": "Add",
         "byAi": "Filled by AI. If you correct it, AI stops changing it.",
         "amount": "Amount",
-        "amountPlaceholder": "Add amount",
         "trip": "The trip",
         "hideEmpty": "Hide empty",
         "addFields": "+ Add {fields}",
-        "staleNotice": "This card is from before: it was marked {stage} on {date} and the client wrote again."
+        "staleNotice": "This card is from before: it was marked {stage} on {date} and the client wrote again.",
+        "addAmount": "+ Add amount",
+        "perPerson": "Per person",
+        "total": "Group total",
+        "quoteUnit": "Per person or total"
       }
     },
     "common": {

@@ -55,3 +55,31 @@ export function suggestAmount(quote: string | null | undefined, groupSize?: stri
   if (!Number.isFinite(people) || people <= 0) return null
   return { amount: Math.round(value * people * 100) / 100, currency }
 }
+
+// La cotizacion separada para editarla con campos (numero, moneda, por persona
+// o total) en vez de texto libre. Se vuelve a guardar como texto con
+// formatQuote, en el mismo formato que escribe la IA y que lee suggestAmount.
+export interface QuoteParts {
+  amount: number | null
+  currency: string
+  perPerson: boolean
+}
+
+export function parseQuote(quote: string | null | undefined): QuoteParts {
+  const text = (quote ?? '').trim()
+  const match = /\d[\d.,\s ]*\d|\d/.exec(text)
+  return {
+    amount: match ? parseNumber(match[0].trim()) : null,
+    currency: currencyOf(text) ?? 'USD',
+    perPerson: /por persona|por adulto|per person|per adult|\bp\/?p\b|c\/u|cada uno|each/i.test(text),
+  }
+}
+
+const QUOTE_SYMBOL: Record<string, string> = { USD: '$', CRC: '₡', NIO: 'C$', EUR: '€' }
+
+// 280, USD, true → "$280 por persona" · 9950, CRC, false → "₡9950 total"
+export function formatQuote(amount: number, currency: string, perPerson: boolean): string {
+  const symbol = QUOTE_SYMBOL[currency]
+  const value = symbol ? `${symbol}${amount}` : `${amount} ${currency}`
+  return `${value} ${perPerson ? 'por persona' : 'total'}`
+}
