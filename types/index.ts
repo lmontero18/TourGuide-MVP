@@ -292,6 +292,8 @@ export interface TeamMemberMetrics {
   sales: number
   sales_amount: Record<string, number>
   leads: number
+  // Ultimo mensaje que mando (en cualquier momento); null = nunca.
+  last_used: string | null
 }
 
 export interface TeamMetrics {
@@ -299,11 +301,34 @@ export interface TeamMetrics {
   team: {
     response_minutes: number | null
     response_samples: number
+    // Conversaciones que esperaron mas de 1 h (en horario) en el periodo.
+    long_waits: number
+    // Traspasos del bot al equipo en el periodo y cuantos nadie contesto.
+    handoffs: number
+    handoffs_unanswered: number
     sales: number
     sales_amount: Record<string, number>
     // Ventas sin quien las marco ni agente asignado (las de antes de closed_by).
     unassigned_sales: number
   }
+}
+
+// Vista Negocio de Metricas (RPC get_business_metrics, admin y owner).
+// Ventas y montos = leads marcados Reservado por el equipo.
+export interface SalesSummary {
+  count: number
+  amount: Record<string, number>
+}
+
+export interface BusinessMetrics {
+  sales: SalesSummary
+  sales_prev: SalesSummary
+  leads: number
+  leads_prev: number
+  funnel: Record<LeadStatus, number>
+  top_tours: { name: string; leads: number; sales: number }[]
+  waiting_count: number
+  waiting: { conversation_id: string; name: string; since: string | null; assignee: string | null }[]
 }
 
 export interface OrgMetrics {

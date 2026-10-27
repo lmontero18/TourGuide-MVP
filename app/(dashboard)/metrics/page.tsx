@@ -15,6 +15,8 @@ import MetricsSkeleton from "@/components/skeletons/MetricsSkeleton";
 import TemplatesCard from "@/components/metrics/TemplatesCard";
 import { downloadCsv } from "@/lib/csv";
 import TeamMetrics from "@/components/metrics/TeamMetrics";
+import BusinessMetrics from "@/components/metrics/BusinessMetrics";
+import { useBusinessMetrics } from "@/hooks/useBusinessMetrics";
 import { useTeamMetrics } from "@/hooks/useTeamMetrics";
 import { useAuth } from "@/hooks/useAuth";
 import { hasFeature } from "@/lib/features";
@@ -58,8 +60,11 @@ export default function MetricsPage() {
   // Pestaña Equipo (flag teamMetrics): admins y el owner (dueño).
   const { featureFlags, role } = useAuth();
   const showTeam = hasFeature(featureFlags, "teamMetrics") && (role === "admin" || role === "owner");
-  const [tab, setTab] = useState<"general" | "team">("general");
-  const team = useTeamMetrics(period, showTeam && tab === "team");
+  // Con el flag: Negocio (lo que mira el dueño), Equipo y Bot (lo de siempre).
+  const [tab, setTab] = useState<"business" | "team" | "bot">("business");
+  const activeTab = showTeam ? tab : "bot";
+  const business = useBusinessMetrics(period, showTeam && activeTab === "business");
+  const team = useTeamMetrics(period, showTeam && (activeTab === "team" || activeTab === "business"));
 
   const active = data?.active_conversations ?? 0;
   // En el modelo de Tourfy el bot prepara al cliente y el agente cierra: la
@@ -116,7 +121,7 @@ export default function MetricsPage() {
         </select>
         <button
           onClick={exportCsv}
-          disabled={!data || tab === "team"}
+          disabled={!data || activeTab !== "bot"}
           className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-navy-900 hover:bg-slate-50 disabled:opacity-40"
         >
           {t("export")}
@@ -125,7 +130,7 @@ export default function MetricsPage() {
 
       {showTeam && (
         <div role="tablist" className="flex gap-6 border-b border-slate-200 bg-white px-5">
-          {(["general", "team"] as const).map((k) => (
+          {(["business", "team", "bot"] as const).map((k) => (
             <button
               key={k}
               role="tab"
@@ -141,7 +146,17 @@ export default function MetricsPage() {
         </div>
       )}
 
-      {tab === "team" && showTeam ? (
+      {activeTab === "business" ? (
+        <div className={`flex-1 overflow-y-auto p-5 transition-opacity ${business.loading && business.data ? "opacity-60" : ""}`}>
+          {business.error ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-medium text-red-700">{t("loadError")}</div>
+          ) : business.data ? (
+            <BusinessMetrics data={business.data} team={team.data} linkConversations={role !== "owner"} />
+          ) : (
+            <MetricsSkeleton />
+          )}
+        </div>
+      ) : activeTab === "team" ? (
         <div className={`flex-1 overflow-y-auto p-5 transition-opacity ${team.loading && team.data ? "opacity-60" : ""}`}>
           {team.error ? (
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-medium text-red-700">{t("loadError")}</div>

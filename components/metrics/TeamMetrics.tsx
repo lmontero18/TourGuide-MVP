@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import MetricCard from "./MetricCard";
-import { formatMoney } from "@/components/leads/leadMeta";
+import { formatMoney, timeAgo } from "@/components/leads/leadMeta";
 import type { TeamMetrics as TeamMetricsData } from "@/types";
 
 // "8 min", "1 h 20 min", "<1 min". Sin respuestas en el periodo: "—".
@@ -49,7 +49,7 @@ export default function TeamMetrics({ data }: { data: TeamMetricsData }) {
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 <th className="px-5 py-3 font-bold">{t("columns.member")}</th>
@@ -58,7 +58,8 @@ export default function TeamMetrics({ data }: { data: TeamMetricsData }) {
                 <th className="px-3 py-3 text-right font-bold" title={t("columns.unansweredHint")}>{t("columns.unanswered")}</th>
                 <th className="px-3 py-3 text-right font-bold" title={t("columns.salesHint")}>{t("columns.sales")}</th>
                 <th className="px-3 py-3 text-right font-bold">{t("columns.sold")}</th>
-                <th className="px-5 py-3 text-right font-bold" title={t("columns.closeRateHint")}>{t("columns.closeRate")}</th>
+                <th className="px-3 py-3 text-right font-bold" title={t("columns.closeRateHint")}>{t("columns.closeRate")}</th>
+                <th className="px-5 py-3 text-right font-bold" title={t("columns.lastUsedHint")}>{t("columns.lastUsed")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -93,7 +94,10 @@ export default function TeamMetrics({ data }: { data: TeamMetricsData }) {
                     </td>
                     <td className="px-3 py-3 text-right tabular-nums">{m.sales}</td>
                     <td className="px-3 py-3 text-right tabular-nums">{formatAmounts(m.sales_amount, locale)}</td>
-                    <td className="px-5 py-3 text-right tabular-nums">{m.leads > 0 ? `${Math.round((m.sales / m.leads) * 100)}%` : "—"}</td>
+                    <td className="px-3 py-3 text-right tabular-nums">{m.leads > 0 ? `${Math.round((m.sales / m.leads) * 100)}%` : "—"}</td>
+                    <td className="px-5 py-3 text-right text-xs" title={m.last_used ? new Date(m.last_used).toLocaleString(locale) : undefined}>
+                      {m.last_used ? timeAgo(m.last_used, locale) : <span className="font-semibold text-amber-700">{t("never")}</span>}
+                    </td>
                   </tr>
                 );
               })}
