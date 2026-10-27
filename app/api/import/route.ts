@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { canEditKnowledge, type OrgFeatureFlags } from "@/lib/features";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
@@ -35,11 +36,12 @@ export async function POST(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("org_id, role")
+    .select("org_id, role, organizations(is_beta, features)")
     .eq("id", user.id)
     .single();
 
-  if (!profile?.org_id || profile.role !== "admin") {
+  // Admins, y agentes si la org tiene el flag agentKnowledge.
+  if (!profile?.org_id || !canEditKnowledge(profile.role, profile.organizations as unknown as OrgFeatureFlags | null)) {
     return NextResponse.json({ error: t("adminOnly") }, { status: 403 });
   }
 

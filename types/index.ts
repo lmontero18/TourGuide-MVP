@@ -19,9 +19,19 @@ export interface Organization {
   plan: PlanType
   status: OrgStatus
   onboarded_at: string | null
+  // Ultima modificacion de cada seccion de Tours y preguntas.
+  knowledge_edits?: KnowledgeEdits
   created_at: string
   updated_at: string
 }
+
+// "by" = nombre de quien modifico o, sin nombre, su correo.
+export interface KnowledgeEdit {
+  at: string
+  by: string
+}
+export type KnowledgeSection = 'tours' | 'faqs' | 'business_info' | 'pickups'
+export type KnowledgeEdits = Partial<Record<KnowledgeSection, KnowledgeEdit>>
 
 export type BotTone = 'formal' | 'friendly' | 'casual'
 
@@ -74,6 +84,9 @@ export interface Tour {
   info: string
   source?: TourSource
   confidence?: number  // 0..1 de la extraccion por IA. <0.6 => bandera de revision en la UI.
+  // Ultima modificacion de este tour (la pone el server al guardar).
+  updated_at?: string
+  updated_by?: string
 }
 
 // Recogidas (flag `pickups`): hora de recogida por tour, salida y zona de

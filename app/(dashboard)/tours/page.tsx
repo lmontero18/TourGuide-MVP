@@ -10,7 +10,7 @@ import BusinessGrid from "@/components/tours/BusinessGrid";
 import FaqAccordion from "@/components/tours/FaqAccordion";
 import SaveStatus, { type SaveState } from "@/components/tours/SaveStatus";
 import ToursSkeleton from "@/components/tours/ToursSkeleton";
-import type { BotConfig, BusinessSection, Organization, Tour } from "@/types";
+import type { BotConfig, BusinessSection, KnowledgeEdit, KnowledgeSection, Organization, Tour } from "@/types";
 import { promptUsage } from "@/lib/bot/compilePrompt";
 import KnowledgeCapacity from "@/components/tours/KnowledgeCapacity";
 import ImportDialog from "@/components/tours/ImportDialog";
@@ -22,8 +22,12 @@ import { queryKeys } from "@/lib/query/keys";
 import { useAuth } from "@/hooks/useAuth";
 import { hasFeature } from "@/lib/features";
 import PickupsTab from "@/components/tours/PickupsTab";
+import LastEdit from "@/components/tours/LastEdit";
 
 type Tab = "tours" | "business" | "faqs" | "pickups";
+
+// Seccion de organizations.knowledge_edits que corresponde a cada pestaña.
+const TAB_SECTION: Record<Tab, KnowledgeSection> = { tours: "tours", business: "business_info", faqs: "faqs", pickups: "pickups" };
 
 interface Knowledge {
   tours: Tour[];
@@ -96,6 +100,18 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
   const [importOpen, setImportOpen] = useState(false);
   const { featureFlags } = useAuth();
   const showPickups = hasFeature(featureFlags, "pickups");
+  // Quien modifico que: sale de la org en cache (la actualiza cada guardado).
+  const { data: liveOrg } = useOrganization();
+  const edits = liveOrg?.knowledge_edits ?? initialOrg.knowledge_edits ?? {};
+  const tourEdits = useMemo(
+    () =>
+      new Map<string, KnowledgeEdit>(
+        (liveOrg?.tours ?? initialOrg.tours ?? [])
+          .filter((tour) => tour.updated_at && tour.updated_by)
+          .map((tour) => [tour.id, { at: tour.updated_at!, by: tour.updated_by! }])
+      ),
+    [liveOrg, initialOrg]
+  );
 
   // Autoguardado: debounce + un solo PATCH en vuelo a la vez. Si hay cambios
   // mientras se guarda, se encola otro guardado con lo ultimo.
@@ -126,8 +142,16 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
         });
         ok = res.ok;
         // La cache queda igual a lo guardado: volver a la pagina no muestra
-        // la version vieja.
-        if (ok) queryClient.setQueryData<Organization>(queryKeys.organization, (prev) => (prev ? { ...prev, ...payload } : prev));
+        // la version vieja. Del server vienen las marcas de quien modifico
+        // (tours y secciones); el editor sigue con su propio estado.
+        if (ok) {
+          const saved = ((await res.json().catch(() => null)) as { organization?: Organization } | null)?.organization;
+          queryClient.setQueryData<Organization>(queryKeys.organization, (prev) =>
+            prev
+              ? { ...prev, ...payload, ...(saved ? { tours: saved.tours, knowledge_edits: saved.knowledge_edits } : {}) }
+              : prev
+          );
+        }
       } catch {
         ok = false;
       }
@@ -281,6 +305,8 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
               })}
             </div>
 
+            <LastEdit edit={edits[TAB_SECTION[tab]]} className="-mt-2" />
+
             {tab === "tours" && <ToursTable tours={tours} selectedId={selectedId} onSelect={setSelectedId} onAdd={addTour} />}
             {tab === "business" && <BusinessGrid sections={business} onChange={(v) => edit({ business: v })} />}
             {tab === "faqs" && <FaqAccordion faqs={faqs} onChange={(v) => edit({ faqs: v })} />}
@@ -305,7 +331,7 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
         }
       />
 
-      <TourDrawer tour={selected} saveState={saveState} onChange={updateTour} onDelete={deleteTour} onClose={closeDrawer} />
+      <TourDrawer tour={selected} saveState={saveState} lastEdit={selected ? tourEdits.get(selected.id) : null} onChange={updateTour} onDelete={deleteTour} onClose={closeDrawer} />
     </div>
   );
 }

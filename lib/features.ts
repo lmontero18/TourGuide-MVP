@@ -16,6 +16,10 @@ export const FEATURES = {
   bookings: 'beta', // Reservas por dia con hora de recogida
   leadPanel: 'beta', // Ficha del cliente siempre abierta a la derecha del chat
   inboxPreview: 'beta', // Bandeja nueva, aviso "Que esta pasando" y modo oscuro
+  // Agentes editan Tours y preguntas. Ojo: la DB lo replica en
+  // can_edit_knowledge() (migracion 20261027010000); al pasar a 'live' sacar
+  // la condicion tambien ahi.
+  agentKnowledge: 'beta',
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES
@@ -29,6 +33,12 @@ export function hasFeature(org: OrgFeatureFlags | null | undefined, key: Feature
   if ((FEATURES[key] as FeatureStage) === 'live') return true
   if (!org) return false
   return org.is_beta || org.features.includes(key)
+}
+
+// Tours, preguntas, info del negocio y recogidas: los admins siempre, los
+// agentes con el flag agentKnowledge.
+export function canEditKnowledge(role: string | null | undefined, org: OrgFeatureFlags | null | undefined): boolean {
+  return role === 'admin' || (role === 'agent' && hasFeature(org, 'agentKnowledge'))
 }
 
 // Para webhook / crons con service client. Un feature 'live' no consulta la DB;

@@ -1,12 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { compilePrompt, type CompilePromptInput } from '@/lib/bot/compilePrompt'
 import { checkPromptBudget } from '@/lib/bot/promptBudget'
 import { createLogger } from '@/lib/logger'
 import { dedupeBusiness, dedupeFaqs, dedupeTours } from '@/lib/knowledge/dedupe'
-import type { BotConfig, BotTone, BusinessSection, FAQ, Tour } from '@/types'
+import { canEditKnowledge, type OrgFeatureFlags } from '@/lib/features'
+import type { BotConfig, BotTone, BusinessSection, FAQ, KnowledgeEdits, KnowledgeSection, Tour } from '@/types'
+
+const ORG_COLUMNS = 'id, name, slug, prompt, faqs, tours, business_info, bot_config, plan, status, onboarded_at, knowledge_edits'
+
+// Lo que un agente puede guardar (flag agentKnowledge). El nombre, el tono y
+// el resto de la configuracion del bot quedan solo para admins.
+const KNOWLEDGE_KEYS = ['tours', 'faqs', 'business_info'] as const
+
+// Lo que cuenta como "modificar" un tour: no la fuente ni la confianza de la IA.
+function tourContent(tour: Tour) {
+  return JSON.stringify([tour.name, tour.category ?? null, tour.prices ?? [], tour.info])
+}
+
+// Cada tour lleva quien lo modifico por ultima vez. Los que llegan iguales
+// conservan su marca; los nuevos o cambiados se marcan con quien guarda.
+function stampTours(next: Tour[], previous: Tour[], by: string, at: string): Tour[] {
+  const before = new Map(previous.map((tour) => [tour.id, tour]))
+  return next.map((tour) => {
+    const old = before.get(tour.id)
+    if (old && tourContent(old) === tourContent(tour)) {
+      return { ...tour, updated_at: old.updated_at, updated_by: old.updated_by }
+    }
+    return { ...tour, updated_at: at, updated_by: by }
+  })
+}
+
+// Secciones que cambiaron de verdad: el editor autoguarda todo junto, asi que
+// cada PATCH trae las tres aunque se haya tocado una.
+function changedSections(
+  next: { tours?: Tour[]; faqs?: FAQ[]; business?: BusinessSection[] },
+  current: { tours: Tour[]; faqs: FAQ[]; business: BusinessSection[] }
+): KnowledgeSection[] {
+  const sections: KnowledgeSection[] = []
+  const toursKey = (list: Tour[]) => JSON.stringify(list.map((tour) => [tour.id, tourContent(tour)]))
+  const faqsKey = (list: FAQ[]) => JSON.stringify(list.map((faq) => [faq.question, faq.answer]))
+  const businessKey = (list: BusinessSection[]) => JSON.stringify(list.map((b) => [b.id, b.title, b.content]))
+  if (next.tours && toursKey(next.tours) !== toursKey(current.tours)) sections.push('tours')
+  if (next.faqs && faqsKey(next.faqs) !== faqsKey(current.faqs)) sections.push('faqs')
+  if (next.business && businessKey(next.business) !== businessKey(current.business)) sections.push('business_info')
+  return sections
+}
 
 export async function GET() {
   const t = await getTranslations('apiErrors')
@@ -21,7 +62,7 @@ export async function GET() {
   // buscar antes su org_id en users (una ida y vuelta menos).
   const { data: org, error } = await supabase
     .from('organizations')
-    .select('id, name, slug, prompt, faqs, tours, business_info, bot_config, plan, status, onboarded_at')
+    .select(ORG_COLUMNS)
     .maybeSingle()
 
   if (error) {
@@ -109,11 +150,11 @@ export async function PATCH(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('org_id, role')
+    .select('org_id, role, full_name, email, organizations(is_beta, features)')
     .eq('id', user.id)
     .single()
 
-  if (!profile?.org_id || profile.role !== 'admin') {
+  if (!profile?.org_id) {
     return NextResponse.json({ error: t('adminOnly') }, { status: 403 })
   }
 
@@ -122,6 +163,15 @@ export async function PATCH(request: NextRequest) {
     const key = parsed.error.issues[0]?.message
     return NextResponse.json({ error: key && t.has(key) ? t(key) : t('invalidInput') }, { status: 400 })
   }
+
+  // Admin: todo. Agente con el flag: solo tours, FAQs e info del negocio.
+  const isAdmin = profile.role === 'admin'
+  const knowledgeOnly = Object.keys(parsed.data).every((key) => (KNOWLEDGE_KEYS as readonly string[]).includes(key))
+  const orgFlags = profile.organizations as unknown as OrgFeatureFlags | null
+  if (!isAdmin && !(knowledgeOnly && canEditKnowledge(profile.role, orgFlags))) {
+    return NextResponse.json({ error: t('adminOnly') }, { status: 403 })
+  }
+  const editor = profile.full_name?.trim() || profile.email
 
   // Estado actual: necesario para mergear bot_config y para recompilar el prompt
   // con los valores efectivos (lo que llega en el body + lo que ya estaba).
@@ -142,10 +192,20 @@ export async function PATCH(request: NextRequest) {
   const effBusiness =
     parsed.data.business_info !== undefined ? dedupeBusiness(parsed.data.business_info as BusinessSection[]) : undefined
 
+  const now = new Date().toISOString()
+  const changed = changedSections(
+    { tours: effTours, faqs: effFaqs, business: effBusiness },
+    {
+      tours: (current?.tours as Tour[] | null) ?? [],
+      faqs: (current?.faqs as FAQ[] | null) ?? [],
+      business: (current?.business_info as BusinessSection[] | null) ?? [],
+    }
+  )
+
   const update: Record<string, unknown> = {}
   if (parsed.data.name !== undefined) update.name = parsed.data.name
   if (effFaqs !== undefined) update.faqs = effFaqs
-  if (effTours !== undefined) update.tours = effTours
+  if (effTours !== undefined) update.tours = stampTours(effTours, (current?.tours as Tour[] | null) ?? [], editor, now)
   if (effBusiness !== undefined) update.business_info = effBusiness
   if (parsed.data.bot_config) update.bot_config = nextBotConfig
 
@@ -182,11 +242,14 @@ export async function PATCH(request: NextRequest) {
     checkPromptBudget(promptInput, profile.org_id, createLogger({ route: 'organizations', org_id: profile.org_id }))
   }
 
-  const { data: org, error } = await supabase
+  // Un agente no tiene UPDATE en organizations (RLS solo admin): su guardado
+  // va con service role, ya acotado arriba a tours/FAQs/info y a su org.
+  const writer = isAdmin ? supabase : await createServiceClient()
+  const { data: org, error } = await writer
     .from('organizations')
     .update(update)
     .eq('id', profile.org_id)
-    .select('id, name, slug, prompt, faqs, tours, business_info, bot_config, plan, status, onboarded_at')
+    .select(ORG_COLUMNS)
     .single()
 
   if (error || !org) {
@@ -194,5 +257,14 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: t('orgUpdateFailed') }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true, organization: org })
+  // Quien modifico cada seccion (con la sesion del usuario: touch_knowledge
+  // lee su nombre). Si falla no se pierde el guardado.
+  let edits = (org.knowledge_edits ?? {}) as KnowledgeEdits
+  if (changed.length) {
+    const { error: touchError } = await supabase.rpc('touch_knowledge', { p_sections: changed })
+    if (touchError) console.error('Failed to record knowledge edit:', touchError)
+    else edits = { ...edits, ...Object.fromEntries(changed.map((s) => [s, { at: now, by: editor }])) }
+  }
+
+  return NextResponse.json({ success: true, organization: { ...org, knowledge_edits: edits } })
 }

@@ -15,6 +15,8 @@ interface NavItem {
   icon: React.ReactNode;
   adminOnly?: boolean;
   feature?: FeatureKey;
+  // Solo admin, salvo que la org tenga este feature: ahi tambien los agentes.
+  agentFeature?: FeatureKey;
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -49,6 +51,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     key: "tours",
     adminOnly: true,
+    agentFeature: "agentKnowledge",
     href: "/tours",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -105,7 +108,11 @@ export const NAV_ITEMS: NavItem[] = [
 // Items que ve el usuario: los de admin solo para admins y los de un feature
 // solo si su org lo tiene.
 export function visibleNavItems(role: string | null, featureFlags: OrgFeatureFlags | null) {
-  return NAV_ITEMS.filter((item) => (!item.adminOnly || role !== "agent") && (!item.feature || hasFeature(featureFlags, item.feature)));
+  return NAV_ITEMS.filter(
+    (item) =>
+      (!item.adminOnly || role !== "agent" || (!!item.agentFeature && hasFeature(featureFlags, item.agentFeature))) &&
+      (!item.feature || hasFeature(featureFlags, item.feature))
+  );
 }
 
 interface SidebarProps {

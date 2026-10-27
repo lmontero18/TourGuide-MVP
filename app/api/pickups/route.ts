@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import * as Sentry from '@sentry/nextjs'
 import { createClient } from '@/lib/supabase/server'
-import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { requireKnowledgeEditor } from '@/lib/auth/requireKnowledgeEditor'
 import { getOrgFeatureFlags } from '@/lib/supabase/queries/organizations'
 import { getPickups, savePickups } from '@/lib/supabase/queries/pickups'
 import { hasFeature } from '@/lib/features'
@@ -81,7 +81,7 @@ function consistent(data: PickupData): PickupData {
 
 export async function PUT(request: NextRequest) {
   const t = await getTranslations('apiErrors')
-  const auth = await requireAdmin()
+  const auth = await requireKnowledgeEditor()
   if (!auth.ok) return auth.response
   if (!hasFeature(await getOrgFeatureFlags(auth.orgId), 'pickups')) {
     return NextResponse.json({ error: t('forbidden') }, { status: 403 })
