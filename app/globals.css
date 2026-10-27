@@ -193,6 +193,16 @@ html[data-theme="dark"] {
   --color-blue-900: oklch(93.2% 0.032 255.585);
 }
 
+/* Mensajes del equipo en el chat: gris un poco mas claro que el fondo, no
+   blanco (el navy invertido quedaba casi blanco). */
+html[data-theme="dark"] .bubble-own {
+  background-color: #2f2f37;
+  color: #f4f4f5;
+}
+html[data-theme="dark"] .bubble-own .text-white\/50 {
+  color: #9b9ba5;
+}
+
 /* Fondos de modales y paneles: oscurecen, no aclaran. */
 html[data-theme="dark"] .bg-navy-900\/25,
 html[data-theme="dark"] .bg-navy-900\/30 {

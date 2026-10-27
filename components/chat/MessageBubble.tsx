@@ -59,7 +59,8 @@ const ROLE_STYLES: Record<MessageRole, { wrapper: string; bubble: string; label:
   },
   agent: {
     wrapper: "justify-end",
-    bubble: "bg-navy-900 text-white rounded-tr-md shadow-md",
+    // bubble-own: en modo oscuro es gris, no claro (app/globals.css).
+    bubble: "bubble-own bg-navy-900 text-white rounded-tr-md shadow-md",
     label: "roleYou",
   },
 };
