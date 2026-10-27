@@ -1535,6 +1535,10 @@
       "channels": {
         "whatsapp": "WhatsApp"
       }
+    },
+    "theme": {
+      "dark": "Dark mode",
+      "light": "Light mode"
     }
   },
   "blog": {
