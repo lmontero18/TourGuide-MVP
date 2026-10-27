@@ -10,6 +10,9 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
+  // El owner (dueño) no dispara la IA: solo mira Metricas.
+  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
+  if (!profile || profile.role === 'owner') return NextResponse.json({ error: t('forbidden') }, { status: 403 })
 
   // RLS: solo encuentra leads de la propia org.
   const { data: lead } = await supabase.from('leads').select('conversation_id').eq('id', id).maybeSingle()

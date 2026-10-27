@@ -1,4 +1,6 @@
-export type Role = 'admin' | 'agent'
+// owner = dueño/CEO de la agencia: solo ve Metricas, no escribe nada y el
+// equipo no lo ve. Lo crea Tourfy (docs/owner-accounts.md).
+export type Role = 'admin' | 'agent' | 'owner'
 export type ConversationStatus = 'open' | 'resolved' | 'pending'
 export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
 export type MessageRole = 'user' | 'assistant' | 'agent'
@@ -275,6 +277,34 @@ export interface Subscription {
 // Capa 1 de metricas: actividad del bot. Leads y revenue van en CODE-171/172.
 // Ventanas moviles o un mes calendario ('month:2026-09', en la zona de la agencia).
 export type MetricsPeriod = '7d' | '30d' | '90d' | `month:${string}`
+
+// Metricas por agente (RPC get_team_metrics, solo admin y owner). Los
+// minutos de respuesta cuentan solo dentro del horario de atencion.
+export interface TeamMemberMetrics {
+  id: string
+  name: string
+  role: Role
+  chats: number
+  messages: number
+  response_minutes: number | null
+  response_samples: number
+  unanswered: number
+  sales: number
+  sales_amount: Record<string, number>
+  leads: number
+}
+
+export interface TeamMetrics {
+  members: TeamMemberMetrics[]
+  team: {
+    response_minutes: number | null
+    response_samples: number
+    sales: number
+    sales_amount: Record<string, number>
+    // Ventas sin quien las marco ni agente asignado (las de antes de closed_by).
+    unassigned_sales: number
+  }
+}
 
 export interface OrgMetrics {
   timezone: string

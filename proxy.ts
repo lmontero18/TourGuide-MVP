@@ -53,6 +53,9 @@ export async function proxy(request: NextRequest) {
     const orgData = profile?.organizations as unknown as OrgRow | OrgRow[] | null
     const org = Array.isArray(orgData) ? orgData[0] : orgData
     const isOnboarded = !!org?.onboarded_at
+    // El owner (dueño) solo ve Metricas: es su pagina de inicio y la unica.
+    const isOwner = profile?.role === 'owner'
+    const home = isOwner ? '/metrics' : '/conversations'
 
     // Not onboarded → force onboarding (sin redirigir si ya está ahí — loop)
     if (!isOnboarded && isProtected && request.nextUrl.pathname !== '/onboarding') {
@@ -61,16 +64,21 @@ export async function proxy(request: NextRequest) {
 
     // Onboarded → keep out of auth / onboarding pages
     if (isOnboarded && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
-      return redirectWithCookies(new URL('/conversations', request.url), ctx.response)
+      return redirectWithCookies(new URL(home, request.url), ctx.response)
     }
 
     if (isOnboarded && request.nextUrl.pathname === '/onboarding') {
-      return redirectWithCookies(new URL('/conversations', request.url), ctx.response)
+      return redirectWithCookies(new URL(home, request.url), ctx.response)
+    }
+
+    if (isOnboarded && isOwner && isProtected && !request.nextUrl.pathname.startsWith('/metrics')) {
+      return redirectWithCookies(new URL(home, request.url), ctx.response)
     }
 
     const isAdminOnly = ADMIN_ONLY_PATHS.some(p => request.nextUrl.pathname.startsWith(p))
     const isKnowledge = KNOWLEDGE_PATHS.some(p => request.nextUrl.pathname.startsWith(p))
-    const allowed = profile?.role === 'admin' || (isKnowledge && canEditKnowledge(profile?.role, org))
+    const isOwnerPath = isOwner && request.nextUrl.pathname.startsWith('/metrics')
+    const allowed = profile?.role === 'admin' || isOwnerPath || (isKnowledge && canEditKnowledge(profile?.role, org))
     if (isOnboarded && isAdminOnly && !allowed) {
       return redirectWithCookies(new URL('/conversations', request.url), ctx.response)
     }

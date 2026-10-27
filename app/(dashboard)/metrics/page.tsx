@@ -14,6 +14,10 @@ import type { MetricsPeriod } from "@/types";
 import MetricsSkeleton from "@/components/skeletons/MetricsSkeleton";
 import TemplatesCard from "@/components/metrics/TemplatesCard";
 import { downloadCsv } from "@/lib/csv";
+import TeamMetrics from "@/components/metrics/TeamMetrics";
+import { useTeamMetrics } from "@/hooks/useTeamMetrics";
+import { useAuth } from "@/hooks/useAuth";
+import { hasFeature } from "@/lib/features";
 
 const ROLLING: MetricsPeriod[] = ["7d", "30d", "90d"];
 
@@ -51,6 +55,11 @@ export default function MetricsPage() {
     new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${m}-15T12:00:00Z`));
   const { data, loading, error } = useMetrics(period);
   const { usage, history } = useMonthlyUsage();
+  // Pestaña Equipo (flag teamMetrics): admins y el owner (dueño).
+  const { featureFlags, role } = useAuth();
+  const showTeam = hasFeature(featureFlags, "teamMetrics") && (role === "admin" || role === "owner");
+  const [tab, setTab] = useState<"general" | "team">("general");
+  const team = useTeamMetrics(period, showTeam && tab === "team");
 
   const active = data?.active_conversations ?? 0;
   // En el modelo de Tourfy el bot prepara al cliente y el agente cierra: la
@@ -107,13 +116,42 @@ export default function MetricsPage() {
         </select>
         <button
           onClick={exportCsv}
-          disabled={!data}
+          disabled={!data || tab === "team"}
           className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-navy-900 hover:bg-slate-50 disabled:opacity-40"
         >
           {t("export")}
         </button>
       </TopBar>
 
+      {showTeam && (
+        <div role="tablist" className="flex gap-6 border-b border-slate-200 bg-white px-5">
+          {(["general", "team"] as const).map((k) => (
+            <button
+              key={k}
+              role="tab"
+              aria-selected={tab === k}
+              onClick={() => setTab(k)}
+              className={`-mb-px border-b-2 py-3 text-sm font-bold transition-colors ${
+                tab === k ? "border-navy-900 text-navy-900" : "border-transparent text-slate-400 hover:text-navy-900"
+              }`}
+            >
+              {t(`tabs.${k}`)}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {tab === "team" && showTeam ? (
+        <div className={`flex-1 overflow-y-auto p-5 transition-opacity ${team.loading && team.data ? "opacity-60" : ""}`}>
+          {team.error ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-medium text-red-700">{t("loadError")}</div>
+          ) : team.data ? (
+            <TeamMetrics data={team.data} />
+          ) : (
+            <MetricsSkeleton />
+          )}
+        </div>
+      ) : (
       <div className={`flex-1 overflow-y-auto p-5 space-y-5 transition-opacity ${loading && !placeholder ? "opacity-60" : ""}`}>
         {placeholder ? <MetricsSkeleton /> : (<>
         {error && (
@@ -192,6 +230,7 @@ export default function MetricsPage() {
         <TemplatesCard />
         </>)}
       </div>
+      )}
     </div>
   );
 }

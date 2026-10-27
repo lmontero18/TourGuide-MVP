@@ -22,6 +22,8 @@ async function loadTarget(orgId: string, selfId: string, targetId: string) {
     .from('users')
     .select('id, org_id, email')
     .eq('id', targetId)
+    // El owner (dueño) no se ve ni se toca desde Agentes.
+    .neq('role', 'owner')
     .maybeSingle()
   if (!target || target.org_id !== orgId) {
     return { error: NextResponse.json({ error: t('agentNotFound') }, { status: 404 }) }

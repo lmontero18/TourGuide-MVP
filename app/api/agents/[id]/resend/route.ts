@@ -21,6 +21,7 @@ export async function POST(
     .from('users')
     .select('id, org_id, email, full_name')
     .eq('id', id)
+    .neq('role', 'owner')
     .maybeSingle()
   if (!target || target.org_id !== ctx.orgId) {
     return NextResponse.json({ error: t('agentNotFound') }, { status: 404 })

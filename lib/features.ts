@@ -19,6 +19,7 @@ export const FEATURES = {
   // Agentes editan Tours y preguntas (en la DB: can_edit_knowledge(), ya sin
   // flag desde 20261027020000).
   agentKnowledge: 'live',
+  teamMetrics: 'beta', // Pestaña Equipo en Metricas (por agente)
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES

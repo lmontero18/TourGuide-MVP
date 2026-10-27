@@ -9,6 +9,7 @@ export const queryKeys = {
   templateHistory: (month: string) => ['templates', 'history', month] as const,
   agents: ['agents'] as const,
   metrics: (period: MetricsPeriod) => ['metrics', period] as const,
+  teamMetrics: (period: MetricsPeriod) => ['metrics', 'team', period] as const,
   usage: ['usage', 'current'] as const,
   usageHistory: ['usage', 'history'] as const,
   leads: (orgId: string | null) => ['leads', orgId] as const,

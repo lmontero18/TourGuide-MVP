@@ -15,7 +15,8 @@ export async function orgRecipients(
   orgId: string,
   opts: { adminsOnly?: boolean; onlySummary?: boolean; attention?: boolean } = {}
 ): Promise<string[]> {
-  let query = service.from('users').select('email').eq('org_id', orgId)
+  // El owner (dueño) no recibe los avisos del dia a dia.
+  let query = service.from('users').select('email').eq('org_id', orgId).neq('role', 'owner')
   if (opts.adminsOnly) query = query.eq('role', 'admin')
   if (opts.onlySummary) query = query.eq('email_daily_summary', true)
   if (opts.attention) query = query.eq('notify_scope', 'all')

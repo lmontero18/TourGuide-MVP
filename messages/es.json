@@ -928,6 +928,47 @@
         "date": "Fecha",
         "conversations": "Conversaciones activas",
         "filename": "tourfy-metricas"
+      },
+      "tabs": {
+        "general": "General",
+        "team": "Equipo"
+      },
+      "team": {
+        "lessThanMinute": "<1 min",
+        "samples": "{count, plural, one {# respuesta} other {# respuestas}}",
+        "cards": {
+          "response": "Respuesta del equipo",
+          "responseHint": "Cuánto tarda el equipo en contestar (mediana), contando solo el horario de atención: desde que el cliente escribe o el bot pasa la conversación al equipo.",
+          "unanswered": "Sin responder ahora",
+          "unansweredHint": "Conversaciones asignadas, sin resolver, donde el cliente escribió último.",
+          "sales": "Ventas",
+          "salesHint": "Oportunidades marcadas como Reservado en el período.",
+          "sold": "Vendido",
+          "soldHint": "Suma de los montos de esas ventas."
+        },
+        "columns": {
+          "member": "Persona",
+          "chats": "Chats",
+          "chatsHint": "Conversaciones en las que escribió en el período.",
+          "response": "Responde en",
+          "responseHint": "Mediana de cuánto tardó en contestar, en horario de atención.",
+          "unanswered": "Sin responder",
+          "unansweredHint": "Asignadas a esta persona, donde el cliente escribió último.",
+          "sales": "Ventas",
+          "salesHint": "Las que marcó como Reservado (o, si no se sabe quién, las asignadas a esta persona).",
+          "sold": "Vendido",
+          "closeRate": "Cierre",
+          "closeRateHint": "Ventas sobre oportunidades de sus conversaciones en el período."
+        },
+        "roles": {
+          "admin": "Administrador",
+          "agent": "Agente",
+          "owner": "Dueño"
+        },
+        "notes": {
+          "hours": "Los tiempos cuentan solo dentro del horario de atención de la agencia.",
+          "unassigned": "{count, plural, one {# venta no tiene a quién atribuirse} other {# ventas no tienen a quién atribuirse}}: se marcaron antes de que Tourfy guardara quién cierra cada venta."
+        }
       }
     },
     "settings": {
@@ -1104,7 +1145,8 @@
         "help": "Con los avisos generales prendidos, la persona recibe un aviso en el panel y un correo cuando el bot pide que alguien atienda a un cliente o cuando un cliente se queda sin respuesta. Apagados, no recibe nada de eso. Lo suyo le llega siempre: el correo cuando le asignan una conversación y los mensajes de los clientes que atiende.",
         "nobody": "Nadie tiene los avisos generales prendidos. Si el bot pide que alguien atienda a un cliente, nadie del equipo se va a enterar.",
         "error": "No pudimos guardar el cambio. Intenta de nuevo."
-      }
+      },
+      "owner": "dueño"
     },
     "notifications": {
       "open": "Ver",
