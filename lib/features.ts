@@ -20,7 +20,7 @@ export const FEATURES = {
   // flag desde 20261027020000).
   agentKnowledge: 'live',
   teamMetrics: 'beta', // Pestaña Equipo en Metricas (por agente)
-  celebrations: 'beta', // Confeti al marcar una venta como Reservado
+  celebrations: 'live', // Confeti al marcar una venta como Reservado
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES
