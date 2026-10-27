@@ -14,6 +14,7 @@ export const FEATURES = {
   notifications: 'live', // CODE-195
   pickups: 'live', // Recogidas por zona y tour
   bookings: 'beta', // Reservas por dia con hora de recogida
+  leadPanel: 'beta', // Ficha del cliente siempre abierta a la derecha del chat
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES
