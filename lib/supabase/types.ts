@@ -960,6 +960,10 @@ export type Database = {
         Returns: number
       }
       can_edit_knowledge: { Args: never; Returns: boolean }
+      get_business_metrics: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       get_org_metrics: { Args: { p_from: string; p_to: string }; Returns: Json }
       get_org_metrics_month: { Args: { p_month: string }; Returns: Json }
       get_org_monthly_usage: { Args: never; Returns: Json }
