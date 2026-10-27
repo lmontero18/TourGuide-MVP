@@ -26,8 +26,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
 
-  const { data: profile } = await supabase.from('users').select('org_id').eq('id', user.id).single()
-  if (!profile?.org_id) return NextResponse.json({ error: t('forbidden') }, { status: 403 })
+  const { data: profile } = await supabase.from('users').select('org_id, role').eq('id', user.id).single()
+  // El owner (dueño) no escribe: solo mira Metricas.
+  if (!profile?.org_id || profile.role === 'owner') return NextResponse.json({ error: t('forbidden') }, { status: 403 })
 
   const parsed = schema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: t('invalidInput') }, { status: 400 })

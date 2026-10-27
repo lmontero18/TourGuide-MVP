@@ -37,8 +37,9 @@ const fail = (body: Record<string, unknown>, status: number): AgentSendResult =>
 export async function getAgentOrg(supabase: Supabase): Promise<{ userId: string; orgId: string } | null> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const { data: profile } = await supabase.from('users').select('org_id').eq('id', user.id).single()
-  if (!profile?.org_id) return null
+  const { data: profile } = await supabase.from('users').select('org_id, role').eq('id', user.id).single()
+  // El owner (dueño) no escribe: solo mira Metricas.
+  if (!profile?.org_id || profile.role === 'owner') return null
   return { userId: user.id, orgId: profile.org_id }
 }
 
@@ -50,11 +51,12 @@ export async function prepareAgentSend(conversationId: string, t: T): Promise<Ag
 
   const { data: profile } = await supabase
     .from('users')
-    .select('org_id')
+    .select('org_id, role')
     .eq('id', user.id)
     .single()
 
-  if (!profile?.org_id) return fail({ error: t('forbidden') }, 403)
+  // El owner (dueño) no escribe: solo mira Metricas.
+  if (!profile?.org_id || profile.role === 'owner') return fail({ error: t('forbidden') }, 403)
 
   const { data: conv } = await supabase
     .from('conversations')

@@ -41,6 +41,7 @@ export async function PATCH(
     .update(parsed.data)
     .eq('id', id)
     .eq('org_id', ctx.orgId)
+    .neq('role', 'owner')
     .select('id')
     .maybeSingle()
 

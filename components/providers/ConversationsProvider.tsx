@@ -27,7 +27,9 @@ const BASE_TITLE = "Tourfy";
 // comparten una sola carga y una sola suscripcion de realtime, y la lista no
 // se vuelve a pedir al ir de Metricas a Conversaciones.
 export function ConversationsProvider({ children }: { children: React.ReactNode }) {
-  const { orgId, user } = useAuth();
+  const { orgId: authOrgId, user, role } = useAuth();
+  // El owner (dueño) no atiende conversaciones: no se cargan ni avisan.
+  const orgId = role === "owner" ? null : authOrgId;
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("dashboard.notifications");

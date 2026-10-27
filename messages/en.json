@@ -928,6 +928,47 @@
         "date": "Date",
         "conversations": "Active conversations",
         "filename": "tourfy-metrics"
+      },
+      "tabs": {
+        "general": "Overview",
+        "team": "Team"
+      },
+      "team": {
+        "lessThanMinute": "<1 min",
+        "samples": "{count, plural, one {# reply} other {# replies}}",
+        "cards": {
+          "response": "Team response time",
+          "responseHint": "How long the team takes to reply (median), counting business hours only: from when the client writes or the bot hands the chat to the team.",
+          "unanswered": "Unanswered now",
+          "unansweredHint": "Assigned, unresolved conversations where the client wrote last.",
+          "sales": "Sales",
+          "salesHint": "Opportunities marked Booked in the period.",
+          "sold": "Sold",
+          "soldHint": "Sum of those sales' amounts."
+        },
+        "columns": {
+          "member": "Person",
+          "chats": "Chats",
+          "chatsHint": "Conversations they wrote in during the period.",
+          "response": "Replies in",
+          "responseHint": "Median time to reply, in business hours.",
+          "unanswered": "Unanswered",
+          "unansweredHint": "Assigned to this person, where the client wrote last.",
+          "sales": "Sales",
+          "salesHint": "The ones they marked Booked (or, when unknown, the ones assigned to them).",
+          "sold": "Sold",
+          "closeRate": "Close rate",
+          "closeRateHint": "Sales over opportunities in their conversations during the period."
+        },
+        "roles": {
+          "admin": "Admin",
+          "agent": "Agent",
+          "owner": "Owner"
+        },
+        "notes": {
+          "hours": "Times count only within the agency's business hours.",
+          "unassigned": "{count, plural, one {# sale can't be attributed} other {# sales can't be attributed}}: they were marked before Tourfy started recording who closes each sale."
+        }
       }
     },
     "settings": {
@@ -1104,7 +1145,8 @@
         "help": "With general alerts on, the person gets a dashboard alert and an email when the bot asks for someone to help a customer or when a customer is left without an answer. With them off, they get none of that. Their own conversations always reach them: the email when a conversation is assigned to them and the messages from customers they're handling.",
         "nobody": "Nobody has general alerts on. If the bot asks for someone to help a customer, nobody on the team will find out.",
         "error": "We couldn't save the change. Please try again."
-      }
+      },
+      "owner": "owner"
     },
     "notifications": {
       "open": "Open",

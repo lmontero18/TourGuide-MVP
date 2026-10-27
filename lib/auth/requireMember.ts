@@ -8,7 +8,7 @@ type MemberContext =
   | { ok: false; response: NextResponse }
 
 // Guard para API routes del trabajo diario: usuario logueado con org, admin o
-// agente. Devuelve el cliente con la sesion: lo que sigue corre con RLS.
+// agente (el owner solo mira Metricas: 403). Devuelve el cliente con la sesion: lo que sigue corre con RLS.
 export async function requireMember(): Promise<MemberContext> {
   const supabase = await createClient()
   const t = await getTranslations('apiErrors')
@@ -17,8 +17,8 @@ export async function requireMember(): Promise<MemberContext> {
     return { ok: false, response: NextResponse.json({ error: t('unauthorized') }, { status: 401 }) }
   }
 
-  const { data: profile } = await supabase.from('users').select('org_id').eq('id', user.id).single()
-  if (!profile?.org_id) {
+  const { data: profile } = await supabase.from('users').select('org_id, role').eq('id', user.id).single()
+  if (!profile?.org_id || profile.role === 'owner') {
     return { ok: false, response: NextResponse.json({ error: t('forbidden') }, { status: 403 }) }
   }
 

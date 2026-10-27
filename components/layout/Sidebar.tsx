@@ -17,6 +17,8 @@ interface NavItem {
   feature?: FeatureKey;
   // Solo admin, salvo que la org tenga este feature: ahi tambien los agentes.
   agentFeature?: FeatureKey;
+  // Lo unico que ve el owner (dueño): Metricas.
+  ownerVisible?: boolean;
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -62,6 +64,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     key: "metrics",
     adminOnly: true,
+    ownerVisible: true,
     href: "/metrics",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -108,6 +111,7 @@ export const NAV_ITEMS: NavItem[] = [
 // Items que ve el usuario: los de admin solo para admins y los de un feature
 // solo si su org lo tiene.
 export function visibleNavItems(role: string | null, featureFlags: OrgFeatureFlags | null) {
+  if (role === "owner") return NAV_ITEMS.filter((item) => item.ownerVisible);
   return NAV_ITEMS.filter(
     (item) =>
       (!item.adminOnly || role !== "agent" || (!!item.agentFeature && hasFeature(featureFlags, item.agentFeature))) &&

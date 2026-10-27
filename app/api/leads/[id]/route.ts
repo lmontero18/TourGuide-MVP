@@ -44,6 +44,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
+  // El owner (dueño) no edita leads: solo mira Metricas.
+  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
+  if (!profile || profile.role === 'owner') return NextResponse.json({ error: t('forbidden') }, { status: 403 })
 
   const parsed = patchSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: t('invalidInput') }, { status: 400 })
@@ -62,8 +65,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     update.status = input.status
     const closed = input.status === 'converted' || input.status === 'lost'
     const wasClosed = lead.status === 'converted' || lead.status === 'lost'
-    if (closed && !wasClosed) update.closed_at = new Date().toISOString()
-    if (!closed) update.closed_at = null
+    // closed_by = quien marco la venta o la perdida: las metricas del equipo
+    // le atribuyen la venta.
+    if (closed && !wasClosed) {
+      update.closed_at = new Date().toISOString()
+      update.closed_by = user.id
+    }
+    if (!closed) {
+      update.closed_at = null
+      update.closed_by = null
+    }
   }
   if (input.amount !== undefined) update.amount = input.amount
   if (input.currency !== undefined) update.currency = input.currency

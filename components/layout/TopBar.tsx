@@ -67,8 +67,9 @@ export default function TopBar({ title, children }: TopBarProps) {
       <div className="flex shrink-0 items-center gap-1.5 md:gap-3">
         {children}
         <ThemeToggle />
-        <WhatsNew />
-        <NotificationBell />
+        {/* El owner (dueño) solo mira Metricas: sin novedades ni avisos */}
+        {profile?.role !== "owner" && <WhatsNew />}
+        {profile?.role !== "owner" && <NotificationBell />}
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setMenuOpen((v) => !v)}
@@ -87,7 +88,7 @@ export default function TopBar({ title, children }: TopBarProps) {
                 )}
                 {profile?.role && (
                   <p className="text-[10px] text-slate-400 mt-0.5 capitalize">
-                    {profile.role === "admin" ? tAgents("admin") : tAgents("agent")}
+                    {profile.role === "admin" ? tAgents("admin") : profile.role === "owner" ? tAgents("owner") : tAgents("agent")}
                   </p>
                 )}
               </div>

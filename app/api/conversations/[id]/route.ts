@@ -71,7 +71,8 @@ export async function PATCH(
     .eq('id', user.id)
     .single()
 
-  if (!profile?.org_id) {
+  // El owner (dueño) no toma, asigna ni resuelve: solo mira Metricas.
+  if (!profile?.org_id || profile.role === 'owner') {
     return NextResponse.json({ error: t('forbidden') }, { status: 403 })
   }
 

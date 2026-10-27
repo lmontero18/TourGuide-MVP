@@ -18,6 +18,8 @@ export async function GET() {
     .from('users')
     .select('id, email, full_name, role, created_at, notify_scope, notify_sound')
     .eq('org_id', ctx.orgId)
+    // El owner (dueño) es una cuenta fantasma: no aparece en Agentes.
+    .neq('role', 'owner')
     .order('created_at', { ascending: true })
 
   if (error) {
