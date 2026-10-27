@@ -1392,11 +1392,14 @@
         "add": "Agregar",
         "byAi": "Lo llenó la IA. Si lo corriges, la IA ya no lo cambia.",
         "amount": "Monto",
-        "amountPlaceholder": "Agregar monto",
         "trip": "El viaje",
         "hideEmpty": "Ocultar vacíos",
         "addFields": "+ Agregar {fields}",
-        "staleNotice": "Esta ficha es de antes: quedó {stage} el {date} y el cliente volvió a escribir."
+        "staleNotice": "Esta ficha es de antes: quedó {stage} el {date} y el cliente volvió a escribir.",
+        "addAmount": "+ Agregar monto",
+        "perPerson": "Por persona",
+        "total": "Total del grupo",
+        "quoteUnit": "Por persona o total"
       }
     },
     "common": {
