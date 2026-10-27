@@ -203,17 +203,18 @@ export default function InboxList({ activeId }: { activeId?: string }) {
                   </div>
                   {lead?.tour_interest && <p className="truncate text-sm text-navy-800">{lead.tour_interest}</p>}
                   <p className="truncate text-sm text-slate-500">{preview}</p>
-                  <div className="mt-2 flex items-center gap-1.5">
+                  <div className="mt-2 flex min-w-0 items-center gap-1.5">
                     {waiting !== null && (
-                      <span className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold ring-1 ${waitTone(waiting)}`}>
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden>
+                      <span className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-1.5 py-0.5 text-[11px] font-semibold ring-1 ${waitTone(waiting)}`}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                           <circle cx="12" cy="12" r="9" />
+                          <path d="M12 7v5l3 2" />
                         </svg>
                         {t("waiting", { time: shortDuration(waiting, t) })}
                       </span>
                     )}
                     {lead && (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-slate-50 px-1.5 py-0.5 text-[11px] font-medium text-slate-600 ring-1 ring-slate-200">
+                      <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md bg-slate-50 px-1.5 py-0.5 text-[11px] font-medium text-slate-600 ring-1 ring-slate-200">
                         <span className={`h-1.5 w-1.5 rounded-full ${STAGE_DOT[lead.status]}`} />
                         {lead.status === "converted" && lead.amount != null
                           ? formatMoney(lead.amount, lead.currency, locale)
@@ -221,12 +222,18 @@ export default function InboxList({ activeId }: { activeId?: string }) {
                       </span>
                     )}
                     {c.botActive && c.status !== "resolved" && (
-                      <span className="rounded-md bg-blue-50 px-1.5 py-0.5 text-[11px] font-semibold text-blue-700 ring-1 ring-blue-100">{t("bot")}</span>
+                      <span className="shrink-0 whitespace-nowrap rounded-md bg-blue-50 px-1.5 py-0.5 text-[11px] font-semibold text-blue-700 ring-1 ring-blue-100">{t("bot")}</span>
                     )}
                     {!c.botActive && c.assignee && (
-                      <span className="truncate text-[11px] text-slate-400">{c.assignee.name}</span>
+                      // Iniciales del agente: el nombre completo no entra junto a las etiquetas.
+                      <span
+                        title={c.assignee.name}
+                        className="ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-slate-500 ring-1 ring-slate-200"
+                      >
+                        {initials(c.assignee.name)}
+                      </span>
                     )}
-                    {c.unreadCount > 0 && <span className="ml-auto h-2 w-2 shrink-0 rounded-full bg-blue-600" aria-label={t("unread")} />}
+                    {c.unreadCount > 0 && <span className={`${!c.botActive && c.assignee ? "" : "ml-auto "}h-2 w-2 shrink-0 rounded-full bg-blue-600`} aria-label={t("unread")} />}
                   </div>
                 </div>
               </Link>
