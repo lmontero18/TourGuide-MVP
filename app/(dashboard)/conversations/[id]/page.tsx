@@ -55,6 +55,7 @@ export default function ConversationDetailPage() {
           initialAssignee={toAssignee(conv.assigned_agent)}
           leadButton={<ConversationLeadButton {...conversationLead} className={showPanel ? "xl:hidden" : ""} />}
           subtitle={preview && tour ? `${tour} · ${contactPhone}` : undefined}
+          channel={preview ? conv.contact?.channel : undefined}
           insight={
             preview ? (
               <ChatInsight key={conv.id} lead={conversationLead.lead} item={item} contactName={conv.contact?.name ?? null} />

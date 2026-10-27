@@ -9,6 +9,8 @@ export interface ConversationListItem {
   id: string
   contactName: string | null
   contactPhone: string
+  // Canal por el que escribe el cliente (hoy siempre 'whatsapp').
+  channel: string | null
   lastMessage: string
   // ISO crudo para ordenar; el "hace X" lo formatea ConversationItem segun el idioma.
   lastMessageIso: string | null
@@ -26,7 +28,7 @@ interface ConversationRow {
   status: ConversationStatus
   bot_active: boolean
   last_message_at: string | null
-  contact: { name: string | null; phone: string } | null
+  contact: { name: string | null; phone: string; channel: string } | null
   assigned_agent: { id: string; full_name: string | null; email: string } | null
   messages: { content: string; role: MessageRole }[]
 }
@@ -44,7 +46,7 @@ export interface ConversationEvents {
 }
 
 const LIST_SELECT = `id, status, bot_active, last_message_at,
-  contact:contacts(name, phone),
+  contact:contacts(name, phone, channel),
   ${ASSIGNED_AGENT_EMBED},
   messages(content, role, created_at)`
 
@@ -53,6 +55,7 @@ function toItem(c: ConversationRow): ConversationListItem {
     id: c.id,
     contactName: c.contact?.name ?? null,
     contactPhone: c.contact?.phone ?? '',
+    channel: c.contact?.channel ?? null,
     lastMessage: c.messages?.[0]?.content ?? '',
     lastMessageIso: c.last_message_at,
     lastRole: c.messages?.[0]?.role ?? null,
