@@ -668,7 +668,8 @@
         "noTourSelected": "Elige qué tours llevan recogida en hotel",
         "tourSettings": "Salidas y operador",
         "cellHint": "Click en una hora para cambiarla."
-      }
+      },
+      "lastEdit": "Última modificación: {by} · {when}"
     },
     "topbar": {
       "search": "Buscar…",

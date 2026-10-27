@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import type { PriceTier, Tour } from "@/types";
+import type { KnowledgeEdit, PriceTier, Tour } from "@/types";
 import SaveStatus, { type SaveState } from "./SaveStatus";
+import LastEdit from "./LastEdit";
 
 interface TourDrawerProps {
   tour: Tour | null;
   saveState: SaveState;
+  // Quien modifico este tour por ultima vez.
+  lastEdit?: KnowledgeEdit | null;
   onChange: (tour: Tour) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
@@ -53,7 +56,7 @@ function AmountInput({ value, onChange, className, label }: { value: number; onC
 
 // Panel lateral de edicion de un tour. Los cambios se guardan solos (la
 // pagina hace el guardado con debounce) y el estado se muestra abajo.
-export default function TourDrawer({ tour, saveState, onChange, onDelete, onClose }: TourDrawerProps) {
+export default function TourDrawer({ tour, saveState, lastEdit, onChange, onDelete, onClose }: TourDrawerProps) {
   const t = useTranslations("dashboard.tours");
   const open = !!tour;
 
@@ -176,7 +179,10 @@ export default function TourDrawer({ tour, saveState, onChange, onDelete, onClos
 
             <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3">
               <button onClick={() => onDelete(tour.id)} className="text-sm font-semibold text-red-600 hover:text-red-700">{t("deleteTour")}</button>
-              <SaveStatus state={saveState} />
+              <div className="flex min-w-0 items-center gap-3">
+                <LastEdit edit={lastEdit} className="truncate" />
+                <SaveStatus state={saveState} />
+              </div>
             </div>
           </>
         )}

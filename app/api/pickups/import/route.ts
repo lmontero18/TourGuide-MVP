@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTranslations } from 'next-intl/server'
-import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { requireKnowledgeEditor } from '@/lib/auth/requireKnowledgeEditor'
 import { getOrgFeatureFlags } from '@/lib/supabase/queries/organizations'
 import { hasFeature } from '@/lib/features'
 import { parsePickupWorkbook } from '@/lib/pickups/parseSheet'
@@ -15,7 +15,7 @@ const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.s
 // NO guarda nada: el guardado es el PUT de /api/pickups despues de revisar.
 export async function POST(request: NextRequest) {
   const t = await getTranslations('apiErrors')
-  const auth = await requireAdmin()
+  const auth = await requireKnowledgeEditor()
   if (!auth.ok) return auth.response
   if (!hasFeature(await getOrgFeatureFlags(auth.orgId), 'pickups')) {
     return NextResponse.json({ error: t('forbidden') }, { status: 403 })

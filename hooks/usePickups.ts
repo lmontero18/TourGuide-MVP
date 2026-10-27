@@ -28,7 +28,11 @@ export function usePickups(enabled: boolean) {
           body: JSON.stringify(data),
           keepalive,
         })
-        if (res.ok) queryClient.setQueryData(queryKeys.pickups, data)
+        if (res.ok) {
+          queryClient.setQueryData(queryKeys.pickups, data)
+          // "Ultima modificacion" de Recogidas vive en la org.
+          void queryClient.invalidateQueries({ queryKey: queryKeys.organization })
+        }
         return res.ok
       } catch {
         return false

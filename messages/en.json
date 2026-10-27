@@ -668,7 +668,8 @@
         "noTourSelected": "Choose which tours include hotel pickup",
         "tourSettings": "Departures and operator",
         "cellHint": "Click a time to change it."
-      }
+      },
+      "lastEdit": "Last edited by {by} · {when}"
     },
     "topbar": {
       "search": "Search...",
