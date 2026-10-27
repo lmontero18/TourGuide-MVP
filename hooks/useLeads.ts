@@ -154,6 +154,10 @@ export function useConversationLead(conversationId: string) {
   return { lead: isPending ? undefined : (data ?? null), update, refresh: requestRefresh }
 }
 
+// Lo que comparten el boton Ficha y el panel fijo del chat: un solo hook por
+// conversacion, porque el canal de realtime no se puede abrir dos veces.
+export type ConversationLead = ReturnType<typeof useConversationLead>
+
 export interface PastLead {
   id: string
   status: LeadStatus

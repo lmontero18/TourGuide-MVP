@@ -4,6 +4,8 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import ConversationList from "@/components/conversations/ConversationList";
 import TopBar from "@/components/layout/TopBar";
+import { hasFeature } from "@/lib/features";
+import { useAuth } from "@/hooks/useAuth";
 
 // La lista vive en el layout, no en cada pagina: Next no re-monta los layouts
 // al navegar entre rutas hijas, asi que pasar de una conversacion a otra solo
@@ -13,6 +15,10 @@ export default function ConversationsLayout({ children }: { children: React.Reac
   const t = useTranslations("dashboard.conversations");
   const params = useParams<{ id?: string }>();
   const activeId = params.id;
+  // Con la ficha fija a la derecha (flag leadPanel) la lista se angosta para
+  // que el chat no quede apretado en una laptop.
+  const { featureFlags } = useAuth();
+  const narrowList = hasFeature(featureFlags, "leadPanel");
 
   return (
     <div className="flex h-full flex-col">
@@ -20,7 +26,7 @@ export default function ConversationsLayout({ children }: { children: React.Reac
       <div className="flex flex-1 overflow-hidden">
         {/* En mobile, con una conversacion abierta se ve solo el chat */}
         <div
-          className={`w-full border-slate-200 bg-white overflow-hidden lg:max-w-md lg:border-r ${
+          className={`w-full border-slate-200 bg-white overflow-hidden lg:max-w-md lg:border-r ${narrowList ? "xl:max-w-sm" : ""} ${
             activeId ? "hidden lg:block" : ""
           }`}
         >

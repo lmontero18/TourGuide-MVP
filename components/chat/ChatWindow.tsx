@@ -10,7 +10,6 @@ import ChatInput from "./ChatInput";
 import TakeControlButton from "./TakeControlButton";
 import AssignMenu from "./AssignMenu";
 import TemplatePicker from "./TemplatePicker";
-import ConversationLeadButton from "@/components/leads/ConversationLeadButton";
 import { ChatMessagesSkeleton } from "./ChatSkeleton";
 import { useMessages } from "@/hooks/useMessages";
 import { useConversationControl } from "@/hooks/useConversationControl";
@@ -27,6 +26,8 @@ interface ChatWindowProps {
   initialBotActive?: boolean;
   initialAssignee?: Assignee | null;
   initialStatus?: ConversationStatus;
+  // Boton Ficha: lo arma la pagina, que tambien muestra el panel de la ficha.
+  leadButton?: React.ReactNode;
 }
 
 interface OptimisticMessage {
@@ -83,6 +84,7 @@ export default function ChatWindow({
   initialBotActive = true,
   initialAssignee = null,
   initialStatus = "open",
+  leadButton,
 }: ChatWindowProps) {
   const router = useRouter();
   const t = useTranslations("dashboard.chat");
@@ -422,7 +424,7 @@ export default function ChatWindow({
               </button>
             </>
           )}
-          <ConversationLeadButton conversationId={conversationId} />
+          {leadButton}
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen((v) => !v)}
