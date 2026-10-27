@@ -12,6 +12,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'sale-confetti',
+    date: '2026-10-27T21:00:00Z',
+    href: '/leads',
+    es: {
+      title: 'Cada venta se celebra 🎉',
+      body: 'Cuando marcas una oportunidad como Reservado, Tourfy lo celebra con confeti. Marca cada venta con su monto: así ves cuánto vende tu equipo por WhatsApp.',
+    },
+    en: {
+      title: 'Every sale gets celebrated 🎉',
+      body: 'When you mark an opportunity as Booked, Tourfy celebrates with confetti. Mark every sale with its amount so you can see how much your team sells on WhatsApp.',
+    },
+  },
+  {
     id: 'inbox-v2',
     date: '2026-10-27T04:00:00Z',
     href: '/conversations',
