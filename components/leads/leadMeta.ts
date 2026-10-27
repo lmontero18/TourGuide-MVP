@@ -1,4 +1,4 @@
-import type { LeadDetails, LeadIntent, LeadStatus } from "@/types";
+import type { Lead, LeadDetails, LeadIntent, LeadStatus } from "@/types";
 
 export const STAGES: LeadStatus[] = ["new", "contacted", "qualified", "converted", "lost"];
 
@@ -44,4 +44,13 @@ export function formatMoney(amount: number, currency: string | null, locale: str
   } catch {
     return `${amount} ${currency ?? ""}`.trim();
   }
+}
+
+// Una oportunidad cerrada (reservado/perdido) deja de describir la conversacion
+// cuando el cliente vuelve a escribir despues: es otro tema, no el tour que ya
+// reservo. La bandeja y el aviso del chat no la muestran como la actual.
+export function isCurrentLead(lead: Pick<Lead, "status" | "closed_at" | "updated_at">, lastMessageIso: string | null): boolean {
+  if (lead.status !== "converted" && lead.status !== "lost") return true;
+  if (!lastMessageIso) return true;
+  return new Date(lastMessageIso).getTime() <= new Date(lead.closed_at ?? lead.updated_at).getTime();
 }

@@ -14,6 +14,7 @@ import { useConversationDetail } from "@/hooks/useConversationDetail";
 import { useConversationLead } from "@/hooks/useLeads";
 import { useConversationsContext } from "@/components/providers/ConversationsProvider";
 import { cleanText } from "@/lib/leads/emptyValue";
+import { isCurrentLead } from "@/components/leads/leadMeta";
 
 export default function ConversationDetailPage() {
   const params = useParams();
@@ -39,7 +40,8 @@ export default function ConversationDetailPage() {
     );
   }
   const contactPhone = conv.contact?.phone ?? "";
-  const tour = cleanText(conversationLead.lead?.tour_interest);
+  const lead = conversationLead.lead;
+  const tour = lead && isCurrentLead(lead, item?.lastMessageIso ?? null) ? cleanText(lead.tour_interest) : null;
   return (
     <div className="flex h-full">
       <div className="min-w-0 flex-1">
@@ -65,7 +67,8 @@ export default function ConversationDetailPage() {
           key={conv.id}
           {...conversationLead}
           contactName={conv.contact?.name ?? null}
-          contactPhone={conv.contact?.phone ?? ""}
+          contactPhone={contactPhone}
+          lastMessageIso={item?.lastMessageIso ?? null}
         />
       )}
     </div>

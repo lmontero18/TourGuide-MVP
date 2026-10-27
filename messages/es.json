@@ -1395,7 +1395,8 @@
         "amountPlaceholder": "Agregar monto",
         "trip": "El viaje",
         "hideEmpty": "Ocultar vacíos",
-        "addFields": "+ Agregar {fields}"
+        "addFields": "+ Agregar {fields}",
+        "staleNotice": "Esta ficha es de antes: quedó {stage} el {date} y el cliente volvió a escribir."
       }
     },
     "common": {

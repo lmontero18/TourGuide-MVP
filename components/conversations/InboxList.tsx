@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLeads, type LeadWithContact } from "@/hooks/useLeads";
 import { useConversationsContext } from "@/components/providers/ConversationsProvider";
 import type { ConversationListItem } from "@/hooks/useConversations";
-import { STAGE_DOT, formatMoney } from "@/components/leads/leadMeta";
+import { STAGE_DOT, formatMoney, isCurrentLead } from "@/components/leads/leadMeta";
 import { parseReaction } from "@/lib/whatsapp/placeholders";
 
 // Bandeja por lo que hay que hacer (prueba de diseno, solo usuarios preview):
@@ -169,7 +169,8 @@ export default function InboxList({ activeId }: { activeId?: string }) {
           </div>
         ) : (
           filtered.map((c) => {
-            const lead = leadByConversation.get(c.id);
+            const found = leadByConversation.get(c.id);
+            const lead = found && isCurrentLead(found, c.lastMessageIso) ? found : undefined;
             const waiting = inTab.toAnswer(c) ? waitedMs(c, now) : null;
             const reaction = parseReaction(c.lastMessage);
             const preview = reaction
