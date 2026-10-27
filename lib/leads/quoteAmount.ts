@@ -51,9 +51,34 @@ export function suggestAmount(quote: string | null | undefined, groupSize?: stri
 
   const perPerson = /por persona|per person|\bp\/?p\b|c\/u|cada uno|each/i.test(text)
   if (!perPerson) return { amount: value, currency }
-  const people = Number(/\d+/.exec(groupSize ?? '')?.[0])
-  if (!Number.isFinite(people) || people <= 0) return null
+  const people = groupCount(groupSize)
+  if (!people) return null
   return { amount: Math.round(value * people * 100) / 100, currency }
+}
+
+const COUNT_WORDS: Record<string, number> = {
+  un: 1, una: 1, uno: 1, one: 1, dos: 2, two: 2, tres: 3, three: 3, cuatro: 4, four: 4,
+  cinco: 5, five: 5, seis: 6, six: 6, siete: 7, seven: 7, ocho: 8, eight: 8,
+}
+
+// Cuantas personas dice la ficha: "4", "2 adultos y 1 niño" → 3, "pareja" → 2,
+// "solo yo" → 1. Las edades no cuentan ("niño de 5 años"). Ante la duda, null.
+export function groupCount(groupSize: string | null | undefined): number | null {
+  const text = (groupSize ?? '').toLowerCase().trim()
+  if (!text || text === 'null') return null
+  if (/\b(pareja|couple|dos personas)\b/.test(text)) return 2
+  if (/^(solo|sola|yo solo|yo sola|solo yo|just me|alone|1 persona|una persona)$/.test(text)) return 1
+  // "2 adultos y 1 niño": suma cada numero (o palabra) seguido de quien es.
+  const people = /(\d+|un|una|uno|dos|tres|cuatro|cinco|seis|siete|ocho|one|two|three|four|five|six|seven|eight)\s+(adult|niñ|nin|menor|persona|pax|people|person|kid|child|bebé|bebe|infant|senior|mayor|estudiante|student)/g
+  let total = 0
+  for (const m of text.matchAll(people)) total += Number(m[1]) || COUNT_WORDS[m[1]]
+  if (total > 0) return total
+  // Un solo numero suelto: "Grupo de 10".
+  const numbers = text.match(/\d+/g)
+  if (numbers?.length === 1) return Number(numbers[0]) || null
+  const first = /^\s*(\d+)/.exec(text)?.[1] ?? /^\s*(\w+)/.exec(text)?.[1]
+  const n = first ? Number(first) || COUNT_WORDS[first] : NaN
+  return Number.isFinite(n) && n > 0 ? n : null
 }
 
 // La cotizacion separada para editarla con campos (numero, moneda, por persona

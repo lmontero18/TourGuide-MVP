@@ -1399,7 +1399,8 @@
         "addAmount": "+ Add amount",
         "perPerson": "Per person",
         "total": "Group total",
-        "quoteUnit": "Per person or total"
+        "quoteUnit": "Per person or total",
+        "quoteTotal": "Total"
       }
     },
     "common": {

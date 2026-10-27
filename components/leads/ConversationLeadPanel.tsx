@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useContactLeads, type ConversationLead, type LeadPatch, type LeadWithContact } from "@/hooks/useLeads";
 import type { LeadField, LeadStatus } from "@/types";
 import { FICHA_FIELDS, STAGES, STAGE_DOT, TEMPERATURE, formatMoney, isCurrentLead, timeAgo } from "./leadMeta";
-import { formatQuote, parseQuote, suggestAmount, type SuggestedAmount } from "@/lib/leads/quoteAmount";
+import { formatQuote, groupCount, parseQuote, suggestAmount, type SuggestedAmount } from "@/lib/leads/quoteAmount";
 import { cleanText } from "@/lib/leads/emptyValue";
 import { useAuth } from "@/hooks/useAuth";
 import { hasFeature } from "@/lib/features";
@@ -407,6 +407,10 @@ function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "upd
   const filled = TRIP_FIELDS.filter((f) => fieldValue(lead, f));
   const empty = TRIP_FIELDS.filter((f) => !fieldValue(lead, f));
   const shown = showEmpty ? TRIP_FIELDS : filled;
+  // Precio por persona × grupo, para no sacar la calculadora.
+  const quote = parseQuote(fieldValue(lead, "quote"));
+  const people = groupCount(lead.metadata?.group_size);
+  const quoteTotal = quote.perPerson && quote.amount != null && people ? Math.round(quote.amount * people * 100) / 100 : null;
   const summary = fieldValue(lead, "summary");
   const nextStep = fieldValue(lead, "next_step");
   const sourceMark = (f: LeadField) =>
@@ -466,7 +470,8 @@ function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "upd
         <p className={`${sectionLabel} mb-1`}>{tp("trip")}</p>
         <dl>
           {shown.map((f) => (
-            <div key={`${f}-${fieldValue(lead, f)}`} className="grid grid-cols-[96px_minmax(0,1fr)] items-start gap-2 py-1.5">
+            <Fragment key={`${f}-${fieldValue(lead, f)}`}>
+            <div className="grid grid-cols-[96px_minmax(0,1fr)] items-start gap-2 py-1.5">
               <dt className="pt-px text-sm text-slate-500">
                 {t(`fields.${f}`)}
                 {fieldValue(lead, f) && sourceMark(f)}
@@ -481,6 +486,18 @@ function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "upd
                 )}
               </dd>
             </div>
+            {f === "quote" && quoteTotal != null && (
+              <div className="grid grid-cols-[96px_minmax(0,1fr)] items-baseline gap-2 py-1.5">
+                <dt className="text-sm text-slate-500">{tp("quoteTotal")}</dt>
+                <dd className="text-sm">
+                  <span className="font-bold tabular-nums text-navy-900">{formatMoney(quoteTotal, quote.currency, locale)}</span>
+                  <span className="ml-1.5 text-xs tabular-nums text-slate-400">
+                    {formatMoney(quote.amount!, quote.currency, locale)} × {people}
+                  </span>
+                </dd>
+              </div>
+            )}
+            </Fragment>
           ))}
         </dl>
         {empty.length > 0 && (
