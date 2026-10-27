@@ -109,7 +109,7 @@ function MoreTabs({ tab, counts, onSelect }: { tab: Tab; counts: Record<Tab, num
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         title={active ? t(`tabs.${tab}`) : undefined}
-        className={`inline-flex max-w-full items-center gap-1.5 whitespace-nowrap border-b-2 pb-2.5 text-sm transition-colors ${
+        className={`inline-flex max-w-full items-center gap-1.5 whitespace-nowrap border-b-2 pb-2.5 text-sm outline-none transition-colors focus-visible:text-navy-900 focus-visible:underline ${
           active ? "border-navy-900 font-semibold text-navy-900" : "border-transparent text-slate-500 hover:text-navy-900"
         }`}
       >
@@ -122,7 +122,9 @@ function MoreTabs({ tab, counts, onSelect }: { tab: Tab; counts: Record<Tab, num
         </svg>
       </button>
       {open && (
-        <ul role="menu" className="absolute left-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+        // Abre hacia la izquierda: "Mas" esta al final de la fila y la columna
+        // de la lista corta lo que se sale por la derecha.
+        <ul role="menu" className="absolute right-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
           {MORE.map((k) => (
             <li key={k}>
               <button
