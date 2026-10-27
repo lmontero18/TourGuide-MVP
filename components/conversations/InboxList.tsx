@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import ConversationListSkeleton from "./ConversationListSkeleton";
 import ChannelIcon from "./ChannelIcon";
@@ -18,6 +18,9 @@ import { parseReaction } from "@/lib/whatsapp/placeholders";
 // Mas las pestañas de siempre: esperando agente, mias y resueltas.
 type Tab = "toAnswer" | "waiting" | "mine" | "theirTurn" | "resolved" | "all";
 const TABS: Tab[] = ["toAnswer", "waiting", "mine", "theirTurn", "resolved", "all"];
+// Una sola fila: las de todos los dias a la vista, el resto en "Mas".
+const PRIMARY: Tab[] = ["toAnswer", "mine", "all"];
+const MORE: Tab[] = ["waiting", "theirTurn", "resolved"];
 const DAY_MS = 86_400_000;
 const HOUR_MS = 3_600_000;
 
@@ -73,6 +76,74 @@ function stamp(iso: string | null, locale: string, yesterday: string, now: numbe
     return day.charAt(0).toUpperCase() + day.slice(1);
   }
   return d.toLocaleDateString(locale, { day: "numeric", month: "short" });
+}
+
+// "Mas ▾": las pestañas que no entran en la fila. Si la elegida esta aca, el
+// boton muestra su nombre.
+function MoreTabs({ tab, counts, onSelect }: { tab: Tab; counts: Record<Tab, number>; onSelect: (t: Tab) => void }) {
+  const t = useTranslations("dashboard.inbox");
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const active = MORE.includes(tab);
+  // Alguien espera un agente y no se esta mirando esa pestaña: punto rojo.
+  const alert = counts.waiting > 0 && tab !== "waiting";
+
+  return (
+    <div ref={ref} className="relative -mb-px min-w-0">
+      <button
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        title={active ? t(`tabs.${tab}`) : undefined}
+        className={`inline-flex max-w-full items-center gap-1.5 whitespace-nowrap border-b-2 pb-2.5 text-sm transition-colors ${
+          active ? "border-navy-900 font-semibold text-navy-900" : "border-transparent text-slate-500 hover:text-navy-900"
+        }`}
+      >
+        {alert && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
+        {/* El nombre largo ("Esperando al cliente") se corta para no salir de la fila */}
+        <span className="min-w-0 truncate">{active ? t(`tabs.${tab}`) : t("more")}</span>
+        {active && <span className="shrink-0 text-xs font-normal text-slate-400">{counts[tab]}</span>}
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-slate-400" aria-hidden>
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+      {open && (
+        <ul role="menu" className="absolute left-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+          {MORE.map((k) => (
+            <li key={k}>
+              <button
+                role="menuitemradio"
+                aria-checked={tab === k}
+                onClick={() => {
+                  setOpen(false);
+                  onSelect(k);
+                }}
+                className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-slate-50 ${tab === k ? "font-semibold text-navy-900" : "text-slate-600"}`}
+              >
+                {k === "waiting" && counts.waiting > 0 && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
+                {t(`tabs.${k}`)}
+                <span className="ml-auto text-xs text-slate-400">{counts[k]}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 export default function InboxList({ activeId }: { activeId?: string }) {
@@ -137,9 +208,8 @@ export default function InboxList({ activeId }: { activeId?: string }) {
           <span className="font-semibold text-navy-900">{t("toAnswerCount", { count: counts.toAnswer })}</span>
           {overADay > 0 && <span className="text-red-600"> · {t("overADay", { count: overADay })}</span>}
         </p>
-        {/* Una sola fila que se desliza: con seis pestañas no entran todas */}
-        <div className="-mx-5 mt-4 flex gap-5 overflow-x-auto border-b border-slate-100 px-5 [scrollbar-width:none]" role="tablist">
-          {TABS.map((k) => (
+        <div className="mt-4 flex items-center gap-4 border-b border-slate-100" role="tablist">
+          {PRIMARY.map((k) => (
             <button
               key={k}
               role="tab"
@@ -149,11 +219,12 @@ export default function InboxList({ activeId }: { activeId?: string }) {
                 tab === k ? "border-navy-900 font-semibold text-navy-900" : "border-transparent text-slate-500 hover:text-navy-900"
               }`}
             >
-              {(k === "toAnswer" || k === "waiting") && counts[k] > 0 && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
+              {k === "toAnswer" && counts.toAnswer > 0 && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
               {t(`tabs.${k}`)}
               <span className="text-xs text-slate-400">{counts[k]}</span>
             </button>
           ))}
+          <MoreTabs tab={tab} counts={counts} onSelect={setTab} />
         </div>
       </div>
 
