@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ASSIGNED_AGENT_EMBED, toAssignee } from '@/lib/assignee'
-import type { Assignee, ConversationStatus } from '@/types'
+import type { Assignee, ConversationStatus, MessageRole } from '@/types'
 
 export interface ConversationListItem {
   id: string
@@ -12,6 +12,8 @@ export interface ConversationListItem {
   lastMessage: string
   // ISO crudo para ordenar; el "hace X" lo formatea ConversationItem segun el idioma.
   lastMessageIso: string | null
+  // Quien escribio el ultimo mensaje: 'user' = el cliente espera respuesta.
+  lastRole: MessageRole | null
   status: ConversationStatus
   botActive: boolean
   assignee: Assignee | null
@@ -26,7 +28,7 @@ interface ConversationRow {
   last_message_at: string | null
   contact: { name: string | null; phone: string } | null
   assigned_agent: { id: string; full_name: string | null; email: string } | null
-  messages: { content: string }[]
+  messages: { content: string; role: MessageRole }[]
 }
 
 // Eventos para avisos (CODE-175). El hook solo los detecta; quien decide si
@@ -44,7 +46,7 @@ export interface ConversationEvents {
 const LIST_SELECT = `id, status, bot_active, last_message_at,
   contact:contacts(name, phone),
   ${ASSIGNED_AGENT_EMBED},
-  messages(content, created_at)`
+  messages(content, role, created_at)`
 
 function toItem(c: ConversationRow): ConversationListItem {
   return {
@@ -53,6 +55,7 @@ function toItem(c: ConversationRow): ConversationListItem {
     contactPhone: c.contact?.phone ?? '',
     lastMessage: c.messages?.[0]?.content ?? '',
     lastMessageIso: c.last_message_at,
+    lastRole: c.messages?.[0]?.role ?? null,
     status: c.status,
     botActive: c.bot_active,
     assignee: toAssignee(c.assigned_agent),
@@ -255,6 +258,7 @@ export function useConversations(
             ...current,
             lastMessage: msg.content,
             lastMessageIso: msg.created_at,
+            lastRole: msg.role as MessageRole,
           }
           upsert(updated)
           if (msg.role === 'user') eventsRef.current.onCustomerMessage?.(updated, msg.content)

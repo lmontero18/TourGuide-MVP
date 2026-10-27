@@ -30,6 +30,14 @@ export function hasFeature(org: OrgFeatureFlags | null | undefined, key: Feature
   return org.is_beta || org.features.includes(key)
 }
 
+// Pruebas de diseno que por ahora solo ve el equipo de Tourfy. Van por usuario,
+// no por org: Agencia Test tiene otros admins que no las tienen que ver.
+const PREVIEW_USERS = new Set(['916175b8-a23f-4e7d-8392-7bcf05d5f633'])
+
+export function isPreviewUser(userId: string | null | undefined): boolean {
+  return !!userId && PREVIEW_USERS.has(userId)
+}
+
 // Para webhook / crons con service client. Un feature 'live' no consulta la DB;
 // si la consulta falla la org queda sin el feature (falla cerrado).
 export async function orgHasFeature(supabase: SupabaseClient, orgId: string, key: FeatureKey): Promise<boolean> {
