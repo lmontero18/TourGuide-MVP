@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import ConversationListSkeleton from "./ConversationListSkeleton";
 import ChannelIcon from "./ChannelIcon";
@@ -13,27 +13,24 @@ import { STAGE_DOT, formatMoney, isCurrentLead } from "@/components/leads/leadMe
 import { parseReaction } from "@/lib/whatsapp/placeholders";
 
 // Bandeja por lo que hay que hacer (prueba de diseno, flag inboxPreview):
-// "Por responder" = el cliente escribio ultimo y no lo tiene el bot.
-// "Esperando al cliente" = le respondimos y falta que conteste.
-// Mas las pestañas de siempre: esperando agente, mias y resueltas.
-type Tab = "toAnswer" | "waiting" | "mine" | "theirTurn" | "resolved" | "all";
-const TABS: Tab[] = ["toAnswer", "waiting", "mine", "theirTurn", "resolved", "all"];
-// Una sola fila: las de todos los dias a la vista, el resto en "Mas".
-const PRIMARY: Tab[] = ["toAnswer", "mine", "all"];
-const MORE: Tab[] = ["waiting", "theirTurn", "resolved"];
+// "Por responder" = le toca al equipo: el cliente escribio ultimo y no lo
+// tiene el bot, o el bot la paso al equipo y nadie la tomo (ahi el ultimo
+// mensaje es del bot, "te paso con el equipo"). "Mias" = asignadas a mi.
+// "Todas" incluye las resueltas, marcadas con su etiqueta.
+type Tab = "toAnswer" | "mine" | "all";
+const TABS: Tab[] = ["toAnswer", "mine", "all"];
 const DAY_MS = 86_400_000;
 const HOUR_MS = 3_600_000;
 
-const isToAnswer = (c: ConversationListItem) => c.status !== "resolved" && !c.botActive && c.lastRole === "user";
+const isToAnswer = (c: ConversationListItem) =>
+  c.status !== "resolved" &&
+  !c.botActive &&
+  (c.lastRole === "user" || (c.status === "pending" && !c.assignee));
 
 function tabFilters(me: string | undefined): Record<Tab, (c: ConversationListItem) => boolean> {
   return {
     toAnswer: isToAnswer,
-    // Esperando agente = el bot pidio un humano y nadie la tomo.
-    waiting: (c) => c.status === "pending" && !c.assignee,
     mine: (c) => c.status !== "resolved" && !!me && c.assignee?.id === me,
-    theirTurn: (c) => c.status !== "resolved" && c.lastRole !== null && c.lastRole !== "user",
-    resolved: (c) => c.status === "resolved",
     all: () => true,
   };
 }
@@ -76,76 +73,6 @@ function stamp(iso: string | null, locale: string, yesterday: string, now: numbe
     return day.charAt(0).toUpperCase() + day.slice(1);
   }
   return d.toLocaleDateString(locale, { day: "numeric", month: "short" });
-}
-
-// "Mas ▾": las pestañas que no entran en la fila. Si la elegida esta aca, el
-// boton muestra su nombre.
-function MoreTabs({ tab, counts, onSelect }: { tab: Tab; counts: Record<Tab, number>; onSelect: (t: Tab) => void }) {
-  const t = useTranslations("dashboard.inbox");
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  const active = MORE.includes(tab);
-  // Alguien espera un agente y no se esta mirando esa pestaña: punto rojo.
-  const alert = counts.waiting > 0 && tab !== "waiting";
-
-  return (
-    <div ref={ref} className="relative -mb-px min-w-0">
-      <button
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        title={active ? t(`tabs.${tab}`) : undefined}
-        className={`inline-flex max-w-full items-center gap-1.5 whitespace-nowrap border-b-2 pb-2.5 text-sm outline-none transition-colors focus-visible:text-navy-900 focus-visible:underline ${
-          active ? "border-navy-900 font-semibold text-navy-900" : "border-transparent text-slate-500 hover:text-navy-900"
-        }`}
-      >
-        {alert && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
-        {/* El nombre largo ("Esperando al cliente") se corta para no salir de la fila */}
-        <span className="min-w-0 truncate">{active ? t(`tabs.${tab}`) : t("more")}</span>
-        {active && <span className="shrink-0 text-xs font-normal text-slate-400">{counts[tab]}</span>}
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-slate-400" aria-hidden>
-          <path d="M6 9l6 6 6-6" />
-        </svg>
-      </button>
-      {open && (
-        // Abre hacia la izquierda: "Mas" esta al final de la fila y la columna
-        // de la lista corta lo que se sale por la derecha.
-        <ul role="menu" className="absolute right-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
-          {MORE.map((k) => (
-            <li key={k}>
-              <button
-                role="menuitemradio"
-                aria-checked={tab === k}
-                onClick={() => {
-                  setOpen(false);
-                  onSelect(k);
-                }}
-                className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-slate-50 ${tab === k ? "font-semibold text-navy-900" : "text-slate-600"}`}
-              >
-                {k === "waiting" && counts.waiting > 0 && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
-                {t(`tabs.${k}`)}
-                <span className="ml-auto text-xs text-slate-400">{counts[k]}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
 }
 
 export default function InboxList({ activeId }: { activeId?: string }) {
@@ -210,14 +137,14 @@ export default function InboxList({ activeId }: { activeId?: string }) {
           <span className="font-semibold text-navy-900">{t("toAnswerCount", { count: counts.toAnswer })}</span>
           {overADay > 0 && <span className="text-red-600"> · {t("overADay", { count: overADay })}</span>}
         </p>
-        <div className="mt-4 flex items-center gap-4 border-b border-slate-100" role="tablist">
-          {PRIMARY.map((k) => (
+        <div className="mt-4 flex items-center gap-5 border-b border-slate-100" role="tablist">
+          {TABS.map((k) => (
             <button
               key={k}
               role="tab"
               aria-selected={tab === k}
               onClick={() => setTab(k)}
-              className={`-mb-px inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 pb-2.5 text-sm transition-colors ${
+              className={`-mb-px inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 pb-2.5 text-sm transition-colors ${
                 tab === k ? "border-navy-900 font-semibold text-navy-900" : "border-transparent text-slate-500 hover:text-navy-900"
               }`}
             >
@@ -226,7 +153,6 @@ export default function InboxList({ activeId }: { activeId?: string }) {
               <span className="text-xs text-slate-400">{counts[k]}</span>
             </button>
           ))}
-          <MoreTabs tab={tab} counts={counts} onSelect={setTab} />
         </div>
       </div>
 
@@ -304,6 +230,9 @@ export default function InboxList({ activeId }: { activeId?: string }) {
                           ? formatMoney(lead.amount, lead.currency, locale)
                           : tStage(lead.status)}
                       </span>
+                    )}
+                    {c.status === "resolved" && (
+                      <span className="shrink-0 whitespace-nowrap rounded-md bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500">{t("resolved")}</span>
                     )}
                     {c.botActive && c.status !== "resolved" && (
                       <span className="shrink-0 whitespace-nowrap rounded-md bg-blue-50 px-1.5 py-0.5 text-[11px] font-semibold text-blue-700 ring-1 ring-blue-100">{t("bot")}</span>
