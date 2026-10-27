@@ -1539,7 +1539,8 @@
       },
       "channels": {
         "whatsapp": "WhatsApp"
-      }
+      },
+      "more": "More"
     },
     "theme": {
       "dark": "Dark mode",
