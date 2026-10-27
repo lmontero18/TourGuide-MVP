@@ -18,8 +18,8 @@ export function TemplateCardSkeleton({ nameWidth = "w-40" }: { nameWidth?: strin
         <div className="flex h-5 items-center pt-1"><Skeleton className="h-2.5 w-12" /></div>
       </div>
       {/* Vista previa (fondo de chat de WhatsApp) */}
-      <div className="rounded-2xl bg-[#e9e2d8] p-4">
-        <div className="max-w-[300px] space-y-1.5 rounded-lg rounded-tl-none bg-white px-3 pb-1.5 pt-2.5 shadow-sm">
+      <div className="wa-preview rounded-2xl bg-[#e9e2d8] p-4">
+        <div className="wa-preview-bubble max-w-[300px] space-y-1.5 rounded-lg rounded-tl-none bg-white px-3 pb-1.5 pt-2.5 shadow-sm">
           <Skeleton className="h-3 w-3/5 bg-slate-200" />
           <Skeleton className="h-2.5 w-full bg-slate-200/80" />
           <Skeleton className="h-2.5 w-11/12 bg-slate-200/80" />
