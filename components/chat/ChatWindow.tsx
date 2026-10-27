@@ -10,6 +10,7 @@ import ChatInput from "./ChatInput";
 import TakeControlButton from "./TakeControlButton";
 import AssignMenu from "./AssignMenu";
 import TemplatePicker from "./TemplatePicker";
+import ChannelIcon from "@/components/conversations/ChannelIcon";
 import { ChatMessagesSkeleton } from "./ChatSkeleton";
 import { useMessages } from "@/hooks/useMessages";
 import { useConversationControl } from "@/hooks/useConversationControl";
@@ -32,6 +33,7 @@ interface ChatWindowProps {
   // cuadro de texto.
   subtitle?: string;
   insight?: React.ReactNode;
+  channel?: string | null;
 }
 
 interface OptimisticMessage {
@@ -91,6 +93,7 @@ export default function ChatWindow({
   leadButton,
   subtitle,
   insight,
+  channel,
 }: ChatWindowProps) {
   const router = useRouter();
   const t = useTranslations("dashboard.chat");
@@ -401,7 +404,10 @@ export default function ChatWindow({
             </span>
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-navy-900">{contactName || contactPhone}</p>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <p className="truncate text-sm font-semibold text-navy-900">{contactName || contactPhone}</p>
+              {channel && <ChannelIcon channel={channel} variant="pill" />}
+            </div>
             <p className="truncate text-[10px] text-slate-400">{subtitle || contactPhone}</p>
           </div>
         </div>

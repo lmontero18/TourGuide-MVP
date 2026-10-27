@@ -1531,6 +1531,9 @@
         "days": "{count, plural, one {# day} other {# days}}",
         "client": "The client",
         "hide": "Hide"
+      },
+      "channels": {
+        "whatsapp": "WhatsApp"
       }
     }
   },

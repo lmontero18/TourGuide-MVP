@@ -10,7 +10,7 @@ export interface ConversationDetail {
   id: string
   bot_active: boolean
   status: ConversationStatus
-  contact: { name: string | null; phone: string } | null
+  contact: { name: string | null; phone: string; channel: string } | null
   assigned_agent: { id: string; full_name: string | null; email: string } | null
 }
 
@@ -22,7 +22,7 @@ export function useConversationDetail(id: string) {
     queryFn: async () => {
       const { data, error } = await createClient()
         .from('conversations')
-        .select(`id, bot_active, status, contact:contacts(name, phone), ${ASSIGNED_AGENT_EMBED}`)
+        .select(`id, bot_active, status, contact:contacts(name, phone, channel), ${ASSIGNED_AGENT_EMBED}`)
         .eq('id', id)
         .is('deleted_at', null)
         .single()

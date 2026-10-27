@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import ConversationListSkeleton from "./ConversationListSkeleton";
+import ChannelIcon from "./ChannelIcon";
 import { useAuth } from "@/hooks/useAuth";
 import { useLeads, type LeadWithContact } from "@/hooks/useLeads";
 import { useConversationsContext } from "@/components/providers/ConversationsProvider";
@@ -190,9 +191,8 @@ export default function InboxList({ activeId }: { activeId?: string }) {
                   <div className={`flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold ${c.unreadCount > 0 ? "bg-navy-900 text-white" : "bg-slate-100 text-slate-600"}`}>
                     {initials(c.contactName)}
                   </div>
-                  {lead && (
-                    <span title={tStage(lead.status)} className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full ring-2 ring-white ${STAGE_DOT[lead.status]}`} />
-                  )}
+                  {/* De donde escribe el cliente; la etapa va en su etiqueta */}
+                  <ChannelIcon channel={c.channel} className="absolute -bottom-0.5 -right-0.5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
