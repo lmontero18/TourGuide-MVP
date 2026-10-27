@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { useCelebrateSale } from "@/hooks/useCelebrateSale";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import TopBar from "@/components/layout/TopBar";
@@ -51,6 +52,7 @@ export default function LeadsPage() {
 
   const selected = leads?.find((l) => l.id === selectedId) ?? null;
 
+  const celebrate = useCelebrateSale();
   const move = useCallback(
     async (id: string, status: LeadStatus) => {
       const lead = leads?.find((l) => l.id === id);
@@ -59,11 +61,12 @@ export default function LeadsPage() {
       if (!res.ok) return toast.error(res.error || t("saveError"));
       // Al reservar se pide el monto: abre la ficha con el campo listo.
       if (status === "converted") {
+        celebrate();
         setFocusAmount(true);
         setSelectedId(id);
       }
     },
-    [leads, update, t]
+    [leads, update, t, celebrate]
   );
 
   const close = useCallback(() => {

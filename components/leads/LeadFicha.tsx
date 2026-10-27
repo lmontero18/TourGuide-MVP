@@ -12,6 +12,7 @@ import { cleanText } from "@/lib/leads/emptyValue";
 import { useAuth } from "@/hooks/useAuth";
 import { hasFeature } from "@/lib/features";
 import LeadBookings from "@/components/bookings/LeadBookings";
+import { useCelebrateSale } from "@/hooks/useCelebrateSale";
 
 interface LeadFichaProps {
   lead: LeadWithContact;
@@ -118,15 +119,17 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
     void run({ amount: n, currency: draftCurrency });
   };
 
+  const celebrate = useCelebrateSale();
   const run = async (patch: LeadPatch) => {
     const res = await onUpdate(lead.id, patch);
     if (!res.ok) toast.error(res.error || t("saveError"));
+    return res.ok;
   };
   const saveField = (field: LeadField, value: string | null) => void run({ fields: { [field]: value } });
   const setStage = (status: LeadStatus) => {
     if (status === lead.status) return;
     if (status === "converted") setJustWon(true);
-    void run({ status });
+    void run({ status }).then((ok) => ok && status === "converted" && celebrate());
   };
   const saveAmount = () => {
     const n = amount.trim() === "" ? null : Number(amount.replace(",", "."));
