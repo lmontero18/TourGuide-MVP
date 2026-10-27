@@ -591,6 +591,7 @@ export type Database = {
           features: string[]
           id: string
           is_beta: boolean
+          knowledge_edits: Json
           name: string
           onboarded_at: string | null
           plan: Database["public"]["Enums"]["plan_type"]
@@ -608,6 +609,7 @@ export type Database = {
           features?: string[]
           id?: string
           is_beta?: boolean
+          knowledge_edits?: Json
           name: string
           onboarded_at?: string | null
           plan?: Database["public"]["Enums"]["plan_type"]
@@ -625,6 +627,7 @@ export type Database = {
           features?: string[]
           id?: string
           is_beta?: boolean
+          knowledge_edits?: Json
           name?: string
           onboarded_at?: string | null
           plan?: Database["public"]["Enums"]["plan_type"]
@@ -942,6 +945,7 @@ export type Database = {
     Functions: {
       auth_org_id: { Args: never; Returns: string }
       auth_role: { Args: never; Returns: string }
+      can_edit_knowledge: { Args: never; Returns: boolean }
       get_org_metrics: { Args: { p_from: string; p_to: string }; Returns: Json }
       get_org_metrics_month: { Args: { p_month: string }; Returns: Json }
       get_org_monthly_usage: { Args: never; Returns: Json }
@@ -974,6 +978,7 @@ export type Database = {
         Args: { p_places: Json; p_times: Json; p_tours: Json; p_zones: Json }
         Returns: undefined
       }
+      touch_knowledge: { Args: { p_sections: string[] }; Returns: undefined }
     }
     Enums: {
       conversation_status: "open" | "resolved" | "pending"
