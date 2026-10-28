@@ -385,9 +385,11 @@ export default function ChatWindow({
 
   return (
     <div className="flex h-full flex-col bg-slate-50">
-      {/* Chat header */}
-      <div className="flex items-center justify-between gap-2 border-b border-slate-200 bg-white px-3 py-3 md:px-4">
-        <div className="flex min-w-0 items-center gap-2 md:gap-3">
+      {/* Chat header. Los textos de los botones dependen del ancho del chat
+          (container query), no de la pantalla: con la lista y la ficha
+          abiertas el chat es angosto aunque la pantalla sea grande. */}
+      <div className="@container flex items-center justify-between gap-2 border-b border-slate-200 bg-white px-3 py-3 md:px-4">
+        <div className="flex min-w-0 flex-1 items-center gap-2 md:gap-3">
           {/* Celular: volver a la lista (la lista y el chat no entran juntos) */}
           <Link
             href="/conversations"
@@ -406,7 +408,7 @@ export default function ChatWindow({
           <div className="min-w-0">
             <div className="flex min-w-0 items-center gap-1.5">
               <p className="truncate text-sm font-semibold text-navy-900">{contactName || contactPhone}</p>
-              {channel && <ChannelIcon channel={channel} variant="pill" />}
+              {channel && <span className="hidden shrink-0 @xl:inline-flex"><ChannelIcon channel={channel} variant="pill" /></span>}
             </div>
             <p className="truncate text-[10px] text-slate-400">{subtitle || contactPhone}</p>
           </div>
@@ -427,12 +429,14 @@ export default function ChatWindow({
               <button
                 onClick={() => setStatusRemote("resolved")}
                 disabled={toggling}
+                title={t("resolve")}
+                aria-label={t("resolve")}
                 className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
-                <span className="hidden sm:inline">{t("resolve")}</span>
+                <span className="hidden @2xl:inline">{t("resolve")}</span>
               </button>
             </>
           )}
