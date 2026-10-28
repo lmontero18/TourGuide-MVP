@@ -1216,7 +1216,9 @@
       "events": "Te avisamos cuando el bot pide una persona, cuando un cliente te escribe en una conversación tuya, cuando otro agente toma una conversación que tenías y cuando Meta no entrega un mensaje que enviaste.",
       "failedTitle": "No se entregó tu mensaje a {name}",
       "assignedTitle": "Te asignaron a {name}",
-      "assignedBody": "Abre la conversación para responder."
+      "assignedBody": "Abre la conversación para responder.",
+      "returnedTitle": "{name} volvió a escribir",
+      "returnedBody": "La atendiste hace poco y sigue contigo: el bot no le va a contestar."
     },
     "templates": {
       "title": "Plantillas de WhatsApp",

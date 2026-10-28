@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -11,6 +11,10 @@ import { useMyNotifyPrefs } from "@/hooks/useMyNotifyPrefs";
 import { useDeliveryFailures } from "@/hooks/useDeliveryFailures";
 import { deliveryReason } from "@/lib/whatsapp/deliveryReasons";
 import { isLastFocusedTab, markTabFocused, playChime, showDesktopNotification, type ChimeKind } from "@/lib/notifications/alert";
+
+// Despues de "volvio a escribir" llega el mensaje del cliente: no avisar dos
+// veces por lo mismo.
+const RETURNED_QUIET_MS = 15_000;
 
 interface ConversationsState {
   conversations: ConversationListItem[];
@@ -56,16 +60,26 @@ export function ConversationsProvider({ children }: { children: React.ReactNode 
   };
 
   const nameOf = (item: ConversationListItem) => item.contactName || item.contactPhone;
+  const returnedAt = useRef<Record<string, number>>({});
   const me = user?.id ?? null;
 
   const events: ConversationEvents = {
     // Todo el equipo: alguien tiene que tomarla. Menos a quien el admin dejo
     // en "solo los suyos".
     onHandoff: (item) => teamPrefs.scope === "all" && deliver(item, t("handoffTitle", { name: nameOf(item) }), item.lastMessage || t("handoffBody"), "urgent"),
-    // Solo quien la atiende.
+    // Solo quien la atiende. Si recien volvio (onReturned), ese aviso ya
+    // cubre el mensaje.
     onCustomerMessage: (item, content) => {
       if (!me || item.assignee?.id !== me || item.status === "resolved") return;
+      if (Date.now() - (returnedAt.current[item.id] ?? 0) < RETURNED_QUIET_MS) return;
       deliver(item, t("messageTitle", { name: nameOf(item) }), content);
+    },
+    // La habia resuelto, el cliente volvio a escribir y sigue conmigo: el bot
+    // no le contesta, asi que el aviso es urgente.
+    onReturned: (item) => {
+      if (!me || item.assignee?.id !== me) return;
+      returnedAt.current[item.id] = Date.now();
+      deliver(item, t("returnedTitle", { name: nameOf(item) }), t("returnedBody"), "urgent");
     },
     // "Otro agente tomo tu conversacion": para no escribirle dos personas al mismo cliente.
     onAssigneeChanged: (previous, item) => {
