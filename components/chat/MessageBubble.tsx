@@ -97,7 +97,7 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, med
   return (
     <div className={`flex flex-col ${undelivered ? "items-end" : ""}`}>
     <div className={`flex w-full ${style.wrapper}`}>
-      <div className={`rounded-2xl px-3.5 py-2.5 max-w-[75%] ${bubbleClass} ${pending ? "opacity-70" : ""} ${failed ? "ring-2 ring-red-400" : ""}`}>
+      <div className={`min-w-0 rounded-2xl px-3.5 py-2.5 max-w-[75%] ${bubbleClass} ${pending ? "opacity-70" : ""} ${failed ? "ring-2 ring-red-400" : ""}`}>
         {role !== "agent" && (
           <span className={`block text-[10px] font-bold mb-0.5 ${
             role === "assistant" ? "text-blue-500" : "text-slate-400"
@@ -150,10 +150,10 @@ export default function MessageBubble({ content, role, createdAt, mediaPath, med
             <span className="italic">{t(reaction.removed ? "reactionRemoved" : "reacted")}</span>
           </p>
         ) : doc && (mediaUrl || pending) ? (
-          doc.caption && <p className="text-sm leading-relaxed whitespace-pre-wrap">{doc.caption}</p>
+          doc.caption && <p className="text-sm leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere]">{doc.caption}</p>
         ) : (
           !(mediaUrl && !imgFailed && isMediaPlaceholder) && (
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere]">{content}</p>
           )
         )}
         <span className={`flex items-center gap-1 text-[10px] mt-1 ${

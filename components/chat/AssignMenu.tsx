@@ -71,7 +71,7 @@ export default function AssignMenu({ conversationId, assignee, onAssigned }: Ass
           <circle cx="9" cy="7" r="4" />
           <path d="M19 8v6M22 11h-6" />
         </svg>
-        <span className="hidden truncate sm:inline">{assignee ? (assignee.id === user?.id ? t("you") : assignee.name) : t("title")}</span>
+        <span className="hidden truncate @2xl:inline">{assignee ? (assignee.id === user?.id ? t("you") : assignee.name) : t("title")}</span>
       </button>
       {open && (
         <div role="menu" className="absolute right-0 top-10 z-20 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
