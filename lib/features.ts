@@ -23,7 +23,7 @@ export const FEATURES = {
   celebrations: 'live', // Confeti al marcar una venta como Reservado
   // Conversacion resuelta que se reabre: si una persona la atendio en las
   // ultimas 24 h vuelve a esa persona (con aviso), no al bot.
-  stickyAgent: 'beta',
+  stickyAgent: 'live',
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES
