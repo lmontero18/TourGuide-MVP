@@ -1213,10 +1213,12 @@
       "sound": "Sound",
       "denied": "You blocked notifications in this browser. Enable them from the lock icon in the address bar.",
       "unsupported": "This browser doesn't support desktop notifications.",
-      "events": "We notify you when the bot asks for a person, when a customer writes in one of your conversations, when another agent takes a conversation you had, and when Meta doesn't deliver a message you sent.",
+      "events": "We notify you when the bot asks for a person, when a customer writes in one of your conversations (even one you had resolved), when another agent takes a conversation you had, and when Meta doesn't deliver a message you sent.",
       "failedTitle": "Your message to {name} wasn't delivered",
       "assignedTitle": "{name} was assigned to you",
-      "assignedBody": "Open the conversation to reply."
+      "assignedBody": "Open the conversation to reply.",
+      "returnedTitle": "{name} wrote again",
+      "returnedBody": "You helped them recently, so it stays with you: the bot won't reply."
     },
     "templates": {
       "title": "WhatsApp templates",

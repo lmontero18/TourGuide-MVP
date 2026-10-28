@@ -6,6 +6,7 @@ import { ensureOpenLead, refreshLead } from '@/lib/leads/sync'
 import { applyDeliveryStatus } from '@/lib/whatsapp/delivery'
 import { notifyTemplateStatus } from '@/lib/whatsapp/templateStatus'
 import { detectAbuse, type AbuseReason } from '@/lib/bot/abuse'
+import { recentAgent } from '@/lib/conversations/recentAgent'
 import { applyContactSync, applyMessageEchoes } from '@/lib/whatsapp/coexistence'
 
 // ~10 min de nota de voz en opus. Mas largo no se manda a Whisper (costo).
@@ -513,9 +514,10 @@ async function processWebhook(body: WebhookPayload) {
         if (!contact) continue
 
         // Una conversacion por contacto (CODE-162). Si esta resuelta y el
-        // cliente vuelve a escribir, se REABRE la misma con el bot activo en
-        // vez de crear otra: mantiene el historial en un hilo, el bot tiene el
-        // contexto anterior y las metricas no ven contactos duplicados.
+        // cliente vuelve a escribir, se REABRE la misma en vez de crear otra:
+        // mantiene el historial en un hilo y las metricas no ven contactos
+        // duplicados. Vuelve al bot, salvo que una persona la haya atendido
+        // hace poco (flag stickyAgent): ahi sigue con esa persona.
         let { data: conversation } = await supabase
           .from('conversations')
           .select('id, bot_active, status, deleted_at')
@@ -542,10 +544,19 @@ async function processWebhook(body: WebhookPayload) {
           conversation = newConv
         } else if (conversation.status === 'resolved' || conversation.deleted_at) {
           // Resuelta o eliminada (borrado logico): el cliente volvio, se
-          // reabre la misma y vuelve a aparecer en el inbox.
+          // reabre la misma y vuelve a aparecer en el inbox. Si alguien del
+          // equipo le escribio en las ultimas 24 h, sigue con esa persona (un
+          // "gracias" o un 🙂 no tiene que contestarlo el bot sin contexto).
+          const holder = conversation.deleted_at
+            ? null
+            : await recentAgent(supabase, conversation.id, waAccount.org_id).catch(() => null)
           const { data: reopened } = await supabase
             .from('conversations')
-            .update({ status: 'open', bot_active: true, assigned_agent_id: null, deleted_at: null, last_message_at: nowTs })
+            .update(
+              holder
+                ? { status: 'open', bot_active: false, assigned_agent_id: holder, deleted_at: null, last_message_at: nowTs }
+                : { status: 'open', bot_active: true, assigned_agent_id: null, deleted_at: null, last_message_at: nowTs }
+            )
             .eq('id', conversation.id)
             .select('id, bot_active, status, deleted_at')
             .single()

@@ -21,6 +21,9 @@ export const FEATURES = {
   agentKnowledge: 'live',
   teamMetrics: 'beta', // Pestaña Equipo en Metricas (por agente)
   celebrations: 'live', // Confeti al marcar una venta como Reservado
+  // Conversacion resuelta que se reabre: si una persona la atendio en las
+  // ultimas 24 h vuelve a esa persona (con aviso), no al bot.
+  stickyAgent: 'live',
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES

@@ -43,6 +43,9 @@ export interface ConversationEvents {
   onCustomerMessage?: (item: ConversationListItem, content: string) => void
   // Cambio el agente asignado (incluye "otro agente me la tomo").
   onAssigneeChanged?: (previous: Assignee | null, item: ConversationListItem) => void
+  // Estaba resuelta, el cliente volvio a escribir y la conversacion volvio a
+  // quien la atendio hace poco, no al bot (flag stickyAgent).
+  onReturned?: (item: ConversationListItem) => void
 }
 
 const LIST_SELECT = `id, status, bot_active, last_message_at,
@@ -205,13 +208,15 @@ export function useConversations(
           }
           const current = listRef.current.find((c) => c.id === row.id)
           const becameHandoff = current?.status !== 'pending' && row.status === 'pending' && !row.assigned_agent_id
+          const returned = current?.status === 'resolved' && row.status === 'open' && !row.bot_active && !!row.assigned_agent_id
           // Agente nuevo: el payload trae el id pero no el nombre.
           if (!current || (row.assigned_agent_id ?? null) !== (current.assignee?.id ?? null)) {
             const previous = current?.assignee ?? null
             fetchOne(row.id).then((item) => {
               if (!item) return
               if (becameHandoff) eventsRef.current.onHandoff?.(item)
-              if (current && (previous?.id ?? null) !== (item.assignee?.id ?? null)) {
+              if (returned) eventsRef.current.onReturned?.(item)
+              else if (current && (previous?.id ?? null) !== (item.assignee?.id ?? null)) {
                 eventsRef.current.onAssigneeChanged?.(previous, item)
               }
             })

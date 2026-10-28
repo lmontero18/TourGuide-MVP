@@ -12,6 +12,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'sticky-agent',
+    date: '2026-10-28T02:30:00Z',
+    href: '/conversations',
+    es: {
+      title: 'Si el cliente vuelve a escribir, sigue contigo',
+      body: 'Si atendiste a un cliente en las últimas 24 horas y vuelve a escribir después de resolver la conversación, vuelve a ti y no al bot. Te llega un aviso urgente para que no se quede esperando.',
+    },
+    en: {
+      title: 'If the customer writes again, it stays with you',
+      body: 'If you helped a customer in the last 24 hours and they write again after you resolved the conversation, it comes back to you, not the bot. You get an urgent notice so they are not left waiting.',
+    },
+  },
+  {
     id: 'sale-confetti',
     date: '2026-10-27T21:00:00Z',
     href: '/leads',
