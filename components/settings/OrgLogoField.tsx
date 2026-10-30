@@ -18,8 +18,8 @@ export default function OrgLogoField({ orgName }: { orgName: string }) {
   const logoUrl = orgLogoUrl(orgLogoPath);
 
   const upload = async (file: File) => {
-    // Mismo chequeo que el server, para no subir 1 MB y que lo rechace.
-    if (!ORG_LOGO_TYPES[file.type]) return toast.error(tErr("logoType"));
+    // Mismo chequeo que el server, para no subir 4 MB y que lo rechace.
+    if (!ORG_LOGO_TYPES.includes(file.type)) return toast.error(tErr("logoType"));
     if (file.size > ORG_LOGO_MAX_BYTES) return toast.error(tErr("logoTooLarge"));
     setBusy(true);
     try {
@@ -90,7 +90,7 @@ export default function OrgLogoField({ orgName }: { orgName: string }) {
         <input
           ref={input}
           type="file"
-          accept={Object.keys(ORG_LOGO_TYPES).join(",")}
+          accept={ORG_LOGO_TYPES.join(",")}
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];

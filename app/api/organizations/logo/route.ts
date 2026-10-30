@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTranslations } from 'next-intl/server'
 import * as Sentry from '@sentry/nextjs'
+import sharp from 'sharp'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { createLogger } from '@/lib/logger'
 import { orgHasFeature } from '@/lib/features'
-import { ORG_LOGO_BUCKET, ORG_LOGO_MAX_BYTES, ORG_LOGO_TYPES } from '@/lib/orgLogo'
+import { ORG_LOGO_BUCKET, ORG_LOGO_MAX_BYTES, ORG_LOGO_SIZE, ORG_LOGO_TYPES } from '@/lib/orgLogo'
 
 const log = createLogger({ route: 'organizations/logo' })
 
@@ -40,15 +41,29 @@ export async function POST(request: NextRequest) {
   const form = await request.formData().catch(() => null)
   const file = form?.get('file')
   if (!(file instanceof File) || file.size === 0) return NextResponse.json({ error: t('invalidInput') }, { status: 400 })
-  const ext = ORG_LOGO_TYPES[file.type]
-  if (!ext) return NextResponse.json({ error: t('logoType') }, { status: 400 })
+  if (!ORG_LOGO_TYPES.includes(file.type)) return NextResponse.json({ error: t('logoType') }, { status: 400 })
   if (file.size > ORG_LOGO_MAX_BYTES) return NextResponse.json({ error: t('logoTooLarge') }, { status: 413 })
 
   const orgLog = log.child({ org_id: auth.orgId })
-  const path = `${auth.orgId}/${Date.now()}.${ext}`
+  // Se guarda achicado a ORG_LOGO_SIZE px (sin agrandar los chicos) en WebP
+  // calidad alta: nitido en retina y pesa decenas de KB, no MB. WebP conserva
+  // la transparencia de los PNG. rotate() aplica la orientacion EXIF de fotos.
+  let logo: Buffer
+  try {
+    logo = await sharp(Buffer.from(await file.arrayBuffer()))
+      .rotate()
+      .resize(ORG_LOGO_SIZE, ORG_LOGO_SIZE, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 90 })
+      .toBuffer()
+  } catch (error) {
+    orgLog.warn('logo not an image', { error })
+    return NextResponse.json({ error: t('logoType') }, { status: 400 })
+  }
+
+  const path = `${auth.orgId}/${Date.now()}.webp`
   const { error: uploadError } = await service.storage
     .from(ORG_LOGO_BUCKET)
-    .upload(path, Buffer.from(await file.arrayBuffer()), { contentType: file.type })
+    .upload(path, logo, { contentType: 'image/webp' })
   if (uploadError) {
     orgLog.error('logo upload failed', { error: uploadError })
     Sentry.captureException(new Error(`logo upload failed: ${uploadError.message}`), { tags: { org_id: auth.orgId } })
