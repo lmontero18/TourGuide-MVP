@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useConversationsContext } from "@/components/providers/ConversationsProvider";
 import FeedbackButton from "@/components/feedback/FeedbackButton";
 import { hasFeature, type FeatureKey, type OrgFeatureFlags } from "@/lib/features";
+import { orgInitials, orgLogoUrl } from "@/lib/orgLogo";
 
 interface NavItem {
   key: string;
@@ -127,7 +128,11 @@ interface SidebarProps {
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const t = useTranslations("dashboard.sidebar");
-  const { role, featureFlags } = useAuth();
+  const { role, featureFlags, orgName, orgLogoPath } = useAuth();
+  // Con orgBranding arriba va la agencia (logo o iniciales) y Tourfy baja a
+  // un "Powered by" chico al pie del menu.
+  const branded = hasFeature(featureFlags, "orgBranding") && !!orgName;
+  const logoUrl = orgLogoUrl(orgLogoPath);
   const { unreadTotal } = useConversationsContext();
   // Mientras carga el rol (null) se muestran todos: ocultarlos haria parpadear
   // el menu a cada admin. El proxy igual bloquea las rutas para agentes.
@@ -148,20 +153,32 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     >
       {/* Logo */}
       <div className="flex h-14 items-center border-b border-slate-100 px-4">
-        <Link href="/" prefetch={false} className="flex items-center gap-2.5 overflow-hidden">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-navy-900 text-white">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-          </div>
+        <Link href="/" prefetch={false} title={branded ? orgName! : undefined} className="flex min-w-0 items-center gap-2.5 overflow-hidden">
+          {branded ? (
+            logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- logo subido por la agencia, URL publica de Supabase
+              <img src={logoUrl} alt="" className="h-8 w-8 shrink-0 rounded-lg bg-white object-contain ring-1 ring-slate-200" />
+            ) : (
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-navy-900 text-[11px] font-bold text-white">
+                {orgInitials(orgName)}
+              </div>
+            )
+          ) : (
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-navy-900 text-white">
+              <TourfyPin size={14} />
+            </div>
+          )}
           {!collapsed && (
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="font-display text-base font-bold tracking-tight text-navy-900 whitespace-nowrap"
+              className={
+                branded
+                  ? "line-clamp-2 text-sm font-bold leading-tight text-navy-900"
+                  : "font-display text-base font-bold tracking-tight text-navy-900 whitespace-nowrap"
+              }
             >
-              Tourfy
+              {branded ? orgName : "Tourfy"}
             </motion.span>
           )}
         </Link>
@@ -209,6 +226,21 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <FeedbackButton collapsed={collapsed} />
       </div>
 
+      {branded && (
+        <a
+          href="https://www.tourfy.app"
+          target="_blank"
+          rel="noopener noreferrer"
+          title={t("poweredBy")}
+          className={`mx-2 mb-2 flex h-7 items-center gap-1.5 rounded-md text-[11px] font-medium text-slate-400 transition-colors hover:text-slate-600 ${
+            collapsed ? "justify-center" : "px-3"
+          }`}
+        >
+          <TourfyPin size={11} />
+          {!collapsed && <span className="whitespace-nowrap">{t("poweredBy")}</span>}
+        </a>
+      )}
+
       {/* Collapse toggle */}
       <div className="border-t border-slate-100 p-2">
         <button
@@ -228,5 +260,14 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </button>
       </div>
     </motion.aside>
+  );
+}
+
+function TourfyPin({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
   );
 }

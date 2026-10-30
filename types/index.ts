@@ -23,6 +23,8 @@ export interface Organization {
   onboarded_at: string | null
   // Ultima modificacion de cada seccion de Tours y preguntas.
   knowledge_edits?: KnowledgeEdits
+  // Logo arriba del menu (flag orgBranding), en el bucket publico org-logos.
+  logo_path?: string | null
   created_at: string
   updated_at: string
 }

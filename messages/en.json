@@ -434,7 +434,8 @@
       "leads": "Leads",
       "more": "More",
       "menu": "Menu",
-      "bookings": "Bookings"
+      "bookings": "Bookings",
+      "poweredBy": "Powered by Tourfy"
     },
     "tours": {
       "title": "What your bot knows",
@@ -1028,7 +1029,14 @@
       "org": {
         "title": "Organization",
         "name": "Agency name",
-        "timezone": "Timezone"
+        "timezone": "Timezone",
+        "logo": "Logo",
+        "logoHint": "Shown at the top of the menu for your whole team. JPG, PNG or WebP, up to 1 MB. Square works best.",
+        "logoUpload": "Upload logo",
+        "logoChange": "Change",
+        "logoRemove": "Remove",
+        "logoSaved": "Logo updated",
+        "logoRemoved": "Logo removed"
       },
       "hours": {
         "title": "Business hours",
@@ -1739,6 +1747,9 @@
     "uploadFailed": "We couldn't upload the file. Please try again.",
     "feedbackImageType": "The screenshot must be a JPG, PNG or WebP image.",
     "feedbackImageTooLarge": "The screenshot is too large (4 MB max).",
+    "logoType": "The logo must be a JPG, PNG or WebP image.",
+    "logoTooLarge": "The logo is too large (1 MB max).",
+    "logoSaveFailed": "We couldn't save the logo. Please try again.",
     "notificationPrefsFailed": "We couldn't save that person's notifications.",
     "pickupsLoadFailed": "We couldn't load pickups. Try again.",
     "pickupsSaveFailed": "We couldn't save pickups. Try again.",

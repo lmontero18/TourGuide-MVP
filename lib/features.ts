@@ -26,6 +26,8 @@ export const FEATURES = {
   stickyAgent: 'live',
   // Fotos que manda el agente: se achican en el navegador antes de subirlas.
   compressAgentPhotos: 'beta',
+  // Logo y nombre de la agencia arriba del menu; "Powered by Tourfy" abajo.
+  orgBranding: 'beta',
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES
