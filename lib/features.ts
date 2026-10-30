@@ -24,6 +24,8 @@ export const FEATURES = {
   // Conversacion resuelta que se reabre: si una persona la atendio en las
   // ultimas 24 h vuelve a esa persona (con aviso), no al bot.
   stickyAgent: 'live',
+  // Fotos que manda el agente: se achican en el navegador antes de subirlas.
+  compressAgentPhotos: 'beta',
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES

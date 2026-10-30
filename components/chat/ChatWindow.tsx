@@ -99,7 +99,9 @@ export default function ChatWindow({
   const t = useTranslations("dashboard.chat");
   const locale = useLocale();
   const { user, featureFlags } = useAuth();
-  const chatFile = useSendChatFile(conversationId);
+  const chatFile = useSendChatFile(conversationId, {
+    compressPhotos: hasFeature(featureFlags, "compressAgentPhotos"),
+  });
   const canAttach = hasFeature(featureFlags, "attachments");
   const { messages, loading } = useMessages(conversationId);
   const { botActive, assignee, status, setState: setControl, refresh: refreshControl } = useConversationControl(
@@ -268,8 +270,8 @@ export default function ChatWindow({
     const uploads = items.map((it) => chatFile.upload(it.file));
     for (const [i, it] of items.entries()) {
       try {
-        const path = await uploads[i];
-        await chatFile.send(path, it.file, it.caption);
+        const { path, file } = await uploads[i];
+        await chatFile.send(path, file, it.caption);
         patch(it.opt.id, { path });
       } catch (err) {
         patch(it.opt.id, { status: "failed" });
