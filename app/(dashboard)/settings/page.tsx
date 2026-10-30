@@ -9,6 +9,9 @@ import { TIMEZONES, utcOffsetLabel } from "@/lib/timezones";
 import { toast } from "sonner";
 import SettingsSkeleton from "@/components/settings/SettingsSkeleton";
 import SettingsShell from "@/components/settings/SettingsShell";
+import OrgLogoField from "@/components/settings/OrgLogoField";
+import { useAuth } from "@/hooks/useAuth";
+import { hasFeature } from "@/lib/features";
 import { DEFAULT_RANGE, normalizeBusinessHours } from "@/lib/bot/businessHours";
 import type { Organization } from "@/types";
 
@@ -35,6 +38,7 @@ export default function SettingsPage() {
 function SettingsForm({ initialOrg }: { initialOrg: Organization }) {
   const t = useTranslations("dashboard.settings");
   const queryClient = useQueryClient();
+  const { featureFlags, setOrgBranding } = useAuth();
   const initialHours = normalizeBusinessHours(initialOrg.bot_config?.business_hours);
   const [saving, setSaving] = useState(false);
 
@@ -92,6 +96,7 @@ function SettingsForm({ initialOrg }: { initialOrg: Organization }) {
             }
           : prev
       );
+      setOrgBranding({ name: orgName.trim() });
       toast.success(t("saved"));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("errors.save"));
@@ -115,6 +120,8 @@ function SettingsForm({ initialOrg }: { initialOrg: Organization }) {
                     className="w-full h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                 </div>
+
+                {hasFeature(featureFlags, "orgBranding") && <OrgLogoField orgName={orgName} />}
 
                 <div>
                   <div>

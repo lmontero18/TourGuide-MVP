@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User as AppUser } from "@/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -15,6 +15,14 @@ export interface AuthState {
   onboardedAt: string | null;
   // Feature flags de la org (lib/features.ts). null = sin features beta.
   featureFlags: OrgFeatureFlags | null;
+  // Nombre y logo de la agencia para el menu (flag orgBranding).
+  orgName: string | null;
+  orgLogoPath: string | null;
+}
+
+export interface AuthContextValue extends AuthState {
+  // Configuracion guarda nombre o logo: el menu se actualiza sin recargar.
+  setOrgBranding: (patch: { name?: string; logoPath?: string | null }) => void;
 }
 
 const EMPTY: AuthState = {
@@ -25,11 +33,19 @@ const EMPTY: AuthState = {
   role: null,
   onboardedAt: null,
   featureFlags: null,
+  orgName: null,
+  orgLogoPath: null,
 };
 
-type OrgRow = { onboarded_at: string | null; is_beta?: boolean; features?: string[] };
+type OrgRow = {
+  onboarded_at: string | null;
+  is_beta?: boolean;
+  features?: string[];
+  name?: string;
+  logo_path?: string | null;
+};
 
-export const AuthContext = createContext<AuthState | null>(null);
+export const AuthContext = createContext<AuthContextValue | null>(null);
 
 // Una sola fuente de sesion + perfil para toda la app. Antes cada componente
 // que llamaba useAuth() (Sidebar, TopBar, lista, chat) cargaba el perfil por
@@ -50,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loadedFor.current = user.id;
       const { data } = await supabase
         .from("users")
-        .select("id, org_id, email, full_name, role, created_at, updated_at, organizations(onboarded_at, is_beta, features)")
+        .select("id, org_id, email, full_name, role, created_at, updated_at, organizations(onboarded_at, is_beta, features, name, logo_path)")
         .eq("id", user.id)
         .single();
 
@@ -70,6 +86,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         role: data?.role ?? null,
         onboardedAt: org?.onboarded_at ?? null,
         featureFlags: org ? { is_beta: org.is_beta ?? false, features: org.features ?? [] } : null,
+        orgName: org?.name ?? null,
+        orgLogoPath: org?.logo_path ?? null,
       });
     }
 
@@ -92,5 +110,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
+  const setOrgBranding = useCallback((patch: { name?: string; logoPath?: string | null }) => {
+    setState((prev) => ({
+      ...prev,
+      ...(patch.name !== undefined && { orgName: patch.name }),
+      ...(patch.logoPath !== undefined && { orgLogoPath: patch.logoPath }),
+    }));
+  }, []);
+  const value = useMemo(() => ({ ...state, setOrgBranding }), [state, setOrgBranding]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

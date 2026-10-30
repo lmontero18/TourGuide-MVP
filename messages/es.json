@@ -434,7 +434,8 @@
       "leads": "Leads",
       "more": "Más",
       "menu": "Menú",
-      "bookings": "Reservas"
+      "bookings": "Reservas",
+      "poweredBy": "Powered by Tourfy"
     },
     "tours": {
       "title": "Lo que sabe tu bot",
@@ -1028,7 +1029,14 @@
       "org": {
         "title": "Organización",
         "name": "Nombre de la agencia",
-        "timezone": "Zona horaria"
+        "timezone": "Zona horaria",
+        "logo": "Logo",
+        "logoHint": "Aparece arriba del menú para todo tu equipo. JPG, PNG o WebP, hasta 4 MB. Mejor cuadrado y con fondo transparente.",
+        "logoUpload": "Subir logo",
+        "logoChange": "Cambiar",
+        "logoRemove": "Quitar",
+        "logoSaved": "Logo actualizado",
+        "logoRemoved": "Logo quitado"
       },
       "hours": {
         "title": "Horario de atención",
@@ -1739,6 +1747,9 @@
     "uploadFailed": "No pudimos subir el archivo. Intenta de nuevo.",
     "feedbackImageType": "La captura tiene que ser una imagen JPG, PNG o WebP.",
     "feedbackImageTooLarge": "La captura es muy grande (máximo 4 MB).",
+    "logoType": "El logo tiene que ser una imagen JPG, PNG o WebP.",
+    "logoTooLarge": "El logo es muy grande (máximo 4 MB).",
+    "logoSaveFailed": "No pudimos guardar el logo. Intenta de nuevo.",
     "notificationPrefsFailed": "No pudimos guardar los avisos de esa persona.",
     "pickupsLoadFailed": "No pudimos cargar las recogidas. Intenta de nuevo.",
     "pickupsSaveFailed": "No pudimos guardar las recogidas. Intenta de nuevo.",

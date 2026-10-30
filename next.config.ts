@@ -20,9 +20,13 @@ const nextConfig: NextConfig = {
   // @img/sharp-libvips-<plataforma>, y el file tracing de Next no la incluye en
   // la funcion: en Vercel fallaba con "libvips-cpp.so.8.18.3: cannot open
   // shared object file" y ninguna imagen de WhatsApp se procesaba. Con pnpm el
-  // paquete vive en node_modules/.pnpm/, de ahi el glob. Solo el webhook usa sharp.
+  // paquete vive en node_modules/.pnpm/, de ahi el glob. Cada ruta que usa
+  // sharp va en esta lista.
   outputFileTracingIncludes: {
     "/api/webhooks/whatsapp": [
+      "./node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/lib/**/*",
+    ],
+    "/api/organizations/logo": [
       "./node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/lib/**/*",
     ],
   },
