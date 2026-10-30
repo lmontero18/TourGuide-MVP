@@ -602,6 +602,7 @@ export type Database = {
           id: string
           is_beta: boolean
           knowledge_edits: Json
+          logo_path: string | null
           name: string
           onboarded_at: string | null
           plan: Database["public"]["Enums"]["plan_type"]
@@ -620,6 +621,7 @@ export type Database = {
           id?: string
           is_beta?: boolean
           knowledge_edits?: Json
+          logo_path?: string | null
           name: string
           onboarded_at?: string | null
           plan?: Database["public"]["Enums"]["plan_type"]
@@ -638,6 +640,7 @@ export type Database = {
           id?: string
           is_beta?: boolean
           knowledge_edits?: Json
+          logo_path?: string | null
           name?: string
           onboarded_at?: string | null
           plan?: Database["public"]["Enums"]["plan_type"]
@@ -971,7 +974,10 @@ export type Database = {
         Args: { p_months?: number }
         Returns: Json
       }
-      get_team_metrics: { Args: { p_from: string; p_to: string }; Returns: Json }
+      get_team_metrics: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       get_unread_counts: {
         Args: never
         Returns: {
