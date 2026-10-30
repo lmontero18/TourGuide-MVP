@@ -8,11 +8,17 @@ import { pingHeartbeat } from '@/lib/monitoring/heartbeat'
 // Borra del bucket chat-media los archivos con mas de RETENTION_DAYS y pone
 // media_url = null en los mensajes afectados. La descripcion de texto del
 // mensaje se conserva siempre — es lo que usa el bot y pesa nada.
+//
+// Despues borra los huerfanos: archivos cuyo mensaje ya no existe (se borro la
+// conversacion, el contacto o la agencia, o un envio del agente fallo despues
+// de subir). Los busca chat_media_orphans() (solo los de mas de 1 dia).
 const RETENTION_DAYS = 90
 const BATCH_SIZE = 200
 // Tope de batches por corrida — el cron es diario, un backlog mayor se
 // termina de drenar en corridas siguientes.
 const MAX_BATCHES = 50
+// Huerfanos por corrida (el resto, al dia siguiente).
+const MAX_ORPHANS = 1000
 
 function getServiceClient() {
   return createClient(
@@ -90,6 +96,21 @@ export async function GET(request: NextRequest) {
     if (expired.length < BATCH_SIZE) break
   }
 
+  // Si falla, se reporta y el cron sigue: lo vencido ya se borro arriba y los
+  // huerfanos no rompen nada, solo ocupan espacio hasta la proxima corrida.
+  let orphans = 0
+  const { data: orphanPaths, error: orphanError } = await supabase.rpc('chat_media_orphans', {
+    p_limit: MAX_ORPHANS,
+  })
+  if (orphanError) {
+    reportCronError('cleanup-media orphan query failed', orphanError, { deleted })
+  } else if (orphanPaths?.length) {
+    const { error: removeError } = await supabase.storage.from('chat-media').remove(orphanPaths)
+    if (removeError) reportCronError('cleanup-media orphan remove failed', removeError, { count: orphanPaths.length })
+    else orphans = orphanPaths.length
+  }
+
+  log.info('cleanup-media done', { deleted, orphans })
   await pingHeartbeat('BETTERSTACK_HEARTBEAT_CLEANUP_MEDIA', log)
-  return NextResponse.json({ deleted })
+  return NextResponse.json({ deleted, orphans })
 }
