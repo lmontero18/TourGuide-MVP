@@ -12,6 +12,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'org-branding',
+    date: '2026-10-30T16:00:00Z',
+    href: '/settings',
+    adminOnly: true,
+    es: {
+      title: 'Tu logo arriba del menú',
+      body: 'Ahora el menú muestra el nombre de tu agencia. Sube tu logo en Configuración → Organización y todo tu equipo lo verá.',
+    },
+    en: {
+      title: 'Your logo at the top of the menu',
+      body: 'The menu now shows your agency name. Upload your logo in Settings → Organization and your whole team will see it.',
+    },
+  },
+  {
     id: 'sticky-agent',
     date: '2026-10-28T02:30:00Z',
     href: '/conversations',
