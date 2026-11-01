@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useChangelog } from "@/hooks/useChangelog";
+import { track } from "@/lib/usage/client";
 
 // Panel de Novedades (🎁 en la barra de arriba). El punto queda hasta que el
 // usuario lo abre; lo que era nuevo al abrir se marca "Nuevo" en la lista.
@@ -33,6 +34,7 @@ export default function WhatsNew() {
     if (!open) {
       setFreshIds(new Set(unseen.map((e) => e.id)));
       void markSeen();
+      track("changelog_open", { unseen: unseen.length });
     }
     setOpen((v) => !v);
   };

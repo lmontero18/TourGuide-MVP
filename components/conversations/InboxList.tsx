@@ -11,6 +11,7 @@ import { useConversationsContext } from "@/components/providers/ConversationsPro
 import type { ConversationListItem } from "@/hooks/useConversations";
 import { STAGE_DOT, formatMoney, isCurrentLead } from "@/components/leads/leadMeta";
 import { parseReaction } from "@/lib/whatsapp/placeholders";
+import { track } from "@/lib/usage/client";
 
 // Bandeja por lo que hay que hacer (prueba de diseno, flag inboxPreview):
 // "Por responder" = le toca al equipo: el cliente escribio ultimo y no lo
@@ -143,7 +144,10 @@ export default function InboxList({ activeId }: { activeId?: string }) {
               key={k}
               role="tab"
               aria-selected={tab === k}
-              onClick={() => setTab(k)}
+              onClick={() => {
+                setTab(k);
+                track("inbox_filter", { filter: k });
+              }}
               className={`-mb-px inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 pb-2.5 text-sm transition-colors ${
                 tab === k ? "border-navy-900 font-semibold text-navy-900" : "border-transparent text-slate-500 hover:text-navy-900"
               }`}
@@ -165,6 +169,8 @@ export default function InboxList({ activeId }: { activeId?: string }) {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            // Una vez por busqueda (al salir del campo), no por tecla. Sin el texto.
+            onBlur={() => search.trim() && track("inbox_search")}
             placeholder={t("search")}
             className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm text-navy-900 outline-none placeholder:text-slate-400 focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
           />

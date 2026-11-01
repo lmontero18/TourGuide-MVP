@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createLogger } from '@/lib/logger'
 import type { LeadDetails, LeadField } from '@/types'
+import { trackUsage } from '@/lib/usage/server'
 
 const log = createLogger({ route: 'leads/[id]' })
 
@@ -102,5 +103,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     log.error('lead update failed', { error, org_id: lead.org_id, lead_id: id })
     return NextResponse.json({ error: t('leadUpdateFailed') }, { status: 500 })
   }
+  const ua = request.headers.get('user-agent')
+  const usage = { orgId: lead.org_id, userId: user.id, userAgent: ua }
+  if (input.status && input.status !== lead.status) {
+    trackUsage({ ...usage, event: 'lead_stage', props: { from: lead.status, to: input.status } })
+  }
+  if (input.amount !== undefined) trackUsage({ ...usage, event: 'lead_amount' })
+  if (input.fields) trackUsage({ ...usage, event: 'lead_edit', props: { fields: Object.keys(input.fields) } })
   return NextResponse.json({ ok: true })
 }

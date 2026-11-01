@@ -20,6 +20,7 @@ import { useBusinessMetrics } from "@/hooks/useBusinessMetrics";
 import { useTeamMetrics } from "@/hooks/useTeamMetrics";
 import { useAuth } from "@/hooks/useAuth";
 import { hasFeature } from "@/lib/features";
+import { track } from "@/lib/usage/client";
 
 const ROLLING: MetricsPeriod[] = ["7d", "30d", "90d"];
 
@@ -135,7 +136,10 @@ export default function MetricsPage() {
               key={k}
               role="tab"
               aria-selected={tab === k}
-              onClick={() => setTab(k)}
+              onClick={() => {
+                setTab(k);
+                track("metrics_tab", { tab: k });
+              }}
               className={`-mb-px border-b-2 py-3 text-sm font-bold transition-colors ${
                 tab === k ? "border-navy-900 text-navy-900" : "border-transparent text-slate-400 hover:text-navy-900"
               }`}

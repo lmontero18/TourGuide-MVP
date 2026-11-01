@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/resend'
 import { createLogger } from '@/lib/logger'
+import { trackUsage } from '@/lib/usage/server'
 
 const log = createLogger({ route: 'feedback' })
 
@@ -126,6 +127,9 @@ export async function POST(request: NextRequest) {
       tags: { area: 'feedback', org_id: profile?.org_id ?? 'none' },
       extra: { message, page, who },
     })
+  }
+  if (profile?.org_id) {
+    trackUsage({ orgId: profile.org_id, userId: user.id, event: 'feedback_sent', props: { kind }, userAgent: request.headers.get('user-agent') })
   }
   return NextResponse.json({ ok: true })
 }

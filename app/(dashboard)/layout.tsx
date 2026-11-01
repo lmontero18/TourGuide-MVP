@@ -9,6 +9,7 @@ import { ConversationsProvider } from "@/components/providers/ConversationsProvi
 import QueryProvider from "@/components/providers/QueryProvider";
 import NewVersionNotice from "@/components/providers/NewVersionNotice";
 import { DashboardTheme } from "@/components/layout/ThemeToggle";
+import UsageTracker from "@/components/usage/UsageTracker";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -21,6 +22,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <AuthProvider>
       <ConversationsProvider>
         <DashboardTheme />
+        <UsageTracker />
         <div className="flex h-dvh overflow-hidden bg-slate-50">
           <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
           <main

@@ -9,6 +9,7 @@ import { outboundMediaContent, outboundMediaSpec } from '@/lib/whatsapp/outbound
 import { getAgentOrg, prepareAgentSend, sendErrorResponse } from '@/lib/conversations/agentSend'
 import { refreshLead } from '@/lib/leads/sync'
 import { createLogger } from '@/lib/logger'
+import { trackUsage } from '@/lib/usage/server'
 
 const log = createLogger({ route: 'conversations/[id]/media' })
 
@@ -103,5 +104,6 @@ export async function POST(
 
   after(async () => refreshLead(await createServiceClient(), conversationId))
 
+  trackUsage({ orgId, userId, event: 'message_sent', props: { kind: spec.kind }, userAgent: request.headers.get('user-agent') })
   return NextResponse.json({ success: true, message: msg })
 }

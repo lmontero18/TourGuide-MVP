@@ -5,6 +5,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { createLogger } from '@/lib/logger'
 import { appUrl, sendOnce } from '@/lib/email/notify'
 import { box, esc, layout, p } from '@/lib/email/layout'
+import { trackUsage } from '@/lib/usage/server'
 
 export async function GET(
   _request: NextRequest,
@@ -81,8 +82,10 @@ export async function PATCH(
     return NextResponse.json({ error: t('invalidInput') }, { status: 400 })
   }
 
+  const ua = request.headers.get('user-agent')
+
   if ('assign_to' in parsed.data) {
-    return assignConversation({
+    const res = await assignConversation({
       supabase,
       t,
       conversationId: id,
@@ -90,6 +93,8 @@ export async function PATCH(
       actor: { id: user.id, role: profile.role },
       target: parsed.data.assign_to,
     })
+    if (res.ok) trackUsage({ orgId: profile.org_id, userId: user.id, event: 'conversation_assign', userAgent: ua })
+    return res
   }
 
   if ('status' in parsed.data) {
@@ -110,6 +115,12 @@ export async function PATCH(
       console.error('Failed to update conversation status:', error)
       return NextResponse.json({ error: t('conversationUpdateFailed') }, { status: error ? 500 : 404 })
     }
+    trackUsage({
+      orgId: profile.org_id,
+      userId: user.id,
+      event: parsed.data.status === 'resolved' ? 'conversation_resolve' : 'conversation_reopen',
+      userAgent: ua,
+    })
     return NextResponse.json({ success: true, conversation: data })
   }
 
@@ -181,6 +192,13 @@ export async function PATCH(
     )
   }
 
+  trackUsage({
+    orgId: profile.org_id,
+    userId: user.id,
+    event: bot_active ? 'conversation_return' : 'conversation_take',
+    props: { held_by_other: heldByOther },
+    userAgent: ua,
+  })
   return NextResponse.json({ success: true, conversation: data })
 }
 
