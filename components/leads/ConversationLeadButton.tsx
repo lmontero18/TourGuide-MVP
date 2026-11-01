@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import type { ConversationLead } from "@/hooks/useLeads";
 import LeadDrawer from "./LeadDrawer";
 import { STAGE_DOT } from "./leadMeta";
+import { track } from "@/lib/usage/client";
 
 // Boton "Ficha" del encabezado del chat: abre la ficha del cliente que llena
 // la IA, sin salir de la conversacion. Con el panel fijo (flag leadPanel) solo
@@ -22,7 +23,10 @@ export default function ConversationLeadButton({
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true);
+          track("lead_panel_toggle");
+        }}
         disabled={lead === undefined}
         title={t("fichaTitle")}
         className={`inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50 ${className}`}

@@ -854,6 +854,54 @@ export type Database = {
           },
         ]
       }
+      usage_events: {
+        Row: {
+          created_at: string
+          device: string | null
+          event: string
+          id: number
+          org_id: string
+          path: string | null
+          props: Json
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device?: string | null
+          event: string
+          id?: never
+          org_id: string
+          path?: string | null
+          props?: Json
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device?: string | null
+          event?: string
+          id?: never
+          org_id?: string
+          path?: string | null
+          props?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usage_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           changelog_seen_at: string | null

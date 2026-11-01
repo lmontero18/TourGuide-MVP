@@ -6,6 +6,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { createLogger } from '@/lib/logger'
 import { orgHasFeature } from '@/lib/features'
 import { ORG_LOGO_BUCKET, ORG_LOGO_MAX_BYTES, ORG_LOGO_SIZE, ORG_LOGO_TYPES } from '@/lib/orgLogo'
+import { trackUsage } from '@/lib/usage/server'
 
 const log = createLogger({ route: 'organizations/logo' })
 
@@ -23,7 +24,7 @@ async function adminOrg() {
     .maybeSingle()
   if (!profile?.org_id || profile.role !== 'admin') return { status: 403 as const }
   const org = profile.organizations as unknown as { logo_path: string | null } | null
-  return { status: 200 as const, orgId: profile.org_id, previous: org?.logo_path ?? null }
+  return { status: 200 as const, orgId: profile.org_id, userId: user.id, previous: org?.logo_path ?? null }
 }
 
 // POST multipart con `file` → sube el logo nuevo y borra el anterior.
@@ -78,11 +79,12 @@ export async function POST(request: NextRequest) {
   }
 
   if (auth.previous) await removeQuietly(auth.previous, orgLog)
+  trackUsage({ orgId: auth.orgId, userId: auth.userId, event: 'logo_uploaded', userAgent: request.headers.get('user-agent') })
   return NextResponse.json({ logo_path: path })
 }
 
 // DELETE → la agencia vuelve a las iniciales.
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
   const t = await getTranslations('apiErrors')
   const auth = await adminOrg()
   if (auth.status === 401) return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
@@ -96,6 +98,7 @@ export async function DELETE() {
     return NextResponse.json({ error: t('logoSaveFailed') }, { status: 500 })
   }
   if (auth.previous) await removeQuietly(auth.previous, orgLog)
+  trackUsage({ orgId: auth.orgId, userId: auth.userId, event: 'logo_removed', userAgent: request.headers.get('user-agent') })
   return NextResponse.json({ logo_path: null })
 }
 

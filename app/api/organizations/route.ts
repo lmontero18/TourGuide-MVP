@@ -8,6 +8,7 @@ import { createLogger } from '@/lib/logger'
 import { dedupeBusiness, dedupeFaqs, dedupeTours } from '@/lib/knowledge/dedupe'
 import { canEditKnowledge, type OrgFeatureFlags } from '@/lib/features'
 import type { BotConfig, BotTone, BusinessSection, FAQ, KnowledgeEdits, KnowledgeSection, Tour } from '@/types'
+import { trackUsage } from '@/lib/usage/server'
 
 const ORG_COLUMNS = 'id, name, slug, prompt, faqs, tours, business_info, bot_config, plan, status, onboarded_at, knowledge_edits'
 
@@ -265,6 +266,11 @@ export async function PATCH(request: NextRequest) {
     if (touchError) console.error('Failed to record knowledge edit:', touchError)
     else edits = { ...edits, ...Object.fromEntries(changed.map((s) => [s, { at: now, by: editor }])) }
   }
+
+  // El editor de Tours autoguarda: solo cuenta si cambio algo de verdad.
+  const usage = { orgId: profile.org_id, userId: user.id, userAgent: request.headers.get('user-agent') }
+  if (changed.length) trackUsage({ ...usage, event: 'knowledge_saved', props: { sections: changed } })
+  else if (!knowledgeOnly) trackUsage({ ...usage, event: 'settings_saved' })
 
   return NextResponse.json({ success: true, organization: { ...org, knowledge_edits: edits } })
 }

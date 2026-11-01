@@ -6,6 +6,7 @@ import { sendTextMessage } from '@/lib/whatsapp/client'
 import { createLogger } from '@/lib/logger'
 import { refreshLead } from '@/lib/leads/sync'
 import { prepareAgentSend, sendErrorResponse } from '@/lib/conversations/agentSend'
+import { trackUsage } from '@/lib/usage/server'
 
 const log = createLogger({ route: 'conversations/[id]/messages' })
 
@@ -67,5 +68,6 @@ export async function POST(
   // Lo que el agente acuerda (montos, fechas) tambien va a la ficha del lead.
   after(async () => refreshLead(await createServiceClient(), id))
 
+  trackUsage({ orgId, userId, event: 'message_sent', props: { kind: 'text' }, userAgent: request.headers.get('user-agent') })
   return NextResponse.json({ success: true, message: msg })
 }

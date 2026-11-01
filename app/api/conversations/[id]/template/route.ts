@@ -7,6 +7,7 @@ import { getOrgWhatsApp } from '@/lib/whatsapp/orgAccount'
 import { GraphError, listTemplates, renderTemplate, sendTemplate } from '@/lib/whatsapp/templates'
 import { isPaymentError, markPaymentFailed } from '@/lib/whatsapp/billing'
 import { createLogger } from '@/lib/logger'
+import { trackUsage } from '@/lib/usage/server'
 
 const log = createLogger({ route: 'conversations/[id]/template' })
 
@@ -111,5 +112,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: t('templateNotSaved') }, { status: 500 })
   }
 
+  trackUsage({ orgId: profile.org_id, userId: user.id, event: 'template_sent', userAgent: request.headers.get('user-agent') })
   return NextResponse.json({ success: true })
 }
