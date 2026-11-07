@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import SettingsSkeleton from "@/components/settings/SettingsSkeleton";
 import SettingsShell from "@/components/settings/SettingsShell";
 import OrgLogoField from "@/components/settings/OrgLogoField";
+import ProGate from "@/components/plans/ProGate";
 import { useAuth } from "@/hooks/useAuth";
 import { hasFeature } from "@/lib/features";
 import { DEFAULT_RANGE, normalizeBusinessHours } from "@/lib/bot/businessHours";
@@ -121,7 +122,11 @@ function SettingsForm({ initialOrg }: { initialOrg: Organization }) {
                   />
                 </div>
 
-                {hasFeature(featureFlags, "orgBranding") && <OrgLogoField orgName={orgName} />}
+                {hasFeature(featureFlags, "orgBranding") && (
+                  <ProGate feature="branding" variant="inline">
+                    <OrgLogoField orgName={orgName} />
+                  </ProGate>
+                )}
 
                 <div>
                   <div>
