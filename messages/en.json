@@ -156,30 +156,47 @@
   },
   "pricing": {
     "label": "Pricing",
-    "title": "One price, everything included",
-    "sub": "Costs less than someone covering WhatsApp at night and on weekends. No contract: cancel anytime.",
+    "title": "Choose how you want to sell on WhatsApp",
+    "sub": "Both plans answer 24/7 with no message limit. Pro adds the tools to follow every sale.",
     "month": "mo",
-    "popular": "All included",
     "tiers": {
-      "0": {
-        "badge": "Available now",
-        "name": "Tourfy",
-        "desc": "Your 24/7 WhatsApp salesperson, set up and maintained by us.",
+      "starter": {
+        "badge": "To get started",
+        "name": "Starter",
+        "price": "$200",
+        "desc": "Your 24/7 WhatsApp salesperson and your team’s chat, so no inquiry goes unanswered.",
         "cta": "Book a demo",
-        "f0": "24/7 bot with unlimited replies, in the customer's language",
-        "f1": "Understands photos, voice notes and locations",
-        "f2": "Tour catalog imported from your website or PDF",
-        "f3": "Leads board: AI fills in each customer's card",
-        "f4": "Live chat with takeover and unlimited agents",
-        "f5": "Sound alerts when a customer wants to book",
-        "f6": "WhatsApp templates with delivery status",
-        "f7": "Monthly metrics with CSV export",
-        "f8": "Setup and maintenance included: send us new tours or prices and we load them"
+        "features": [
+          "24/7 bot with no message limit, in your customer’s language",
+          "Understands photos, voice notes and locations",
+          "Your tours and prices, imported from your website or a PDF",
+          "Live chat with takeover and unlimited users",
+          "Instant alerts when a customer wants to talk to someone",
+          "Metrics for the bot and for each team member",
+          "We set it up with you on one call"
+        ]
+      },
+      "pro": {
+        "badge": "To sell more",
+        "name": "Pro",
+        "price": "$300",
+        "desc": "Everything in Starter, plus what you need to follow every sale and organize your team.",
+        "cta": "Book a demo",
+        "lead": "Everything in Starter, plus:",
+        "features": [
+          "Leads board: see where each customer stands and who is ready to book",
+          "How much you sold with Tourfy, by month and by team member",
+          "Daily bookings, with pickup times answered by the bot",
+          "Daily and monthly summary in your inbox",
+          "Your logo in the dashboard and CSV export",
+          "Priority support on WhatsApp"
+        ],
+        "soon": "Coming soon: automatic follow-ups, quick replies and internal notes."
       }
     },
     "soon": "Coming soon:",
-    "soonList": "automatic follow-ups, payments and deposits via chat links, segment campaigns and post-tour review requests.",
-    "guarantee": "If the first month doesn't convince you, we refund your money."
+    "soonList": "payment links in the chat and template campaigns: promotions, review requests and messages to past customers.",
+    "guarantee": "No contract. If the first month doesn’t convince you, we refund your money."
   },
   "footer": {
     "tagline1": "WhatsApp AI for tour agencies.",
