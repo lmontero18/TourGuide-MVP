@@ -1010,8 +1010,8 @@ export type Database = {
         Args: { p_from: string; p_hours: Json; p_to: string; p_tz: string }
         Returns: number
       }
-      chat_media_orphans: { Args: { p_limit: number }; Returns: string[] }
       can_edit_knowledge: { Args: never; Returns: boolean }
+      chat_media_orphans: { Args: { p_limit: number }; Returns: string[] }
       get_business_metrics: {
         Args: { p_from: string; p_to: string }
         Returns: Json

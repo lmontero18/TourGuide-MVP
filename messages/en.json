@@ -440,6 +440,7 @@
     "tours": {
       "title": "What your bot knows",
       "subtitle": "Your tours, agency info and FAQs. The bot answers with this. Changes save automatically.",
+      "readOnlyNotice": "Only your agency's admin can change this. You can see it to answer your customers well.",
       "tabTours": "Tours",
       "tabBusiness": "Your agency",
       "tabFaqs": "FAQs",
@@ -607,6 +608,7 @@
         "heroTitle": "Upload your pickup spreadsheet",
         "heroText": "The one your team already uses: hotels in the first column and tours across the top, with the pickup time in each cell. We read it, group hotels into zones and you review before saving.",
         "heroManual": "or build the table by hand",
+        "emptyReadOnly": "No pickups loaded yet.",
         "uploadCta": "Upload Excel (.xlsx)",
         "importExcel": "Import Excel",
         "uploading": "Reading…",

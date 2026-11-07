@@ -16,9 +16,6 @@ export const FEATURES = {
   bookings: 'beta', // Reservas por dia con hora de recogida
   leadPanel: 'live', // Ficha del cliente siempre abierta a la derecha del chat
   inboxPreview: 'live', // Bandeja nueva, aviso "Que esta pasando" y modo oscuro
-  // Agentes editan Tours y preguntas (en la DB: can_edit_knowledge(), ya sin
-  // flag desde 20261027020000).
-  agentKnowledge: 'live',
   teamMetrics: 'beta', // Pestaña Equipo en Metricas (por agente)
   celebrations: 'live', // Confeti al marcar una venta como Reservado
   // Conversacion resuelta que se reabre: si una persona la atendio en las
@@ -43,10 +40,10 @@ export function hasFeature(org: OrgFeatureFlags | null | undefined, key: Feature
   return org.is_beta || org.features.includes(key)
 }
 
-// Tours, preguntas, info del negocio y recogidas: los admins siempre, los
-// agentes con el flag agentKnowledge.
-export function canEditKnowledge(role: string | null | undefined, org: OrgFeatureFlags | null | undefined): boolean {
-  return role === 'admin' || (role === 'agent' && hasFeature(org, 'agentKnowledge'))
+// Tours, preguntas, info del negocio y recogidas: solo el admin (CODE-200).
+// Los agentes los ven en solo lectura. En la DB: can_edit_knowledge().
+export function canEditKnowledge(role: string | null | undefined): boolean {
+  return role === 'admin'
 }
 
 // Para webhook / crons con service client. Un feature 'live' no consulta la DB;

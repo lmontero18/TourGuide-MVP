@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { compilePrompt, type CompilePromptInput } from '@/lib/bot/compilePrompt'
 import { checkPromptBudget } from '@/lib/bot/promptBudget'
 import { createLogger } from '@/lib/logger'
 import { dedupeBusiness, dedupeFaqs, dedupeTours } from '@/lib/knowledge/dedupe'
-import { canEditKnowledge, type OrgFeatureFlags } from '@/lib/features'
 import type { BotConfig, BotTone, BusinessSection, FAQ, KnowledgeEdits, KnowledgeSection, Tour } from '@/types'
 import { trackUsage } from '@/lib/usage/server'
 
 const ORG_COLUMNS = 'id, name, slug, prompt, faqs, tours, business_info, bot_config, plan, status, onboarded_at, knowledge_edits'
 
-// Lo que un agente puede guardar (flag agentKnowledge). El nombre, el tono y
-// el resto de la configuracion del bot quedan solo para admins.
+// Lo que guarda el editor de Tours y preguntas (para no contar su autoguardado
+// como un cambio de Configuracion).
 const KNOWLEDGE_KEYS = ['tours', 'faqs', 'business_info'] as const
 
 // Lo que cuenta como "modificar" un tour: no la fuente ni la confianza de la IA.
@@ -151,7 +150,7 @@ export async function PATCH(request: NextRequest) {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('org_id, role, full_name, email, organizations(is_beta, features)')
+    .select('org_id, role, full_name, email')
     .eq('id', user.id)
     .single()
 
@@ -165,13 +164,11 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: key && t.has(key) ? t(key) : t('invalidInput') }, { status: 400 })
   }
 
-  // Admin: todo. Agente con el flag: solo tours, FAQs e info del negocio.
-  const isAdmin = profile.role === 'admin'
-  const knowledgeOnly = Object.keys(parsed.data).every((key) => (KNOWLEDGE_KEYS as readonly string[]).includes(key))
-  const orgFlags = profile.organizations as unknown as OrgFeatureFlags | null
-  if (!isAdmin && !(knowledgeOnly && canEditKnowledge(profile.role, orgFlags))) {
+  // Solo el admin guarda: configuracion y tambien Tours y preguntas (CODE-200).
+  if (profile.role !== 'admin') {
     return NextResponse.json({ error: t('adminOnly') }, { status: 403 })
   }
+  const knowledgeOnly = Object.keys(parsed.data).every((key) => (KNOWLEDGE_KEYS as readonly string[]).includes(key))
   const editor = profile.full_name?.trim() || profile.email
 
   // Estado actual: necesario para mergear bot_config y para recompilar el prompt
@@ -243,10 +240,7 @@ export async function PATCH(request: NextRequest) {
     checkPromptBudget(promptInput, profile.org_id, createLogger({ route: 'organizations', org_id: profile.org_id }))
   }
 
-  // Un agente no tiene UPDATE en organizations (RLS solo admin): su guardado
-  // va con service role, ya acotado arriba a tours/FAQs/info y a su org.
-  const writer = isAdmin ? supabase : await createServiceClient()
-  const { data: org, error } = await writer
+  const { data: org, error } = await supabase
     .from('organizations')
     .update(update)
     .eq('id', profile.org_id)

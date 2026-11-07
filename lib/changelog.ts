@@ -91,19 +91,6 @@ export const CHANGELOG: ChangelogEntry[] = [
     },
   },
   {
-    id: 'agent-knowledge',
-    date: '2026-10-27T04:00:00Z',
-    href: '/tours',
-    es: {
-      title: 'Todo el equipo puede editar tours y preguntas',
-      body: 'Los agentes ahora entran a Tours y preguntas para corregir precios, tours y respuestas del bot. Cada sección y cada tour muestra quién lo modificó por última vez.',
-    },
-    en: {
-      title: 'Your whole team can edit tours and FAQs',
-      body: 'Agents can now open Tours and FAQs to fix prices, tours and bot answers. Each section and tour shows who edited it last.',
-    },
-  },
-  {
     id: 'pickups',
     date: '2026-10-22T16:00:00Z',
     href: '/tours',
