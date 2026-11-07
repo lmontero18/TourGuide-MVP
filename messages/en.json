@@ -423,13 +423,14 @@
   },
   "dashboard": {
     "proLock": {
+      "sent": "Done, we let the Tourfy team know. We'll get back to you soon.",
+      "error": "Couldn't send it. Please try again.",
       "teamSales": {"title": "Sales and leads per person on Pro", "description": "How much each team member sold and how many of their customers booked."},
       "exportLocked": "Exporting to CSV is part of the Pro plan.",
       "ficha": {"title": "Full customer card on Pro", "description": "Stages, next step, bookings and follow-up for every customer."},
       "badge": "Pro",
       "cta": "Upgrade to Pro",
-      "subject": "Upgrade to Tourfy Pro",
-      "message": "Hi, I'm with {agency}. I'd like to upgrade to Tourfy Pro.",
+      "message": "{agency} wants to upgrade to Tourfy Pro (from: {feature}).",
       "askAdmin": "Ask your agency's admin to upgrade to Pro.",
       "menuLocked": "Available on Pro",
       "features": {
@@ -481,7 +482,8 @@
     "tours": {
       "title": "What your bot knows",
       "subtitle": "Your tours, agency info and FAQs. The bot answers with this. Changes save automatically.",
-      "readOnlyNotice": "Only your agency's admin can change this. You can see it to answer your customers well.",
+      "readOnlyTitle": "Read only.",
+      "readOnlyNotice": "Only your agency's admin can change tours, prices and answers. You can see them to answer your customers well.",
       "tabTours": "Tours",
       "tabBusiness": "Your agency",
       "tabFaqs": "FAQs",
