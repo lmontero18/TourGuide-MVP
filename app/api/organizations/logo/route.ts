@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/nextjs'
 import sharp from 'sharp'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { createLogger } from '@/lib/logger'
-import { orgHasFeature } from '@/lib/features'
+import { orgHasFeature, orgHasPlan } from '@/lib/features'
 import { ORG_LOGO_BUCKET, ORG_LOGO_MAX_BYTES, ORG_LOGO_SIZE, ORG_LOGO_TYPES } from '@/lib/orgLogo'
 import { trackUsage } from '@/lib/usage/server'
 
@@ -37,6 +37,10 @@ export async function POST(request: NextRequest) {
   const service = await createServiceClient()
   if (!(await orgHasFeature(service, auth.orgId, 'orgBranding'))) {
     return NextResponse.json({ error: t('forbidden') }, { status: 403 })
+  }
+  // El logo es Pro (CODE-207). Borrarlo (DELETE) sigue abierto en los dos.
+  if (!(await orgHasPlan(service, auth.orgId, 'pro'))) {
+    return NextResponse.json({ error: t('proOnly') }, { status: 403 })
   }
 
   const form = await request.formData().catch(() => null)

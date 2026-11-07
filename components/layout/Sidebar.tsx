@@ -140,7 +140,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   // Con orgBranding arriba va la agencia (logo o iniciales) y Tourfy baja a
   // un "Powered by" chico al pie del menu.
   const branded = hasFeature(featureFlags, "orgBranding") && !!orgName;
-  const logoUrl = orgLogoUrl(orgLogoPath);
+  // El logo es Pro (CODE-207): en Starter van las iniciales. El archivo no se
+  // borra, solo deja de mostrarse.
+  const logoUrl = hasProFeature(featureFlags, "branding") ? orgLogoUrl(orgLogoPath) : null;
   const { unreadTotal } = useConversationsContext();
   // Mientras carga el rol (null) se muestran todos: ocultarlos haria parpadear
   // el menu a cada admin. El proxy igual bloquea las rutas para agentes.
