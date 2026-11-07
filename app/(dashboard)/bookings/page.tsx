@@ -10,7 +10,8 @@ import BookingsSkeleton from "@/components/skeletons/BookingsSkeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { sortBookings, useBookingsRange, type BookingWithLead } from "@/hooks/useBookings";
 import { addDays, isoDate } from "@/lib/bookings/prefill";
-import { hasFeature } from "@/lib/features";
+import { hasFeature, hasProFeature } from "@/lib/features";
+import { ProLockFor } from "@/components/plans/ProGate";
 
 // Lunes de la semana del dia (la tira arranca en lunes).
 function weekStart(day: string) {
@@ -22,7 +23,24 @@ function weekStart(day: string) {
 // Reservas (flag `bookings`): la lista de un dia ordenada por hora de recogida,
 // que es el orden de la ruta. Por defecto muestra mañana: es lo que el equipo
 // arma cada tarde.
+// Reservas es Pro (CODE-205): en Starter va el candado y no se carga nada.
 export default function BookingsPage() {
+  const t = useTranslations("dashboard.bookings");
+  const { featureFlags } = useAuth();
+  if (hasFeature(featureFlags, "bookings") && !hasProFeature(featureFlags, "bookings")) {
+    return (
+      <div className="flex h-full flex-col">
+        <TopBar title={t("title")} />
+        <div className="flex-1 overflow-y-auto p-5">
+          <ProLockFor feature="bookings" />
+        </div>
+      </div>
+    );
+  }
+  return <BookingsDay />;
+}
+
+function BookingsDay() {
   const t = useTranslations("dashboard.bookings");
   const locale = useLocale();
   const { featureFlags } = useAuth();

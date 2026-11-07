@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { createLogger } from '@/lib/logger'
 import { safeEqual } from '@/lib/security'
 import { checkRateLimit } from '@/lib/ratelimit'
-import { orgHasFeature } from '@/lib/features'
+import { orgHasFeature, orgHasPlan } from '@/lib/features'
 import { lookupPickup, pickupInstruction } from '@/lib/pickups/lookup'
 import type { PickupPlace, PickupTime, PickupTour, PickupZone, Tour } from '@/types'
 
@@ -76,9 +76,11 @@ export async function POST(request: NextRequest) {
     }
     const orgId = conversation.org_id
 
-    // Sin el feature la tool no deberia estar en el prompt; si igual llega,
-    // se responde como "sin datos" para que el bot no invente.
-    const enabled = await orgHasFeature(supabase, orgId, 'pickups')
+    // Sin el feature, o en Starter (Recogidas es Pro, CODE-205), la tool no
+    // deberia estar en el prompt; si igual llega, se responde como "sin datos"
+    // para que el bot no invente y pase con el equipo. Las recogidas cargadas
+    // no se tocan.
+    const enabled = (await orgHasFeature(supabase, orgId, 'pickups')) && (await orgHasPlan(supabase, orgId, 'pro'))
 
     const [org, zones, places, tours, times] = enabled
       ? await Promise.all([

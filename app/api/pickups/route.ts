@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireKnowledgeEditor } from '@/lib/auth/requireKnowledgeEditor'
 import { getOrgFeatureFlags } from '@/lib/supabase/queries/organizations'
 import { getPickups, savePickups } from '@/lib/supabase/queries/pickups'
-import { hasFeature } from '@/lib/features'
+import { hasFeature, hasProFeature } from '@/lib/features'
 import { createLogger } from '@/lib/logger'
 import type { PickupData } from '@/types'
 
@@ -20,8 +20,13 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: t('unauthorized') }, { status: 401 })
   const { data: profile } = await supabase.from('users').select('org_id').eq('id', user.id).single()
   if (!profile?.org_id) return NextResponse.json({ error: t('forbidden') }, { status: 403 })
-  if (!hasFeature(await getOrgFeatureFlags(profile.org_id), 'pickups')) {
+  const flags = await getOrgFeatureFlags(profile.org_id)
+  if (!hasFeature(flags, 'pickups')) {
     return NextResponse.json({ error: t('forbidden') }, { status: 403 })
+  }
+  // Recogidas es Pro (CODE-205). Lo cargado no se borra: solo deja de usarse.
+  if (!hasProFeature(flags, 'pickups')) {
+    return NextResponse.json({ error: t('proOnly') }, { status: 403 })
   }
 
   try {
@@ -83,8 +88,12 @@ export async function PUT(request: NextRequest) {
   const t = await getTranslations('apiErrors')
   const auth = await requireKnowledgeEditor()
   if (!auth.ok) return auth.response
-  if (!hasFeature(await getOrgFeatureFlags(auth.orgId), 'pickups')) {
+  const flags = await getOrgFeatureFlags(auth.orgId)
+  if (!hasFeature(flags, 'pickups')) {
     return NextResponse.json({ error: t('forbidden') }, { status: 403 })
+  }
+  if (!hasProFeature(flags, 'pickups')) {
+    return NextResponse.json({ error: t('proOnly') }, { status: 403 })
   }
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null))

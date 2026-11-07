@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTranslations } from 'next-intl/server'
 import { requireMember } from '@/lib/auth/requireMember'
 import { getOrgFeatureFlags } from '@/lib/supabase/queries/organizations'
-import { hasFeature } from '@/lib/features'
+import { hasFeature, hasProFeature } from '@/lib/features'
 import { createBookingSchema } from '@/lib/bookings/schema'
 import { createLogger } from '@/lib/logger'
 
@@ -14,8 +14,13 @@ export async function POST(request: NextRequest) {
   const t = await getTranslations('apiErrors')
   const auth = await requireMember()
   if (!auth.ok) return auth.response
-  if (!hasFeature(await getOrgFeatureFlags(auth.orgId), 'bookings')) {
+  const flags = await getOrgFeatureFlags(auth.orgId)
+  if (!hasFeature(flags, 'bookings')) {
     return NextResponse.json({ error: t('forbidden') }, { status: 403 })
+  }
+  // Reservas es Pro (CODE-205).
+  if (!hasProFeature(flags, 'bookings')) {
+    return NextResponse.json({ error: t('proOnly') }, { status: 403 })
   }
 
   const parsed = createBookingSchema.safeParse(await request.json().catch(() => null))
