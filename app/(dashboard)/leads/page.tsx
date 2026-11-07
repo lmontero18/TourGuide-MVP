@@ -13,8 +13,28 @@ import { useLeads } from "@/hooks/useLeads";
 import type { LeadStatus } from "@/types";
 import { LeadBoardSkeleton } from "@/components/skeletons/LeadsSkeleton";
 import LeadsExport from "@/components/leads/LeadsExport";
+import { ProLockFor } from "@/components/plans/ProGate";
+import { hasProFeature } from "@/lib/features";
 
+// Pantalla de Leads y exportacion a CSV: Pro (CODE-203). En Starter se ve el
+// candado y no se cargan los leads.
 export default function LeadsPage() {
+  const t = useTranslations("dashboard.leads");
+  const { featureFlags } = useAuth();
+  if (!hasProFeature(featureFlags, "leadsBoard")) {
+    return (
+      <div className="flex h-full flex-col">
+        <TopBar title={t("title")} />
+        <div className="flex-1 overflow-y-auto p-5">
+          <ProLockFor feature="leadsBoard" />
+        </div>
+      </div>
+    );
+  }
+  return <LeadsBoardPage />;
+}
+
+function LeadsBoardPage() {
   const t = useTranslations("dashboard.leads");
   const locale = useLocale();
   const { orgId } = useAuth();

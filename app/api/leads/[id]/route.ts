@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createLogger } from '@/lib/logger'
 import type { LeadDetails, LeadField } from '@/types'
 import { trackUsage } from '@/lib/usage/server'
+import { getOrgFeatureFlags } from '@/lib/supabase/queries/organizations'
+import { hasProFeature } from '@/lib/features'
 
 const log = createLogger({ route: 'leads/[id]' })
 
@@ -59,6 +61,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     .eq('id', id)
     .maybeSingle()
   if (!lead) return NextResponse.json({ error: t('leadNotFound') }, { status: 404 })
+
+  // El estado del lead es de la ficha completa (Pro, CODE-203). En Starter se
+  // corrigen datos y el monto, no el estado. La DB lo frena igual (trigger
+  // leads_status_pro_only); aca se corta antes con un mensaje claro.
+  if (input.status && input.status !== lead.status && !hasProFeature(await getOrgFeatureFlags(lead.org_id), 'leadsBoard')) {
+    return NextResponse.json({ error: t('proOnly') }, { status: 403 })
+  }
 
   const update: Record<string, unknown> = {}
 

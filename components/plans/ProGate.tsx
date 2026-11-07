@@ -20,7 +20,9 @@ export default function ProGate({ feature, variant = "panel", children }: ProGat
   return <ProLockFor feature={feature} variant={variant} />;
 }
 
-export function ProLockFor({ feature, variant = "panel" }: { feature: ProFeature; variant?: "panel" | "inline" }) {
+// copyKey: textos propios para un lugar puntual (ej. "ficha" en el chat); sin
+// el, los de la funcion.
+export function ProLockFor({ feature, variant = "panel", copyKey }: { feature: ProFeature; variant?: "panel" | "inline"; copyKey?: "ficha" }) {
   const t = useTranslations("dashboard.proLock");
   const { role, orgName } = useAuth();
   // Solo el admin decide el plan: el agente ve a quien pedirselo.
@@ -30,8 +32,8 @@ export function ProLockFor({ feature, variant = "panel" }: { feature: ProFeature
   return (
     <ProLock
       badge={t("badge")}
-      title={t(`features.${feature}.title`)}
-      description={t(`features.${feature}.description`)}
+      title={t(`${copyKey ?? `features.${feature}`}.title`)}
+      description={t(`${copyKey ?? `features.${feature}`}.description`)}
       cta={cta}
       hint={t("askAdmin")}
       variant={variant}

@@ -9,7 +9,8 @@ import { FICHA_FIELDS, STAGES, STAGE_DOT, TEMPERATURE, formatMoney, isCurrentLea
 import { formatQuote, groupCount, parseQuote, suggestAmount, type SuggestedAmount } from "@/lib/leads/quoteAmount";
 import { cleanText } from "@/lib/leads/emptyValue";
 import { useAuth } from "@/hooks/useAuth";
-import { hasFeature } from "@/lib/features";
+import { hasFeature, hasProFeature } from "@/lib/features";
+import { ProLockFor } from "@/components/plans/ProGate";
 import LeadBookings from "@/components/bookings/LeadBookings";
 import { useCelebrateSale } from "@/hooks/useCelebrateSale";
 
@@ -24,6 +25,8 @@ interface ConversationLeadPanelProps extends ConversationLead {
 const CURRENCIES = ["USD", "NIO", "CRC", "MXN", "PEN", "COP", "GTQ", "EUR"];
 // El proximo paso va en su propia seccion, no entre los datos del viaje.
 const TRIP_FIELDS = FICHA_FIELDS.filter((f) => f !== "next_step");
+// Ficha simple de Starter (CODE-203): el nombre y el telefono van arriba.
+const SIMPLE_FIELDS = TRIP_FIELDS.filter((f) => f === "tour_interest" || f === "travel_date" || f === "group_size");
 
 function initials(name: string | null) {
   if (!name) return "#";
@@ -380,6 +383,9 @@ function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "upd
   const tp = useTranslations("dashboard.leads.panel");
   const locale = useLocale();
   const { featureFlags } = useAuth();
+  // Starter: ficha simple. Corrige datos y anota el monto; el estado, el
+  // resumen, el proximo paso, las reservas y el historial son de Pro.
+  const simple = !hasProFeature(featureFlags, "leadsBoard");
   const { data: contactLeads } = useContactLeads(lead.contact_id);
   const past = (contactLeads ?? []).filter((l) => l.id !== lead.id);
   const [showEmpty, setShowEmpty] = useState(false);
@@ -402,9 +408,10 @@ function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "upd
     void run({ status }).then((ok) => ok && status === "converted" && celebrate());
   };
 
-  const filled = TRIP_FIELDS.filter((f) => fieldValue(lead, f));
-  const empty = TRIP_FIELDS.filter((f) => !fieldValue(lead, f));
-  const shown = showEmpty ? TRIP_FIELDS : filled;
+  const fields = simple ? SIMPLE_FIELDS : TRIP_FIELDS;
+  const filled = fields.filter((f) => fieldValue(lead, f));
+  const empty = fields.filter((f) => !fieldValue(lead, f));
+  const shown = showEmpty ? fields : filled;
   // Precio por persona × grupo, para no sacar la calculadora.
   const quote = parseQuote(fieldValue(lead, "quote"));
   const people = groupCount(lead.metadata?.group_size);
@@ -425,7 +432,7 @@ function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "upd
 
   return (
     <div className="divide-y divide-slate-100">
-      {stale && (
+      {stale && !simple && (
         <div className="bg-slate-50 px-5 py-3 text-xs text-slate-600">
           <p>
             {tp("staleNotice", {
@@ -439,11 +446,14 @@ function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "upd
         </div>
       )}
       <div className="space-y-1 px-5 py-4">
-        <div className="flex items-center justify-between gap-3 py-1">
-          <label htmlFor="panel-stage" className="text-sm text-slate-500">{t("stage")}</label>
-          <StageMenu value={lead.status} onChange={setStage} />
-        </div>
-        {lead.status === "converted" && (
+        {!simple && (
+          <div className="flex items-center justify-between gap-3 py-1">
+            <label htmlFor="panel-stage" className="text-sm text-slate-500">{t("stage")}</label>
+            <StageMenu value={lead.status} onChange={setStage} />
+          </div>
+        )}
+        {/* En Starter no hay "Reservado": el monto se anota siempre. */}
+        {(simple || lead.status === "converted") && (
           <AmountRow
             key={`${lead.amount}-${lead.currency}`}
             lead={lead}
@@ -457,7 +467,7 @@ function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "upd
         )}
       </div>
 
-      {summary && (
+      {summary && !simple && (
         <div className="px-5 py-4">
           <p className={`${sectionLabel} mb-1.5`}>{t("summary")}{sourceMark("summary")}</p>
           <InlineText value={summary} multiline clamp onSave={saveField("summary")} className="text-slate-700" />
@@ -505,6 +515,7 @@ function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "upd
         )}
       </div>
 
+      {!simple && (
       <div className="px-5 py-4">
         <p className={`${sectionLabel} mb-1.5`}>{t("fields.next_step")}{nextStep && sourceMark("next_step")}</p>
         {nextStep ? (
@@ -520,14 +531,21 @@ function PanelBody({ lead, update, refresh, stale }: Pick<ConversationLead, "upd
           <InlineText value="" onSave={saveField("next_step")} />
         )}
       </div>
+      )}
 
-      {hasFeature(featureFlags, "bookings") && (
+      {!simple && hasFeature(featureFlags, "bookings") && (
         <div className="px-5 py-4 empty:hidden">
           <LeadBookings lead={lead} />
         </div>
       )}
 
-      {past.length > 0 && (
+      {simple && (
+        <div className="px-5 py-4">
+          <ProLockFor feature="leadsBoard" variant="inline" copyKey="ficha" />
+        </div>
+      )}
+
+      {!simple && past.length > 0 && (
         <div className="px-5 py-4">
           <p className={`${sectionLabel} mb-1.5`}>{t("history", { count: past.length })}</p>
           <ul className="space-y-1.5">
