@@ -14,6 +14,8 @@ interface TourDrawerProps {
   onChange: (tour: Tour) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
+  // Agentes: ven el tour pero no lo cambian (CODE-200).
+  readOnly?: boolean;
 }
 
 const CURRENCIES = ["USD", "NIO", "CRC", "MXN", "PEN", "COP", "GTQ", "EUR"];
@@ -56,7 +58,7 @@ function AmountInput({ value, onChange, className, label }: { value: number; onC
 
 // Panel lateral de edicion de un tour. Los cambios se guardan solos (la
 // pagina hace el guardado con debounce) y el estado se muestra abajo.
-export default function TourDrawer({ tour, saveState, lastEdit, onChange, onDelete, onClose }: TourDrawerProps) {
+export default function TourDrawer({ tour, saveState, lastEdit, onChange, onDelete, onClose, readOnly = false }: TourDrawerProps) {
   const t = useTranslations("dashboard.tours");
   const open = !!tour;
 
@@ -92,6 +94,7 @@ export default function TourDrawer({ tour, saveState, lastEdit, onChange, onDele
                 value={tour.name}
                 onChange={(e) => onChange({ ...tour, name: e.target.value })}
                 rows={2}
+                readOnly={readOnly}
                 aria-label={t("tourName")}
                 placeholder={t("tourNamePlaceholder")}
                 className="min-w-0 flex-1 resize-none rounded-lg border border-transparent bg-transparent px-1.5 py-1 font-display text-xl font-extrabold leading-tight text-navy-900 outline-none hover:border-slate-200 focus:border-slate-200"
@@ -99,7 +102,8 @@ export default function TourDrawer({ tour, saveState, lastEdit, onChange, onDele
               <button onClick={onClose} aria-label={t("close")} className="px-2 text-2xl leading-none text-slate-400 hover:text-navy-900">×</button>
             </div>
 
-            <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
+            <div className="flex-1 overflow-y-auto px-5 py-5">
+            <fieldset disabled={readOnly} className="min-w-0 space-y-5">
               <div>
                 <label htmlFor="tour-category" className="mb-1.5 block text-xs font-bold text-navy-900">{t("type")}</label>
                 <input
@@ -142,10 +146,13 @@ export default function TourDrawer({ tour, saveState, lastEdit, onChange, onDele
                       >
                         {[...new Set([p.currency, ...CURRENCIES])].map((c) => <option key={c}>{c}</option>)}
                       </select>
-                      <button onClick={() => setPrices(prices.filter((_, j) => j !== i))} aria-label={t("removePrice")} className="text-lg text-slate-400 hover:text-red-500">×</button>
+                      {!readOnly && (
+                        <button onClick={() => setPrices(prices.filter((_, j) => j !== i))} aria-label={t("removePrice")} className="text-lg text-slate-400 hover:text-red-500">×</button>
+                      )}
                     </div>
                   ))}
                 </div>
+                {!readOnly && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {PRESETS.map((preset) => t(`presets.${preset}`)).map((label) => (
                     <button
@@ -157,7 +164,8 @@ export default function TourDrawer({ tour, saveState, lastEdit, onChange, onDele
                     </button>
                   ))}
                 </div>
-                <p className="mt-1.5 text-xs text-slate-400">{t("pricesHint")}</p>
+                )}
+                {!readOnly && <p className="mt-1.5 text-xs text-slate-400">{t("pricesHint")}</p>}
               </div>
 
               <div>
@@ -168,20 +176,23 @@ export default function TourDrawer({ tour, saveState, lastEdit, onChange, onDele
                   onChange={(e) => onChange({ ...tour, info: e.target.value })}
                   className={`${input} min-h-32 resize-y`}
                 />
-                <p className="mt-1.5 text-xs text-slate-400">{t("detailsHint")}</p>
+                {!readOnly && <p className="mt-1.5 text-xs text-slate-400">{t("detailsHint")}</p>}
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <p className="text-xs font-bold text-navy-900">{t("botView")}</p>
                 <p className="mt-1 text-[13px] leading-relaxed text-slate-600">{botLine(tour)}</p>
               </div>
+            </fieldset>
             </div>
 
             <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3">
-              <button onClick={() => onDelete(tour.id)} className="text-sm font-semibold text-red-600 hover:text-red-700">{t("deleteTour")}</button>
+              {readOnly ? <span /> : (
+                <button onClick={() => onDelete(tour.id)} className="text-sm font-semibold text-red-600 hover:text-red-700">{t("deleteTour")}</button>
+              )}
               <div className="flex min-w-0 items-center gap-3">
                 <LastEdit edit={lastEdit} className="truncate" />
-                <SaveStatus state={saveState} />
+                {!readOnly && <SaveStatus state={saveState} />}
               </div>
             </div>
           </>

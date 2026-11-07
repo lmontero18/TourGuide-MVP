@@ -9,7 +9,8 @@ interface ToursTableProps {
   tours: Tour[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-  onAdd: () => void;
+  // Sin onAdd (agentes, solo lectura) no se muestra "Agregar tour".
+  onAdd?: () => void;
 }
 
 function PriceCell({ tour }: { tour: Tour }) {
@@ -92,9 +93,11 @@ export default function ToursTable({ tours, selectedId, onSelect, onAdd }: Tours
             ))}
           </div>
         )}
-        <button onClick={onAdd} className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-4 text-sm font-bold text-white hover:bg-navy-800">
-          + {t("addTour")}
-        </button>
+        {onAdd && (
+          <button onClick={onAdd} className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-navy-900 px-4 text-sm font-bold text-white hover:bg-navy-800">
+            + {t("addTour")}
+          </button>
+        )}
       </div>
 
       {pending.length > 0 ? (

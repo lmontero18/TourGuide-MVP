@@ -7,10 +7,12 @@ import type { FaqDraft } from "./TourCards";
 interface FaqAccordionProps {
   faqs: FaqDraft[];
   onChange: (faqs: FaqDraft[]) => void;
+  // Agentes: abren y leen las preguntas pero no las cambian (CODE-200).
+  readOnly?: boolean;
 }
 
 // Preguntas frecuentes en acordeon: se abre una y se edita ahi mismo.
-export default function FaqAccordion({ faqs, onChange }: FaqAccordionProps) {
+export default function FaqAccordion({ faqs, onChange, readOnly = false }: FaqAccordionProps) {
   const t = useTranslations("dashboard.tours");
   const [openId, setOpenId] = useState<string | null>(null);
   const update = (id: string, patch: Partial<FaqDraft>) => onChange(faqs.map((f) => (f.id === id ? { ...f, ...patch } : f)));
@@ -49,35 +51,43 @@ export default function FaqAccordion({ faqs, onChange }: FaqAccordionProps) {
                   <input
                     value={faq.question}
                     onChange={(e) => update(faq.id, { question: e.target.value })}
+                    readOnly={readOnly}
                     placeholder={t("faqQuestionPlaceholder")}
                     aria-label={t("faqQuestion")}
-                    autoFocus={!faq.question}
+                    autoFocus={!readOnly && !faq.question}
                     className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-navy-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   />
                   <textarea
                     value={faq.answer}
                     onChange={(e) => update(faq.id, { answer: e.target.value })}
+                    readOnly={readOnly}
                     placeholder={t("faqAnswerPlaceholder")}
                     aria-label={t("faqAnswer")}
                     rows={3}
                     className="w-full resize-y rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   />
-                  <button
-                    onClick={() => onChange(faqs.filter((f) => f.id !== faq.id))}
-                    className="text-xs font-semibold text-red-600 hover:text-red-700"
-                  >
-                    {t("deleteFaq")}
-                  </button>
+                  {!readOnly && (
+                    <button
+                      onClick={() => onChange(faqs.filter((f) => f.id !== faq.id))}
+                      className="text-xs font-semibold text-red-600 hover:text-red-700"
+                    >
+                      {t("deleteFaq")}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
           );
         })}
       </div>
-      <button onClick={add} className="inline-flex h-10 items-center rounded-xl border border-dashed border-slate-300 px-4 text-sm font-semibold text-slate-500 hover:border-slate-400 hover:text-navy-900">
-        + {t("addFaq")}
-      </button>
-      <p className="text-xs text-slate-400">{t("faqHint")}</p>
+      {!readOnly && (
+        <>
+          <button onClick={add} className="inline-flex h-10 items-center rounded-xl border border-dashed border-slate-300 px-4 text-sm font-semibold text-slate-500 hover:border-slate-400 hover:text-navy-900">
+            + {t("addFaq")}
+          </button>
+          <p className="text-xs text-slate-400">{t("faqHint")}</p>
+        </>
+      )}
     </div>
   );
 }

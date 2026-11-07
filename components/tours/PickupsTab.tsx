@@ -13,12 +13,14 @@ const AUTOSAVE_MS = 1000;
 
 interface PickupsTabProps {
   tours: Tour[];
+  // Agentes: ven la tabla pero no la cambian (CODE-200).
+  readOnly?: boolean;
 }
 
 // Tours › Recogidas (flag `pickups`): hora de recogida por zona de hoteles,
 // tour y salida, con horas propias por hotel. Lo normal es importar el Excel
 // que la agencia ya usa; armarla a mano queda como alternativa.
-export default function PickupsTab({ tours }: PickupsTabProps) {
+export default function PickupsTab({ tours, readOnly = false }: PickupsTabProps) {
   const t = useTranslations("dashboard.tours.pickups");
   const { data, isError, save } = usePickups(true);
   const [imported, setImported] = useState<{ draft: PickupDraft; fileName: string } | null>(null);
@@ -53,6 +55,7 @@ export default function PickupsTab({ tours }: PickupsTabProps) {
       initial={data}
       tours={tours}
       save={save}
+      readOnly={readOnly}
       onImported={(draft, fileName) => setImported({ draft, fileName })}
     />
   );
@@ -63,11 +66,12 @@ interface EditorProps {
   tours: Tour[];
   save: (data: PickupData, keepalive?: boolean) => Promise<boolean>;
   onImported: (draft: PickupDraft, fileName: string) => void;
+  readOnly: boolean;
 }
 
 type Dialog = { mode: "pick" } | { mode: "settings"; tourId: string } | null;
 
-function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
+function PickupsEditor({ initial, tours, save, onImported, readOnly }: EditorProps) {
   const t = useTranslations("dashboard.tours.pickups");
   const [data, setData] = useState<PickupData>(initial);
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -116,6 +120,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
   }, [save, tourIds]);
 
   const edit = useCallback((update: (prev: PickupData) => PickupData) => {
+    if (readOnly) return;
     setData((prev) => {
       const next = update(prev);
       latest.current = next;
@@ -124,7 +129,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
     setSaveState("pending");
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => void flush(), AUTOSAVE_MS);
-  }, [flush]);
+  }, [flush, readOnly]);
 
   useEffect(() => () => {
     if (timer.current) void flush(true);
@@ -243,6 +248,10 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
   const settingsTour = dialog?.mode === "settings" ? data.tours.find((x) => x.tour_id === dialog.tourId) ?? null : null;
   const isEmpty = !data.zones.length && !data.tours.length;
 
+  if (isEmpty && readOnly) {
+    return <p className="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-500">{t("emptyReadOnly")}</p>;
+  }
+
   if (isEmpty && !manual) {
     return <ImportHero onImported={onImported} onManual={() => setManual(true)} />;
   }
@@ -271,11 +280,15 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
           <p className="text-sm text-slate-500">{t("counts", { zones: data.zones.length, places: data.places.length })}</p>
         </div>
         <div className="flex items-center gap-2">
-          <SaveStatus state={saveState} onRetry={() => void flush()} />
-          <UploadButton onImported={onImported} variant="secondary" />
-          <button onClick={addZone} className="h-9 rounded-lg bg-navy-900 px-3 text-xs font-semibold text-white hover:bg-navy-800">
-            {t("addZone")}
-          </button>
+          {!readOnly && (
+            <>
+              <SaveStatus state={saveState} onRetry={() => void flush()} />
+              <UploadButton onImported={onImported} variant="secondary" />
+              <button onClick={addZone} className="h-9 rounded-lg bg-navy-900 px-3 text-xs font-semibold text-white hover:bg-navy-800">
+                {t("addZone")}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -308,21 +321,25 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
               </button>
             );
           })}
-          <button
-            onClick={() => setDialog({ mode: "pick" })}
-            className="w-full border-t border-slate-100 px-4 py-3 text-left text-sm font-semibold text-blue-600 hover:bg-slate-50 hover:text-blue-700"
-          >
-            {t("addTour")}
-          </button>
+          {!readOnly && (
+            <button
+              onClick={() => setDialog({ mode: "pick" })}
+              className="w-full border-t border-slate-100 px-4 py-3 text-left text-sm font-semibold text-blue-600 hover:bg-slate-50 hover:text-blue-700"
+            >
+              {t("addTour")}
+            </button>
+          )}
         </section>
 
         <section className="min-w-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white">
           {!selected ? (
             <div className="px-6 py-12 text-center">
               <p className="text-sm font-bold text-navy-900">{t("noTourSelected")}</p>
-              <button onClick={() => setDialog({ mode: "pick" })} className="mt-2 text-sm font-semibold text-blue-600 hover:text-blue-700">
-                {t("pickToursCta")}
-              </button>
+              {!readOnly && (
+                <button onClick={() => setDialog({ mode: "pick" })} className="mt-2 text-sm font-semibold text-blue-600 hover:text-blue-700">
+                  {t("pickToursCta")}
+                </button>
+              )}
             </div>
           ) : (
             <>
@@ -331,7 +348,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                   <h2 className="font-display text-xl font-bold text-navy-900">{tourName.get(selected.tour_id)}</h2>
                   <p className="mt-0.5 text-[13px] text-slate-500">{summary(selected)}</p>
                 </div>
-                <button
+                {!readOnly && <button
                   onClick={() => setDialog({ mode: "settings", tourId: selected.tour_id })}
                   className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-navy-900 hover:border-slate-300 hover:bg-slate-50"
                 >
@@ -339,7 +356,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                     <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
                   </svg>
                   {t("tourSettings")}
-                </button>
+                </button>}
               </div>
 
               <div className="overflow-x-auto">
@@ -353,7 +370,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                     </tr>
                   </thead>
                   <tbody>
-                    {!data.zones.length && (
+                    {!data.zones.length && !readOnly && (
                       <tr className="border-t border-slate-100">
                         <td colSpan={selected.departures.length + 1} className="px-5 py-6">
                           <button onClick={addZone} className="text-sm font-semibold text-blue-600 hover:text-blue-700">{t("addZoneCta")}</button>
@@ -380,13 +397,18 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                                 >
                                   {open ? "▾" : "▸"}
                                 </button>
-                                <ZoneName name={zone.name} autoFocus={focusZone === zone.id} onChange={(name) => renameZone(zone.id, name)} />
+                                {readOnly ? (
+                                  <span className="min-w-0 flex-1 px-1.5 text-sm font-semibold text-navy-900">{zone.name}</span>
+                                ) : (
+                                  <ZoneName name={zone.name} autoFocus={focusZone === zone.id} onChange={(name) => renameZone(zone.id, name)} />
+                                )}
                                 <span className="shrink-0 pr-2 text-xs font-normal text-slate-400">{t("placesCount", { count: places.length })}</span>
                               </div>
                             </th>
                             {selected.departures.map((label, i) => (
                               <td key={i} className="px-3 py-1.5 text-right">
                                 <PickupCell
+                                  readOnly={readOnly}
                                   value={times.get(timeKey(selected.tour_id, i, zone.id)) ?? null}
                                   label={`${zone.name} · ${label}`}
                                   onChange={(time) => edit((prev) => setTime(prev, selected.tour_id, i, zone.id, null, time))}
@@ -398,6 +420,7 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                             <tr className="bg-slate-50">
                               <td colSpan={selected.departures.length + 1} className="pb-3 pl-12 pr-5 pt-1">
                                 <ZonePanel
+                                  readOnly={readOnly}
                                   places={places}
                                   ownRows={ownRows}
                                   onAddPlace={(name) => addPlace(zone.id, name)}
@@ -414,13 +437,16 @@ function PickupsEditor({ initial, tours, save, onImported }: EditorProps) {
                                 <th scope="row" className="py-2 pl-12 pr-5 text-left font-medium text-navy-900">
                                   {place.name}
                                   <span className="ml-2 text-xs font-normal text-amber-800">{t("ownTimes")}</span>
-                                  <button onClick={() => clearOwnTimes(place.id, selected.tour_id)} className="ml-2 text-xs font-normal text-amber-800 underline hover:text-amber-900">
-                                    {t("useZoneTimes")}
-                                  </button>
+                                  {!readOnly && (
+                                    <button onClick={() => clearOwnTimes(place.id, selected.tour_id)} className="ml-2 text-xs font-normal text-amber-800 underline hover:text-amber-900">
+                                      {t("useZoneTimes")}
+                                    </button>
+                                  )}
                                 </th>
                                 {selected.departures.map((label, i) => (
                                   <td key={i} className="px-3 py-1.5 text-right">
                                     <PickupCell
+                                      readOnly={readOnly}
                                       value={times.get(timeKey(selected.tour_id, i, zone.id, place.id)) ?? null}
                                       inherited={times.get(timeKey(selected.tour_id, i, zone.id)) ?? null}
                                       label={`${place.name} · ${label}`}
@@ -559,11 +585,12 @@ function ZoneName({ name, autoFocus, onChange }: { name: string; autoFocus: bool
 // Una celda de la tabla. Click abre un menu con los tres estados: una hora,
 // "No recoge" o "Pendiente" (sin cargar). En la fila de un hotel con horas
 // propias, la tercera opcion es "Igual que la zona" y se ve la hora heredada.
-function PickupCell({ value, inherited, label, onChange }: {
+function PickupCell({ value, inherited, label, onChange, readOnly = false }: {
   value: string | null;
   inherited?: string | null;
   label: string;
   onChange: (time: string | null) => void;
+  readOnly?: boolean;
 }) {
   const t = useTranslations("dashboard.tours.pickups");
   const [open, setOpen] = useState(false);
@@ -639,6 +666,14 @@ function PickupCell({ value, inherited, label, onChange }: {
     );
   }
 
+  if (readOnly) {
+    return (
+      <span aria-label={label} className="ml-auto flex h-9 w-full max-w-20 items-center justify-end px-2">
+        {content}
+      </span>
+    );
+  }
+
   const option = (active: boolean) =>
     `flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm ${active ? "bg-slate-100 font-semibold text-navy-900" : "text-slate-700 hover:bg-slate-50"}`;
 
@@ -704,7 +739,8 @@ function PickupCell({ value, inherited, label, onChange }: {
   );
 }
 
-function ZonePanel({ places, ownRows, onAddPlace, onRemovePlace, onToggleOwn, onRemoveZone }: {
+function ZonePanel({ places, ownRows, onAddPlace, onRemovePlace, onToggleOwn, onRemoveZone, readOnly = false }: {
+  readOnly?: boolean;
   places: PickupData["places"];
   ownRows: Set<string>;
   onAddPlace: (name: string) => void;
@@ -722,6 +758,19 @@ function ZonePanel({ places, ownRows, onAddPlace, onRemovePlace, onToggleOwn, on
     onAddPlace(value);
     setNewPlace("");
   };
+
+  if (readOnly) {
+    return (
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-xs font-semibold text-slate-500">{t("placesLabel")}</span>
+        {places.map((place) => (
+          <span key={place.id} className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700">
+            {place.name}
+          </span>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">

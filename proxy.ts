@@ -1,14 +1,12 @@
 import { createMiddlewareClient } from '@/lib/supabase/middleware'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { canEditKnowledge, type OrgFeatureFlags } from '@/lib/features'
 
 // Solo admins: los agentes atienden conversaciones, no configuran la agencia
 // (CLAUDE.md > Auth y roles). Las API routes validan el rol por su cuenta;
 // esto evita que un agente llegue a las pantallas escribiendo la URL.
-const ADMIN_ONLY_PATHS = ['/metrics', '/settings', '/tours', '/templates']
-// Tours y preguntas: tambien agentes si la org tiene el flag agentKnowledge.
-const KNOWLEDGE_PATHS = ['/tours']
+// /tours no esta: los agentes la ven en solo lectura (CODE-200).
+const ADMIN_ONLY_PATHS = ['/metrics', '/settings', '/templates']
 
 function redirectWithCookies(url: URL, response: NextResponse) {
   const redirect = NextResponse.redirect(url)
@@ -45,11 +43,11 @@ export async function proxy(request: NextRequest) {
     // Check if the user's org has completed onboarding
     const { data: profile } = await supabase
       .from('users')
-      .select('org_id, role, organizations(onboarded_at, is_beta, features)')
+      .select('org_id, role, organizations(onboarded_at)')
       .eq('id', user.id)
       .maybeSingle()
 
-    type OrgRow = { onboarded_at: string | null } & OrgFeatureFlags
+    type OrgRow = { onboarded_at: string | null }
     const orgData = profile?.organizations as unknown as OrgRow | OrgRow[] | null
     const org = Array.isArray(orgData) ? orgData[0] : orgData
     const isOnboarded = !!org?.onboarded_at
@@ -76,9 +74,8 @@ export async function proxy(request: NextRequest) {
     }
 
     const isAdminOnly = ADMIN_ONLY_PATHS.some(p => request.nextUrl.pathname.startsWith(p))
-    const isKnowledge = KNOWLEDGE_PATHS.some(p => request.nextUrl.pathname.startsWith(p))
     const isOwnerPath = isOwner && request.nextUrl.pathname.startsWith('/metrics')
-    const allowed = profile?.role === 'admin' || isOwnerPath || (isKnowledge && canEditKnowledge(profile?.role, org))
+    const allowed = profile?.role === 'admin' || isOwnerPath
     if (isOnboarded && isAdminOnly && !allowed) {
       return redirectWithCookies(new URL('/conversations', request.url), ctx.response)
     }

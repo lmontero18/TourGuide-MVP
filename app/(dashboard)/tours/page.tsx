@@ -98,7 +98,9 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [importOpen, setImportOpen] = useState(false);
-  const { featureFlags } = useAuth();
+  const { featureFlags, role } = useAuth();
+  // Solo el admin cambia lo que sabe el bot; los agentes lo ven (CODE-200).
+  const readOnly = role !== "admin";
   const showPickups = hasFeature(featureFlags, "pickups");
   // Quien modifico que: sale de la org en cache (la actualiza cada guardado).
   const { data: liveOrg } = useOrganization();
@@ -161,6 +163,7 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
   }, [queryClient]);
 
   const edit = useCallback((patch: Partial<Knowledge>) => {
+    if (readOnly) return;
     setData((prev) => {
       const next = { ...prev, ...patch };
       latest.current = next;
@@ -169,7 +172,7 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
     setSaveState("pending");
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => void flush(), AUTOSAVE_MS);
-  }, [flush]);
+  }, [flush, readOnly]);
 
   // Avisar antes de cerrar la pestaña si queda algo sin guardar.
   const unsaved = saveState === "pending" || saveState === "saving" || saveState === "error";
@@ -249,14 +252,14 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
   return (
     <div className="flex h-full flex-col">
       <TopBar title={t("title")}>
-        <SaveStatus state={saveState} onRetry={() => void flush()} />
+        {!readOnly && <SaveStatus state={saveState} onRetry={() => void flush()} />}
       </TopBar>
 
       <div className="flex-1 overflow-y-auto p-5">
           <div className="mx-auto max-w-5xl space-y-5">
             <div className="flex flex-wrap items-end justify-between gap-4">
-              <p className="max-w-2xl text-sm text-slate-500">{t("subtitle")}</p>
-              <div className="flex flex-wrap items-end gap-4">
+              <p className="max-w-2xl text-sm text-slate-500">{readOnly ? t("readOnlyNotice") : t("subtitle")}</p>
+              {!readOnly && <div className="flex flex-wrap items-end gap-4">
                 <KnowledgeCapacity ratio={capacity} />
                 <button
                   onClick={() => setImportOpen(true)}
@@ -270,7 +273,7 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
                     <span className="rounded-full bg-blue-50 px-1.5 py-px text-[10px] font-bold text-blue-700">{t("reimport.newBadge")}</span>
                   )}
                 </button>
-              </div>
+              </div>}
             </div>
 
             <div role="tablist" className="flex gap-6 border-b border-slate-200">
@@ -307,15 +310,15 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
 
             <LastEdit edit={edits[TAB_SECTION[tab]]} className="-mt-2" />
 
-            {tab === "tours" && <ToursTable tours={tours} selectedId={selectedId} onSelect={setSelectedId} onAdd={addTour} />}
-            {tab === "business" && <BusinessGrid sections={business} onChange={(v) => edit({ business: v })} />}
-            {tab === "faqs" && <FaqAccordion faqs={faqs} onChange={(v) => edit({ faqs: v })} />}
-            {tab === "pickups" && showPickups && <PickupsTab tours={tours} />}
+            {tab === "tours" && <ToursTable tours={tours} selectedId={selectedId} onSelect={setSelectedId} onAdd={readOnly ? undefined : addTour} />}
+            {tab === "business" && <BusinessGrid sections={business} readOnly={readOnly} onChange={(v) => edit({ business: v })} />}
+            {tab === "faqs" && <FaqAccordion faqs={faqs} readOnly={readOnly} onChange={(v) => edit({ faqs: v })} />}
+            {tab === "pickups" && showPickups && <PickupsTab tours={tours} readOnly={readOnly} />}
           </div>
       </div>
 
       <ImportDialog
-        open={importOpen}
+        open={importOpen && !readOnly}
         current={{ tours, faqs: faqs.map(({ question, answer }) => ({ question, answer })), business }}
         onClose={() => setImportOpen(false)}
         onApply={(next) =>
@@ -331,7 +334,7 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
         }
       />
 
-      <TourDrawer tour={selected} saveState={saveState} lastEdit={selected ? tourEdits.get(selected.id) : null} onChange={updateTour} onDelete={deleteTour} onClose={closeDrawer} />
+      <TourDrawer tour={selected} saveState={saveState} lastEdit={selected ? tourEdits.get(selected.id) : null} onChange={updateTour} onDelete={deleteTour} onClose={closeDrawer} readOnly={readOnly} />
     </div>
   );
 }

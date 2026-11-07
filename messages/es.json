@@ -440,6 +440,7 @@
     "tours": {
       "title": "Lo que sabe tu bot",
       "subtitle": "Tus tours, la información de tu agencia y las preguntas frecuentes. El bot responde con esto. Los cambios se guardan solos.",
+      "readOnlyNotice": "Solo el admin de tu agencia puede cambiar esto. Lo ves para responder bien a tus clientes.",
       "tabTours": "Tours",
       "tabBusiness": "Tu agencia",
       "tabFaqs": "Preguntas frecuentes",
@@ -607,6 +608,7 @@
         "heroTitle": "Sube tu Excel de recogidas",
         "heroText": "El mismo que ya usa tu equipo: hoteles en la primera columna y tours arriba, con la hora de recogida en cada celda. Lo leemos, agrupamos los hoteles en zonas y revisas antes de guardar.",
         "heroManual": "o arma la tabla a mano",
+        "emptyReadOnly": "Todavía no hay recogidas cargadas.",
         "uploadCta": "Subir Excel (.xlsx)",
         "importExcel": "Importar Excel",
         "uploading": "Leyendo…",

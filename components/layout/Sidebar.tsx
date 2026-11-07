@@ -16,8 +16,6 @@ interface NavItem {
   icon: React.ReactNode;
   adminOnly?: boolean;
   feature?: FeatureKey;
-  // Solo admin, salvo que la org tenga este feature: ahi tambien los agentes.
-  agentFeature?: FeatureKey;
   // Lo unico que ve el owner (dueño): Metricas.
   ownerVisible?: boolean;
 }
@@ -52,9 +50,8 @@ export const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    // Los agentes la ven en solo lectura; editar es solo del admin (CODE-200).
     key: "tours",
-    adminOnly: true,
-    agentFeature: "agentKnowledge",
     href: "/tours",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -115,7 +112,7 @@ export function visibleNavItems(role: string | null, featureFlags: OrgFeatureFla
   if (role === "owner") return NAV_ITEMS.filter((item) => item.ownerVisible);
   return NAV_ITEMS.filter(
     (item) =>
-      (!item.adminOnly || role !== "agent" || (!!item.agentFeature && hasFeature(featureFlags, item.agentFeature))) &&
+      (!item.adminOnly || role !== "agent") &&
       (!item.feature || hasFeature(featureFlags, item.feature))
   );
 }
