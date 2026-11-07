@@ -29,6 +29,15 @@ export const BOT_PICKUPS =
   `Puedes informar las horas que devuelve la herramienta y sigue su campo "instruction". ` +
   `Nunca inventes una hora ni la calcules por tu cuenta: si la herramienta no da una hora, el equipo la confirma.`
 
+// Recogidas en Starter (CODE-205): la tabla de Recogidas es Pro. El bot no da
+// horas: dice que el equipo se la confirma y avisa al equipo como un pedido de
+// persona (transfer_to_human).
+export const BOT_PICKUPS_STARTER =
+  `## HORAS DE RECOGIDA\n` +
+  `No tienes las horas de recogida de esta agencia. Si el cliente pregunta a que hora lo recogen o si recogen en su hotel, ` +
+  `no des ni calcules una hora: dile en una frase que alguien del equipo le confirma la hora de recogida ` +
+  `(menciona el tour y el hotel si los dijo) y usa transfer_to_human.`
+
 // Cuando pasar con el equipo y que decir. Visto en prod:
 // - "Hi! Thanks for the details — an agent will assist you shortly." a un
 //   cliente que pidio un tour de cacao para 4 con recogida en su hotel: no

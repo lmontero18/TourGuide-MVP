@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTranslations } from 'next-intl/server'
 import { requireKnowledgeEditor } from '@/lib/auth/requireKnowledgeEditor'
 import { getOrgFeatureFlags } from '@/lib/supabase/queries/organizations'
-import { hasFeature } from '@/lib/features'
+import { hasFeature, hasProFeature } from '@/lib/features'
 import { parsePickupWorkbook } from '@/lib/pickups/parseSheet'
 import { createLogger } from '@/lib/logger'
 
@@ -17,8 +17,13 @@ export async function POST(request: NextRequest) {
   const t = await getTranslations('apiErrors')
   const auth = await requireKnowledgeEditor()
   if (!auth.ok) return auth.response
-  if (!hasFeature(await getOrgFeatureFlags(auth.orgId), 'pickups')) {
+  const flags = await getOrgFeatureFlags(auth.orgId)
+  if (!hasFeature(flags, 'pickups')) {
     return NextResponse.json({ error: t('forbidden') }, { status: 403 })
+  }
+  // Recogidas es Pro (CODE-205).
+  if (!hasProFeature(flags, 'pickups')) {
+    return NextResponse.json({ error: t('proOnly') }, { status: 403 })
   }
 
   const form = await request.formData().catch(() => null)

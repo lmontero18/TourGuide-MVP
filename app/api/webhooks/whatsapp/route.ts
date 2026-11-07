@@ -21,9 +21,9 @@ import { checkRateLimit } from '@/lib/ratelimit'
 import { createLogger, type Logger } from '@/lib/logger'
 import { DEFAULT_TIMEZONE } from '@/lib/bot/businessHours'
 import type { BotConfig } from '@/types'
-import { hasFeature, orgHasFeature, type OrgFeatureFlags } from '@/lib/features'
+import { hasFeature, hasProFeature, orgHasFeature, type OrgFeatureFlags } from '@/lib/features'
 import { isPlaceholder, reactionContent } from '@/lib/whatsapp/placeholders'
-import { BOT_HANDOFF, BOT_LIMITS, BOT_PICKUPS } from '@/lib/bot/limits'
+import { BOT_HANDOFF, BOT_LIMITS, BOT_PICKUPS, BOT_PICKUPS_STARTER } from '@/lib/bot/limits'
 import { languageReminder } from '@/lib/bot/language'
 import { BOT_STYLE } from '@/lib/bot/style'
 import { leadContext, type LeadCard } from '@/lib/bot/leadContext'
@@ -643,7 +643,7 @@ async function processWebhook(body: WebhookPayload) {
           const [{ data: org }, { data: lead }] = await Promise.all([
             supabase
               .from('organizations')
-              .select('prompt, bot_config, is_beta, features')
+              .select('prompt, bot_config, is_beta, features, plan')
               .eq('id', waAccount.org_id)
               .single(),
             // Ficha del lead abierto: ver lib/bot/leadContext.ts. Si falla, el
@@ -711,7 +711,11 @@ async function processWebhook(body: WebhookPayload) {
             // Va siempre, para todas las agencias: ver lib/bot/limits.ts.
             `${BOT_LIMITS}\n\n` +
             `${BOT_HANDOFF}\n\n` +
-            (hasFeature(org as OrgFeatureFlags | null, 'pickups') ? `${BOT_PICKUPS}\n\n` : '') +
+            // Recogidas: Pro da la hora con la tool; Starter pasa con el equipo
+            // (CODE-205). El bot responde igual en los dos planes.
+            (hasFeature(org as OrgFeatureFlags | null, 'pickups')
+              ? `${hasProFeature(org as OrgFeatureFlags | null, 'pickups') ? BOT_PICKUPS : BOT_PICKUPS_STARTER}\n\n`
+              : '') +
             (leadNote ? `${leadNote}\n\n` : '') +
             // Al final a proposito: el modelo copiaba el formato de ficha de los datos.
             `${BOT_STYLE}\n\n` +

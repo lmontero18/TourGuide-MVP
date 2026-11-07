@@ -21,6 +21,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { queryKeys } from "@/lib/query/keys";
 import { useAuth } from "@/hooks/useAuth";
 import { hasFeature } from "@/lib/features";
+import ProGate from "@/components/plans/ProGate";
 import PickupsTab from "@/components/tours/PickupsTab";
 import LastEdit from "@/components/tours/LastEdit";
 
@@ -313,7 +314,11 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
             {tab === "tours" && <ToursTable tours={tours} selectedId={selectedId} onSelect={setSelectedId} onAdd={readOnly ? undefined : addTour} />}
             {tab === "business" && <BusinessGrid sections={business} readOnly={readOnly} onChange={(v) => edit({ business: v })} />}
             {tab === "faqs" && <FaqAccordion faqs={faqs} readOnly={readOnly} onChange={(v) => edit({ faqs: v })} />}
-            {tab === "pickups" && showPickups && <PickupsTab tours={tours} readOnly={readOnly} />}
+            {tab === "pickups" && showPickups && (
+              <ProGate feature="pickups">
+                <PickupsTab tours={tours} readOnly={readOnly} />
+              </ProGate>
+            )}
           </div>
       </div>
 
