@@ -19,7 +19,9 @@ import BusinessMetrics from "@/components/metrics/BusinessMetrics";
 import { useBusinessMetrics } from "@/hooks/useBusinessMetrics";
 import { useTeamMetrics } from "@/hooks/useTeamMetrics";
 import { useAuth } from "@/hooks/useAuth";
-import { hasFeature } from "@/lib/features";
+import { hasFeature, hasProFeature } from "@/lib/features";
+import { ProLockFor } from "@/components/plans/ProGate";
+import { LockIcon } from "@/components/ui/ProLock";
 import { track } from "@/lib/usage/client";
 
 const ROLLING: MetricsPeriod[] = ["7d", "30d", "90d"];
@@ -58,14 +60,19 @@ export default function MetricsPage() {
     new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${m}-15T12:00:00Z`));
   const { data, loading, error } = useMetrics(period);
   const { usage, history } = useMonthlyUsage();
-  // Pestaña Equipo (flag teamMetrics): admins y el owner (dueño).
+  // Pestañas Negocio y Equipo: admins y el owner (dueño).
   const { featureFlags, role } = useAuth();
+  const tLock = useTranslations("dashboard.proLock");
   const showTeam = hasFeature(featureFlags, "teamMetrics") && (role === "admin" || role === "owner");
-  // Con el flag: Negocio (lo que mira el dueño), Equipo y Bot (lo de siempre).
-  const [tab, setTab] = useState<"business" | "team" | "bot">("business");
-  const activeTab = showTeam ? tab : "bot";
-  const business = useBusinessMetrics(period, showTeam && activeTab === "business");
-  const team = useTeamMetrics(period, showTeam && (activeTab === "team" || activeTab === "business"));
+  // Pro (CODE-204): Negocio, ventas por persona y CSV. Starter ve el bot y las
+  // conversaciones por persona; Negocio muestra el candado. La DB tambien lo
+  // corta (get_business_metrics / get_team_metrics).
+  const pro = hasProFeature(featureFlags, "businessMetrics");
+  const [tab, setTab] = useState<"business" | "team" | "bot" | null>(null);
+  // Starter abre en Bot, no en el candado.
+  const activeTab = showTeam ? tab ?? (pro ? "business" : "bot") : "bot";
+  const business = useBusinessMetrics(period, showTeam && pro && activeTab === "business");
+  const team = useTeamMetrics(period, showTeam && (activeTab === "team" || (pro && activeTab === "business")));
 
   const active = data?.active_conversations ?? 0;
   // En el modelo de Tourfy el bot prepara al cliente y el agente cierra: la
@@ -122,9 +129,11 @@ export default function MetricsPage() {
         </select>
         <button
           onClick={exportCsv}
-          disabled={!data || activeTab !== "bot"}
-          className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-navy-900 hover:bg-slate-50 disabled:opacity-40"
+          disabled={!pro || !data || activeTab !== "bot"}
+          title={pro ? undefined : tLock("exportLocked")}
+          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-navy-900 hover:bg-slate-50 disabled:opacity-40"
         >
+          {!pro && <LockIcon size={11} />}
           {t("export")}
         </button>
       </TopBar>
@@ -135,22 +144,29 @@ export default function MetricsPage() {
             <button
               key={k}
               role="tab"
-              aria-selected={tab === k}
+              aria-selected={activeTab === k}
               onClick={() => {
                 setTab(k);
                 track("metrics_tab", { tab: k });
               }}
               className={`-mb-px border-b-2 py-3 text-sm font-bold transition-colors ${
-                tab === k ? "border-navy-900 text-navy-900" : "border-transparent text-slate-400 hover:text-navy-900"
+                activeTab === k ? "border-navy-900 text-navy-900" : "border-transparent text-slate-400 hover:text-navy-900"
               }`}
             >
-              {t(`tabs.${k}`)}
+              <span className="inline-flex items-center gap-1">
+                {t(`tabs.${k}`)}
+                {k === "business" && !pro && <LockIcon size={11} />}
+              </span>
             </button>
           ))}
         </div>
       )}
 
-      {activeTab === "business" ? (
+      {activeTab === "business" && !pro ? (
+        <div className="flex-1 overflow-y-auto p-5">
+          <ProLockFor feature="businessMetrics" />
+        </div>
+      ) : activeTab === "business" ? (
         <div className={`flex-1 overflow-y-auto p-5 transition-opacity ${business.loading && business.data ? "opacity-60" : ""}`}>
           {business.error ? (
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-medium text-red-700">{t("loadError")}</div>
@@ -165,7 +181,7 @@ export default function MetricsPage() {
           {team.error ? (
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-medium text-red-700">{t("loadError")}</div>
           ) : team.data ? (
-            <TeamMetrics data={team.data} />
+            <TeamMetrics data={team.data} showSales={pro} />
           ) : (
             <MetricsSkeleton />
           )}

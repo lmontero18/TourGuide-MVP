@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import MetricCard from "./MetricCard";
 import { formatMoney, timeAgo } from "@/components/leads/leadMeta";
 import type { TeamMetrics as TeamMetricsData } from "@/types";
+import { ProLockFor } from "@/components/plans/ProGate";
 
 // "8 min", "1 h 20 min", "<1 min". Sin respuestas en el periodo: "—".
 function formatMinutes(minutes: number | null, t: (key: "lessThanMinute") => string): string {
@@ -28,43 +29,49 @@ function initials(name: string) {
   return clean.split(/[\s._-]+/).filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 }
 
-// Pestaña Equipo de Metricas (flag teamMetrics): como le va a cada persona.
-// La ven los admins y el owner (dueño).
-export default function TeamMetrics({ data }: { data: TeamMetricsData }) {
+// Pestaña Equipo de Metricas: como le va a cada persona. La ven los admins y
+// el owner (dueño). showSales = Pro: en Starter no hay ventas ni leads por
+// persona (la DB tampoco los manda) y va el candado (CODE-204).
+export default function TeamMetrics({ data, showSales }: { data: TeamMetricsData; showSales: boolean }) {
   const t = useTranslations("dashboard.metrics.team");
   const locale = useLocale();
   const { team, members } = data;
   const unanswered = members.reduce((sum, m) => sum + m.unanswered, 0);
   // Los que no hicieron nada en el periodo van al final, atenuados.
-  const sorted = [...members].sort((a, b) => b.chats - a.chats || b.sales - a.sales || a.name.localeCompare(b.name));
+  const sorted = [...members].sort((a, b) => b.chats - a.chats || (b.sales ?? 0) - (a.sales ?? 0) || a.name.localeCompare(b.name));
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${showSales ? "lg:grid-cols-4" : ""}`}>
         <MetricCard label={t("cards.response")} hint={t("cards.responseHint")} value={formatMinutes(team.response_minutes, t)} />
         <MetricCard label={t("cards.unanswered")} hint={t("cards.unansweredHint")} value={unanswered} />
-        <MetricCard label={t("cards.sales")} hint={t("cards.salesHint")} value={team.sales} />
-        <MetricCard label={t("cards.sold")} hint={t("cards.soldHint")} value={formatAmounts(team.sales_amount, locale)} />
+        {showSales && <MetricCard label={t("cards.sales")} hint={t("cards.salesHint")} value={team.sales ?? 0} />}
+        {showSales && <MetricCard label={t("cards.sold")} hint={t("cards.soldHint")} value={formatAmounts(team.sales_amount ?? {}, locale)} />}
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className={`w-full text-sm ${showSales ? "min-w-[720px]" : "min-w-[480px]"}`}>
             <thead>
               <tr className="border-b border-slate-100 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 <th className="px-5 py-3 font-bold">{t("columns.member")}</th>
                 <th className="px-3 py-3 text-right font-bold" title={t("columns.chatsHint")}>{t("columns.chats")}</th>
                 <th className="px-3 py-3 text-right font-bold" title={t("columns.responseHint")}>{t("columns.response")}</th>
                 <th className="px-3 py-3 text-right font-bold" title={t("columns.unansweredHint")}>{t("columns.unanswered")}</th>
-                <th className="px-3 py-3 text-right font-bold" title={t("columns.salesHint")}>{t("columns.sales")}</th>
-                <th className="px-3 py-3 text-right font-bold">{t("columns.sold")}</th>
-                <th className="px-3 py-3 text-right font-bold" title={t("columns.closeRateHint")}>{t("columns.closeRate")}</th>
+                {showSales && (
+                  <>
+                    <th className="px-3 py-3 text-right font-bold" title={t("columns.salesHint")}>{t("columns.sales")}</th>
+                    <th className="px-3 py-3 text-right font-bold">{t("columns.sold")}</th>
+                    <th className="px-3 py-3 text-right font-bold" title={t("columns.closeRateHint")}>{t("columns.closeRate")}</th>
+                  </>
+                )}
                 <th className="px-5 py-3 text-right font-bold" title={t("columns.lastUsedHint")}>{t("columns.lastUsed")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {sorted.map((m) => {
-                const idle = m.chats === 0 && m.sales === 0 && m.unanswered === 0;
+                const sales = m.sales ?? 0;
+                const idle = m.chats === 0 && sales === 0 && m.unanswered === 0;
                 return (
                   <tr key={m.id} className={idle ? "text-slate-400" : "text-navy-900"}>
                     <td className="px-5 py-3">
@@ -92,9 +99,13 @@ export default function TeamMetrics({ data }: { data: TeamMetricsData }) {
                         0
                       )}
                     </td>
-                    <td className="px-3 py-3 text-right tabular-nums">{m.sales}</td>
-                    <td className="px-3 py-3 text-right tabular-nums">{formatAmounts(m.sales_amount, locale)}</td>
-                    <td className="px-3 py-3 text-right tabular-nums">{m.leads > 0 ? `${Math.round((m.sales / m.leads) * 100)}%` : "—"}</td>
+                    {showSales && (
+                      <>
+                        <td className="px-3 py-3 text-right tabular-nums">{sales}</td>
+                        <td className="px-3 py-3 text-right tabular-nums">{formatAmounts(m.sales_amount ?? {}, locale)}</td>
+                        <td className="px-3 py-3 text-right tabular-nums">{m.leads ? `${Math.round((sales / m.leads) * 100)}%` : "—"}</td>
+                      </>
+                    )}
                     <td className="px-5 py-3 text-right text-xs" title={m.last_used ? new Date(m.last_used).toLocaleString(locale) : undefined}>
                       {m.last_used ? timeAgo(m.last_used, locale) : <span className="font-semibold text-amber-700">{t("never")}</span>}
                     </td>
@@ -106,9 +117,11 @@ export default function TeamMetrics({ data }: { data: TeamMetricsData }) {
         </div>
       </div>
 
+      {!showSales && <ProLockFor feature="businessMetrics" variant="inline" copyKey="teamSales" />}
+
       <div className="space-y-1 text-xs text-slate-400">
         <p>{t("notes.hours")}</p>
-        {team.unassigned_sales > 0 && <p>{t("notes.unassigned", { count: team.unassigned_sales })}</p>}
+        {showSales && (team.unassigned_sales ?? 0) > 0 && <p>{t("notes.unassigned", { count: team.unassigned_sales ?? 0 })}</p>}
       </div>
     </div>
   );

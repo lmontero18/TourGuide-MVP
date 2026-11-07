@@ -291,9 +291,10 @@ export interface TeamMemberMetrics {
   response_minutes: number | null
   response_samples: number
   unanswered: number
-  sales: number
-  sales_amount: Record<string, number>
-  leads: number
+  // Sin estos tres en Starter (CODE-204): la DB no los manda.
+  sales?: number
+  sales_amount?: Record<string, number>
+  leads?: number
   // Ultimo mensaje que mando (en cualquier momento); null = nunca.
   last_used: string | null
 }
@@ -308,10 +309,11 @@ export interface TeamMetrics {
     // Traspasos del bot al equipo en el periodo y cuantos nadie contesto.
     handoffs: number
     handoffs_unanswered: number
-    sales: number
-    sales_amount: Record<string, number>
+    // Sin estos en Starter (CODE-204).
+    sales?: number
+    sales_amount?: Record<string, number>
     // Ventas sin quien las marco ni agente asignado (las de antes de closed_by).
-    unassigned_sales: number
+    unassigned_sales?: number
   }
 }
 

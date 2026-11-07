@@ -22,7 +22,7 @@ export default function ProGate({ feature, variant = "panel", children }: ProGat
 
 // copyKey: textos propios para un lugar puntual (ej. "ficha" en el chat); sin
 // el, los de la funcion.
-export function ProLockFor({ feature, variant = "panel", copyKey }: { feature: ProFeature; variant?: "panel" | "inline"; copyKey?: "ficha" }) {
+export function ProLockFor({ feature, variant = "panel", copyKey }: { feature: ProFeature; variant?: "panel" | "inline"; copyKey?: "ficha" | "teamSales" }) {
   const t = useTranslations("dashboard.proLock");
   const { role, orgName } = useAuth();
   // Solo el admin decide el plan: el agente ve a quien pedirselo.
