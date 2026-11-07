@@ -1005,6 +1005,7 @@ export type Database = {
     }
     Functions: {
       auth_org_id: { Args: never; Returns: string }
+      auth_org_starter_gated: { Args: never; Returns: boolean }
       auth_role: { Args: never; Returns: string }
       business_minutes: {
         Args: { p_from: string; p_hours: Json; p_to: string; p_tz: string }

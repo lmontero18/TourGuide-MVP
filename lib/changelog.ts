@@ -12,6 +12,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'team-metrics',
+    date: '2026-11-07T18:00:00Z',
+    href: '/metrics',
+    adminOnly: true,
+    es: {
+      title: 'Cómo le va a cada persona del equipo',
+      body: 'En Métricas, la pestaña Equipo muestra cuántas conversaciones atendió cada persona, cuánto tarda en responder y quién tiene clientes esperando.',
+    },
+    en: {
+      title: 'How each team member is doing',
+      body: 'In Metrics, the Team tab shows how many conversations each person handled, how fast they reply and who has customers waiting.',
+    },
+  },
+  {
     id: 'org-branding',
     date: '2026-10-30T16:00:00Z',
     href: '/settings',

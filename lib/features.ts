@@ -17,7 +17,9 @@ export const FEATURES = {
   bookings: 'beta', // Reservas por dia con hora de recogida
   leadPanel: 'live', // Ficha del cliente siempre abierta a la derecha del chat
   inboxPreview: 'live', // Bandeja nueva, aviso "Que esta pasando" y modo oscuro
-  teamMetrics: 'beta', // Pestaña Equipo en Metricas (por agente)
+  // Pestaña Equipo en Metricas (por agente). Las ventas por persona son Pro
+  // (CODE-204).
+  teamMetrics: 'live',
   celebrations: 'live', // Confeti al marcar una venta como Reservado
   // Conversacion resuelta que se reabre: si una persona la atendio en las
   // ultimas 24 h vuelve a esa persona (con aviso), no al bot.
