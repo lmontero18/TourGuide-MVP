@@ -186,7 +186,7 @@
         "features": [
           "Leads board: see where each customer stands and who is ready to book",
           "How much you sold with Tourfy, by month and by team member",
-          "Daily bookings, with pickup times answered by the bot",
+          "The bot gives each customer their hotel pickup time",
           "Daily and monthly summary in your inbox",
           "Your logo in the dashboard and CSV export",
           "Priority support on WhatsApp"

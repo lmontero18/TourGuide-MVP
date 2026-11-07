@@ -186,7 +186,7 @@
         "features": [
           "Panel de leads: ves en qué va cada cliente y quién está listo para reservar",
           "Cuánto vendiste con Tourfy, por mes y por persona del equipo",
-          "Reservas del día, con la hora de recogida que da el bot",
+          "El bot da la hora de recogida en el hotel de cada cliente",
           "Resumen diario y mensual en tu correo",
           "Tu logo en el panel y exportación a CSV",
           "Soporte prioritario por WhatsApp"
