@@ -5,8 +5,8 @@ import { Footer } from "../components/Footer";
 
 import { CONTACT_EMAIL, LEGAL_ADDRESS, LEGAL_NAME } from "@/lib/legal";
 
-const UPDATED_EN = "October 7, 2026";
-const UPDATED_ES = "7 de octubre de 2026";
+const UPDATED_EN = "November 7, 2026";
+const UPDATED_ES = "7 de noviembre de 2026";
 
 export async function generateMetadata(): Promise<Metadata> {
   const isEs = (await getLocale()) === "es";
@@ -75,8 +75,9 @@ function TermsEs() {
 
       <h2 className={H2}>3. Precio y facturación</h2>
       <ul className={UL}>
-        <li>La suscripción cuesta <strong>US$500 por mes</strong>, salvo que acordemos otro precio
-          por escrito. Se cobra por adelantado al inicio de cada período mensual.</li>
+        <li>La suscripción cuesta <strong>US$200 por mes</strong> en el plan Starter y{" "}
+          <strong>US$300 por mes</strong> en el plan Pro, salvo que acordemos otro precio por
+          escrito. Se cobra por adelantado al inicio de cada período mensual.</li>
         <li>Los pagos se procesan con Stripe. La suscripción se <strong>renueva automáticamente</strong> cada
           mes hasta que la canceles.</li>
         <li>Los precios no incluyen impuestos de tu país. Si alguna ley local te obliga a pagar,
@@ -223,8 +224,9 @@ function TermsEn() {
 
       <h2 className={H2}>3. Pricing and billing</h2>
       <ul className={UL}>
-        <li>The subscription costs <strong>US$500 per month</strong>, unless we agree on a different
-          price in writing. It is charged in advance at the start of each monthly period.</li>
+        <li>The subscription costs <strong>US$200 per month</strong> on the Starter plan and{" "}
+          <strong>US$300 per month</strong> on the Pro plan, unless we agree on a different price in
+          writing. It is charged in advance at the start of each monthly period.</li>
         <li>Payments are processed by Stripe. The subscription <strong>renews automatically</strong> every
           month until you cancel.</li>
         <li>Prices exclude taxes in your country. If local law requires you to pay, withhold or

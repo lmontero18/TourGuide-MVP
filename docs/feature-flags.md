@@ -6,6 +6,7 @@ queda detrás de un flag hasta que lo soltamos para todas las agencias.
 ## Cómo funciona
 
 - `lib/features.ts` registra cada feature como `'beta'` o `'live'`.
+  `'off'` lo apaga para todas las orgs, beta incluidas (algo pausado que no se quiere ver ni en las orgs de prueba, ej. `bookings`).
 - `organizations.is_beta`: la org ve **todos** los features `'beta'` (orgs de prueba del equipo).
 - `organizations.features`: lista de features puntuales para una agencia (acceso temprano).
 - `hasFeature(flags, 'attachments')` → `true` si el feature es `'live'`, o la org es beta, o lo tiene en `features`.

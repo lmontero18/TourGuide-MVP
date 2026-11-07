@@ -427,7 +427,7 @@
       "error": "No se pudo enviar. Intenta otra vez.",
       "teamSales": {"title": "Ventas y leads por persona en Pro", "description": "Cuánto vendió cada persona del equipo y qué parte de sus clientes reservó."},
       "exportLocked": "Exportar a CSV es parte del plan Pro.",
-      "ficha": {"title": "Ficha completa en Pro", "description": "Estados, próximo paso, reservas y seguimiento de cada cliente."},
+      "ficha": {"title": "Ficha completa en Pro", "description": "Estados, próximo paso y seguimiento de cada cliente."},
       "badge": "Pro",
       "cta": "Pasar a Pro",
       "message": "{agency} quiere pasar a Tourfy Pro (desde: {feature}).",
