@@ -156,30 +156,47 @@
   },
   "pricing": {
     "label": "Precios",
-    "title": "Un precio, todo incluido",
-    "sub": "Cuesta menos que una persona atendiendo WhatsApp de noche y los fines de semana. Sin contrato: cancelas cuando quieras.",
+    "title": "Elige cómo quieres vender por WhatsApp",
+    "sub": "Los dos planes responden 24/7 sin límite de mensajes. Pro suma las herramientas para seguir cada venta.",
     "month": "mes",
-    "popular": "Todo incluido",
     "tiers": {
-      "0": {
-        "badge": "Disponible ahora",
-        "name": "Tourfy",
-        "desc": "Tu vendedor 24/7 en WhatsApp, configurado y mantenido por nosotros.",
+      "starter": {
+        "badge": "Para empezar",
+        "name": "Starter",
+        "price": "$200",
+        "desc": "Tu vendedor 24/7 en WhatsApp y el chat de tu equipo, para que ninguna consulta quede sin respuesta.",
         "cta": "Agenda una demo",
-        "f0": "Bot 24/7 con respuestas ilimitadas, en el idioma del cliente",
-        "f1": "Entiende fotos, notas de voz y ubicaciones",
-        "f2": "Catálogo de tours con importación desde tu web o PDF",
-        "f3": "Panel de leads: la IA llena la ficha de cada cliente",
-        "f4": "Chat en vivo con toma de control y agentes ilimitados",
-        "f5": "Avisos con sonido cuando un cliente quiere reservar",
-        "f6": "Plantillas de WhatsApp con estado de entrega",
-        "f7": "Métricas mensuales con exportación a CSV",
-        "f8": "Configuración y mantenimiento incluidos: nos mandas tours o precios nuevos y los cargamos"
+        "features": [
+          "Bot 24/7 sin límite de mensajes, en el idioma del cliente",
+          "Entiende fotos, notas de voz y ubicaciones",
+          "Tus tours y precios, importados desde tu web o un PDF",
+          "Chat en vivo con toma de control y usuarios ilimitados",
+          "Avisos al instante cuando un cliente quiere hablar con alguien",
+          "Métricas del bot y de cada persona del equipo",
+          "Te lo dejamos funcionando en una llamada"
+        ]
+      },
+      "pro": {
+        "badge": "Para vender más",
+        "name": "Pro",
+        "price": "$300",
+        "desc": "Todo lo de Starter, más lo que necesitas para seguir cada venta y ordenar a tu equipo.",
+        "cta": "Agenda una demo",
+        "lead": "Todo lo de Starter, más:",
+        "features": [
+          "Panel de leads: ves en qué va cada cliente y quién está listo para reservar",
+          "Cuánto vendiste con Tourfy, por mes y por persona del equipo",
+          "El bot da la hora de recogida en el hotel de cada cliente",
+          "Resumen diario y mensual en tu correo",
+          "Tu logo en el panel y exportación a CSV",
+          "Soporte prioritario por WhatsApp"
+        ],
+        "soon": "Muy pronto: seguimientos automáticos, respuestas rápidas y notas internas."
       }
     },
     "soon": "Próximamente:",
-    "soonList": "seguimientos automáticos, cobros y anticipos por link en el chat, campañas a segmentos y pedido de reseñas después del tour.",
-    "guarantee": "Si el primer mes no te convence, te devolvemos el dinero."
+    "soonList": "cobros por link en el chat y campañas con plantillas: promociones, pedido de reseñas y mensajes a clientes anteriores.",
+    "guarantee": "Sin contrato. Si el primer mes no te convence, te devolvemos el dinero."
   },
   "footer": {
     "tagline1": "IA de WhatsApp para agencias de turismo.",

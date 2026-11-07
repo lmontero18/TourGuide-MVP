@@ -4,6 +4,7 @@ import { LogoBar } from "./components/LogoBar";
 import { Features } from "./components/Features";
 import { HowItWorks } from "./components/HowItWorks";
 import { Metrics } from "./components/Metrics";
+import { Pricing } from "./components/Pricing";
 import { CTA } from "./components/CTA";
 import { Footer } from "./components/Footer";
 
@@ -37,8 +38,8 @@ export default function LandingPage() {
       <Features />
       <HowItWorks />
       <Metrics />
-      {/* Precio oculto mientras la venta es por demo: se dice en la llamada.
-          Para volver a mostrarlo, importar y renderizar <Pricing /> aca. */}
+      {/* Planes Starter y Pro (CODE-208). */}
+      <Pricing />
       <CTA />
       <Footer />
     </main>
