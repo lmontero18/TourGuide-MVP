@@ -11,7 +11,8 @@ import { hasProFeature, type OrgFeatureFlags } from '@/lib/features'
 // se manda el dia 1 a las 8:00 en la zona horaria de la agencia, con el mes
 // que termino: leads calificados, ventas y actividad del bot. Lo reciben los
 // admins que no apagaron los resumenes. Para probar: ?org=<id>&force=1 (con
-// el mismo CRON_SECRET) manda el del mes pasado aunque no sea dia 1.
+// el mismo CRON_SECRET) manda el del mes pasado aunque no sea dia 1; con
+// &month=YYYY-MM, el de ese mes (el mes en curso, hasta hoy).
 const SEND_HOUR = 8
 const log = createLogger({ route: 'cron/monthly-summary' })
 
@@ -22,14 +23,21 @@ function money(amounts: Map<string, number>) {
     .join(' + ')
 }
 
-async function summarize(service: SupabaseClient, org: { id: string; name: string; tz: string }, force: boolean) {
+async function summarize(
+  service: SupabaseClient,
+  org: { id: string; name: string; tz: string },
+  force: boolean,
+  month: { y: number; m: number } | null
+) {
   const now = tzParts(new Date(), org.tz)
   if (!force && (now.d !== 1 || now.h !== SEND_HOUR)) return false
-  // Mes que termino: del 1 del mes pasado al 1 de este, en hora local.
-  const prevY = now.m === 1 ? now.y - 1 : now.y
-  const prevM = now.m === 1 ? 12 : now.m - 1
+  // Mes que termino (del 1 del mes pasado al 1 de este, en hora local), o el
+  // que se pidio para probar, cortado en ahora si es el mes en curso.
+  const prevY = month ? month.y : now.m === 1 ? now.y - 1 : now.y
+  const prevM = month ? month.m : now.m === 1 ? 12 : now.m - 1
   const fromDate = localMidnight(prevY, prevM, 1, org.tz)
-  const toDate = localMidnight(now.y, now.m, 1, org.tz)
+  const monthEnd = localMidnight(prevM === 12 ? prevY + 1 : prevY, prevM === 12 ? 1 : prevM + 1, 1, org.tz)
+  const toDate = new Date(Math.min(monthEnd.getTime(), Date.now()))
   const from = fromDate.toISOString()
   const to = toDate.toISOString()
   const monthKey = `${prevY}-${String(prevM).padStart(2, '0')}`
@@ -113,6 +121,8 @@ export async function GET(request: NextRequest) {
   const service = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
   const onlyOrg = request.nextUrl.searchParams.get('org')
   const force = request.nextUrl.searchParams.get('force') === '1' && !!onlyOrg
+  const monthParam = force ? /^(\d{4})-(0[1-9]|1[0-2])$/.exec(request.nextUrl.searchParams.get('month') ?? '') : null
+  const month = monthParam ? { y: Number(monthParam[1]), m: Number(monthParam[2]) } : null
 
   try {
     let query = service.from('organizations').select('id, name, bot_config, is_beta, features, plan').not('onboarded_at', 'is', null)
@@ -123,7 +133,7 @@ export async function GET(request: NextRequest) {
       if (!hasProFeature(o as unknown as OrgFeatureFlags, 'emailSummaries')) continue
       const tz = (o.bot_config as { timezone?: string } | null)?.timezone || 'America/Managua'
       try {
-        if (await summarize(service, { id: o.id, name: o.name, tz }, force)) sent++
+        if (await summarize(service, { id: o.id, name: o.name, tz }, force, month)) sent++
       } catch (error) {
         log.error('monthly summary failed for org', { error, org_id: o.id })
         Sentry.captureException(error, { tags: { route: 'cron/monthly-summary', org_id: o.id } })

@@ -22,6 +22,7 @@ import { queryKeys } from "@/lib/query/keys";
 import { useAuth } from "@/hooks/useAuth";
 import { hasFeature } from "@/lib/features";
 import ProGate from "@/components/plans/ProGate";
+import { LockIcon } from "@/components/ui/ProLock";
 import PickupsTab from "@/components/tours/PickupsTab";
 import LastEdit from "@/components/tours/LastEdit";
 
@@ -259,7 +260,7 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
       <div className="flex-1 overflow-y-auto p-5">
           <div className="mx-auto max-w-5xl space-y-5">
             <div className="flex flex-wrap items-end justify-between gap-4">
-              <p className="max-w-2xl text-sm text-slate-500">{readOnly ? t("readOnlyNotice") : t("subtitle")}</p>
+              <p className="max-w-2xl text-sm text-slate-500">{t("subtitle")}</p>
               {!readOnly && <div className="flex flex-wrap items-end gap-4">
                 <KnowledgeCapacity ratio={capacity} />
                 <button
@@ -276,6 +277,16 @@ function ToursEditor({ initialOrg }: { initialOrg: Organization }) {
                 </button>
               </div>}
             </div>
+
+            {/* Agentes (CODE-200): aviso propio, visible, arriba de las pestañas. */}
+            {readOnly && (
+              <div role="note" className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <LockIcon size={16} className="mt-0.5 shrink-0" />
+                <p>
+                  <strong className="font-bold">{t("readOnlyTitle")}</strong> {t("readOnlyNotice")}
+                </p>
+              </div>
+            )}
 
             <div role="tablist" className="flex gap-6 border-b border-slate-200">
               {TABS.map((item) => {

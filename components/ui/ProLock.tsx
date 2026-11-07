@@ -9,8 +9,10 @@ interface ProLockProps {
   title: string;
   description: string;
   // Sin cta (por ejemplo, un agente): se muestra el hint en su lugar.
-  cta?: { label: string; href: string; external: boolean };
+  cta?: { label: string; onClick: () => void; busy?: boolean };
   hint?: string;
+  // Texto despues de usar el cta (ej. "Listo, te escribimos pronto").
+  done?: string;
   // "panel": ocupa el lugar de una pantalla o pestaña. "inline": una tarjeta
   // chica dentro de otra pantalla (ficha, Configuracion).
   variant?: "panel" | "inline";
@@ -25,7 +27,7 @@ export function LockIcon({ size = 14, className }: { size?: number; className?: 
   );
 }
 
-export default function ProLock({ badge, title, description, cta, hint, variant = "panel" }: ProLockProps) {
+export default function ProLock({ badge, title, description, cta, hint, done, variant = "panel" }: ProLockProps) {
   const panel = variant === "panel";
   return (
     <section
@@ -42,17 +44,19 @@ export default function ProLock({ badge, title, description, cta, hint, variant 
       </span>
       <h2 className={panel ? "mt-4 font-display text-xl font-bold text-navy-900" : "text-sm font-bold text-navy-900"}>{title}</h2>
       <p className={panel ? "mt-2 text-sm text-slate-500" : "text-[13px] text-slate-500"}>{description}</p>
-      {cta ? (
-        <a
-          href={cta.href}
-          target={cta.external ? "_blank" : undefined}
-          rel={cta.external ? "noopener noreferrer" : undefined}
-          className={`inline-flex items-center justify-center rounded-lg bg-navy-900 font-semibold text-white hover:bg-navy-800 ${
+      {done ? (
+        <p role="status" className={`font-semibold text-green-700 ${panel ? "mt-6 text-sm" : "text-xs"}`}>{done}</p>
+      ) : cta ? (
+        <button
+          type="button"
+          onClick={cta.onClick}
+          disabled={cta.busy}
+          className={`inline-flex items-center justify-center rounded-lg bg-navy-900 font-semibold text-white hover:bg-navy-800 disabled:opacity-50 ${
             panel ? "mt-6 h-10 px-5 text-sm" : "h-8 self-start px-3 text-xs"
           }`}
         >
           {cta.label}
-        </a>
+        </button>
       ) : (
         hint && <p className={`text-xs text-slate-400 ${panel ? "mt-6" : ""}`}>{hint}</p>
       )}

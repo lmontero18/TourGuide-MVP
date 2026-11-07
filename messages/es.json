@@ -423,13 +423,14 @@
   },
   "dashboard": {
     "proLock": {
+      "sent": "Listo, le avisamos al equipo de Tourfy. Te escribimos pronto.",
+      "error": "No se pudo enviar. Intenta otra vez.",
       "teamSales": {"title": "Ventas y leads por persona en Pro", "description": "Cuánto vendió cada persona del equipo y qué parte de sus clientes reservó."},
       "exportLocked": "Exportar a CSV es parte del plan Pro.",
       "ficha": {"title": "Ficha completa en Pro", "description": "Estados, próximo paso, reservas y seguimiento de cada cliente."},
       "badge": "Pro",
       "cta": "Pasar a Pro",
-      "subject": "Pasar a Tourfy Pro",
-      "message": "Hola, soy de {agency}. Quiero pasar a Tourfy Pro.",
+      "message": "{agency} quiere pasar a Tourfy Pro (desde: {feature}).",
       "askAdmin": "Pídele al admin de tu agencia que pase a Pro.",
       "menuLocked": "Disponible en Pro",
       "features": {
@@ -481,7 +482,8 @@
     "tours": {
       "title": "Lo que sabe tu bot",
       "subtitle": "Tus tours, la información de tu agencia y las preguntas frecuentes. El bot responde con esto. Los cambios se guardan solos.",
-      "readOnlyNotice": "Solo el admin de tu agencia puede cambiar esto. Lo ves para responder bien a tus clientes.",
+      "readOnlyTitle": "Solo lectura.",
+      "readOnlyNotice": "Solo el admin de tu agencia puede cambiar tours, precios y respuestas. Lo ves para responder bien a tus clientes.",
       "tabTours": "Tours",
       "tabBusiness": "Tu agencia",
       "tabFaqs": "Preguntas frecuentes",
