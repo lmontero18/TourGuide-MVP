@@ -7,7 +7,8 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversationsContext } from "@/components/providers/ConversationsProvider";
 import FeedbackButton from "@/components/feedback/FeedbackButton";
-import { visibleNavItems } from "@/components/layout/Sidebar";
+import { isNavLocked, visibleNavItems } from "@/components/layout/Sidebar";
+import { LockIcon } from "@/components/ui/ProLock";
 
 // Navegacion del celular (debajo de md): barra fija abajo con las 4 secciones
 // principales y "Mas" con el resto. En la compu se usa el Sidebar.
@@ -59,6 +60,7 @@ export default function MobileNav() {
             >
               {item.icon}
               {t(item.key)}
+              {isNavLocked(item, featureFlags) && <LockIcon size={12} className="ml-auto text-slate-400" />}
             </Link>
           ))}
           <div className="mt-1 border-t border-slate-100 pt-1">
@@ -83,7 +85,10 @@ export default function MobileNav() {
                   </span>
                 )}
               </span>
-              <span className="max-w-full truncate px-1">{t(item.key)}</span>
+              <span className="inline-flex max-w-full items-center gap-0.5 truncate px-1">
+                {t(item.key)}
+                {isNavLocked(item, featureFlags) && <LockIcon size={9} />}
+              </span>
             </Link>
           );
         })}

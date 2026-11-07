@@ -7,7 +7,8 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { useConversationsContext } from "@/components/providers/ConversationsProvider";
 import FeedbackButton from "@/components/feedback/FeedbackButton";
-import { hasFeature, type FeatureKey, type OrgFeatureFlags } from "@/lib/features";
+import { hasFeature, hasProFeature, type FeatureKey, type OrgFeatureFlags, type ProFeature } from "@/lib/features";
+import { LockIcon } from "@/components/ui/ProLock";
 import { orgInitials, orgLogoUrl } from "@/lib/orgLogo";
 
 interface NavItem {
@@ -16,6 +17,8 @@ interface NavItem {
   icon: React.ReactNode;
   adminOnly?: boolean;
   feature?: FeatureKey;
+  // Solo Pro: en Starter se ve con candado y abre la pantalla con el candado.
+  proFeature?: ProFeature;
   // Lo unico que ve el owner (dueño): Metricas.
   ownerVisible?: boolean;
 }
@@ -32,6 +35,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     key: "leads",
+    proFeature: "leadsBoard",
     href: "/leads",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -42,6 +46,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     key: "bookings",
     feature: "bookings",
+    proFeature: "bookings",
     href: "/bookings",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -106,6 +111,11 @@ export const NAV_ITEMS: NavItem[] = [
   },
 ];
 
+// En Starter, los items de Pro siguen en el menu con un candado (CODE-202).
+export function isNavLocked(item: NavItem, featureFlags: OrgFeatureFlags | null) {
+  return !!item.proFeature && !hasProFeature(featureFlags, item.proFeature);
+}
+
 // Items que ve el usuario: los de admin solo para admins y los de un feature
 // solo si su org lo tiene.
 export function visibleNavItems(role: string | null, featureFlags: OrgFeatureFlags | null) {
@@ -125,6 +135,7 @@ interface SidebarProps {
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const t = useTranslations("dashboard.sidebar");
+  const tLock = useTranslations("dashboard.proLock");
   const { role, featureFlags, orgName, orgLogoPath } = useAuth();
   // Con orgBranding arriba va la agencia (logo o iniciales) y Tourfy baja a
   // un "Powered by" chico al pie del menu.
@@ -206,6 +217,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 )}
               </span>
               {!collapsed && <span className="whitespace-nowrap">{t(item.key)}</span>}
+              {!collapsed && isNavLocked(item, featureFlags) && (
+                <span title={tLock("menuLocked")} className="text-slate-400">
+                  <LockIcon size={12} />
+                  <span className="sr-only">{tLock("menuLocked")}</span>
+                </span>
+              )}
               {!collapsed && item.key === "conversations" && unreadTotal > 0 ? (
                 <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
                   {unreadTotal > 99 ? "99+" : unreadTotal}
