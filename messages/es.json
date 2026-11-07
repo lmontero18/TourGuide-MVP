@@ -422,6 +422,44 @@
     }
   },
   "dashboard": {
+    "proLock": {
+      "badge": "Pro",
+      "cta": "Pasar a Pro",
+      "subject": "Pasar a Tourfy Pro",
+      "message": "Hola, soy de {agency}. Quiero pasar a Tourfy Pro.",
+      "askAdmin": "Pídele al admin de tu agencia que pase a Pro.",
+      "menuLocked": "Disponible en Pro",
+      "features": {
+        "leadsBoard": {
+          "title": "Panel de leads",
+          "description": "Ve en qué va cada cliente y quién está listo para reservar."
+        },
+        "businessMetrics": {
+          "title": "Ventas con Tourfy",
+          "description": "Cuánto vendiste con Tourfy, por mes y por persona del equipo."
+        },
+        "bookings": {
+          "title": "Reservas del día",
+          "description": "Las reservas de cada día, con la hora de recogida que da el bot."
+        },
+        "pickups": {
+          "title": "Recogidas",
+          "description": "El bot le dice a cada cliente a qué hora lo recogen en su hotel."
+        },
+        "emailSummaries": {
+          "title": "Resúmenes por correo",
+          "description": "Un resumen diario y mensual de tu agencia en tu correo."
+        },
+        "branding": {
+          "title": "Tu logo en el panel",
+          "description": "El logo de tu agencia arriba del menú."
+        },
+        "csvExport": {
+          "title": "Exportar a CSV",
+          "description": "Descarga tus leads para usarlos en Excel o en tu CRM."
+        }
+      }
+    },
     "sidebar": {
       "conversations": "Conversaciones",
       "tours": "Tours y preguntas",

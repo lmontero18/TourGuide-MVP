@@ -422,6 +422,44 @@
     }
   },
   "dashboard": {
+    "proLock": {
+      "badge": "Pro",
+      "cta": "Upgrade to Pro",
+      "subject": "Upgrade to Tourfy Pro",
+      "message": "Hi, I'm with {agency}. I'd like to upgrade to Tourfy Pro.",
+      "askAdmin": "Ask your agency's admin to upgrade to Pro.",
+      "menuLocked": "Available on Pro",
+      "features": {
+        "leadsBoard": {
+          "title": "Leads board",
+          "description": "See where each customer is and who's ready to book."
+        },
+        "businessMetrics": {
+          "title": "Sales with Tourfy",
+          "description": "How much you sold with Tourfy, by month and by team member."
+        },
+        "bookings": {
+          "title": "Today's bookings",
+          "description": "Each day's bookings, with the pickup time the bot gave."
+        },
+        "pickups": {
+          "title": "Pickups",
+          "description": "The bot tells each customer what time they get picked up at their hotel."
+        },
+        "emailSummaries": {
+          "title": "Email summaries",
+          "description": "A daily and monthly summary of your agency in your inbox."
+        },
+        "branding": {
+          "title": "Your logo in the dashboard",
+          "description": "Your agency's logo at the top of the menu."
+        },
+        "csvExport": {
+          "title": "Export to CSV",
+          "description": "Download your leads to use them in Excel or your CRM."
+        }
+      }
+    },
     "sidebar": {
       "conversations": "Conversations",
       "tours": "Tours & FAQs",
