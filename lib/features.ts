@@ -7,14 +7,18 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PlanType } from '@/types'
 
-export type FeatureStage = 'beta' | 'live'
+// 'off': apagado para todas las orgs, beta incluidas (algo a medio hacer que
+// no se quiere ver ni en las orgs de prueba).
+export type FeatureStage = 'off' | 'beta' | 'live'
 
 export const FEATURES = {
   reactions: 'live', // CODE-193
   attachments: 'live', // CODE-194
   notifications: 'live', // CODE-195
   pickups: 'live', // Recogidas por zona y tour
-  bookings: 'beta', // Reservas por dia con hora de recogida
+  // Reservas por dia con hora de recogida. Apagado hasta retomarlo, tambien en
+  // las orgs beta: sin menu, sin pantalla, sin API, sin seccion en la ficha.
+  bookings: 'off',
   leadPanel: 'live', // Ficha del cliente siempre abierta a la derecha del chat
   inboxPreview: 'live', // Bandeja nueva, aviso "Que esta pasando" y modo oscuro
   // Pestaña Equipo en Metricas (por agente). Las ventas por persona son Pro
@@ -44,8 +48,9 @@ export interface OrgFeatureFlags {
 }
 
 export function hasFeature(org: OrgFeatureFlags | null | undefined, key: FeatureKey): boolean {
-  if ((FEATURES[key] as FeatureStage) === 'live') return true
-  if (!org) return false
+  const stage = FEATURES[key] as FeatureStage
+  if (stage === 'live') return true
+  if (stage === 'off' || !org) return false
   return org.is_beta || org.features.includes(key)
 }
 
@@ -58,7 +63,9 @@ export function canEditKnowledge(role: string | null | undefined): boolean {
 // Para webhook / crons con service client. Un feature 'live' no consulta la DB;
 // si la consulta falla la org queda sin el feature (falla cerrado).
 export async function orgHasFeature(supabase: SupabaseClient, orgId: string, key: FeatureKey): Promise<boolean> {
-  if ((FEATURES[key] as FeatureStage) === 'live') return true
+  const stage = FEATURES[key] as FeatureStage
+  if (stage === 'live') return true
+  if (stage === 'off') return false
   const { data } = await supabase.from('organizations').select('is_beta, features').eq('id', orgId).maybeSingle()
   return hasFeature(data as OrgFeatureFlags | null, key)
 }

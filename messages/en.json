@@ -427,7 +427,7 @@
       "error": "Couldn't send it. Please try again.",
       "teamSales": {"title": "Sales and leads per person on Pro", "description": "How much each team member sold and how many of their customers booked."},
       "exportLocked": "Exporting to CSV is part of the Pro plan.",
-      "ficha": {"title": "Full customer card on Pro", "description": "Stages, next step, bookings and follow-up for every customer."},
+      "ficha": {"title": "Full customer card on Pro", "description": "Stages, next step and follow-up for every customer."},
       "badge": "Pro",
       "cta": "Upgrade to Pro",
       "message": "{agency} wants to upgrade to Tourfy Pro (from: {feature}).",
