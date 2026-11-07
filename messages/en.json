@@ -1176,8 +1176,8 @@
       "emails": {
         "title": "Emails",
         "sub": "Which Tourfy emails you receive.",
-        "dailySummary": "Daily summary",
-        "dailySummaryHint": "Every morning at 8:00: yesterday's conversations, night inquiries, customers ready to close and bookings.",
+        "dailySummary": "Email summaries",
+        "dailySummaryHint": "Every morning at 8:00, yesterday's conversations, night inquiries, customers ready to close and bookings. And on the 1st, the month's summary.",
         "always": "We always email you when a customer has been waiting 5 minutes, when Meta rejects sends for missing payment, and when it reviews a template.",
         "error": "We couldn't save the change."
       },
