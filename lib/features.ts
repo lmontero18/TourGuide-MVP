@@ -5,6 +5,7 @@
 // Las orgs se marcan con SQL (service role), un admin no puede auto-activarse.
 // Ver docs/feature-flags.md.
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type { PlanType } from '@/types'
 
 export type FeatureStage = 'beta' | 'live'
 
@@ -25,6 +26,9 @@ export const FEATURES = {
   compressAgentPhotos: 'live',
   // Logo y nombre de la agencia arriba del menu; "Powered by Tourfy" abajo.
   orgBranding: 'live',
+  // Planes Starter / Pro (CODE-201). Apagado: hasPlan() responde que si para
+  // todo, nadie pierde nada hasta lanzarlo.
+  plans: 'beta',
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES
@@ -32,6 +36,9 @@ export type FeatureKey = keyof typeof FEATURES
 export interface OrgFeatureFlags {
   is_beta: boolean
   features: string[]
+  // organizations.plan. Hace falta para hasPlan(): sin el, con el flag
+  // `plans` prendido la org cuenta como Starter.
+  plan?: PlanType
 }
 
 export function hasFeature(org: OrgFeatureFlags | null | undefined, key: FeatureKey): boolean {
@@ -52,4 +59,45 @@ export async function orgHasFeature(supabase: SupabaseClient, orgId: string, key
   if ((FEATURES[key] as FeatureStage) === 'live') return true
   const { data } = await supabase.from('organizations').select('is_beta, features').eq('id', orgId).maybeSingle()
   return hasFeature(data as OrgFeatureFlags | null, key)
+}
+
+// ---------------------------------------------------------------------------
+// Planes (CODE-201). Ver docs/plans.md.
+//
+// El plan sale de organizations.plan, la unica fuente de verdad para el acceso.
+// subscriptions.plan es lo que se cobra y no decide nada en la app. El admin no
+// puede cambiar su plan (sin grant de UPDATE en esa columna): solo SQL o el
+// service role. El bot nunca pregunta el plan para decidir si responde.
+
+const PLAN_RANK: Record<PlanType, number> = { starter: 0, pro: 1 }
+
+// Lo que es solo Pro, en un solo lugar. Las pantallas y las API routes
+// preguntan con hasProFeature(); el chequeo del servidor es el que vale.
+export const PRO_FEATURES = [
+  'leadsBoard', // Pantalla de Leads y ficha completa del cliente (CODE-203)
+  'businessMetrics', // Ventas con Tourfy, por mes y por persona (CODE-204)
+  'bookings', // Reservas del dia (CODE-205)
+  'pickups', // Recogidas: tabla y hora que da el bot (CODE-205)
+  'emailSummaries', // Resumen diario y mensual por correo (CODE-206)
+  'branding', // Logo de la agencia en el panel (CODE-207)
+  'csvExport', // Exportar a CSV
+] as const
+
+export type ProFeature = (typeof PRO_FEATURES)[number]
+
+// ¿La org tiene al menos este plan? Con el flag `plans` apagado, siempre si.
+export function hasPlan(org: OrgFeatureFlags | null | undefined, required: PlanType): boolean {
+  if (!hasFeature(org, 'plans')) return true
+  return PLAN_RANK[org?.plan ?? 'starter'] >= PLAN_RANK[required]
+}
+
+export function hasProFeature(org: OrgFeatureFlags | null | undefined, feature: ProFeature): boolean {
+  return PRO_FEATURES.includes(feature) ? hasPlan(org, 'pro') : true
+}
+
+// Para webhook / crons / API routes con service client. Si la consulta falla
+// la org cuenta como Starter (falla cerrado), salvo con el flag apagado.
+export async function orgHasPlan(supabase: SupabaseClient, orgId: string, required: PlanType): Promise<boolean> {
+  const { data } = await supabase.from('organizations').select('is_beta, features, plan').eq('id', orgId).maybeSingle()
+  return hasPlan(data as OrgFeatureFlags | null, required)
 }

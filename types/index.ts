@@ -5,7 +5,7 @@ export type ConversationStatus = 'open' | 'resolved' | 'pending'
 export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
 export type MessageRole = 'user' | 'assistant' | 'agent'
 export type MediaType = 'image' | 'video' | 'document' | 'sticker'
-export type PlanType = 'starter' | 'growth' | 'pro'
+export type PlanType = 'starter' | 'pro'
 export type OrgStatus = 'active' | 'inactive' | 'suspended'
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid'
 

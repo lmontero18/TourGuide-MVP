@@ -19,7 +19,7 @@
 
 -- ============ 1. Organizaciones ============
 insert into public.organizations (id, name, slug, plan, status, prompt) values
-  ('11111111-1111-1111-1111-111111111111', 'Tours Patagonia',   'tours-patagonia',   'growth',  'active', 'Eres el asistente de Tours Patagonia. Vendes excursiones en la Patagonia argentina y chilena.'),
+  ('11111111-1111-1111-1111-111111111111', 'Tours Patagonia',   'tours-patagonia',   'pro',     'active', 'Eres el asistente de Tours Patagonia. Vendes excursiones en la Patagonia argentina y chilena.'),
   ('22222222-2222-2222-2222-222222222222', 'Caribe Adventures', 'caribe-adventures', 'starter', 'active', 'Eres el asistente de Caribe Adventures. Ofreces tours de buceo y playa en el Caribe.');
 
 -- ============ 2. Usuarios ============

@@ -1057,7 +1057,7 @@ export type Database = {
     Enums: {
       conversation_status: "open" | "resolved" | "pending"
       lead_status: "new" | "contacted" | "qualified" | "converted" | "lost"
-      plan_type: "starter" | "growth" | "pro"
+      plan_type: "starter" | "pro"
       status_type: "active" | "inactive" | "suspended"
       subscription_status:
         | "trialing"
@@ -1198,7 +1198,7 @@ export const Constants = {
     Enums: {
       conversation_status: ["open", "resolved", "pending"],
       lead_status: ["new", "contacted", "qualified", "converted", "lost"],
-      plan_type: ["starter", "growth", "pro"],
+      plan_type: ["starter", "pro"],
       status_type: ["active", "inactive", "suspended"],
       subscription_status: [
         "trialing",

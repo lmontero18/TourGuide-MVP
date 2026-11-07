@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { User as AppUser } from "@/types";
+import type { PlanType, User as AppUser } from "@/types";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import type { OrgFeatureFlags } from "@/lib/features";
 
@@ -41,6 +41,7 @@ type OrgRow = {
   onboarded_at: string | null;
   is_beta?: boolean;
   features?: string[];
+  plan?: PlanType;
   name?: string;
   logo_path?: string | null;
 };
@@ -66,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loadedFor.current = user.id;
       const { data } = await supabase
         .from("users")
-        .select("id, org_id, email, full_name, role, created_at, updated_at, organizations(onboarded_at, is_beta, features, name, logo_path)")
+        .select("id, org_id, email, full_name, role, created_at, updated_at, organizations(onboarded_at, is_beta, features, plan, name, logo_path)")
         .eq("id", user.id)
         .single();
 
@@ -85,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         orgId: data?.org_id ?? null,
         role: data?.role ?? null,
         onboardedAt: org?.onboarded_at ?? null,
-        featureFlags: org ? { is_beta: org.is_beta ?? false, features: org.features ?? [] } : null,
+        featureFlags: org ? { is_beta: org.is_beta ?? false, features: org.features ?? [], plan: org.plan ?? "starter" } : null,
         orgName: org?.name ?? null,
         orgLogoPath: org?.logo_path ?? null,
       });
