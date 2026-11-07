@@ -423,6 +423,7 @@
   },
   "dashboard": {
     "proLock": {
+      "ficha": {"title": "Full customer card on Pro", "description": "Stages, next step, bookings and follow-up for every customer."},
       "badge": "Pro",
       "cta": "Upgrade to Pro",
       "subject": "Upgrade to Tourfy Pro",
@@ -1709,6 +1710,7 @@
   "apiErrors": {
     "unauthorized": "Your session has expired. Please log in again.",
     "forbidden": "You don't have permission to do this.",
+    "proOnly": "This is part of the Pro plan.",
     "adminOnly": "Only an admin can do this.",
     "invalidInput": "Some of the information isn't valid. Please check it and try again.",
     "serverMisconfigured": "The server isn't configured correctly. Please contact support.",

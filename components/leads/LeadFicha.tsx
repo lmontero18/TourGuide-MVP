@@ -10,7 +10,8 @@ import { FICHA_FIELDS, STAGES, STAGE_DOT, TEMPERATURE, formatMoney, timeAgo } fr
 import { suggestAmount } from "@/lib/leads/quoteAmount";
 import { cleanText } from "@/lib/leads/emptyValue";
 import { useAuth } from "@/hooks/useAuth";
-import { hasFeature } from "@/lib/features";
+import { hasFeature, hasProFeature } from "@/lib/features";
+import { ProLockFor } from "@/components/plans/ProGate";
 import LeadBookings from "@/components/bookings/LeadBookings";
 import { useCelebrateSale } from "@/hooks/useCelebrateSale";
 
@@ -23,6 +24,8 @@ interface LeadFichaProps {
 }
 
 const CURRENCIES = ["USD", "NIO", "CRC", "MXN", "PEN", "COP", "GTQ", "EUR"];
+// Ficha simple de Starter (CODE-203).
+const SIMPLE_FIELDS = FICHA_FIELDS.filter((f) => f === "tour_interest" || f === "travel_date" || f === "group_size");
 
 function fieldValue(lead: LeadWithContact, key: LeadField): string {
   if (key === "tour_interest") return cleanText(lead.tour_interest) ?? "";
@@ -100,6 +103,8 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
   const [refreshing, setRefreshing] = useState(false);
   const { data: contactLeads } = useContactLeads(lead.contact_id);
   const { featureFlags } = useAuth();
+  // Starter: corrige datos y anota el monto; el estado y el resto es de Pro.
+  const simple = !hasProFeature(featureFlags, "leadsBoard");
   const past = (contactLeads ?? []).filter((l) => l.id !== lead.id);
   const closed = lead.status === "converted" || lead.status === "lost";
   const [amount, setAmount] = useState(lead.amount != null ? String(lead.amount) : "");
@@ -140,7 +145,7 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        {temp && <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${temp.className}`}>{t(`temperature.${temp.key}`)}</span>}
+        {temp && !simple && <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${temp.className}`}>{t(`temperature.${temp.key}`)}</span>}
         <span className="text-xs text-slate-400">{t("updated", { when: timeAgo(lead.updated_at, locale) })}</span>
         <button
           onClick={async () => {
@@ -157,7 +162,7 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
         </button>
       </div>
 
-      <div>
+      {!simple && <div>
         <p className="mb-1.5 text-xs font-bold text-navy-900">{t("stage")}</p>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label={t("stage")}>
           {STAGES.map((s) => (
@@ -174,9 +179,9 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
-      {showAsk && (
+      {!simple && showAsk && (
         <div className="rounded-xl border-2 border-green-300 bg-green-50 p-4">
           <label htmlFor="lead-sale-amount" className="text-sm font-bold text-green-900">{t("saleAsk")}</label>
           {suggestion && lead.metadata?.quote && (
@@ -212,7 +217,7 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
         </div>
       )}
 
-      {lead.status === "converted" && !showAsk && (
+      {(simple || (lead.status === "converted" && !showAsk)) && (
         <div className="rounded-xl border border-green-200 bg-green-50/60 p-3">
           <label htmlFor="lead-amount" className="text-xs font-bold text-green-800">{t("amount")}</label>
           <div className="mt-1.5 flex gap-2">
@@ -240,19 +245,23 @@ export default function LeadFicha({ lead, onUpdate, onRefresh, showConversationL
         </div>
       )}
 
-      {hasFeature(featureFlags, "bookings") && <LeadBookings lead={lead} />}
+      {!simple && hasFeature(featureFlags, "bookings") && <LeadBookings lead={lead} />}
 
-      <div className="rounded-xl bg-slate-50 px-2 py-1">
-        <EditableField key={`summary-${lead.summary}`} lead={lead} field="summary" label={t("summary")} multiline stacked onSave={saveField} />
-      </div>
+      {!simple && (
+        <div className="rounded-xl bg-slate-50 px-2 py-1">
+          <EditableField key={`summary-${lead.summary}`} lead={lead} field="summary" label={t("summary")} multiline stacked onSave={saveField} />
+        </div>
+      )}
 
       <div>
-        {FICHA_FIELDS.map((f) => (
+        {(simple ? SIMPLE_FIELDS : FICHA_FIELDS).map((f) => (
           <EditableField key={`${f}-${fieldValue(lead, f)}`} lead={lead} field={f} label={t(`fields.${f}`)} multiline={f === "next_step"} onSave={saveField} />
         ))}
       </div>
 
-      {past.length > 0 && (
+      {simple && <ProLockFor feature="leadsBoard" variant="inline" copyKey="ficha" />}
+
+      {!simple && past.length > 0 && (
         <div className="rounded-xl border border-slate-200 p-3">
           <p className="text-xs font-bold text-navy-900">{t("history", { count: past.length })}</p>
           <ul className="mt-2 space-y-1.5">

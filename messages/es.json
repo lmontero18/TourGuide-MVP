@@ -423,6 +423,7 @@
   },
   "dashboard": {
     "proLock": {
+      "ficha": {"title": "Ficha completa en Pro", "description": "Estados, próximo paso, reservas y seguimiento de cada cliente."},
       "badge": "Pro",
       "cta": "Pasar a Pro",
       "subject": "Pasar a Tourfy Pro",
@@ -1709,6 +1710,7 @@
   "apiErrors": {
     "unauthorized": "Tu sesión expiró. Vuelve a iniciar sesión.",
     "forbidden": "No tienes permiso para hacer esto.",
+    "proOnly": "Esto es parte del plan Pro.",
     "adminOnly": "Solo un administrador puede hacer esto.",
     "invalidInput": "Algunos datos no son válidos. Revísalos e intenta de nuevo.",
     "serverMisconfigured": "El servidor no está bien configurado. Contacta a soporte.",
