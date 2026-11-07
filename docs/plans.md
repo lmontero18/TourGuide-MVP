@@ -1,7 +1,34 @@
 # Planes y pricing — TourGuide
 
-> Decisión de julio 2026. Referencia para equipo y para cuando se implemente
-> billing (Stripe) y metering. Nada de esto está aplicado en código todavía.
+> **Actualización 2026-11-07:** pasamos a dos planes, **Starter $200** y
+> **Pro $300** al mes (CODE-199). Lo de abajo de "Principio rector" es la
+> decisión de julio ($500 único) y queda como historia; el principio sigue
+> valiendo.
+
+## Planes en el código (CODE-201)
+
+- **Fuente de verdad:** `organizations.plan` (`'starter' | 'pro'`). Una org
+  nueva arranca en `starter`. `subscriptions.plan` es lo que se cobra y no
+  decide acceso.
+- **Quién lo cambia:** solo SQL o el service role. El admin no tiene grant de
+  UPDATE en la columna (test en `supabase/tests/plans_test.sql`).
+- **Cómo se pregunta:** `hasPlan(org, 'pro')` y `hasProFeature(org, 'leadsBoard')`
+  en `lib/features.ts`. `org` son los flags de la org con su `plan`
+  (`getOrgFeatureFlags()` en el servidor, `useAuth().featureFlags` en el
+  cliente). Desde webhook/crons: `orgHasPlan(serviceClient, orgId, 'pro')`.
+- **Qué es Pro:** la lista `PRO_FEATURES` en `lib/features.ts`. Es la única.
+- **Flag `plans`:** mientras está en `'beta'`, `hasPlan` responde que sí para
+  todas las orgs menos las beta. Al lanzarlo pasa a `'live'`.
+- **Siempre en el servidor:** la API route de una función Pro chequea el plan,
+  no solo la pantalla.
+- **El bot nunca pregunta el plan** para decidir si responde.
+
+```sql
+-- Cambiar el plan de una agencia (Supabase → SQL Editor)
+update organizations set plan = 'pro' where id = '<org_id>';
+```
+
+---
 
 ## Principio rector
 

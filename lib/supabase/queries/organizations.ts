@@ -36,7 +36,7 @@ export async function getOrgFeatureFlags(orgId: string): Promise<OrgFeatureFlags
 
   const { data, error } = await supabase
     .from('organizations')
-    .select('is_beta, features')
+    .select('is_beta, features, plan')
     .eq('id', orgId)
     .maybeSingle()
 

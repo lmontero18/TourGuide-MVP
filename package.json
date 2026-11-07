@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:types": "supabase gen types typescript --local > lib/supabase/types.ts",
+    "test": "node --test tests/*.test.mjs",
     "test:db": "supabase test db"
   },
   "dependencies": {
