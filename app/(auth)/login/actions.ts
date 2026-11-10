@@ -21,6 +21,19 @@ const signupSchema = z.object({
   fullName: z.string().trim().min(1, 'fullNameRequired').max(100).optional().or(z.literal('')),
 })
 
+// Destino post-login (?next=). Solo rutas internas: "//evil.com" o "/\\evil"
+// serian un open redirect.
+function safeNext(value: FormDataEntryValue | null): string | null {
+  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//') || value.startsWith('/\\')) return null
+  return value
+}
+
+function loginError(msg: string, next: string | null): string {
+  const q = new URLSearchParams({ error: msg })
+  if (next) q.set('next', next)
+  return `/login?${q.toString()}`
+}
+
 async function issueMessage(issue: { message: string; path: PropertyKey[] } | undefined): Promise<string> {
   const t = await getTranslations('auth.errors')
   if (issue && t.has(issue.message)) return t(issue.message)
@@ -30,6 +43,7 @@ async function issueMessage(issue: { message: string; path: PropertyKey[] } | un
 }
 
 export async function login(formData: FormData) {
+  const next = safeNext(formData.get('next'))
   const parsed = loginSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
@@ -37,7 +51,7 @@ export async function login(formData: FormData) {
 
   if (!parsed.success) {
     const msg = await issueMessage(parsed.error.issues[0])
-    redirect(`/login?error=${encodeURIComponent(msg)}`)
+    redirect(loginError(msg, next))
   }
 
   const { email, password } = parsed.data
@@ -47,7 +61,7 @@ export async function login(formData: FormData) {
   const limit = await checkRateLimit(identifier)
   if (!limit.ok) {
     const t = await getTranslations('auth.errors')
-    redirect(`/login?error=${encodeURIComponent(t('tooMany', { minutes: limit.retryAfter ?? 1 }))}`)
+    redirect(loginError(t('tooMany', { minutes: limit.retryAfter ?? 1 }), next))
   }
 
   const supabase = await createClient()
@@ -56,7 +70,7 @@ export async function login(formData: FormData) {
   if (error) {
     await recordAttempt(identifier, false)
     const t = await getTranslations('auth.errors')
-    redirect(`/login?error=${encodeURIComponent(t('invalidCredentials'))}`)
+    redirect(loginError(t('invalidCredentials'), next))
   }
 
   await recordAttempt(identifier, true)
@@ -75,7 +89,8 @@ export async function login(formData: FormData) {
     redirect('/onboarding')
   }
 
-  redirect('/conversations')
+  // El proxy igual manda a cada rol a su home si `next` no le corresponde.
+  redirect(next ?? '/conversations')
 }
 
 // BETA CERRADA — el registro publico esta desactivado.
