@@ -22,13 +22,15 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  // A donde volver despues del login (ej. el link del correo a una conversacion).
+  const next = searchParams.get("next");
 
   useEffect(() => {
     if (error) {
       toast.error(decodeURIComponent(error));
-      router.replace("/login", { scroll: false });
+      router.replace(next ? `/login?next=${encodeURIComponent(next)}` : "/login", { scroll: false });
     }
-  }, [error, router]);
+  }, [error, next, router]);
 
   return (
     <div>
@@ -38,6 +40,7 @@ function LoginForm() {
       <p className="mt-2 text-sm text-slate-500">{t("sub")}</p>
 
       <form className="mt-8 space-y-4" onSubmit={() => setLoading(true)}>
+        {next && <input type="hidden" name="next" value={next} />}
         {/* Email */}
         <div>
           <label

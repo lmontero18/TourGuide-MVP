@@ -30,7 +30,12 @@ export async function proxy(request: NextRequest) {
 
   // Redirect unauthenticated users from protected routes to login
   if (!user && isProtected) {
-    return redirectWithCookies(new URL('/login', request.url), ctx.response)
+    // Guardar a donde iba (ej. el link del correo a una conversacion) para
+    // volver ahi despues del login.
+    const login = new URL('/login', request.url)
+    const { pathname, search } = request.nextUrl
+    if (pathname !== '/onboarding') login.searchParams.set('next', pathname + search)
+    return redirectWithCookies(login, ctx.response)
   }
 
   // Prefetch del <Link>: solo trae el shell y el loading.tsx de la ruta. La

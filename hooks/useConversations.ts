@@ -154,33 +154,43 @@ export function useConversations(
     let cancelled = false
     const supabase = createClient()
 
-    supabase
-      .from('conversations')
-      .select(LIST_SELECT)
-      .eq('org_id', orgId)
-      .is('deleted_at', null)
-      .order('last_message_at', { ascending: false, nullsFirst: false })
-      .order('created_at', { ascending: false, foreignTable: 'messages' })
-      .limit(1, { foreignTable: 'messages' })
-      .then(({ data, error }) => {
+    // Carga completa (lista + no leidos). Se repite al volver a la pestaña y
+    // al reconectar realtime: con la pestaña en segundo plano o la compu
+    // suspendida el websocket se cae y los eventos de ese rato no se
+    // reenvian, asi que la bandeja quedaba congelada hasta recargar.
+    let lastLoad = 0
+    let dropped = false
+    const load = () => {
+      lastLoad = Date.now()
+      supabase
+        .from('conversations')
+        .select(LIST_SELECT)
+        .eq('org_id', orgId)
+        .is('deleted_at', null)
+        .order('last_message_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false, foreignTable: 'messages' })
+        .limit(1, { foreignTable: 'messages' })
+        .then(({ data, error }) => {
+          if (cancelled) return
+          if (error) {
+            console.error('Error loading conversations:', error)
+          } else {
+            commit(((data ?? []) as unknown as ConversationRow[]).map(toItem))
+          }
+          setLoading(false)
+        })
+
+      supabase.rpc('get_unread_counts').then(({ data, error }) => {
         if (cancelled) return
         if (error) {
-          console.error('Error loading conversations:', error)
-        } else {
-          commit(((data ?? []) as unknown as ConversationRow[]).map(toItem))
+          console.error('Error loading unread counts:', error)
+          return
         }
-        setLoading(false)
+        const rows = (data ?? []) as { conversation_id: string; unread: number }[]
+        setUnread(Object.fromEntries(rows.map((r) => [r.conversation_id, Number(r.unread)])))
       })
-
-    supabase.rpc('get_unread_counts').then(({ data, error }) => {
-      if (cancelled) return
-      if (error) {
-        console.error('Error loading unread counts:', error)
-        return
-      }
-      const rows = (data ?? []) as { conversation_id: string; unread: number }[]
-      setUnread(Object.fromEntries(rows.map((r) => [r.conversation_id, Number(r.unread)])))
-    })
+    }
+    load()
 
     const channel = supabase
       .channel(`conversations:${orgId}`)
@@ -272,10 +282,29 @@ export function useConversations(
           if (msg.role === 'user') eventsRef.current.onCustomerMessage?.(updated, msg.content)
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        // Se cayo el canal: al volver a suscribirse hay que recargar lo perdido.
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          dropped = true
+        } else if (status === 'SUBSCRIBED' && dropped) {
+          dropped = false
+          load()
+        }
+      })
+
+    // Pestaña que vuelve a primer plano (o vuelve la red): recargar si paso
+    // un rato. Barato: es la misma query de la carga inicial.
+    const STALE_MS = 30_000
+    const refresh = () => {
+      if (document.visibilityState === 'visible' && Date.now() - lastLoad > STALE_MS) load()
+    }
+    document.addEventListener('visibilitychange', refresh)
+    window.addEventListener('online', refresh)
 
     return () => {
       cancelled = true
+      document.removeEventListener('visibilitychange', refresh)
+      window.removeEventListener('online', refresh)
       supabase.removeChannel(channel)
     }
   }, [orgId, commit, fetchOne, upsert, markRead])
