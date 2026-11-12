@@ -18,9 +18,8 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
   {
     id: 'business-contacts',
-    date: '2026-11-11T18:00:00Z',
+    date: '2026-11-12T01:40:00Z',
     href: '/conversations',
-    feature: 'businessContacts',
     es: {
       title: 'Agencias y proveedores, aparte',
       body: 'Cuando te escribe una agencia, un proveedor o un socio, Tourfy lo detecta: el bot deja de responderle para siempre y su chat pasa a la pestaña Negocios, así "Por responder" queda solo con clientes. Si se equivoca, corrígelo desde el menú ⋮ del chat.',
