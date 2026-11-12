@@ -5,6 +5,7 @@ import { createLogger } from '@/lib/logger'
 import { safeEqual } from '@/lib/security'
 import { checkRateLimit } from '@/lib/ratelimit'
 import { refreshLead } from '@/lib/leads/sync'
+import { classifyOnHandoff } from '@/lib/contacts/business'
 
 function getServiceClient() {
   return createClient(
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
-      .select('org_id')
+      .select('org_id, contact_id')
       .eq('id', conversation_id)
       .maybeSingle()
 
@@ -96,9 +97,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Update failed' }, { status: 500 })
     }
 
-    // Traspaso a un agente: la ficha se actualiza ya (sin throttle) para que
-    // el agente reciba el resumen y el proximo paso.
-    after(() => refreshLead(supabase, conversation_id, { force: true }))
+    // Traspaso a un agente. Primero: ¿es un negocio (agencia, proveedor)?
+    // Entonces el bot queda apagado con ese contacto y no lleva ficha (flag
+    // businessContacts). Si es un cliente, la ficha se actualiza ya (sin
+    // throttle) para que el agente reciba el resumen y el proximo paso.
+    after(async () => {
+      const conv = { id: conversation_id, org_id: conversation.org_id, contact_id: conversation.contact_id }
+      const business = await classifyOnHandoff(supabase, conv).catch((error) => {
+        log.error('contact classify failed', { error, org_id: conversation.org_id, conversation_id })
+        Sentry.captureException(error, { tags: { route: 'internal/bot-control', org_id: conversation.org_id } })
+        return false
+      })
+      if (!business) await refreshLead(supabase, conversation_id, { force: true })
+    })
 
     return NextResponse.json({ ok: true })
   } catch (error) {

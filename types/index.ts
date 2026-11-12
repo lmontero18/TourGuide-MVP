@@ -4,6 +4,8 @@ export type Role = 'admin' | 'agent' | 'owner'
 export type ConversationStatus = 'open' | 'resolved' | 'pending'
 export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
 export type MessageRole = 'user' | 'assistant' | 'agent'
+// customer = viajero; business = agencia/proveedor/socio (bot apagado, sin leads).
+export type ContactKind = 'customer' | 'business'
 export type MediaType = 'image' | 'video' | 'document' | 'sticker'
 export type PlanType = 'starter' | 'pro'
 export type OrgStatus = 'active' | 'inactive' | 'suspended'
@@ -174,6 +176,8 @@ export interface Contact {
   phone: string
   name: string | null
   channel: string
+  kind: ContactKind
+  kind_locked: boolean          // lo eligio una persona: la IA no lo cambia
   custom_attributes: Record<string, unknown>
   last_seen_at: string | null
   created_at: string

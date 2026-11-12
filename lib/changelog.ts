@@ -1,16 +1,35 @@
 // Novedades de Tourfy que ve cada agencia en el panel 🎁 (TopBar). La mas
 // nueva va primero. Al sacar una funcion que el cliente nota, agregar la
 // entrada en el mismo PR. `adminOnly`: solo la ven los admins (ej. Tours).
+// `feature`: solo la ven las orgs que tienen ese flag (una funcion en beta no
+// se anuncia a todas las agencias).
+import type { FeatureKey } from '@/lib/features'
+
 export interface ChangelogEntry {
   id: string
   date: string // ISO con hora: se compara contra users.changelog_seen_at
   href?: string
   adminOnly?: boolean
+  feature?: FeatureKey
   es: { title: string; body: string }
   en: { title: string; body: string }
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    id: 'business-contacts',
+    date: '2026-11-11T18:00:00Z',
+    href: '/conversations',
+    feature: 'businessContacts',
+    es: {
+      title: 'Agencias y proveedores, aparte',
+      body: 'Cuando te escribe una agencia, un proveedor o un socio, Tourfy lo detecta: el bot deja de responderle para siempre y su chat pasa a la pestaña Negocios, así "Por responder" queda solo con clientes. Si se equivoca, corrígelo desde el menú ⋮ del chat.',
+    },
+    en: {
+      title: 'Agencies and suppliers, kept apart',
+      body: 'When an agency, supplier or partner messages you, Tourfy detects it: the bot stops replying to them for good and their chat moves to the Business tab, so "To answer" only has customers. If it gets it wrong, fix it from the ⋮ menu in the chat.',
+    },
+  },
   {
     id: 'team-metrics',
     date: '2026-11-07T18:00:00Z',

@@ -23,6 +23,7 @@ export const SERVER_EVENTS = [
   'conversation_resolve',
   'conversation_reopen',
   'conversation_assign',
+  'contact_kind',
   'lead_stage',
   'lead_amount',
   'lead_edit',

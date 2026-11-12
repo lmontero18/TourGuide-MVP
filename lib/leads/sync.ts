@@ -2,6 +2,7 @@ import 'server-only'
 import * as Sentry from '@sentry/nextjs'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createLogger } from '@/lib/logger'
+import { isBusinessContact } from '@/lib/contacts/business'
 import { extractLead, type ExtractedLead, type TranscriptLine } from '@/lib/leads/extract'
 import type { LeadDetails, LeadField, LeadStatus } from '@/types'
 
@@ -161,10 +162,13 @@ export async function refreshLead(
   try {
     const { data: conv } = await service
       .from('conversations')
-      .select('id, org_id, contact_id, last_message_at')
+      .select('id, org_id, contact_id, last_message_at, contact:contacts(kind)')
       .eq('id', conversationId)
       .maybeSingle()
     if (!conv) return
+    // Contacto de negocio (agencia, proveedor): no es una venta, no lleva ficha.
+    const contact = conv.contact as unknown as { kind: string } | null
+    if (await isBusinessContact(service, conv.org_id, contact?.kind)) return
 
     const lead = await ensureOpenLead(service, conv)
     if (!lead) {

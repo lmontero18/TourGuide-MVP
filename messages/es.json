@@ -898,7 +898,13 @@
       "dropFiles": "Suelta aquí tus fotos o PDFs",
       "fileFailed": "No se envió",
       "today": "Hoy",
-      "yesterday": "Ayer"
+      "yesterday": "Ayer",
+      "businessBadge": "Negocio",
+      "businessHint": "Contacto de negocio: el bot no le responde y no se crea lead.",
+      "markBusiness": "Es un negocio (apagar bot)",
+      "markCustomer": "Es un cliente",
+      "markedBusiness": "Marcado como negocio. El bot no le va a responder.",
+      "markedCustomer": "Marcado como cliente. Puedes devolverlo al bot cuando quieras."
     },
     "metrics": {
       "title": "Métricas",
@@ -1674,13 +1680,15 @@
       "tabs": {
         "toAnswer": "Por responder",
         "mine": "Mías",
-        "all": "Todas"
+        "all": "Todas",
+        "business": "Negocios"
       },
       "search": "Buscar cliente, tour o mensaje",
       "empty": {
         "toAnswer": "Nadie está esperando respuesta. 🎉",
         "mine": "No tienes conversaciones asignadas.",
-        "all": "No hay conversaciones."
+        "all": "No hay conversaciones.",
+        "business": "Aquí aparecen las agencias, proveedores y socios que escriben. El bot no les responde."
       },
       "yesterday": "Ayer",
       "waiting": "Esperando {time}",
@@ -1689,6 +1697,7 @@
       "d": "{count} d",
       "bot": "Bot",
       "unread": "Sin leer",
+      "businessTag": "Negocio",
       "insight": {
         "title": "Qué está pasando",
         "waiting": "{name} escribió hace {since} y nadie respondió.",
@@ -1729,6 +1738,7 @@
     "description": "Tus tours se venden solos a las 2 a. m. Un bot de WhatsApp entrenado con tus tours, tus precios y tu tono que responde en segundos y te pasa a los clientes listos para reservar."
   },
   "apiErrors": {
+    "businessContactBot": "Es un contacto de negocio: el bot no le responde. Márcalo como cliente primero.",
     "unauthorized": "Tu sesión expiró. Vuelve a iniciar sesión.",
     "forbidden": "No tienes permiso para hacer esto.",
     "proOnly": "Esto es parte del plan Pro.",

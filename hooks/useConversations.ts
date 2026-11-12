@@ -3,10 +3,13 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ASSIGNED_AGENT_EMBED, toAssignee } from '@/lib/assignee'
-import type { Assignee, ConversationStatus, MessageRole } from '@/types'
+import type { Assignee, ContactKind, ConversationStatus, MessageRole } from '@/types'
 
 export interface ConversationListItem {
   id: string
+  contactId: string
+  // 'business' = agencia/proveedor/socio: pestaña Negocios, sin bot ni lead.
+  contactKind: ContactKind
   contactName: string | null
   contactPhone: string
   // Canal por el que escribe el cliente (hoy siempre 'whatsapp').
@@ -25,10 +28,11 @@ export interface ConversationListItem {
 
 interface ConversationRow {
   id: string
+  contact_id: string
   status: ConversationStatus
   bot_active: boolean
   last_message_at: string | null
-  contact: { name: string | null; phone: string; channel: string } | null
+  contact: { name: string | null; phone: string; channel: string; kind: ContactKind | null } | null
   assigned_agent: { id: string; full_name: string | null; email: string } | null
   messages: { content: string; role: MessageRole }[]
 }
@@ -48,14 +52,16 @@ export interface ConversationEvents {
   onReturned?: (item: ConversationListItem) => void
 }
 
-const LIST_SELECT = `id, status, bot_active, last_message_at,
-  contact:contacts(name, phone, channel),
+const LIST_SELECT = `id, contact_id, status, bot_active, last_message_at,
+  contact:contacts(name, phone, channel, kind),
   ${ASSIGNED_AGENT_EMBED},
   messages(content, role, created_at)`
 
 function toItem(c: ConversationRow): ConversationListItem {
   return {
     id: c.id,
+    contactId: c.contact_id,
+    contactKind: c.contact?.kind === 'business' ? 'business' : 'customer',
     contactName: c.contact?.name ?? null,
     contactPhone: c.contact?.phone ?? '',
     channel: c.contact?.channel ?? null,
@@ -250,6 +256,18 @@ export function useConversations(
         (payload) => {
           const deletedId = (payload.old as { id?: string })?.id
           if (deletedId) commit(listRef.current.filter((c) => c.id !== deletedId))
+        }
+      )
+      .on(
+        'postgres_changes',
+        // Contacto marcado como negocio / cliente (por la IA o una persona):
+        // la conversacion cambia de pestaña sin recargar.
+        { event: 'UPDATE', schema: 'public', table: 'contacts', filter: `org_id=eq.${orgId}` },
+        (payload) => {
+          const row = payload.new as { id: string; kind: string | null; name: string | null }
+          const kind: ContactKind = row.kind === 'business' ? 'business' : 'customer'
+          if (!listRef.current.some((c) => c.contactId === row.id && c.contactKind !== kind)) return
+          commit(listRef.current.map((c) => (c.contactId === row.id ? { ...c, contactKind: kind } : c)))
         }
       )
       .on(

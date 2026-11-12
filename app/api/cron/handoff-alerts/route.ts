@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     for (const ev of events ?? []) {
       const { data: conv } = await service
         .from('conversations')
-        .select('id, status, assigned_agent_id, contact:contacts(name, phone)')
+        .select('id, status, assigned_agent_id, contact:contacts(name, phone, kind)')
         .eq('id', ev.conversation_id)
         .maybeSingle()
       // Ya la tomo alguien o se resolvio: no hace falta avisar.
@@ -59,15 +59,22 @@ export async function GET(request: NextRequest) {
         .limit(1)
         .maybeSingle()
 
-      const contact = conv.contact as unknown as { name: string | null; phone: string } | null
+      const contact = conv.contact as unknown as { name: string | null; phone: string; kind: string | null } | null
+      // Agencia, proveedor o socio (flag businessContacts): no es un cliente
+      // y no lo paso el bot, volvio a escribir y espera a una persona.
+      const business = contact?.kind === 'business'
       const name = contact?.name || contact?.phone || 'Un cliente'
       const minutes = Math.round((now - new Date(ev.created_at).getTime()) / 60_000)
       const meta = (lead?.metadata ?? {}) as { group_size?: string; travel_date?: string; quote?: string }
       const details = [lead?.tour_interest, meta.group_size, meta.travel_date].filter(Boolean).map(esc).join(' · ')
       const html = layout({
-        title: 'Un cliente quiere atención y nadie lo tomó',
+        title: business ? 'Un contacto de negocio escribió y nadie respondió' : 'Un cliente quiere atención y nadie lo tomó',
         body:
-          p(`El bot pasó esta conversación a tu equipo hace ${minutes} minutos y sigue esperando.`) +
+          p(
+            business
+              ? `Escribió hace ${minutes} minutos y sigue esperando. Está en la pestaña Negocios.`
+              : `El bot pasó esta conversación a tu equipo hace ${minutes} minutos y sigue esperando.`
+          ) +
           box(`${esc(name)}${contact?.phone && contact?.name ? ` · ${esc(contact.phone)}` : ''}`, [
             ...(details ? [details] : []),
             ...(meta.quote ? [`Cotizado: ${esc(meta.quote)}`] : []),

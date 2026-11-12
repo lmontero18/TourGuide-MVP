@@ -35,6 +35,10 @@ export const FEATURES = {
   // Planes Starter / Pro (CODE-201). Apagado: hasPlan() responde que si para
   // todo, nadie pierde nada hasta lanzarlo.
   plans: 'beta',
+  // Contactos de negocio (agencias, proveedores, socios): la IA los detecta al
+  // traspaso, el bot queda apagado para siempre con ellos, van a la pestaña
+  // Negocios y no crean leads.
+  businessContacts: 'beta',
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES

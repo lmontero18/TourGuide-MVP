@@ -898,7 +898,13 @@
       "dropFiles": "Drop your photos or PDFs here",
       "fileFailed": "Not sent",
       "today": "Today",
-      "yesterday": "Yesterday"
+      "yesterday": "Yesterday",
+      "businessBadge": "Business",
+      "businessHint": "Business contact: the bot does not reply and no lead is created.",
+      "markBusiness": "It is a business (turn bot off)",
+      "markCustomer": "It is a customer",
+      "markedBusiness": "Marked as business. The bot will not reply to them.",
+      "markedCustomer": "Marked as customer. You can hand it back to the bot anytime."
     },
     "metrics": {
       "title": "Metrics",
@@ -1674,13 +1680,15 @@
       "tabs": {
         "toAnswer": "To answer",
         "mine": "Mine",
-        "all": "All"
+        "all": "All",
+        "business": "Business"
       },
       "search": "Search client, tour or message",
       "empty": {
         "toAnswer": "Nobody is waiting for an answer. 🎉",
         "mine": "No conversations assigned to you.",
-        "all": "No conversations."
+        "all": "No conversations.",
+        "business": "Agencies, suppliers and partners who message you show up here. The bot does not reply to them."
       },
       "yesterday": "Yesterday",
       "waiting": "Waiting {time}",
@@ -1689,6 +1697,7 @@
       "d": "{count}d",
       "bot": "Bot",
       "unread": "Unread",
+      "businessTag": "Business",
       "insight": {
         "title": "What's going on",
         "waiting": "{name} wrote {since} ago and nobody has answered.",
@@ -1729,6 +1738,7 @@
     "description": "Your tours sell themselves at 2 AM. A WhatsApp bot trained on your tours, prices and tone that replies in seconds and hands you customers ready to book."
   },
   "apiErrors": {
+    "businessContactBot": "This is a business contact: the bot does not reply. Mark it as a customer first.",
     "unauthorized": "Your session has expired. Please log in again.",
     "forbidden": "You don't have permission to do this.",
     "proOnly": "This is part of the Pro plan.",

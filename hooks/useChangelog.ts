@@ -5,13 +5,15 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { CHANGELOG, type ChangelogEntry } from '@/lib/changelog'
+import { hasFeature } from '@/lib/features'
 
 const KEY = ['changelog-seen'] as const
 
-// Novedades visibles para el usuario (las adminOnly solo para admins) y cuales
+// Novedades visibles para el usuario (las adminOnly solo para admins, las de
+// un flag solo con ese flag) y cuales
 // no vio todavia (publicadas despues de users.changelog_seen_at).
 export function useChangelog() {
-  const { user, role } = useAuth()
+  const { user, role, featureFlags } = useAuth()
   const queryClient = useQueryClient()
   const { data: seenAt, isFetched } = useQuery({
     queryKey: KEY,
@@ -24,8 +26,11 @@ export function useChangelog() {
   })
 
   const entries = useMemo<ChangelogEntry[]>(
-    () => CHANGELOG.filter((e) => !e.adminOnly || role === 'admin'),
-    [role]
+    () =>
+      CHANGELOG.filter(
+        (e) => (!e.adminOnly || role === 'admin') && (!e.feature || hasFeature(featureFlags, e.feature))
+      ),
+    [role, featureFlags]
   )
   const unseen = useMemo(
     () => (isFetched ? entries.filter((e) => !seenAt || new Date(e.date) > new Date(seenAt)) : []),

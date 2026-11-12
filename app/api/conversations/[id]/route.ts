@@ -6,6 +6,7 @@ import { createLogger } from '@/lib/logger'
 import { appUrl, sendOnce } from '@/lib/email/notify'
 import { box, esc, layout, p } from '@/lib/email/layout'
 import { trackUsage } from '@/lib/usage/server'
+import { orgHasFeature } from '@/lib/features'
 
 export async function GET(
   _request: NextRequest,
@@ -128,13 +129,14 @@ export async function PATCH(
 
   const { data: current } = await supabase
     .from('conversations')
-    .select('id, org_id, assigned_agent_id, assigned_agent:users!conversations_assigned_agent_id_fkey(full_name, email)')
+    .select('id, org_id, assigned_agent_id, assigned_agent:users!conversations_assigned_agent_id_fkey(full_name, email), contact:contacts(kind)')
     .eq('id', id)
     .single<{
       id: string
       org_id: string
       assigned_agent_id: string | null
       assigned_agent: { full_name: string | null; email: string } | null
+      contact: { kind: string } | null
     }>()
 
   if (!current || current.org_id !== profile.org_id) {
@@ -142,6 +144,12 @@ export async function PATCH(
   }
 
   const heldByOther = !!current.assigned_agent_id && current.assigned_agent_id !== user.id
+
+  // Contacto de negocio: el bot no le responde. Para volver a prenderlo hay
+  // que marcarlo como cliente primero.
+  if (bot_active && current.contact?.kind === 'business' && (await orgHasFeature(supabase, profile.org_id, 'businessContacts'))) {
+    return NextResponse.json({ error: t('businessContactBot'), code: 'business_contact' }, { status: 409 })
+  }
 
   // Devolver al bot: solo quien la atiende o un admin. Si no, un agente podia
   // devolverle al bot la conversacion que otro estaba atendiendo.
