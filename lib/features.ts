@@ -38,7 +38,7 @@ export const FEATURES = {
   // Contactos de negocio (agencias, proveedores, socios): la IA los detecta al
   // traspaso, el bot queda apagado para siempre con ellos, van a la pestaña
   // Negocios y no crean leads.
-  businessContacts: 'beta',
+  businessContacts: 'live',
 } as const satisfies Record<string, FeatureStage>
 
 export type FeatureKey = keyof typeof FEATURES
