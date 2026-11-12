@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
 import { PAYMENT_ERROR_CODE, clearPaymentFailed, markPaymentFailed } from '@/lib/whatsapp/billing'
 import { ensureOpenLead, refreshLead } from '@/lib/leads/sync'
+import { isBusinessContact } from '@/lib/contacts/business'
 import { applyDeliveryStatus } from '@/lib/whatsapp/delivery'
 import { notifyTemplateStatus } from '@/lib/whatsapp/templateStatus'
 import { detectAbuse, type AbuseReason } from '@/lib/bot/abuse'
@@ -508,10 +509,14 @@ async function processWebhook(body: WebhookPayload) {
             },
             { onConflict: 'org_id,phone' }
           )
-          .select('id')
+          .select('id, kind')
           .single()
 
         if (!contact) continue
+
+        // Agencia, proveedor o socio (flag businessContacts): el bot nunca le
+        // responde, su chat espera a una persona y no crea lead.
+        const business = await isBusinessContact(supabase, waAccount.org_id, contact.kind)
 
         // Una conversacion por contacto (CODE-162). Si esta resuelta y el
         // cliente vuelve a escribir, se REABRE la misma en vez de crear otra:
@@ -534,8 +539,8 @@ async function processWebhook(body: WebhookPayload) {
             .insert({
               org_id: waAccount.org_id,
               contact_id: contact.id,
-              status: 'open',
-              bot_active: true,
+              status: business ? 'pending' : 'open',
+              bot_active: !business,
               last_message_at: nowTs,
             })
             .select('id, bot_active, status, deleted_at')
@@ -555,7 +560,10 @@ async function processWebhook(body: WebhookPayload) {
             .update(
               holder
                 ? { status: 'open', bot_active: false, assigned_agent_id: holder, deleted_at: null, last_message_at: nowTs }
-                : { status: 'open', bot_active: true, assigned_agent_id: null, deleted_at: null, last_message_at: nowTs }
+                : business
+                  ? // Negocio: espera a una persona (dispara el aviso de traspaso).
+                    { status: 'pending', bot_active: false, assigned_agent_id: null, deleted_at: null, last_message_at: nowTs }
+                  : { status: 'open', bot_active: true, assigned_agent_id: null, deleted_at: null, last_message_at: nowTs }
             )
             .eq('id', conversation.id)
             .select('id, bot_active, status, deleted_at')
@@ -569,6 +577,16 @@ async function processWebhook(body: WebhookPayload) {
             .from('conversations')
             .update({ last_message_at: nowTs })
             .eq('id', conversation.id)
+          // Negocio con el bot prendido (se marco despues): apagarlo ya.
+          if (business && conversation.bot_active) {
+            const { data: paused } = await supabase
+              .from('conversations')
+              .update({ bot_active: false, status: 'pending', assigned_agent_id: null })
+              .eq('id', conversation.id)
+              .select('id, bot_active, status, deleted_at')
+              .single()
+            conversation = paused ?? conversation
+          }
         }
 
         if (!conversation) continue
@@ -609,8 +627,10 @@ async function processWebhook(body: WebhookPayload) {
         // activo la ficha se llena al guardar su respuesta (save-bot-reply);
         // con un agente a cargo, se actualiza aca (con throttle).
         try {
-          await ensureOpenLead(supabase, { id: conversation.id, org_id: waAccount.org_id, contact_id: contact.id })
-          if (!conversation.bot_active) await refreshLead(supabase, conversation.id)
+          if (!business) {
+            await ensureOpenLead(supabase, { id: conversation.id, org_id: waAccount.org_id, contact_id: contact.id })
+            if (!conversation.bot_active) await refreshLead(supabase, conversation.id)
+          }
         } catch (error) {
           log.warn('lead sync failed', { error, conversation_id: conversation.id })
         }

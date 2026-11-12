@@ -113,6 +113,8 @@ export type Database = {
           created_at: string
           custom_attributes: Json | null
           id: string
+          kind: string
+          kind_locked: boolean
           last_seen_at: string | null
           name: string | null
           org_id: string
@@ -124,6 +126,8 @@ export type Database = {
           created_at?: string
           custom_attributes?: Json | null
           id?: string
+          kind?: string
+          kind_locked?: boolean
           last_seen_at?: string | null
           name?: string | null
           org_id: string
@@ -135,6 +139,8 @@ export type Database = {
           created_at?: string
           custom_attributes?: Json | null
           id?: string
+          kind?: string
+          kind_locked?: boolean
           last_seen_at?: string | null
           name?: string | null
           org_id?: string

@@ -28,6 +28,11 @@ export default function ConversationDetailPage() {
   const preview = hasFeature(featureFlags, "inboxPreview");
   const { conversations } = useConversationsContext();
   const item = conversations.find((c) => c.id === id);
+  // Cliente o negocio (flag businessContacts). La lista lo trae al dia por
+  // realtime; mientras carga, el de la cabecera.
+  const contactKind = hasFeature(featureFlags, "businessContacts") ? (item?.contactKind ?? conv?.contact?.kind) : undefined;
+  // Un negocio no lleva ficha de lead.
+  const business = contactKind === "business";
 
   // La lista y el TopBar viven en conversations/layout.tsx: aca solo el chat.
   // Una conversacion ya abierta sale de la cache de TanStack Query al instante.
@@ -53,9 +58,10 @@ export default function ConversationDetailPage() {
           initialBotActive={conv.bot_active}
           initialStatus={conv.status}
           initialAssignee={toAssignee(conv.assigned_agent)}
-          leadButton={<ConversationLeadButton {...conversationLead} className={showPanel ? "xl:hidden" : ""} />}
+          leadButton={business ? undefined : <ConversationLeadButton {...conversationLead} className={showPanel ? "xl:hidden" : ""} />}
           subtitle={preview && tour ? `${tour} · ${contactPhone}` : undefined}
           channel={preview ? conv.contact?.channel : undefined}
+          contactKind={contactKind}
           insight={
             preview ? (
               <ChatInsight key={conv.id} lead={conversationLead.lead} item={item} contactName={conv.contact?.name ?? null} />
@@ -63,7 +69,7 @@ export default function ConversationDetailPage() {
           }
         />
       </div>
-      {showPanel && (
+      {showPanel && !business && (
         <ConversationLeadPanel
           key={conv.id}
           {...conversationLead}

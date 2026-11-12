@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSendChatFile } from "@/hooks/useSendChatFile";
 import { hasFeature } from "@/lib/features";
 import { outboundMediaContent, outboundMediaSpec, type OutboundMediaKind } from "@/lib/whatsapp/outboundMedia";
-import type { Assignee, ConversationStatus, MessageRole } from "@/types";
+import type { Assignee, ContactKind, ConversationStatus, MessageRole } from "@/types";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -34,6 +34,9 @@ interface ChatWindowProps {
   subtitle?: string;
   insight?: React.ReactNode;
   channel?: string | null;
+  // Cliente o negocio (flag businessContacts). Sin el flag no se pasa y no se
+  // muestra nada.
+  contactKind?: ContactKind;
 }
 
 interface OptimisticMessage {
@@ -94,6 +97,7 @@ export default function ChatWindow({
   subtitle,
   insight,
   channel,
+  contactKind,
 }: ChatWindowProps) {
   const router = useRouter();
   const t = useTranslations("dashboard.chat");
@@ -116,6 +120,10 @@ export default function ChatWindow({
   const [toggling, setToggling] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Lo que eligio el agente se ve al instante; despues manda el realtime.
+  const [kindOverride, setKindOverride] = useState<{ from: ContactKind | undefined; kind: ContactKind } | null>(null);
+  const kind = kindOverride && kindOverride.from === contactKind ? kindOverride.kind : contactKind;
+  const business = kind === "business";
   const [optimistic, setOptimistic] = useState<OptimisticMessage[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -351,6 +359,29 @@ export default function ChatWindow({
     }
   };
 
+  // "Es negocio" / "Es cliente": negocio apaga el bot con ese contacto para
+  // siempre y lo pasa a la pestaña Negocios.
+  const setKindRemote = async (next: ContactKind) => {
+    if (toggling) return;
+    setToggling(true);
+    try {
+      const res = await fetch(`/api/conversations/${conversationId}/kind`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: next }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error ?? t("errors.update"));
+      setKindOverride({ from: contactKind, kind: next });
+      await refreshControl();
+      toast.success(next === "business" ? t("markedBusiness") : t("markedCustomer"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("errors.update"));
+    } finally {
+      setToggling(false);
+    }
+  };
+
   const handleToggleBot = () => {
     if (heldByOther && assignee) {
       setConfirmTakeover(assignee.name);
@@ -411,6 +442,15 @@ export default function ChatWindow({
             <div className="flex min-w-0 items-center gap-1.5">
               <p className="truncate text-sm font-semibold text-navy-900">{contactName || contactPhone}</p>
               {channel && <span className="hidden shrink-0 @xl:inline-flex"><ChannelIcon channel={channel} variant="pill" /></span>}
+              {business && (
+                <span
+                  title={t("businessHint")}
+                  className="inline-flex shrink-0 items-center gap-1 rounded-md bg-violet-50 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 ring-1 ring-violet-100"
+                >
+                  <span aria-hidden>🤝</span>
+                  {t("businessBadge")}
+                </span>
+              )}
             </div>
             <p className="truncate text-[10px] text-slate-400">{subtitle || contactPhone}</p>
           </div>
@@ -426,7 +466,10 @@ export default function ChatWindow({
             </button>
           ) : (
             <>
-              <TakeControlButton botActive={botActive} heldByOther={heldByOther} unassigned={!assignee} onToggle={handleToggleBot} />
+              {/* Negocio: el bot no le responde, no hay "Devolver al bot". */}
+              {!(business && !botActive && !heldByOther && assignee) && (
+                <TakeControlButton botActive={botActive} heldByOther={heldByOther} unassigned={!assignee} onToggle={handleToggleBot} />
+              )}
               <AssignMenu conversationId={conversationId} assignee={assignee} onAssigned={() => void refreshControl()} />
               <button
                 onClick={() => setStatusRemote("resolved")}
@@ -457,7 +500,17 @@ export default function ChatWindow({
               </svg>
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-9 z-20 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+              <div className="absolute right-0 top-9 z-20 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                {kind && (
+                  <button
+                    onClick={() => { setMenuOpen(false); void setKindRemote(business ? "customer" : "business"); }}
+                    disabled={toggling}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-navy-900 transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span aria-hidden className="w-3.5 text-center">{business ? "👤" : "🤝"}</span>
+                    {business ? t("markCustomer") : t("markBusiness")}
+                  </button>
+                )}
                 <button
                   onClick={() => { setMenuOpen(false); handleDelete(); }}
                   disabled={deleting}

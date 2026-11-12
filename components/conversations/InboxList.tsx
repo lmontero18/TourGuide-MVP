@@ -12,26 +12,33 @@ import type { ConversationListItem } from "@/hooks/useConversations";
 import { STAGE_DOT, formatMoney, isCurrentLead } from "@/components/leads/leadMeta";
 import { parseReaction } from "@/lib/whatsapp/placeholders";
 import { track } from "@/lib/usage/client";
+import { hasFeature } from "@/lib/features";
 
 // Bandeja por lo que hay que hacer (prueba de diseno, flag inboxPreview):
 // "Por responder" = le toca al equipo: el cliente escribio ultimo y no lo
 // tiene el bot, o el bot la paso al equipo y nadie la tomo (ahi el ultimo
 // mensaje es del bot, "te paso con el equipo"). "Mias" = asignadas a mi.
-// "Todas" incluye las resueltas, marcadas con su etiqueta.
-type Tab = "toAnswer" | "mine" | "all";
-const TABS: Tab[] = ["toAnswer", "mine", "all"];
+// "Todas" incluye las resueltas, marcadas con su etiqueta. "Negocios" (flag
+// businessContacts): agencias, proveedores y socios; no entran en "Por
+// responder" para que esa cola sea solo de clientes.
+type Tab = "toAnswer" | "mine" | "business" | "all";
+const BASE_TABS: Tab[] = ["toAnswer", "mine", "all"];
+const BUSINESS_TABS: Tab[] = ["toAnswer", "mine", "business", "all"];
 const DAY_MS = 86_400_000;
 const HOUR_MS = 3_600_000;
 
-const isToAnswer = (c: ConversationListItem) =>
+// Le toca al equipo responder (cliente o negocio).
+const isWaiting = (c: ConversationListItem) =>
   c.status !== "resolved" &&
   !c.botActive &&
   (c.lastRole === "user" || (c.status === "pending" && !c.assignee));
 
-function tabFilters(me: string | undefined): Record<Tab, (c: ConversationListItem) => boolean> {
+function tabFilters(me: string | undefined, splitBusiness: boolean): Record<Tab, (c: ConversationListItem) => boolean> {
+  const isBusiness = (c: ConversationListItem) => splitBusiness && c.contactKind === "business";
   return {
-    toAnswer: isToAnswer,
+    toAnswer: (c) => isWaiting(c) && !isBusiness(c),
     mine: (c) => c.status !== "resolved" && !!me && c.assignee?.id === me,
+    business: isBusiness,
     all: () => true,
   };
 }
@@ -77,8 +84,10 @@ function stamp(iso: string | null, locale: string, yesterday: string, now: numbe
 }
 
 export default function InboxList({ activeId }: { activeId?: string }) {
-  const { user, orgId, loading: authLoading } = useAuth();
-  const inTab = useMemo(() => tabFilters(user?.id), [user?.id]);
+  const { user, orgId, loading: authLoading, featureFlags } = useAuth();
+  const splitBusiness = hasFeature(featureFlags, "businessContacts");
+  const tabs = splitBusiness ? BUSINESS_TABS : BASE_TABS;
+  const inTab = useMemo(() => tabFilters(user?.id, splitBusiness), [user?.id, splitBusiness]);
   const { conversations, loading } = useConversationsContext();
   const { leads } = useLeads(orgId);
   const t = useTranslations("dashboard.inbox");
@@ -103,12 +112,17 @@ export default function InboxList({ activeId }: { activeId?: string }) {
   }, [leads]);
 
   const counts = useMemo(
-    () => Object.fromEntries(TABS.map((k) => [k, conversations.filter(inTab[k]).length])) as Record<Tab, number>,
+    () => Object.fromEntries(BUSINESS_TABS.map((k) => [k, conversations.filter(inTab[k]).length])) as Record<Tab, number>,
+    [conversations, inTab]
+  );
+  // Negocios esperando respuesta: el punto rojo y el numero de su pestaña.
+  const businessWaiting = useMemo(
+    () => conversations.filter((c) => inTab.business(c) && isWaiting(c)).length,
     [conversations, inTab]
   );
   const overADay = useMemo(
-    () => conversations.filter((c) => isToAnswer(c) && waitedMs(c, now) >= DAY_MS).length,
-    [conversations, now]
+    () => conversations.filter((c) => inTab.toAnswer(c) && waitedMs(c, now) >= DAY_MS).length,
+    [conversations, now, inTab]
   );
 
   const filtered = useMemo(() => {
@@ -124,8 +138,14 @@ export default function InboxList({ activeId }: { activeId?: string }) {
         (lead?.tour_interest?.toLowerCase().includes(q) ?? false)
       );
     });
-    // Por responder: primero el que mas lleva esperando.
-    return tab === "toAnswer" ? [...list].sort((a, b) => waitedMs(b, now) - waitedMs(a, now)) : list;
+    // Por responder: primero el que mas lleva esperando. Negocios: primero
+    // los que esperan (el que mas lleva), despues el resto por fecha.
+    if (tab === "toAnswer") return [...list].sort((a, b) => waitedMs(b, now) - waitedMs(a, now));
+    if (tab === "business") {
+      const waiting = list.filter(isWaiting).sort((a, b) => waitedMs(b, now) - waitedMs(a, now));
+      return [...waiting, ...list.filter((c) => !isWaiting(c))];
+    }
+    return list;
   }, [conversations, tab, search, leadByConversation, now, inTab]);
 
   const isLoading = authLoading || loading;
@@ -139,7 +159,7 @@ export default function InboxList({ activeId }: { activeId?: string }) {
           {overADay > 0 && <span className="text-red-600"> · {t("overADay", { count: overADay })}</span>}
         </p>
         <div className="mt-4 flex items-center gap-5 border-b border-slate-100" role="tablist">
-          {TABS.map((k) => (
+          {tabs.map((k) => (
             <button
               key={k}
               role="tab"
@@ -152,9 +172,15 @@ export default function InboxList({ activeId }: { activeId?: string }) {
                 tab === k ? "border-navy-900 font-semibold text-navy-900" : "border-transparent text-slate-500 hover:text-navy-900"
               }`}
             >
-              {k === "toAnswer" && counts.toAnswer > 0 && <span className="h-1.5 w-1.5 rounded-full bg-red-500" />}
+              {((k === "toAnswer" && counts.toAnswer > 0) || (k === "business" && businessWaiting > 0)) && (
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+              )}
               {t(`tabs.${k}`)}
-              <span className="text-xs text-slate-400">{counts[k]}</span>
+              {k === "business" ? (
+                businessWaiting > 0 && <span className="text-xs text-slate-400">{businessWaiting}</span>
+              ) : (
+                <span className="text-xs text-slate-400">{counts[k]}</span>
+              )}
             </button>
           ))}
         </div>
@@ -186,9 +212,10 @@ export default function InboxList({ activeId }: { activeId?: string }) {
           </div>
         ) : (
           filtered.map((c) => {
-            const found = leadByConversation.get(c.id);
+            const business = inTab.business(c);
+            const found = business ? undefined : leadByConversation.get(c.id);
             const lead = found && isCurrentLead(found, c.lastMessageIso) ? found : undefined;
-            const waiting = isToAnswer(c) ? waitedMs(c, now) : null;
+            const waiting = isWaiting(c) ? waitedMs(c, now) : null;
             const reaction = parseReaction(c.lastMessage);
             const preview = reaction
               ? [reaction.emoji, tChat(reaction.removed ? "reactionRemoved" : "reacted")].filter(Boolean).join(" ")
@@ -227,6 +254,12 @@ export default function InboxList({ activeId }: { activeId?: string }) {
                           <path d="M12 7v5l3 2" />
                         </svg>
                         {t("waiting", { time: shortDuration(waiting, t) })}
+                      </span>
+                    )}
+                    {business && (
+                      <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md bg-violet-50 px-1.5 py-0.5 text-[11px] font-semibold text-violet-700 ring-1 ring-violet-100">
+                        <span aria-hidden>🤝</span>
+                        {t("businessTag")}
                       </span>
                     )}
                     {lead && (

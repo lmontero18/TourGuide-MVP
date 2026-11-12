@@ -7,7 +7,8 @@ import { CHANGELOG } from '@/lib/changelog'
 export const dynamic = 'force-dynamic'
 
 export function GET() {
-  const latest = CHANGELOG[0]
+  // Una novedad de un flag en beta no se nombra: el aviso lo ven todas las agencias.
+  const latest = CHANGELOG.find((e) => !e.feature)
   return NextResponse.json(
     {
       version: process.env.VERCEL_GIT_COMMIT_SHA ?? 'dev',
