@@ -75,7 +75,7 @@
                 "conditions": [
                   {
                     "id": "buffer-owner-cond",
-                    "leftValue": "={{ ($json.Message || []).map(m => JSON.parse(m)).sort((a, b) => a.updated_at < b.updated_at ? 1 : -1)[0]?._meta?.exec_id ?? '' }}",
+                    "leftValue": "={{ ($json.Message || []).map(m => JSON.parse(m)).sort((a, b) => a.updated_at < b.updated_at ? 1 : -1)[0]?._meta?.exec_id ?? \"\" }}",
                     "rightValue": "={{ $execution.id }}",
                     "operator": {
                       "type": "string",
@@ -202,7 +202,9 @@
           "cachedResultName": "gpt-5-mini"
         },
         "builtInTools": {},
-        "options": {}
+        "options": {
+          "reasoningEffort": "low"
+        }
       },
       "id": "tg-openai-model-001",
       "name": "OpenAI Chat Model",
@@ -222,7 +224,8 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $('Code in JavaScript').first().json.conversation_id }}"
+        "sessionKey": "={{ $('Code in JavaScript').first().json.conversation_id }}",
+        "contextWindowLength": 30
       },
       "id": "tg-pg-memory-001",
       "name": "Postgres Chat Memory",
@@ -241,7 +244,53 @@
     },
     {
       "parameters": {
-        "toolDescription": "Usa esta herramienta cuando el cliente quiera hablar con un agente humano, reservar un tour, o la consulta requiera atención personalizada. Ejecútala silenciosamente.",
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Busca información sobre tours, destinos, precios, itinerarios y servicios de la agencia de viajes.",
+        "tableName": {
+          "__rl": true,
+          "value": "embeddings",
+          "mode": "list"
+        },
+        "topK": 10,
+        "options": {}
+      },
+      "id": "tg-vector-store-001",
+      "name": "Supabase Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        1360,
+        752
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "NytmONDz69bGngm7",
+          "name": "Vector Store"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "tg-embeddings-001",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        912
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "uRIneI7wUFT03BvL",
+          "name": "Tourguide OpenAI Prod"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Pasa la conversación a alguien del equipo. Úsala cuando el cliente quiera hablar con una persona, reservar o pagar, pida un tour que no está en la lista, sea una agencia u hotel, o la consulta necesite a alguien del equipo. En tu misma respuesta dile al cliente lo que entendiste que pide, que lo pasas con el equipo y cuándo le van a contestar. Nunca menciones el nombre de esta herramienta.",
         "method": "POST",
         "url": "={{ $('Code in JavaScript').first().json.callback_base_url + '/api/internal/bot-control' }}",
         "sendHeaders": true,
@@ -294,7 +343,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1024,
+        1184,
         400
       ]
     },
@@ -317,7 +366,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ conversation_id: $('Code in JavaScript').first().json.conversation_id, content: $('AI Agent').first().json.output }) }}",
+        "jsonBody": "={{ JSON.stringify({ conversation_id: $('Code in JavaScript').first().json.conversation_id, content: $('Sanitize Reply').first().json.output }) }}",
         "options": {}
       },
       "id": "tg-save-reply-001",
@@ -325,9 +374,54 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1168,
+        1392,
         400
       ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Recogidas en hotel. Úsala cuando el cliente pregunte a qué hora lo recogen, si recogen en su hotel o en qué hoteles recogen. Tour y hotel pueden ir vacíos. Sigue el campo \"instruction\" de la respuesta.",
+        "method": "POST",
+        "url": "={{ $('Code in JavaScript').first().json.callback_base_url + '/api/internal/pickups' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Code in JavaScript').first().json.n8n_secret }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({                                      \n    conversation_id: $('Code in JavaScript').first().json.conversation_id,\n    tour: $fromAI('tour', 'Nombre del tour; vacío si el cliente no lo dijo', 'string'),\n    hotel: $fromAI('hotel', 'Hotel o zona donde se hospeda el cliente; vacío si no lo dijo', 'string') }) }}",
+        "options": {}
+      },
+      "id": "e1536ce1-dd06-4ae7-a6ee-3d748dd49a00",
+      "name": "get_pickup_times",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const reply = String($input.first().json.output ?? '').trim();\nconst client = String($('Code in JavaScript').first().json.allMessages ?? '');\n\n// Respaldo en el idioma del cliente\nconst en = (client.match(/\\b(the|and|you|we|is|are|would|can|have|for|with|thanks)\\b/gi) || []).length >= 2;\nconst FALLBACK = en\n  ? \"Thanks for your message! I'm passing your request to someone on our team and they'll get back to you shortly.\"\n  : 'Gracias por escribirnos. Le paso tu consulta a alguien del equipo y te responde en breve.';\n\n// Razonamiento interno que se filtra (visto en prod: \"We must follow developer instructions...\")\nconst LEAK = /(developer (message|instructions?)|system (message|prompt)|tool call|transfer_to_human|get_pickup_times|the user (wants|asked|is)|final answer|we must (follow|respond)|I should (respond|reply))/i;\n\nlet text = reply\n  .replace(/\\s*[—–]\\s*/g, ', ')\n  .replace(/\\s*;\\s*/g, '. ')\n  .replace(/(\\p{L})\\/(\\p{L})/gu, en ? '$1 or $2' : '$1 o $2')\n  .replace(/ {2,}/g, ' ')\n  .trim();\n\nconst blocked = !text || text.length > 1500 || LEAK.test(text);\nif (blocked) text = FALLBACK;\n\nreturn [{ json: { output: text, blocked, raw: reply } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        400
+      ],
+      "id": "f2587dc4-81a0-43cb-8099-639acbb0b925",
+      "name": "Sanitize Reply"
     }
   ],
   "connections": {
@@ -420,7 +514,7 @@
       "main": [
         [
           {
-            "node": "Send MSG",
+            "node": "Sanitize Reply",
             "type": "main",
             "index": 0
           }
@@ -460,12 +554,50 @@
         ]
       ]
     },
+    "Supabase Vector Store": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "transfer_to_human": {
       "ai_tool": [
         [
           {
             "node": "AI Agent",
             "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_pickup_times": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sanitize Reply": {
+      "main": [
+        [
+          {
+            "node": "Send MSG",
+            "type": "main",
             "index": 0
           }
         ]
@@ -477,10 +609,8 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "0342a902-3f28-4b42-97ad-8199b8d795a8",
-  "meta": {
-    "instanceId": "a93887efce39398eac3791d0d9b65f0b7ab9ffa27d222ee165feed420c0d07df"
-  },
+  "versionId": "72d08c8c-b293-45a9-919d-9de8d6753a97",
+  "meta": null,
   "id": "Kfb6Oo8rTdYG4wIV",
   "tags": []
 }

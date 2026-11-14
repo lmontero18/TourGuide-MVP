@@ -13,6 +13,12 @@ lo que hoy solo vive en la UI de N8N (ver CODE-148 / M5).
 | `stage.json` | TourGuide - Parametrizado - Stage (`QKEmxVTUKY5IDmSk`) | staging |
 | `prod.json` | TourGuide - Parametrizado - Prod (`Kfb6Oo8rTdYG4wIV`) | prod — **activo** |
 
+> **Estado al 2026-11-14:** `prod.json` es el export real de n8n (versión del
+> 2026-10-22). `stage.json` y `dev.json` NO son copia de n8n: tienen el fix del
+> buffer (#84) que nunca se aplicó en esos workflows, y no tienen Sanitize Reply
+> ni `get_pickup_times`. En n8n el workflow dev ahora se llama "Dev Costco".
+> Para probar un cambio de prod, duplicar el workflow de prod, no usar dev.
+
 ## Cómo exportar (manual, desde la UI de N8N)
 
 1. Abrir el workflow en `naia.naiaautomate.com`.
@@ -42,9 +48,16 @@ ahora, a criterio del que edita.
 2. **Buffer de mensajes (Redis/Upstash)** — agrupa mensajes en ráfaga
    (ventana de 15s) antes de procesarlos, para no responder mensaje por
    mensaje cuando el cliente escribe varios seguidos.
-3. **AI Agent** (OpenAI `gpt-5-mini` vía Langchain):
-   - **Postgres Chat Memory** — historial de conversación, keyed por `conversation_id`.
-   - ~~Supabase Vector Store~~ — **quitado (CODE-168, oct 2026)**. La tabla
+3. **AI Agent** (OpenAI `gpt-5-mini` con `reasoningEffort: low`, vía Langchain).
+   **`gpt-5-mini` se apaga el 2026-12-11** (deprecations de OpenAI): hay que
+   cambiarlo antes. Los modelos terra/luna no aceptan herramientas por Chat
+   Completions con razonamiento prendido: al cambiar el modelo, revisar ese campo.
+   - **Postgres Chat Memory** — historial de conversación, keyed por `conversation_id`
+     (`contextWindowLength: 30`). Guarda solo los turnos del bot: los mensajes que
+     escribe un agente humano desde el dashboard no entran.
+   - ~~Supabase Vector Store~~ — **quitado (CODE-168, oct 2026)**. Los nodos
+     "Supabase Vector Store" y "Embeddings OpenAI" siguen en el workflow pero
+     desconectados del agente: no corren. La tabla
      `embeddings` estaba vacía (nada la llena) y buscaba sin filtrar por agencia:
      cada uso costaba una llamada de embeddings + una vuelta extra del LLM para
      nada. El conocimiento del bot (tours, precios, FAQs, info de la agencia) va
@@ -55,6 +68,12 @@ ahora, a criterio del que edita.
      con `Authorization: Bearer {n8n_secret}` → desactiva el bot (`bot_active = false`)
      cuando el cliente pide hablar con un humano. Body: `{ conversation_id }` (requerido;
      404 si la conversación no existe, 401 si el secret no matchea).
+   - **Tool `get_pickup_times`** — `POST {callback_base_url}/api/internal/pickups`
+     (recogidas, ver lib/bot/limits.ts `BOT_PICKUPS`).
+   - **Sanitize Reply** (Code, después del agente) — limpia guiones largos, `;` y
+     barras; si la respuesta viene vacía, pasa de 1500 caracteres o filtra
+     razonamiento interno ("developer instructions", nombres de tools...), manda un
+     texto de respaldo ("Le paso tu consulta a alguien del equipo...").
 4. **Send MSG** — `POST` directo a Meta Graph API
    (`graph.facebook.com/v21.0/{phone_number_id}/messages`) con el `access_token` de la org.
 5. **Save bot reply** — `POST {callback_base_url}/api/internal/save-bot-reply`
