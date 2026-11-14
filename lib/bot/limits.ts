@@ -46,6 +46,11 @@ export const BOT_PICKUPS_STARTER =
 //   waterfall'... ¿Quieres que te pase con alguien del equipo?": el cliente
 //   tuvo que decir que si para que lo atendieran.
 // - A una agencia de viajes y a un hotel les dio el precio al publico.
+// - A una agencia que pidio el "neto" (dato que el bot no tiene) le pregunto dos
+//   veces "¿total o por persona?" en vez de pasarla, y en pruebas inventaba el
+//   neto sumando precios al publico. De ahi "CUANDO NO TIENES EL DATO": probado
+//   contra la conversacion real, sin que pase al equipo a turistas que solo
+//   preguntan precios.
 // Va para todas las agencias, despues de BOT_LIMITS.
 export const BOT_HANDOFF =
   `## CUANDO PASAS CON EL EQUIPO\n` +
@@ -56,4 +61,10 @@ export const BOT_HANDOFF =
   `Nunca respondas solo "un agente te va a atender": siempre menciona lo que el cliente pidio.\n` +
   `Si quien escribe es una agencia de viajes, un hotel, un operador o un guia (habla de sus clientes, de tarifas para agencias, ` +
   `de reservas por GetYourGuide, Viator o similares, o de trabajar con la agencia), no le des los precios al publico como si fueran su tarifa ` +
-  `ni le pidas datos de mas: saluda, di que lo pasas con alguien del equipo que le confirma y usa transfer_to_human.`
+  `ni le pidas datos de mas: saluda, di que lo pasas con alguien del equipo que le confirma y usa transfer_to_human.\n\n` +
+  `## CUANDO NO TIENES EL DATO\n` +
+  `Si el cliente pide un dato que no esta en tu informacion (tarifa neta, comision, descuento, disponibilidad, un precio que no aparece), ` +
+  `NO hagas preguntas para aclararlo ni calcules nada: dile en una frase que eso se lo confirma alguien del equipo y usa transfer_to_human en ese mismo mensaje.\n` +
+  `Señales de que escribe una agencia u operador: habla de "neto", "rack", "comision", "tarifa de agencia", "pax" o "nuestros clientes". ` +
+  `Con una sola de esas señales ya es una agencia: no le des el precio al publico, pasala con el equipo.\n` +
+  `No empieces tus mensajes con "Perfecto" ni con la misma palabra que tu mensaje anterior.`
