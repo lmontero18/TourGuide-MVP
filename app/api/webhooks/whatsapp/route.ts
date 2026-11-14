@@ -20,7 +20,7 @@ import {
 } from '@/lib/whatsapp/schemas'
 import { checkRateLimit } from '@/lib/ratelimit'
 import { createLogger, type Logger } from '@/lib/logger'
-import { DEFAULT_TIMEZONE } from '@/lib/bot/businessHours'
+import { DEFAULT_TIMEZONE, handoffTimeNote } from '@/lib/bot/businessHours'
 import type { BotConfig } from '@/types'
 import { hasFeature, hasProFeature, orgHasFeature, type OrgFeatureFlags } from '@/lib/features'
 import { isPlaceholder, reactionContent } from '@/lib/whatsapp/placeholders'
@@ -723,6 +723,15 @@ async function processWebhook(body: WebhookPayload) {
               timeZone: DEFAULT_TIMEZONE,
             }).format(new Date())
           }
+          // Abierto/cerrado y cuando abre, calculado aca (no por el modelo): el
+          // bot lo usa al pasar con el equipo. Ver lib/bot/businessHours.ts.
+          const businessHours = (org?.bot_config as BotConfig | null)?.business_hours
+          let timeNote: string
+          try {
+            timeNote = handoffTimeNote(businessHours, orgTimezone)
+          } catch {
+            timeNote = handoffTimeNote(businessHours, DEFAULT_TIMEZONE)
+          }
           // El recordatorio de idioma va al final a proposito: es lo ultimo que
           // lee el modelo y el prompt entero esta en español (gpt-5-mini mezclaba).
           // Nombra el idioma detectado: ver lib/bot/language.ts.
@@ -740,6 +749,7 @@ async function processWebhook(body: WebhookPayload) {
             // Al final a proposito: el modelo copiaba el formato de ficha de los datos.
             `${BOT_STYLE}\n\n` +
             `Fecha y hora actual (zona horaria de la agencia): ${nowFormatted}.\n` +
+            `${timeNote}\n` +
             languageReminder(content) +
             // Medios (CODE-177): el bot recibe una nota entre corchetes. Que
             // responda como una persona; transferir solo si hace falta.
