@@ -197,14 +197,12 @@
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "gpt-5-mini",
+          "value": "gpt-5.4-mini",
           "mode": "list",
-          "cachedResultName": "gpt-5-mini"
+          "cachedResultName": "gpt-5.4-mini"
         },
         "builtInTools": {},
-        "options": {
-          "reasoningEffort": "low"
-        }
+        "options": {}
       },
       "id": "tg-openai-model-001",
       "name": "OpenAI Chat Model",
@@ -609,7 +607,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "72d08c8c-b293-45a9-919d-9de8d6753a97",
+  "versionId": "b9599460-307b-4d62-a755-2be9fd476abe",
   "meta": null,
   "id": "Kfb6Oo8rTdYG4wIV",
   "tags": []

@@ -13,8 +13,7 @@ lo que hoy solo vive en la UI de N8N (ver CODE-148 / M5).
 | `stage.json` | TourGuide - Parametrizado - Stage (`QKEmxVTUKY5IDmSk`) | staging |
 | `prod.json` | TourGuide - Parametrizado - Prod (`Kfb6Oo8rTdYG4wIV`) | prod — **activo** |
 
-> **Estado al 2026-11-14:** `prod.json` es el export real de n8n (versión del
-> 2026-10-22). `stage.json` y `dev.json` NO son copia de n8n: tienen el fix del
+> **Estado al 2026-11-14:** `prod.json` es el export real de n8n. `stage.json` y `dev.json` NO son copia de n8n: tienen el fix del
 > buffer (#84) que nunca se aplicó en esos workflows, y no tienen Sanitize Reply
 > ni `get_pickup_times`. En n8n el workflow dev ahora se llama "Dev Costco".
 > Para probar un cambio de prod, duplicar el workflow de prod, no usar dev.
@@ -48,10 +47,11 @@ ahora, a criterio del que edita.
 2. **Buffer de mensajes (Redis/Upstash)** — agrupa mensajes en ráfaga
    (ventana de 15s) antes de procesarlos, para no responder mensaje por
    mensaje cuando el cliente escribe varios seguidos.
-3. **AI Agent** (OpenAI `gpt-5-mini` con `reasoningEffort: low`, vía Langchain).
-   **`gpt-5-mini` se apaga el 2026-12-11** (deprecations de OpenAI): hay que
-   cambiarlo antes. Los modelos terra/luna no aceptan herramientas por Chat
-   Completions con razonamiento prendido: al cambiar el modelo, revisar ese campo.
+3. **AI Agent** (OpenAI `gpt-5.4-mini` sin `reasoningEffort`, vía Langchain).
+   Desde 2026-11-14; antes era `gpt-5-mini`, que OpenAI apaga el 2026-12-11.
+   `gpt-5.4-mini` (y los terra/luna) **no aceptan herramientas por Chat
+   Completions con razonamiento prendido**: no ponerle `reasoningEffort` sin
+   probar antes en una copia del workflow, o el bot deja de responder.
    - **Postgres Chat Memory** — historial de conversación, keyed por `conversation_id`
      (`contextWindowLength: 30`). Guarda solo los turnos del bot: los mensajes que
      escribe un agente humano desde el dashboard no entran.
