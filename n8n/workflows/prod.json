@@ -288,7 +288,7 @@
     },
     {
       "parameters": {
-        "toolDescription": "Pasa la conversación a alguien del equipo. Úsala cuando el cliente quiera hablar con una persona, reservar o pagar, pida un tour que no está en la lista, sea una agencia u hotel, o la consulta necesite a alguien del equipo. En tu misma respuesta dile al cliente lo que entendiste que pide, que lo pasas con el equipo y cuándo le van a contestar. Nunca menciones el nombre de esta herramienta.",
+        "toolDescription": "Pasa la conversación a alguien del equipo. Úsala cuando el cliente quiera hablar con una persona, reservar o pagar, pida un tour que no está en la lista, sea una agencia u hotel, o la consulta necesite a alguien del equipo. Llámala primero, sin escribir nada todavía. Cuando te responda, escribe tu mensaje al cliente: una frase corta diciendo que lo pasas con el equipo y cuándo le van a contestar, nombrando el tema en dos o tres palabras sin repetir su pedido. Nunca menciones el nombre de esta herramienta.",
         "method": "POST",
         "url": "={{ $('Code in JavaScript').first().json.callback_base_url + '/api/internal/bot-control' }}",
         "sendHeaders": true,
@@ -607,7 +607,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "b9599460-307b-4d62-a755-2be9fd476abe",
+  "versionId": "5a9231f8-e3bd-4dbb-8b71-cfa58b267e4c",
   "meta": null,
   "id": "Kfb6Oo8rTdYG4wIV",
   "tags": []
