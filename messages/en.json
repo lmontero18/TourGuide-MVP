@@ -1724,7 +1724,11 @@
     "title": "Guides for tour agencies",
     "sub": "WhatsApp automation, CRM, and booking management — no fluff, for LATAM operators.",
     "readMore": "Read more",
-    "back": "Blog"
+    "back": "Blog",
+    "related": "Related articles",
+    "ctaTitle": "Want your WhatsApp to answer itself, 24/7?",
+    "ctaSub": "Tourfy answers your agency’s WhatsApp with your tours and prices, at any hour.",
+    "ctaButton": "Discover Tourfy"
   },
   "localeToggle": {
     "switchTo": "Switch to {lang}",

@@ -2,14 +2,24 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getAllPosts } from "@/lib/blog";
+import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  BLOG_AUTHOR,
+  ORGANIZATION_ID,
+  SITE_NAME,
+  SITE_URL,
+  absoluteUrl,
+  pageMetadata,
+} from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("blog");
-  return {
+  return pageMetadata({
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: { canonical: "https://www.tourfy.app/blog" },
-  };
+    path: "/blog",
+    lang: await getLocale(),
+  });
 }
 
 export default async function BlogPage() {
@@ -17,8 +27,27 @@ export default async function BlogPage() {
   const locale = await getLocale();
   const posts = getAllPosts();
 
+  const blogJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "@id": absoluteUrl("/blog"),
+    url: absoluteUrl("/blog"),
+    name: t("metaTitle"),
+    description: t("metaDescription"),
+    publisher: { "@type": "Organization", "@id": ORGANIZATION_ID, name: SITE_NAME, url: SITE_URL },
+    blogPost: posts.map((post) => ({
+      "@type": "BlogPosting",
+      headline: post.title,
+      url: absoluteUrl(`/blog/${post.slug}`),
+      datePublished: post.date,
+      dateModified: post.updated,
+      author: BLOG_AUTHOR,
+    })),
+  };
+
   return (
     <section className="pt-28 pb-16 sm:pt-32 sm:pb-24">
+      <JsonLd data={blogJsonLd} />
       <div className="mx-auto max-w-3xl px-5 sm:px-6 lg:px-8">
         <p className="text-sm font-bold uppercase tracking-[0.15em] text-blue-500">
           {t("label")}

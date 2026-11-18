@@ -1,21 +1,25 @@
 import type { MetadataRoute } from 'next'
-
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.tourfy.app'
+import { absoluteUrl } from '@/lib/seo'
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
       allow: '/',
+      // Panel y API: requieren login, no tienen nada para indexar
       disallow: [
         '/api/',
         '/onboarding',
         '/conversations',
+        '/leads',
+        '/bookings',
         '/metrics',
         '/settings',
+        '/tours',
+        '/templates',
         '/dashboard',
       ],
     },
-    sitemap: `${BASE_URL}/sitemap.xml`,
+    sitemap: absoluteUrl('/sitemap.xml'),
   }
 }

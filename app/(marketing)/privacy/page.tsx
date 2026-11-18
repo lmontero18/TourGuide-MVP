@@ -3,22 +3,37 @@ import { getLocale } from "next-intl/server";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 
-import { CONTACT_EMAIL, LEGAL_ADDRESS, LEGAL_NAME } from "@/lib/legal";
+import {
+  CONTACT_EMAIL,
+  PRIVACY_UPDATED,
+  LEGAL_ADDRESS,
+  LEGAL_NAME,
+  formatLegalDate,
+} from "@/lib/legal";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { pageMetadata, webPageJsonLd } from "@/lib/seo";
 
-const UPDATED_EN = "October 7, 2026";
-const UPDATED_ES = "7 de octubre de 2026";
+const UPDATED_EN = formatLegalDate(PRIVACY_UPDATED, "en");
+const UPDATED_ES = formatLegalDate(PRIVACY_UPDATED, "es");
+
+const PAGE_TEXT = {
+  es: {
+    title: "Política de privacidad · Tourfy",
+    description: "Cómo Tourfy recopila, usa y protege los datos.",
+  },
+  en: {
+    title: "Privacy Policy · Tourfy",
+    description: "How Tourfy collects, uses and protects data.",
+  },
+};
 
 export async function generateMetadata(): Promise<Metadata> {
-  const isEs = (await getLocale()) === "es";
-  return isEs
-    ? {
-        title: "Política de privacidad · Tourfy",
-        description: "Cómo Tourfy recopila, usa y protege los datos.",
-      }
-    : {
-        title: "Privacy Policy · Tourfy",
-        description: "How Tourfy collects, uses and protects data.",
-      };
+  const lang = await getLocale();
+  return pageMetadata({
+    ...(lang === "es" ? PAGE_TEXT.es : PAGE_TEXT.en),
+    path: "/privacy",
+    lang,
+  });
 }
 
 const H1 = "font-display text-3xl sm:text-4xl font-bold tracking-tight text-navy-900";
@@ -30,9 +45,18 @@ const A = "text-blue-600 hover:text-blue-700 underline underline-offset-2";
 export default async function PrivacyPage() {
   const locale = await getLocale();
   const isEs = locale === "es";
+  const text = isEs ? PAGE_TEXT.es : PAGE_TEXT.en;
+  const jsonLd = webPageJsonLd({
+    name: text.title,
+    description: text.description,
+    path: "/privacy",
+    lang: locale,
+    dateModified: PRIVACY_UPDATED,
+  });
 
   return (
     <main className="flex min-h-screen flex-col bg-white">
+      <JsonLd data={jsonLd} />
       <Navbar />
       <article className="mx-auto w-full max-w-3xl flex-1 px-5 py-16 sm:px-6 sm:py-20 lg:px-8">
         {isEs ? <PrivacyEs /> : <PrivacyEn />}

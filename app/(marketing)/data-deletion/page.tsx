@@ -3,22 +3,37 @@ import { getLocale } from "next-intl/server";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 
-import { CONTACT_EMAIL, LEGAL_ADDRESS, LEGAL_NAME } from "@/lib/legal";
+import {
+  CONTACT_EMAIL,
+  DATA_DELETION_UPDATED,
+  LEGAL_ADDRESS,
+  LEGAL_NAME,
+  formatLegalDate,
+} from "@/lib/legal";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { pageMetadata, webPageJsonLd } from "@/lib/seo";
 
-const UPDATED_EN = "October 7, 2026";
-const UPDATED_ES = "7 de octubre de 2026";
+const UPDATED_EN = formatLegalDate(DATA_DELETION_UPDATED, "en");
+const UPDATED_ES = formatLegalDate(DATA_DELETION_UPDATED, "es");
+
+const PAGE_TEXT = {
+  es: {
+    title: "Eliminación de datos · Tourfy",
+    description: "Cómo solicitar la eliminación de tus datos en Tourfy.",
+  },
+  en: {
+    title: "Data Deletion · Tourfy",
+    description: "How to request deletion of your data from Tourfy.",
+  },
+};
 
 export async function generateMetadata(): Promise<Metadata> {
-  const isEs = (await getLocale()) === "es";
-  return isEs
-    ? {
-        title: "Eliminación de datos · Tourfy",
-        description: "Cómo solicitar la eliminación de tus datos en Tourfy.",
-      }
-    : {
-        title: "Data Deletion · Tourfy",
-        description: "How to request deletion of your data from Tourfy.",
-      };
+  const lang = await getLocale();
+  return pageMetadata({
+    ...(lang === "es" ? PAGE_TEXT.es : PAGE_TEXT.en),
+    path: "/data-deletion",
+    lang,
+  });
 }
 
 const H1 = "font-display text-3xl sm:text-4xl font-bold tracking-tight text-navy-900";
@@ -31,9 +46,18 @@ const A = "text-blue-600 hover:text-blue-700 underline underline-offset-2";
 export default async function DataDeletionPage() {
   const locale = await getLocale();
   const isEs = locale === "es";
+  const text = isEs ? PAGE_TEXT.es : PAGE_TEXT.en;
+  const jsonLd = webPageJsonLd({
+    name: text.title,
+    description: text.description,
+    path: "/data-deletion",
+    lang: locale,
+    dateModified: DATA_DELETION_UPDATED,
+  });
 
   return (
     <main className="flex min-h-screen flex-col bg-white">
+      <JsonLd data={jsonLd} />
       <Navbar />
       <article className="mx-auto w-full max-w-3xl flex-1 px-5 py-16 sm:px-6 sm:py-20 lg:px-8">
         {isEs ? <DeletionEs /> : <DeletionEn />}

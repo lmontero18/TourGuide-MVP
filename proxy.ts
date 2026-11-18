@@ -17,7 +17,25 @@ function redirectWithCookies(url: URL, response: NextResponse) {
   return redirect
 }
 
+// Idioma del contenido para el <html lang>: los posts del blog estan escritos
+// en español aunque la UI este en ingles. El layout raiz no conoce la ruta, asi
+// que se lo pasamos en un header de la request (app/layout.tsx lo lee y solo
+// acepta idiomas conocidos; mandarlo a mano solo cambia el lang de tu propia
+// respuesta). Se va con las URLs por idioma.
+const CONTENT_LANG_HEADER = 'x-content-lang'
+
+function withContentLang(request: NextRequest, lang: string) {
+  const headers = new Headers(request.headers)
+  headers.set(CONTENT_LANG_HEADER, lang)
+  return NextResponse.next({ request: { headers } })
+}
+
 export async function proxy(request: NextRequest) {
+  // Posts del blog: paginas publicas, no necesitan sesion — sin Supabase
+  if (request.nextUrl.pathname.startsWith('/blog/')) {
+    return withContentLang(request, 'es')
+  }
+
   const ctx = createMiddlewareClient(request)
   const { supabase } = ctx
 
@@ -90,5 +108,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register', '/onboarding', '/conversations/:path*', '/leads/:path*', '/bookings/:path*', '/metrics/:path*', '/settings/:path*', '/tours/:path*', '/templates/:path*'],
+  matcher: ['/blog/:path+', '/dashboard/:path*', '/login', '/register', '/onboarding', '/conversations/:path*', '/leads/:path*', '/bookings/:path*', '/metrics/:path*', '/settings/:path*', '/tours/:path*', '/templates/:path*'],
 }
