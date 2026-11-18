@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_BUILD_ID: process.env.VERCEL_GIT_COMMIT_SHA ?? "dev",
   },
-  // Los posts del blog viven como .mdx en el repo (app/blog/posts/)
+  // Los posts del blog viven como .mdx en el repo (content/blog/)
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   // Permite servir assets de dev (_next/*, HMR) cuando se accede via tunel (ngrok)
   // y no solo desde localhost. Necesario para probar el Embedded Signup por HTTPS.
@@ -50,6 +50,10 @@ const nextConfig: NextConfig = {
       // SIGNUP_ENABLED = true en app/(auth)/login/actions.ts y reactivar el
       // signup en Supabase.
       { source: "/register", destination: "/login", permanent: true },
+      // Sitio publico: el español va sin prefijo (i18n/routing.ts). /es/... es
+      // una URL duplicada — 308 a la canonica antes de llegar al middleware.
+      { source: "/es", destination: "/", permanent: true },
+      { source: "/es/:path*", destination: "/:path*", permanent: true },
     ];
   },
 };

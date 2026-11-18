@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
-import { headers } from "next/headers";
 import { Toaster } from "sonner";
-import { LOCALES } from "@/i18n/config";
 import { SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
@@ -41,17 +39,12 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const messages = await getMessages();
-  // Paginas cuyo contenido tiene idioma propio (posts del blog en español):
-  // el proxy lo marca en la request. Solo se aceptan idiomas conocidos.
-  const contentLang = (await headers()).get("x-content-lang");
-  const htmlLang =
-    contentLang && (LOCALES as readonly string[]).includes(contentLang)
-      ? contentLang
-      : locale;
+  // Paginas publicas: el idioma de la URL (/en/...). Panel: cookie.
+  // Ver i18n/request.ts.
 
   return (
     <html
-      lang={htmlLang}
+      lang={locale}
       className={`${bricolage.variable} ${jakarta.variable} h-full`}
       suppressHydrationWarning
     >

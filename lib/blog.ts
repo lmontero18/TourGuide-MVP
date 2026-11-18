@@ -2,10 +2,10 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-// Posts del blog: archivos .mdx versionados en el repo (app/blog/posts/).
+// Posts del blog: archivos .mdx versionados en el repo (content/blog/).
 // Sin CMS ni tabla — cada post entra por PR como cualquier cambio de codigo.
 
-const POSTS_DIR = path.join(process.cwd(), "app", "blog", "posts");
+const POSTS_DIR = path.join(process.cwd(), "content", "blog");
 
 export interface PostMeta {
   slug: string;

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { localizedPath } from "@/i18n/routing";
 import LocaleToggle from "@/components/LocaleToggle";
 import { UserMenu, MobileAuthLinks } from "./UserMenu";
 
@@ -11,6 +12,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const t = useTranslations("nav");
+  const home = localizedPath("/", useLocale());
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -43,9 +45,9 @@ export function Navbar() {
         <div className="flex h-14 sm:h-16 items-center justify-between">
           {/* Logo */}
           <Link
-            href="/"
+            href={home}
             onClick={(e) => {
-              if (window.location.pathname === "/") {
+              if (window.location.pathname === home) {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }

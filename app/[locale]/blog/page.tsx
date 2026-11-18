@@ -5,6 +5,7 @@ import { getAllPosts } from "@/lib/blog";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   BLOG_AUTHOR,
+  BLOG_LOCALES,
   ORGANIZATION_ID,
   SITE_NAME,
   SITE_URL,
@@ -18,7 +19,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t("metaTitle"),
     description: t("metaDescription"),
     path: "/blog",
-    lang: await getLocale(),
+    lang: "es",
+    locales: BLOG_LOCALES,
   });
 }
 

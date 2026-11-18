@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getLocale } from "next-intl/server";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -117,7 +118,7 @@ function DeletionEn() {
       <p className={P}>
         Questions:{" "}
         <a className={A} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. See also our{" "}
-        <a className={A} href="/privacy">Privacy Policy</a>.
+        <Link className={A} href="/en/privacy">Privacy Policy</Link>.
       </p>
     </>
   );
@@ -173,7 +174,7 @@ function DeletionEs() {
       <p className={P}>
         Consultas:{" "}
         <a className={A} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. Mira también nuestra{" "}
-        <a className={A} href="/privacy">Política de privacidad</a>.
+        <Link className={A} href="/privacy">Política de privacidad</Link>.
       </p>
     </>
   );

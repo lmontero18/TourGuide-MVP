@@ -14,7 +14,17 @@ function detectFromAcceptLanguage(header: string | null): Locale {
   return isLocale(first) ? first : DEFAULT_LOCALE;
 }
 
-export default getRequestConfig(async () => {
+export default getRequestConfig(async ({ requestLocale }) => {
+  // Sitio publico (app/[locale]): el idioma lo dice la URL y nada mas — el
+  // middleware de next-intl (proxy.ts) lo resuelve. Ver i18n/routing.ts.
+  const fromUrl = await requestLocale;
+  if (isLocale(fromUrl)) {
+    const messages = (await import(`../messages/${fromUrl}.json`)).default;
+    return { locale: fromUrl, messages };
+  }
+
+  // Panel, login y demas rutas sin idioma en la URL: cookie del selector y,
+  // si no hay, el Accept-Language del navegador.
   const cookieStore = await cookies();
   const headerStore = await headers();
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getLocale } from "next-intl/server";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -166,7 +167,7 @@ function TermsEs() {
           Tourfy actúa como encargado en tu nombre. Debes contar con una base legal para tratar esos
           datos y cumplir las leyes de protección de datos que te apliquen.</li>
         <li>El tratamiento de datos se describe en nuestra{" "}
-          <a className={A} href="/privacy">Política de privacidad</a>.</li>
+          <Link className={A} href="/privacy">Política de privacidad</Link>.</li>
       </ul>
 
       <h2 className={H2}>9. Disponibilidad</h2>
@@ -190,7 +191,7 @@ function TermsEs() {
         Cualquiera de las partes puede terminar la relación cancelando la suscripción. Al terminar,
         dejarás de tener acceso al panel. Puedes pedirnos la exportación de tus leads antes de
         cancelar y la eliminación de tus datos según nuestra página de{" "}
-        <a className={A} href="/data-deletion">Eliminación de datos</a>.
+        <Link className={A} href="/data-deletion">Eliminación de datos</Link>.
       </p>
 
       <h2 className={H2}>12. Cambios a estos términos</h2>
@@ -315,7 +316,7 @@ function TermsEn() {
           on your behalf. You must have a legal basis to process that data and comply with the data
           protection laws that apply to you.</li>
         <li>Data processing is described in our{" "}
-          <a className={A} href="/privacy">Privacy Policy</a>.</li>
+          <Link className={A} href="/en/privacy">Privacy Policy</Link>.</li>
       </ul>
 
       <h2 className={H2}>9. Availability</h2>
@@ -339,7 +340,7 @@ function TermsEn() {
         Either party may end the relationship by cancelling the subscription. On termination you
         lose access to the dashboard. You can ask us to export your leads before cancelling and to
         delete your data as described on our{" "}
-        <a className={A} href="/data-deletion">Data Deletion</a> page.
+        <Link className={A} href="/en/data-deletion">Data Deletion</Link> page.
       </p>
 
       <h2 className={H2}>12. Changes to these terms</h2>
