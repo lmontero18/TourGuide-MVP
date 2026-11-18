@@ -11,7 +11,11 @@ export interface PostMeta {
   slug: string;
   title: string;
   description: string;
-  date: string; // ISO yyyy-mm-dd
+  date: string; // ISO yyyy-mm-dd — fecha de publicacion
+  // Fecha de la ultima edicion importante (frontmatter `updated`, opcional).
+  // Sin `updated`, se toma la de publicacion. Alimenta el `lastmod` del
+  // sitemap y el `dateModified` del JSON-LD: subirla al editar un post.
+  updated: string;
 }
 
 export function getAllPosts(): PostMeta[] {
@@ -28,6 +32,7 @@ export function getAllPosts(): PostMeta[] {
         title: data.title ?? "",
         description: data.description ?? "",
         date: data.date ?? "",
+        updated: data.updated ?? data.date ?? "",
       } satisfies PostMeta;
     })
     .sort((a, b) => (a.date < b.date ? 1 : -1));

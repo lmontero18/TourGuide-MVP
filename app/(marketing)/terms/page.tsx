@@ -3,22 +3,37 @@ import { getLocale } from "next-intl/server";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 
-import { CONTACT_EMAIL, LEGAL_ADDRESS, LEGAL_NAME } from "@/lib/legal";
+import {
+  CONTACT_EMAIL,
+  TERMS_UPDATED,
+  LEGAL_ADDRESS,
+  LEGAL_NAME,
+  formatLegalDate,
+} from "@/lib/legal";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { pageMetadata, webPageJsonLd } from "@/lib/seo";
 
-const UPDATED_EN = "November 7, 2026";
-const UPDATED_ES = "7 de noviembre de 2026";
+const UPDATED_EN = formatLegalDate(TERMS_UPDATED, "en");
+const UPDATED_ES = formatLegalDate(TERMS_UPDATED, "es");
+
+const PAGE_TEXT = {
+  es: {
+    title: "Términos y condiciones · Tourfy",
+    description: "Condiciones de uso y de la suscripción a Tourfy.",
+  },
+  en: {
+    title: "Terms of Service · Tourfy",
+    description: "Terms of use and subscription terms for Tourfy.",
+  },
+};
 
 export async function generateMetadata(): Promise<Metadata> {
-  const isEs = (await getLocale()) === "es";
-  return isEs
-    ? {
-        title: "Términos y condiciones · Tourfy",
-        description: "Condiciones de uso y de la suscripción a Tourfy.",
-      }
-    : {
-        title: "Terms of Service · Tourfy",
-        description: "Terms of use and subscription terms for Tourfy.",
-      };
+  const lang = await getLocale();
+  return pageMetadata({
+    ...(lang === "es" ? PAGE_TEXT.es : PAGE_TEXT.en),
+    path: "/terms",
+    lang,
+  });
 }
 
 const H1 = "font-display text-3xl sm:text-4xl font-bold tracking-tight text-navy-900";
@@ -30,9 +45,18 @@ const A = "text-blue-600 hover:text-blue-700 underline underline-offset-2";
 export default async function TermsPage() {
   const locale = await getLocale();
   const isEs = locale === "es";
+  const text = isEs ? PAGE_TEXT.es : PAGE_TEXT.en;
+  const jsonLd = webPageJsonLd({
+    name: text.title,
+    description: text.description,
+    path: "/terms",
+    lang: locale,
+    dateModified: TERMS_UPDATED,
+  });
 
   return (
     <main className="flex min-h-screen flex-col bg-white">
+      <JsonLd data={jsonLd} />
       <Navbar />
       <article className="mx-auto w-full max-w-3xl flex-1 px-5 py-16 sm:px-6 sm:py-20 lg:px-8">
         {isEs ? <TermsEs /> : <TermsEn />}

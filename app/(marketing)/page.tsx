@@ -1,3 +1,12 @@
+import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
+import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  ORGANIZATION_ID,
+  SITE_URL,
+  organizationJsonLd,
+  pageMetadata,
+} from "@/lib/seo";
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
 import { LogoBar } from "./components/LogoBar";
@@ -8,30 +17,42 @@ import { Pricing } from "./components/Pricing";
 import { CTA } from "./components/CTA";
 import { Footer } from "./components/Footer";
 
-// Datos para buscadores y herramientas que leen la web: de donde es Tourfy y
-// a quien atiende. Sin esto infieren el pais por los ejemplos del sitio.
-const organizationJsonLd = {
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return pageMetadata({
+    title: t("title"),
+    description: t("description"),
+    path: "/",
+    lang: await getLocale(),
+  });
+}
+
+// Datos para buscadores y herramientas que leen la web: quien es Tourfy, de
+// donde es, a quien atiende y que hace el producto.
+const homeJsonLd = {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Tourfy",
-  url: "https://www.tourfy.app",
-  description: "WhatsApp AI for tour agencies in Latin America.",
-  address: { "@type": "PostalAddress", addressCountry: "CR" },
-  areaServed: [
-    { "@type": "Country", name: "Costa Rica" },
-    { "@type": "Place", name: "Latin America" },
+  "@graph": [
+    organizationJsonLd,
+    {
+      "@type": "SoftwareApplication",
+      name: "Tourfy",
+      url: SITE_URL,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      description:
+        "Responde el WhatsApp de agencias de tours en Costa Rica en español e inglés.",
+      publisher: { "@id": ORGANIZATION_ID },
+      // TODO: agregar `offers` (precio de los planes) cuando se defina que
+      // precio publicar. Sin `offers` Google no muestra el rich result de
+      // software, pero el marcado sigue siendo valido.
+    },
   ],
 };
 
 export default function LandingPage() {
   return (
     <main className="flex flex-col min-h-screen">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c"),
-        }}
-      />
+      <JsonLd data={homeJsonLd} />
       <Navbar />
       <Hero />
       <LogoBar />
