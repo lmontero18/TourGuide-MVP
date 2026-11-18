@@ -1,6 +1,8 @@
 import { createMiddlewareClient } from '@/lib/supabase/middleware'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import createIntlMiddleware from 'next-intl/middleware'
+import { isPublicPath, routing } from '@/i18n/routing'
 
 // Solo admins: los agentes atienden conversaciones, no configuran la agencia
 // (CLAUDE.md > Auth y roles). Las API routes validan el rol por su cuenta;
@@ -17,23 +19,13 @@ function redirectWithCookies(url: URL, response: NextResponse) {
   return redirect
 }
 
-// Idioma del contenido para el <html lang>: los posts del blog estan escritos
-// en español aunque la UI este en ingles. El layout raiz no conoce la ruta, asi
-// que se lo pasamos en un header de la request (app/layout.tsx lo lee y solo
-// acepta idiomas conocidos; mandarlo a mano solo cambia el lang de tu propia
-// respuesta). Se va con las URLs por idioma.
-const CONTENT_LANG_HEADER = 'x-content-lang'
-
-function withContentLang(request: NextRequest, lang: string) {
-  const headers = new Headers(request.headers)
-  headers.set(CONTENT_LANG_HEADER, lang)
-  return NextResponse.next({ request: { headers } })
-}
+// Sitio publico: next-intl resuelve el idioma desde la URL (/en/... o la
+// raiz en español) y reescribe a app/[locale]. No necesita sesion.
+const intlMiddleware = createIntlMiddleware(routing)
 
 export async function proxy(request: NextRequest) {
-  // Posts del blog: paginas publicas, no necesitan sesion — sin Supabase
-  if (request.nextUrl.pathname.startsWith('/blog/')) {
-    return withContentLang(request, 'es')
+  if (isPublicPath(request.nextUrl.pathname)) {
+    return intlMiddleware(request)
   }
 
   const ctx = createMiddlewareClient(request)
@@ -108,5 +100,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/blog/:path+', '/dashboard/:path*', '/login', '/register', '/onboarding', '/conversations/:path*', '/leads/:path*', '/bookings/:path*', '/metrics/:path*', '/settings/:path*', '/tours/:path*', '/templates/:path*'],
+  matcher: [
+    // Sitio publico (i18n/routing.ts > isPublicPath)
+    '/', '/(en|es)', '/(en|es)/:path*', '/blog', '/blog/:path*', '/terms', '/privacy', '/data-deletion',
+    // Panel
+    '/dashboard/:path*', '/login', '/register', '/onboarding', '/conversations/:path*', '/leads/:path*', '/bookings/:path*', '/metrics/:path*', '/settings/:path*', '/tours/:path*', '/templates/:path*'],
 }

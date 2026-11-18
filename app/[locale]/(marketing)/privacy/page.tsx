@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getLocale } from "next-intl/server";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -135,7 +136,7 @@ function PrivacyEn() {
       <p className={P}>
         You can access, correct or delete your data. To request deletion of your data, follow the
         instructions on our{" "}
-        <a className={A} href="/data-deletion">Data Deletion</a> page, or contact us at{" "}
+        <Link className={A} href="/en/data-deletion">Data Deletion</Link> page, or contact us at{" "}
         <a className={A} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
       </p>
 
@@ -230,7 +231,7 @@ function PrivacyEs() {
       <p className={P}>
         Puedes acceder, corregir o eliminar tus datos. Para solicitar la eliminación, sigue las
         instrucciones de nuestra página de{" "}
-        <a className={A} href="/data-deletion">Eliminación de datos</a>, o escríbenos a{" "}
+        <Link className={A} href="/data-deletion">Eliminación de datos</Link>, o escríbenos a{" "}
         <a className={A} href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
       </p>
 

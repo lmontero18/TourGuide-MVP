@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { localizedPath } from "@/i18n/routing";
 import { FadeIn } from "./Motion";
 
 export function Footer() {
   const t = useTranslations("footer");
   const nav = useTranslations("nav");
+  const locale = useLocale();
+  const home = localizedPath("/", locale);
 
   return (
     <FadeIn>
@@ -15,7 +18,7 @@ export function Footer() {
           <div className="flex flex-col lg:flex-row items-start justify-between gap-8 lg:gap-12">
             {/* Logo & tagline */}
             <div className="max-w-xs">
-              <Link href="/" className="flex items-center gap-2.5">
+              <Link href={home} className="flex items-center gap-2.5">
                 <div className="flex h-7 w-7 items-center justify-center rounded-md bg-navy-900">
                   <svg
                     width="14"
@@ -49,8 +52,9 @@ export function Footer() {
               </p>
               <ul className="space-y-2">
                 {[
-                  { label: nav("features"), href: "/#features" },
-                  { label: nav("howItWorks"), href: "/#how-it-works" },
+                  { label: nav("features"), href: `${home}#features` },
+                  { label: nav("howItWorks"), href: `${home}#how-it-works` },
+                  // El blog existe solo en español: mismo link en los dos idiomas
                   { label: nav("blog"), href: "/blog" },
                 ].map((item) => (
                   <li key={item.href}>
@@ -69,9 +73,9 @@ export function Footer() {
               </p>
               <ul className="space-y-2">
                 {[
-                  { label: t("terms"), href: "/terms" },
-                  { label: t("privacy"), href: "/privacy" },
-                  { label: t("dataDeletion"), href: "/data-deletion" },
+                  { label: t("terms"), href: localizedPath("/terms", locale) },
+                  { label: t("privacy"), href: localizedPath("/privacy", locale) },
+                  { label: t("dataDeletion"), href: localizedPath("/data-deletion", locale) },
                 ].map((item) => (
                   <li key={item.label}>
                     <Link href={item.href} className="text-xs sm:text-sm text-slate-500 hover:text-navy-900 transition-colors">

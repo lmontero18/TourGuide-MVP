@@ -57,9 +57,11 @@ tourguide/
 │   │   │   └── agents/
 │   │   │       └── page.tsx           # Gestion de agentes
 │   │   └── layout.tsx                 # Sidebar + auth guard
-│   ├── (marketing)/
-│   │   ├── page.tsx                   # Landing page
-│   │   └── layout.tsx                 # Layout publico (navbar + footer)
+│   ├── [locale]/                      # Sitio publico con idioma en la URL: / (es) y /en (en)
+│   │   ├── layout.tsx                 # Valida el idioma + provider de next-intl
+│   │   ├── (marketing)/               # Landing, terms, privacy, data-deletion
+│   │   └── blog/                      # Solo español (BLOG_LOCALES en lib/seo.ts); posts en content/blog/*.mdx
+│   │   # Pagina publica nueva: sumarla a isPublicPath (i18n/routing.ts) y al matcher de proxy.ts
 │   ├── api/
 │   │   ├── webhooks/
 │   │   │   └── whatsapp/

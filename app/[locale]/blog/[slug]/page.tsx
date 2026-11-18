@@ -6,6 +6,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllPosts, getPostBySlug } from "@/lib/blog";
 import {
   BLOG_AUTHOR,
+  BLOG_LOCALES,
   LOGO_URL,
   ORGANIZATION_ID,
   SITE_NAME,
@@ -17,8 +18,9 @@ import {
 // Solo los slugs pre-renderizados existen; cualquier otro da 404.
 export const dynamicParams = false;
 
+// Posts solo en español: /en/blog/<slug> no se genera y da 404
 export function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
+  return getAllPosts().map((post) => ({ locale: "es", slug: post.slug }));
 }
 
 export async function generateMetadata({
@@ -36,6 +38,7 @@ export async function generateMetadata({
     description: post.description,
     path: `/blog/${post.slug}`,
     lang: "es",
+    locales: BLOG_LOCALES,
     type: "article",
     publishedTime: post.date,
     modifiedTime: post.updated,
@@ -54,8 +57,8 @@ export default async function BlogPostPage({
   const t = await getTranslations("blog");
   const locale = await getLocale();
 
-  // El nombre del archivo es el slug — convencion de app/blog/posts/
-  const { default: Content } = await import(`@/app/blog/posts/${slug}.mdx`);
+  // El nombre del archivo es el slug — convencion de content/blog/
+  const { default: Content } = await import(`@/content/blog/${slug}.mdx`);
 
   const url = absoluteUrl(`/blog/${post.slug}`);
   const related = getAllPosts().filter((p) => p.slug !== post.slug);
